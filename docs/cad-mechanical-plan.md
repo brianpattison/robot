@@ -86,6 +86,8 @@ The head should be modular because this is where personality will evolve. First 
 | `tof_sensor_pod` | OpenSCAD | Repeatable front/side proximity sensor pods with angled variants. |
 | `camera_head_bracket` | OpenSCAD first, Python CAD later if needed | Holds camera and optional pan/tilt servos. |
 | `top_service_shell` | OpenSCAD first, Python CAD later | Covers electronics while leaving ventilation and fastener access. |
+| `estop_mount_plate` | OpenSCAD | Reinforced E-stop mount plate tied to deck structure with cable strain relief placeholders. |
+| `split_print_variants` | OpenSCAD | Smaller-bed export variants for base, deck, bumper quadrants, and seam plates. |
 
 ### Optional Early Modules
 
@@ -184,6 +186,7 @@ Create files in this order:
    - Rounded or chamfered corners.
    - Anchor points for motor pods, battery cradle, electronics deck, bumper carrier, and caster.
    - Cable pass-throughs between motor, battery, and electronics zones.
+   - Battery strap windows through the tray floor.
 
 3. `cad/openscad/electronics_deck.scad`
    - Removable flat deck.
@@ -196,8 +199,9 @@ Create files in this order:
 4. `cad/openscad/battery_cradle.scad`
    - Battery pocket with 3 mm padding clearance.
    - Two strap slots.
+   - Mounting holes that match tray bosses.
    - End stops that prevent sliding under acceleration.
-   - Clearance for battery wires without sharp bends.
+   - Clearance and strain relief for battery wires without sharp bends.
 
 5. `cad/openscad/motor_pod.scad`
    - Parametric motor hole pattern.
@@ -221,6 +225,18 @@ Create files in this order:
    - Cable relief path.
    - Optional servo mount placeholder.
    - Simple protective brow/shell.
+
+9. `cad/openscad/estop_mount_plate.scad`
+   - Separate mount plate under the service shell cutout.
+   - M3 deck-mount screw pattern.
+   - Placeholder anti-rotation notch.
+   - Cable-tie strain relief slots for the motor-power cut path.
+
+10. `cad/openscad/split_print_variants.scad`
+   - Front/rear base tray split outputs.
+   - Left/right electronics deck split outputs.
+   - Bumper quadrant fit-check outputs.
+   - Reusable seam plate output for M3 screw joining.
 
 Optional later:
 

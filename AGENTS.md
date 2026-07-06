@@ -58,11 +58,14 @@ If you touch any motion, power, battery, or safety-control design, update the re
 ## CAD And Mechanical Conventions
 
 - OpenSCAD is the default first-pass CAD tool for simple parametric printable parts.
+- Local OpenSCAD CLI is available at `/Applications/OpenSCAD-2021.01.app/Contents/MacOS/openscad`.
 - `build123d` and CadQuery are approved for Python CAD when geometry needs richer fillets, chamfers, STEP exports, or complex assemblies.
 - Keep editable CAD source in `cad/openscad/` or `cad/python/`.
 - Keep generated exports under `cad/exports/`; generated STL/STEP/mesh files are ignored by Git by default.
 - Use shared parameters for dimensions, fastener sizes, wheel geometry, sensor offsets, keepouts, and board mount patterns.
 - Printed parts should be modular and serviceable: base tray, electronics deck, battery cradle, motor pods, bumper carrier, ToF sensor pods, camera/head bracket, and top shell.
+- Use `preview_only()` in OpenSCAD for dummy hardware, LED/status markers, keepout markers, and other review-only solids so generated STLs stay print-focused.
+- `cad/openscad/split_print_variants.scad` has smaller-bed exports for base tray halves, electronics deck halves, bumper quadrants, and seam plates; use it before assuming a one-piece 300 x 220 mm tray print.
 - Include USB storage mounting as a serviceable later module only if USB SSD/flash storage becomes part of the build.
 - Do not rely on printed plastic alone for safety-critical battery retention, E-stop mounting, axle support, or motor retention.
 
@@ -92,8 +95,8 @@ Do not install CAD packages into Apple/system Python.
 
 Likely next useful work:
 
-1. Create `cad/openscad/robot_params.scad`.
-2. Create the first OpenSCAD electronics deck.
-3. Create the first base tray fit-check model.
-4. Confirm printer build volume and filament/material assumptions.
+1. Review and fit-check the initial OpenSCAD body concept in `cad/openscad/` and the rendered overview in `docs/cad-v0-body.md`.
+2. Confirm printer build volume and filament/material assumptions before committing to one-piece tray dimensions.
+3. Replace generic motor pod, bumper switch, caster, E-stop, and battery geometry with measured real parts; the current E-stop plate is still a datasheet placeholder.
+4. Print insert/fastener coupons, then the electronics deck, before printing the whole base tray.
 5. Confirm which bench-brain parts are already owned vs need to be ordered from `docs/bom-v0.md`.

@@ -14,6 +14,7 @@ This repo is at the planning and early tooling stage. Start with the docs index:
 - MVP architecture: [`docs/mvp-architecture.md`](docs/mvp-architecture.md)
 - BOM v0: [`docs/bom-v0.md`](docs/bom-v0.md)
 - CAD mechanical plan: [`docs/cad-mechanical-plan.md`](docs/cad-mechanical-plan.md)
+- CAD v0 body concept and renders: [`docs/cad-v0-body.md`](docs/cad-v0-body.md)
 - Python CAD tooling notes: [`cad/python/README.md`](cad/python/README.md)
 
 ## MVP Direction
@@ -67,16 +68,24 @@ python -m pip install -r cad/python/requirements.txt
 ```text
 .
 |-- cad/
+|   |-- openscad/
+|   |   |-- robot_params.scad
+|   |   |-- codex_body_assembly.scad
+|   |   `-- ...
 |   `-- python/
 |       |-- README.md
 |       `-- requirements.txt
 |-- docs/
 |   |-- README.md
 |   |-- bom-v0.md
+|   |-- cad-v0-body.md
+|   |-- images/
 |   |-- cad-mechanical-plan.md
 |   |-- decision-log.md
 |   |-- mvp-architecture.md
 |   `-- mvp-prd.md
+|-- scripts/
+|   `-- render_cad_v0_previews.py
 |-- .gitignore
 `-- README.md
 ```
@@ -85,6 +94,6 @@ python -m pip install -r cad/python/requirements.txt
 
 1. Confirm printer model/build volume and first operating area in the house.
 2. Buy the bench-brain and safety-prototype batch from [`docs/bom-v0.md`](docs/bom-v0.md).
-3. Add `cad/openscad/robot_params.scad`.
-4. Generate the first printable electronics deck and base tray.
+3. Fit-check the v0 OpenSCAD body concept and split-print variants in [`docs/cad-v0-body.md`](docs/cad-v0-body.md).
+4. Replace generic motor, bumper switch, caster, E-stop, and battery placeholders with measured real parts.
 5. Build the stationary bench brain before powering any drive motors.
