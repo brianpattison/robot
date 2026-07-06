@@ -14,8 +14,8 @@ This repo is at the planning and early tooling stage.
 
 ## MVP Direction
 
-- Raspberry Pi 5 as the main computer.
-- Raspberry Pi AI HAT+ 2 for local AI acceleration experiments.
+- Existing Raspberry Pi 5 8GB as the main computer.
+- No AI HAT+ 2 required for MVP; reserve room to add it later for local AI experiments.
 - Raspberry Pi Camera Module 3 Wide for the main head camera.
 - Wheeled differential-drive base for the first physical body.
 - Pan/tilt camera head for expression and perception.
@@ -79,4 +79,3 @@ python -m pip install -r cad/python/requirements.txt
 3. Add `cad/openscad/` and shared robot dimensions.
 4. Generate the first printable base tray model.
 5. Decide whether the first chassis needs 2D LiDAR from day one or can start with camera, ToF sensors, and bumpers.
-

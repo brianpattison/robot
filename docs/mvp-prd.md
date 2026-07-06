@@ -14,11 +14,11 @@ OpenSCAD should be the default first-pass source format for printable mechanical
 
 ## 2. Hardware Notes From Current Raspberry Pi Sources
 
-- Raspberry Pi AI HAT+ 2 is a distinct board from AI HAT+. Raspberry Pi documents AI HAT+ as 13/26 TOPS, while AI HAT+ 2 delivers 40 TOPS via a Hailo-10H accelerator and adds local LLM/VLM capability.
-- Raspberry Pi's AI HAT+ 2 product page lists the board as Hailo-10H, 40 TOPS INT4, 8GB on-board RAM, camera-stack integrated, and available at $200.
+- Raspberry Pi AI HAT+ 2 is a distinct optional future board from AI HAT+. Raspberry Pi documents AI HAT+ as 13/26 TOPS, while AI HAT+ 2 delivers 40 TOPS via a Hailo-10H accelerator and adds local LLM/VLM capability.
+- Raspberry Pi's AI HAT+ 2 product page lists the board as Hailo-10H, 40 TOPS INT4, 8GB on-board RAM, camera-stack integrated, and available at $200. It is useful for later local AI work, but it is not required for the MVP.
 - Raspberry Pi Camera Module 3 is a 12MP autofocus camera with standard/wide and filtered/NoIR variants.
-- Raspberry Pi 5 is the host computer target, with a 2.4GHz quad-core Arm Cortex-A76 CPU and RAM variants up to 16GB.
-- Raspberry Pi AI software docs describe local LLM setup on Pi 5 as AI HAT+ 2 only, with Hailo Ollama server access through POST requests and optional Open WebUI.
+- Raspberry Pi 5 is the host computer target, with a 2.4GHz quad-core Arm Cortex-A76 CPU and RAM variants up to 16GB. The existing Raspberry Pi 5 8GB board is good enough for the MVP without an AI accelerator.
+- Raspberry Pi AI software docs describe local LLM setup on Pi 5 as AI HAT+ 2 only, with Hailo Ollama server access through POST requests and optional Open WebUI. This makes AI HAT+ 2 a future local-AI upgrade, not an MVP dependency.
 
 Sources:
 
@@ -50,6 +50,7 @@ Codex gets a small, safe, expressive body that can live in the house as a conver
 - Fully autonomous charging dock in MVP.
 - Security/patrol behavior that could surprise guests.
 - Always-recording home surveillance.
+- Fully local rich LLM/VLM conversation without network access.
 
 ## 6. Target User
 
@@ -76,7 +77,7 @@ The MVP body is a compact wheeled rover with a friendly head:
 
 The printer should be used for every non-critical body part that benefits from iteration:
 
-- Internal electronics tray with mounting patterns for Pi, AI HAT+ 2 clearance, motor controller, buck converters, and cable strain relief.
+- Internal electronics tray with mounting patterns for Pi, optional future HAT clearance, motor controller, buck converters, and cable strain relief.
 - Swappable sensor pods for ToF modules, bumper switches, LEDs, mic array, and camera/head experiments.
 - Camera head shell with pan/tilt servo brackets and adjustable pitch range.
 - Wheel guards and soft-bumper carrier.
@@ -110,8 +111,8 @@ Dog-like behavior comes from motion language:
 
 | Area | MVP Choice | Rationale |
 | --- | --- | --- |
-| Main compute | Raspberry Pi 5, preferably 16GB | Host OS, audio, routing, safety supervisor, robotics middleware. |
-| AI accelerator | Raspberry Pi AI HAT+ 2 | Local vision-language and small local LLM/VLM experiments; better fit than 13/26 TOPS HAT+ for embodied companion behaviors. |
+| Main compute | Existing Raspberry Pi 5 8GB | Host OS, audio, routing, safety supervisor, robotics middleware. 16GB is optional, not required for MVP. |
+| AI accelerator | None for MVP; reserve expansion room for AI HAT+ 2 | MVP responsiveness comes from local reflexes, simple intent routing, and optional cloud AI. AI HAT+ 2 can be added later for local LLM/VLM experiments. |
 | Camera | Raspberry Pi Camera Module 3 Wide, autofocus | Wide FOV helps indoor navigation and person tracking. |
 | Audio input | USB mic array with echo/noise handling | Wake word and far-field voice are critical to pet-like interaction. |
 | Audio output | Small amplified speaker, 3-5W | Clear speech without needing external speakers. |
@@ -242,7 +243,7 @@ The MVP is done when:
 
 ### M0: Bench Brain
 
-- Pi 5 + AI HAT+ 2 assembled and cooled.
+- Pi 5 assembled, cooled, and running the base robot services.
 - Camera, mic, speaker, wake word, STT/TTS, and simple local command routing working on desk.
 - Local dashboard skeleton shows health and logs.
 - Initial OpenSCAD parameter file captures known hardware dimensions and mounting assumptions.
@@ -277,7 +278,8 @@ The MVP is done when:
 | Risk | Mitigation |
 | --- | --- |
 | Camera-only navigation is unreliable indoors | Add ToF/bump sensors in MVP; reserve 2D LiDAR/depth sensor as likely upgrade. |
-| AI HAT+ 2 software stack changes quickly | Keep perception/conversation interfaces modular; pin install docs and versions once hardware arrives. |
+| Rich conversation depends on network/cloud availability | Keep local stop, wait, mute, battery status, and basic scripted replies working without cloud AI. |
+| Future AI HAT+ 2 integration could force mechanical or power changes | Reserve physical clearance, cooling airflow, and power budget for a future HAT without making it part of MVP. |
 | Motor noise hurts voice recognition | Isolate mic mechanically, place it high, use echo cancellation, slow/stop during critical listening. |
 | Battery brownouts reset Pi | Separate motor and compute rails, fused pack, proper buck converters, brownout logging. |
 | Robot feels creepy instead of companionable | Clear LEDs, physical mute, no silent recording, gentle motion cues, no surprise roaming. |
@@ -292,15 +294,17 @@ The MVP is done when:
 - Whether MVP includes 2D LiDAR from day one or waits until camera/proximity testing proves insufficient.
 - Exact local/cloud AI split for conversation.
 - Whether voice should run mostly local, cloud-assisted, or hybrid.
+- Whether and when to add AI HAT+ 2 after the basic body, safety loop, and voice workflow are working.
 - Whether to use ROS 2 end to end or keep a lighter Python service stack for the first moving prototype.
 - Name/persona defaults. I am partial to something small and bright-eyed, but I will behave if asked.
 
 ## 18. Proposed Default MVP Decisions
 
 - Use wheeled differential drive, not legs.
-- Use Raspberry Pi 5 16GB + AI HAT+ 2.
+- Use the existing Raspberry Pi 5 8GB without AI HAT+ 2 as the MVP compute baseline.
 - Use Camera Module 3 Wide for the main head camera.
 - Design the body as modular 3D-printable parts from the start, with separate electronics tray, sensor pods, bumper carrier, battery cradle, and head shell.
+- Reserve mechanical clearance, cooling airflow, and power budget for a later AI HAT+ 2 upgrade.
 - Use OpenSCAD for simple source CAD, allow `build123d` and CadQuery for more complex Python CAD, and keep generated STL/STEP exports out of the authoritative design source.
 - Include physical E-stop, bumper switches, and ToF proximity sensors before any autonomous movement.
 - Build ROS-compatible interfaces even if early prototypes start as Python services.
