@@ -1,0 +1,81 @@
+# macOS and editor clutter
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Python environments and caches
+.venv/
+.venv-*/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Python packaging/build artifacts
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+*.local
+
+# Logs and runtime state
+*.log
+logs/
+tmp/
+temp/
+*.pid
+*.sqlite
+*.sqlite3
+*.db
+
+# CAD generated exports
+cad/exports/
+*.FCStd1
+*.brep
+
+# OpenSCAD generated/intermediate files
+*.stl
+*.3mf
+*.obj
+*.off
+*.csg
+*.dxf
+
+# Keep source CAD files tracked
+!cad/**/*.scad
+!cad/**/*.py
+
+# Node/web tooling, if the dashboard lands here later
+node_modules/
+.next/
+.vite/
+coverage/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Robot and hardware capture outputs
+captures/
+recordings/
+rosbags/
+*.bag
+*.mcap
