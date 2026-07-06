@@ -6,11 +6,15 @@ The design goal is pet-like presence without overcomplicating the first build. T
 
 ## Current Status
 
-This repo is at the planning and early tooling stage.
+This repo is at the planning and early tooling stage. Start with the docs index:
 
+- Documentation index: [`docs/README.md`](docs/README.md)
 - MVP PRD: [`docs/mvp-prd.md`](docs/mvp-prd.md)
+- Decision log: [`docs/decision-log.md`](docs/decision-log.md)
+- MVP architecture: [`docs/mvp-architecture.md`](docs/mvp-architecture.md)
+- BOM v0: [`docs/bom-v0.md`](docs/bom-v0.md)
+- CAD mechanical plan: [`docs/cad-mechanical-plan.md`](docs/cad-mechanical-plan.md)
 - Python CAD tooling notes: [`cad/python/README.md`](cad/python/README.md)
-- Python CAD dependencies: [`cad/python/requirements.txt`](cad/python/requirements.txt)
 
 ## MVP Direction
 
@@ -62,20 +66,25 @@ python -m pip install -r cad/python/requirements.txt
 
 ```text
 .
-├── cad/
-│   └── python/
-│       ├── README.md
-│       └── requirements.txt
-├── docs/
-│   └── mvp-prd.md
-├── .gitignore
-└── README.md
+|-- cad/
+|   `-- python/
+|       |-- README.md
+|       `-- requirements.txt
+|-- docs/
+|   |-- README.md
+|   |-- bom-v0.md
+|   |-- cad-mechanical-plan.md
+|   |-- decision-log.md
+|   |-- mvp-architecture.md
+|   `-- mvp-prd.md
+|-- .gitignore
+`-- README.md
 ```
 
 ## Next Steps
 
-1. Create the MVP system architecture and first build plan.
-2. Draft a first-pass BOM.
-3. Add `cad/openscad/` and shared robot dimensions.
-4. Generate the first printable base tray model.
-5. Decide whether the first chassis needs 2D LiDAR from day one or can start with camera, ToF sensors, and bumpers.
+1. Confirm printer model/build volume and first operating area in the house.
+2. Buy the bench-brain and safety-prototype batch from [`docs/bom-v0.md`](docs/bom-v0.md).
+3. Add `cad/openscad/robot_params.scad`.
+4. Generate the first printable electronics deck and base tray.
+5. Build the stationary bench brain before powering any drive motors.
