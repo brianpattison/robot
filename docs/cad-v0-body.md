@@ -8,7 +8,9 @@ Nominal v0 envelope: **300 mm long**, **220 mm wide**, **80 mm wheels**, **42 mm
 
 ![Finished Codex Rover Bean concept art](images/codex_body_finished_concept.png)
 
-This concept image is the visual north star for the finished body: soft rounded panels, covered wheel pinch zones, an obvious E-stop, a friendly camera head, and a bright but practical Codex color palette. It is **not** generated from the OpenSCAD files and should not be treated as fit-checked geometry.
+![Exploded finished Codex Rover Bean concept art](images/codex_body_finished_exploded_concept.png)
+
+These concept images are the visual north star for the finished body: soft rounded panels, covered wheel pinch zones, an obvious E-stop, a friendly camera head, and a bright but practical Codex color palette. The exploded concept is meant to preserve the assembled concept's colors, scale, and part language while showing the service layers. They are **not** generated from the OpenSCAD files and should not be treated as fit-checked geometry.
 
 ## Preview Renders
 
