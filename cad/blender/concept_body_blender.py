@@ -25,23 +25,34 @@ OUT = ROOT / "docs" / "images"
 
 
 COLORS = {
-    "cream": (0.88, 0.78, 0.60, 1.0),
-    "cream_light": (0.94, 0.82, 0.62, 1.0),
-    "cream_shadow": (0.58, 0.49, 0.36, 1.0),
-    "teal": (0.00, 0.31, 0.35, 1.0),
-    "teal_dark": (0.00, 0.17, 0.20, 1.0),
-    "charcoal": (0.018, 0.020, 0.024, 1.0),
-    "panel_black": (0.008, 0.009, 0.011, 1.0),
+    # Calibrated against the finished concept art (sampled + delit): the cream is
+    # a warm off-white, not a saturated tan, and the teal is a brighter medium
+    # teal that reads ~(0.31,0.62,0.64) in direct light.
+    "cream": (0.91, 0.82, 0.67, 1.0),
+    "cream_light": (0.95, 0.87, 0.71, 1.0),
+    "cream_shadow": (0.58, 0.50, 0.40, 1.0),
+    "teal": (0.11, 0.50, 0.53, 1.0),
+    "teal_dark": (0.04, 0.25, 0.27, 1.0),
+    "charcoal": (0.028, 0.030, 0.033, 1.0),
+    "panel_black": (0.016, 0.018, 0.020, 1.0),
     "black": (0.0, 0.0, 0.0, 1.0),
     "rubber": (0.105, 0.100, 0.092, 1.0),
     "rubber_tread": (0.090, 0.086, 0.078, 1.0),
-    "lime": (0.72, 1.0, 0.22, 1.0),
-    "blue": (0.03, 0.23, 0.76, 1.0),
+    "lime": (0.76, 0.97, 0.34, 1.0),
+    "blue": (0.05, 0.27, 0.82, 1.0),
     "red": (0.86, 0.08, 0.04, 1.0),
     "keepout": (0.30, 0.52, 1.0, 0.28),
     "safety_teal": (0.00, 0.72, 0.78, 0.22),
     "safety_red": (1.0, 0.16, 0.08, 0.24),
     "floor": (0.68, 0.52, 0.36, 1.0),
+    # Representative internal-component materials (shown in exploded/service).
+    "pcb": (0.05, 0.22, 0.10, 1.0),
+    "pcb_blue": (0.07, 0.12, 0.30, 1.0),
+    "metal": (0.42, 0.43, 0.46, 1.0),
+    "metal_dark": (0.20, 0.21, 0.23, 1.0),
+    "battery_body": (0.12, 0.14, 0.19, 1.0),
+    "copper": (0.72, 0.45, 0.20, 1.0),
+    "silver": (0.62, 0.63, 0.66, 1.0),
 }
 
 
@@ -195,24 +206,6 @@ def cylinder(
     return obj
 
 
-def cone(
-    name: str,
-    loc: tuple[float, float, float],
-    radius1: float,
-    radius2: float,
-    depth: float,
-    material_obj: bpy.types.Material,
-    vertices: int = 72,
-) -> bpy.types.Object:
-    bpy.ops.mesh.primitive_cone_add(vertices=vertices, radius1=radius1, radius2=radius2, depth=depth, location=loc)
-    obj = bpy.context.object
-    obj.name = name
-    obj.data.materials.append(material_obj)
-    add_bevel(obj, 1.2, 4)
-    shade_smooth(obj)
-    return obj
-
-
 def torus(
     name: str,
     loc: tuple[float, float, float],
@@ -261,89 +254,6 @@ def curve_tube(
     return obj
 
 
-def trapezoid_prism(
-    name: str,
-    loc: tuple[float, float, float],
-    length: float,
-    front_width: float,
-    rear_width: float,
-    height: float,
-    material_obj: bpy.types.Material,
-    bevel: float,
-    segments: int = 8,
-) -> bpy.types.Object:
-    x0 = loc[0] - length / 2
-    x1 = loc[0] + length / 2
-    y0f = -front_width / 2
-    y1f = front_width / 2
-    y0r = -rear_width / 2
-    y1r = rear_width / 2
-    z0 = loc[2] - height / 2
-    z1 = loc[2] + height / 2
-    verts = [
-        (x0, y0f, z0),
-        (x0, y1f, z0),
-        (x1, y1r, z0),
-        (x1, y0r, z0),
-        (x0, y0f, z1),
-        (x0, y1f, z1),
-        (x1, y1r, z1),
-        (x1, y0r, z1),
-    ]
-    faces = [
-        (0, 1, 2, 3),
-        (4, 7, 6, 5),
-        (0, 4, 5, 1),
-        (1, 5, 6, 2),
-        (2, 6, 7, 3),
-        (3, 7, 4, 0),
-    ]
-    mesh = bpy.data.meshes.new(f"{name}_mesh")
-    mesh.from_pydata(verts, [], faces)
-    mesh.update()
-    obj = bpy.data.objects.new(name, mesh)
-    bpy.context.collection.objects.link(obj)
-    obj.data.materials.append(material_obj)
-    add_bevel(obj, bevel, segments)
-    shade_smooth(obj)
-    return obj
-
-
-def rounded_trapezoid_plate(
-    name: str,
-    loc: tuple[float, float, float],
-    length: float,
-    front_width: float,
-    rear_width: float,
-    corner: float,
-    material_obj: bpy.types.Material,
-) -> bpy.types.Object:
-    """Build a flat trapezoid-like hood inlay without vertical slab sides."""
-    f = front_width / 2
-    r = rear_width / 2
-    half_len = length / 2
-    exponent = max(2.4, min(4.8, length / max(corner, 1.0) * 0.65))
-    verts: list[tuple[float, float, float]] = []
-    for index in range(96):
-        angle = 2 * math.pi * index / 96
-        ca = math.cos(angle)
-        sa = math.sin(angle)
-        x_local = half_len * math.copysign(abs(ca) ** (2 / exponent), ca)
-        taper = (x_local + half_len) / length
-        half_y = f + (r - f) * taper
-        y_local = half_y * math.copysign(abs(sa) ** (2 / exponent), sa)
-        verts.append((loc[0] + x_local, loc[1] + y_local, loc[2]))
-
-    mesh = bpy.data.meshes.new(f"{name}_mesh")
-    mesh.from_pydata(verts, [], [tuple(range(len(verts)))])
-    mesh.update()
-    obj = bpy.data.objects.new(name, mesh)
-    bpy.context.collection.objects.link(obj)
-    obj.data.materials.append(material_obj)
-    obj.modifiers.new("hood weighted normals", "WEIGHTED_NORMAL")
-    return obj
-
-
 def superellipse_shell(
     name: str,
     loc: tuple[float, float, float],
@@ -362,6 +272,15 @@ def superellipse_shell(
             y = half_y * math.copysign(abs(sa) ** (2 / exponent), sa)
             verts.append((loc[0] + x, loc[1] + y, loc[2] + z))
 
+    # Cap centroids so the top/bottom close as clean triangle fans instead of a
+    # single many-sided n-gon (an n-gon cap fan-triangulates from one vertex and,
+    # once smooth-shaded against the sloped sides, smears a dark triangle across
+    # the surface).  Flat-shading the caps keeps them reading as crisp panels.
+    top_center = len(verts)
+    verts.append((loc[0], loc[1], loc[2] + rings[-1][0]))
+    bottom_center = len(verts)
+    verts.append((loc[0], loc[1], loc[2] + rings[0][0]))
+
     faces: list[tuple[int, ...]] = []
     for ring in range(len(rings) - 1):
         start = ring * points
@@ -375,9 +294,12 @@ def superellipse_shell(
                     next_start + index,
                 )
             )
-    faces.append(tuple(reversed(range(points))))
+    side_face_count = len(faces)
+    for index in range(points):  # bottom cap fan (normal points down)
+        faces.append((bottom_center, (index + 1) % points, index))
     top_start = (len(rings) - 1) * points
-    faces.append(tuple(top_start + index for index in range(points)))
+    for index in range(points):  # top cap fan (normal points up)
+        faces.append((top_center, top_start + index, top_start + (index + 1) % points))
 
     mesh = bpy.data.meshes.new(f"{name}_mesh")
     mesh.from_pydata(verts, [], faces)
@@ -387,251 +309,9 @@ def superellipse_shell(
     obj.data.materials.append(material_obj)
     obj.modifiers.new("shell weighted normals", "WEIGHTED_NORMAL")
     shade_smooth(obj)
+    for poly in obj.data.polygons[side_face_count:]:
+        poly.use_smooth = False
     return obj
-
-
-def superellipse_plate(
-    name: str,
-    loc: tuple[float, float, float],
-    half_x: float,
-    half_y: float,
-    material_obj: bpy.types.Material,
-    exponent: float = 3.5,
-    points: int = 96,
-) -> bpy.types.Object:
-    """Build a flat rounded inlay surface without visible vertical side walls."""
-    verts: list[tuple[float, float, float]] = []
-    for index in range(points):
-        angle = 2 * math.pi * index / points
-        ca = math.cos(angle)
-        sa = math.sin(angle)
-        x = half_x * math.copysign(abs(ca) ** (2 / exponent), ca)
-        y = half_y * math.copysign(abs(sa) ** (2 / exponent), sa)
-        verts.append((loc[0] + x, loc[1] + y, loc[2]))
-
-    mesh = bpy.data.meshes.new(f"{name}_mesh")
-    mesh.from_pydata(verts, [], [tuple(range(points))])
-    mesh.update()
-    obj = bpy.data.objects.new(name, mesh)
-    bpy.context.collection.objects.link(obj)
-    obj.data.materials.append(material_obj)
-    obj.modifiers.new("plate weighted normals", "WEIGHTED_NORMAL")
-    return obj
-
-
-def curved_front_band(
-    name: str,
-    loc: tuple[float, float, float],
-    y_half: float,
-    z_center: float,
-    height: float,
-    outer_x: float,
-    inner_x: float,
-    side_recede: float,
-    material_obj: bpy.types.Material,
-    points: int = 44,
-    exponent: float = 1.85,
-    bevel: float = 3.0,
-) -> bpy.types.Object:
-    """Build a curved, constant-thickness front bumper or fascia band."""
-    z0 = loc[2] + z_center - height / 2
-    z1 = loc[2] + z_center + height / 2
-    samples: list[tuple[float, float, float, float]] = []
-    for index in range(points):
-        t = index / (points - 1)
-        y = -y_half + 2 * y_half * t
-        recede = side_recede * (abs(y) / y_half) ** exponent
-        samples.append((loc[0] + outer_x + recede, loc[0] + inner_x + recede, loc[1] + y, recede))
-
-    verts: list[tuple[float, float, float]] = []
-    for outer, inner, y, _ in samples:
-        verts.extend(
-            [
-                (outer, y, z0),
-                (inner, y, z0),
-                (outer, y, z1),
-                (inner, y, z1),
-            ]
-        )
-
-    faces: list[tuple[int, ...]] = []
-    for index in range(points - 1):
-        a = index * 4
-        b = (index + 1) * 4
-        faces.extend(
-            [
-                (a, b, b + 2, a + 2),  # outer face
-                (a + 1, a + 3, b + 3, b + 1),  # inner face
-                (a + 2, b + 2, b + 3, a + 3),  # top face
-                (a, a + 1, b + 1, b),  # bottom face
-            ]
-        )
-    faces.append((0, 2, 3, 1))
-    last = (points - 1) * 4
-    faces.append((last, last + 1, last + 3, last + 2))
-
-    mesh = bpy.data.meshes.new(f"{name}_mesh")
-    mesh.from_pydata(verts, [], faces)
-    mesh.update()
-    obj = bpy.data.objects.new(name, mesh)
-    bpy.context.collection.objects.link(obj)
-    obj.data.materials.append(material_obj)
-    add_bevel(obj, bevel, 10)
-    shade_smooth(obj)
-    return obj
-
-
-def curved_front_band_segment(
-    name: str,
-    loc: tuple[float, float, float],
-    y_start: float,
-    y_end: float,
-    y_half: float,
-    z_center: float,
-    height: float,
-    outer_x: float,
-    inner_x: float,
-    side_recede: float,
-    material_obj: bpy.types.Material,
-    points: int = 24,
-    exponent: float = 1.85,
-    bevel: float = 5.0,
-) -> bpy.types.Object:
-    """Build one curved bumper/fascia segment on the shared front arc."""
-    segment_mid = (y_start + y_end) / 2
-    segment_half = abs(y_end - y_start) / 2
-    z_half = height / 2
-    verts: list[tuple[float, float, float]] = []
-    for index in range(points):
-        t = index / (points - 1)
-        y = y_start + (y_end - y_start) * t
-        recede = side_recede * (abs(y) / y_half) ** exponent
-        local_z_half = capsule_z_radius(y - segment_mid, segment_half, z_half)
-        verts.extend(
-            [
-                (loc[0] + outer_x + recede, loc[1] + y, loc[2] + z_center - local_z_half),
-                (loc[0] + inner_x + recede, loc[1] + y, loc[2] + z_center - local_z_half),
-                (loc[0] + outer_x + recede, loc[1] + y, loc[2] + z_center + local_z_half),
-                (loc[0] + inner_x + recede, loc[1] + y, loc[2] + z_center + local_z_half),
-            ]
-        )
-
-    faces: list[tuple[int, ...]] = []
-    for index in range(points - 1):
-        a = index * 4
-        b = (index + 1) * 4
-        faces.extend(
-            [
-                (a, b, b + 2, a + 2),
-                (a + 1, a + 3, b + 3, b + 1),
-                (a + 2, b + 2, b + 3, a + 3),
-                (a, a + 1, b + 1, b),
-            ]
-        )
-    faces.append((0, 2, 3, 1))
-    last = (points - 1) * 4
-    faces.append((last, last + 1, last + 3, last + 2))
-
-    mesh = bpy.data.meshes.new(f"{name}_mesh")
-    mesh.from_pydata(verts, [], faces)
-    mesh.update()
-    obj = bpy.data.objects.new(name, mesh)
-    bpy.context.collection.objects.link(obj)
-    obj.data.materials.append(material_obj)
-    add_bevel(obj, bevel, 10)
-    shade_smooth(obj)
-    return obj
-
-
-def curved_front_oval_band(
-    name: str,
-    loc: tuple[float, float, float],
-    y_half: float,
-    z_center: float,
-    x_center: float,
-    radius_x: float,
-    radius_z: float,
-    side_recede: float,
-    material_obj: bpy.types.Material,
-    points: int = 96,
-    ring_points: int = 28,
-    exponent: float = 1.85,
-) -> bpy.types.Object:
-    """Build a rounded curved bumper band with an oval x/z cross-section."""
-    verts: list[tuple[float, float, float]] = []
-    for index in range(points):
-        t = index / (points - 1)
-        y = -y_half + 2 * y_half * t
-        recede = side_recede * (abs(y) / y_half) ** exponent
-        cx = loc[0] + x_center + recede
-        for ring_index in range(ring_points):
-            angle = 2 * math.pi * ring_index / ring_points
-            verts.append(
-                (
-                    cx + radius_x * math.cos(angle),
-                    loc[1] + y,
-                    loc[2] + z_center + radius_z * math.sin(angle),
-                )
-            )
-
-    faces: list[tuple[int, ...]] = []
-    for index in range(points - 1):
-        a = index * ring_points
-        b = (index + 1) * ring_points
-        for ring_index in range(ring_points):
-            faces.append(
-                (
-                    a + ring_index,
-                    a + (ring_index + 1) % ring_points,
-                    b + (ring_index + 1) % ring_points,
-                    b + ring_index,
-                )
-            )
-    faces.append(tuple(reversed(range(ring_points))))
-    last = (points - 1) * ring_points
-    faces.append(tuple(last + index for index in range(ring_points)))
-
-    mesh = bpy.data.meshes.new(f"{name}_mesh")
-    mesh.from_pydata(verts, [], faces)
-    mesh.update()
-    obj = bpy.data.objects.new(name, mesh)
-    bpy.context.collection.objects.link(obj)
-    obj.data.materials.append(material_obj)
-    obj.modifiers.new("bumper weighted normals", "WEIGHTED_NORMAL")
-    shade_smooth(obj)
-    return obj
-
-
-def front_curve_x(y: float, base_x: float, y_half: float, side_recede: float, exponent: float = 1.85) -> float:
-    """Return the x position on the shared curved nose/bumper arc."""
-    clamped = min(abs(y), y_half) / y_half
-    return base_x + side_recede * clamped**exponent
-
-
-def front_curve_points(
-    base_x: float,
-    y_half: float,
-    z: float,
-    side_recede: float,
-    exponent: float = 1.85,
-    count: int = 9,
-) -> list[tuple[float, float, float]]:
-    points: list[tuple[float, float, float]] = []
-    for index in range(count):
-        t = index / (count - 1)
-        y = -y_half + 2 * y_half * t
-        points.append((front_curve_x(y, base_x, y_half, side_recede, exponent), y, z))
-    return points
-
-
-def capsule_z_radius(y: float, y_half: float, z_half: float) -> float:
-    """Return the vertical half-height for a horizontal pill at position y."""
-    straight_half = max(0.0, y_half - z_half)
-    distance = abs(y)
-    if distance <= straight_half:
-        return z_half
-    cap_distance = min(z_half, distance - straight_half)
-    return max(0.7, math.sqrt(max(0.0, z_half * z_half - cap_distance * cap_distance)))
 
 
 def capsule_outline(
@@ -652,130 +332,140 @@ def capsule_outline(
     return outline
 
 
-def curved_front_pill_frame(
+def _superellipse_front_x(y: float, half_x: float, half_y: float, exponent: float) -> float:
+    """Front (-X) surface x of a superellipse ring at lateral position y."""
+    ratio = abs(y) / half_y
+    if ratio >= 1.0:
+        return 0.0
+    return half_x * (1.0 - ratio ** exponent) ** (1.0 / exponent)
+
+
+# Molded cream body shell profile (shared by the shell build and the boolean
+# cutters that carve recessed front windows into it, so the cutters follow the
+# exact same curved surface).
+BODY_RINGS = [(16, 122, 88), (28, 139, 101), (50, 144, 105), (68, 139, 101), (76, 126, 91)]
+BODY_SHELL_EXP = 3.75
+
+
+def body_ring_params(z: float) -> tuple[float, float]:
+    """Interpolate (half_x, half_y) of the body shell superellipse at height z."""
+    if z <= BODY_RINGS[0][0]:
+        return BODY_RINGS[0][1], BODY_RINGS[0][2]
+    if z >= BODY_RINGS[-1][0]:
+        return BODY_RINGS[-1][1], BODY_RINGS[-1][2]
+    for i in range(len(BODY_RINGS) - 1):
+        z0, hx0, hy0 = BODY_RINGS[i]
+        z1, hx1, hy1 = BODY_RINGS[i + 1]
+        if z0 <= z <= z1:
+            t = (z - z0) / (z1 - z0)
+            return hx0 + (hx1 - hx0) * t, hy0 + (hy1 - hy0) * t
+    return BODY_RINGS[-1][1], BODY_RINGS[-1][2]
+
+
+def body_front_x(y: float, z: float) -> float:
+    """Magnitude of the front (-X) body shell surface x at lateral y, height z."""
+    hx, hy = body_ring_params(z)
+    return _superellipse_front_x(y, hx, hy, BODY_SHELL_EXP)
+
+
+def front_recess_cutter(
     name: str,
     loc: tuple[float, float, float],
-    outer_y_half: float,
-    outer_z_center: float,
-    outer_z_half: float,
-    inner_y_half: float,
-    inner_z_center: float,
-    inner_z_half: float,
-    front_x: float,
-    back_x: float,
-    side_recede: float,
-    material_obj: bpy.types.Material,
-    points: int = 96,
-    exponent: float = 1.65,
-    bevel: float = 1.4,
+    outline_yz: list[tuple[float, float]],
+    back_off: float,
+    front_off: float,
 ) -> bpy.types.Object:
-    """Build a curved cream frame around a recessed pill opening."""
-    outer = capsule_outline(outer_y_half, outer_z_center, outer_z_half, points)
-    inner = capsule_outline(inner_y_half, inner_z_center, inner_z_half, points)
-    loops: list[list[tuple[float, float, float]]] = []
-    for base_x, outline in ((front_x, outer), (front_x, inner), (back_x, outer), (back_x, inner)):
-        loop: list[tuple[float, float, float]] = []
-        for y, z in outline:
-            clamped = min(abs(y), outer_y_half) / outer_y_half
-            x = loc[0] + base_x + side_recede * clamped**exponent
-            loop.append((x, loc[1] + y, loc[2] + z))
-        loops.append(loop)
-
-    verts = [point for loop in loops for point in loop]
-    outer_front = 0
-    inner_front = points
-    outer_back = points * 2
-    inner_back = points * 3
-    faces: list[tuple[int, ...]] = []
-    for index in range(points):
-        next_index = (index + 1) % points
-        faces.extend(
-            [
-                (outer_front + index, outer_front + next_index, inner_front + next_index, inner_front + index),
-                (outer_back + index, inner_back + index, inner_back + next_index, outer_back + next_index),
-                (outer_front + index, outer_back + index, outer_back + next_index, outer_front + next_index),
-                (inner_front + next_index, inner_back + next_index, inner_back + index, inner_front + index),
-            ]
-        )
-
-    mesh = bpy.data.meshes.new(f"{name}_mesh")
-    mesh.from_pydata(verts, [], faces)
-    mesh.update()
-    obj = bpy.data.objects.new(name, mesh)
-    bpy.context.collection.objects.link(obj)
-    obj.data.materials.append(material_obj)
-    add_bevel(obj, bevel, 6)
-    shade_smooth(obj)
-    return obj
-
-
-def curved_front_pill_band(
-    name: str,
-    loc: tuple[float, float, float],
-    y_half: float,
-    z_center: float,
-    z_half: float,
-    outer_x: float,
-    inner_x: float,
-    side_recede: float,
-    material_obj: bpy.types.Material,
-    points: int = 72,
-    exponent: float = 1.65,
-    bevel: float = 2.6,
-) -> bpy.types.Object:
-    """Build a curved front inset with rounded pill ends in the y/z plane."""
-    samples: list[tuple[float, float, float, float, float]] = []
-    for index in range(points):
-        t = index / (points - 1)
-        y = -y_half + 2 * y_half * t
-        recede = side_recede * (abs(y) / y_half) ** exponent
-        zh = capsule_z_radius(y, y_half, z_half)
-        samples.append(
-            (
-                loc[0] + outer_x + recede,
-                loc[0] + inner_x + recede,
-                loc[1] + y,
-                loc[2] + z_center - zh,
-                loc[2] + z_center + zh,
-            )
-        )
-
+    """Rounded-rectangle 'tunnel' whose back face sits back_off inside the front
+    shell surface and whose front face is front_off proud — used as a BOOLEAN
+    DIFFERENCE cutter to carve a clean recessed window into the smooth front."""
+    n = len(outline_yz)
     verts: list[tuple[float, float, float]] = []
-    for outer, inner, y, z0, z1 in samples:
-        verts.extend(
-            [
-                (outer, y, z0),
-                (inner, y, z0),
-                (outer, y, z1),
-                (inner, y, z1),
-            ]
-        )
-
+    for y, z in outline_yz:  # front loop (well proud, outside the shell)
+        sx = body_front_x(y, z)
+        verts.append((loc[0] - sx - front_off, loc[1] + y, loc[2] + z))
+    for y, z in outline_yz:  # back loop (recess floor, inside the shell)
+        sx = body_front_x(y, z)
+        verts.append((loc[0] - sx + back_off, loc[1] + y, loc[2] + z))
     faces: list[tuple[int, ...]] = []
-    for index in range(points - 1):
-        a = index * 4
-        b = (index + 1) * 4
-        faces.extend(
-            [
-                (a, b, b + 2, a + 2),
-                (a + 1, a + 3, b + 3, b + 1),
-                (a + 2, b + 2, b + 3, a + 3),
-                (a, a + 1, b + 1, b),
-            ]
-        )
-    faces.append((0, 2, 3, 1))
-    last = (points - 1) * 4
-    faces.append((last, last + 1, last + 3, last + 2))
-
+    for i in range(n):
+        j = (i + 1) % n
+        faces.append((i, j, n + j, n + i))
+    faces.append(tuple(range(n - 1, -1, -1)))  # front cap
+    faces.append(tuple(range(n, 2 * n)))  # back cap
     mesh = bpy.data.meshes.new(f"{name}_mesh")
     mesh.from_pydata(verts, [], faces)
     mesh.update()
     obj = bpy.data.objects.new(name, mesh)
     bpy.context.collection.objects.link(obj)
-    obj.data.materials.append(material_obj)
-    add_bevel(obj, bevel, 8)
-    shade_smooth(obj)
     return obj
+
+
+def front_recess_liner(
+    name: str,
+    loc: tuple[float, float, float],
+    outline_yz: list[tuple[float, float]],
+    floor_off: float,
+    rim_off: float = 0.0,
+    material_obj: bpy.types.Material | None = None,
+) -> bpy.types.Object:
+    """Open-front dark 'cup' that lines a carved recess: walls run from the front
+    rim (at the cream surface) back to a floor cap, so the recess interior reads
+    solid dark with no lit cream sill. The floor cap is the recessed sensor face."""
+    n = len(outline_yz)
+    verts: list[tuple[float, float, float]] = []
+    for y, z in outline_yz:  # rim loop (at/near the cream surface)
+        sx = body_front_x(y, z)
+        verts.append((loc[0] - sx + rim_off, loc[1] + y, loc[2] + z))
+    for y, z in outline_yz:  # floor loop (recessed)
+        sx = body_front_x(y, z)
+        verts.append((loc[0] - sx + floor_off, loc[1] + y, loc[2] + z))
+    faces: list[tuple[int, ...]] = []
+    for i in range(n):
+        j = (i + 1) % n
+        faces.append((i, n + i, n + j, j))  # wall
+    faces.append(tuple(range(2 * n - 1, n - 1, -1)))  # floor cap facing -X
+    mesh = bpy.data.meshes.new(f"{name}_mesh")
+    mesh.from_pydata(verts, [], faces)
+    mesh.update()
+    obj = bpy.data.objects.new(name, mesh)
+    bpy.context.collection.objects.link(obj)
+    if material_obj is not None:
+        obj.data.materials.append(material_obj)
+    return obj
+
+
+def box_cutter(loc: tuple[float, float, float], dims: tuple[float, float, float]) -> bpy.types.Object:
+    """A plain box used as a boolean-difference cutter."""
+    bpy.ops.mesh.primitive_cube_add(size=1, location=loc)
+    obj = bpy.context.object
+    obj.name = "box cutter"
+    obj.dimensions = dims
+    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+    return obj
+
+
+def boolean_carve(target: bpy.types.Object, cutter: bpy.types.Object) -> None:
+    """Difference `cutter` out of `target`, then restore clean smooth shading."""
+    bpy.ops.object.select_all(action="DESELECT")
+    bpy.context.view_layer.objects.active = target
+    target.select_set(True)
+    if target.mode != "OBJECT":
+        bpy.ops.object.mode_set(mode="OBJECT")
+    for m in list(target.modifiers):
+        bpy.ops.object.modifier_apply(modifier=m.name)
+    boolean = target.modifiers.new("front recess cut", "BOOLEAN")
+    boolean.operation = "DIFFERENCE"
+    boolean.object = cutter
+    boolean.solver = "EXACT"
+    bpy.ops.object.modifier_apply(modifier="front recess cut")
+    bpy.data.objects.remove(cutter, do_unlink=True)
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.mesh.normals_make_consistent(inside=False)
+    bpy.ops.object.mode_set(mode="OBJECT")
+    target.modifiers.new("recut weighted normals", "WEIGHTED_NORMAL")
+    shade_smooth(target)
+    target.select_set(False)
 
 
 def x_capsule_shell(
@@ -796,6 +486,12 @@ def x_capsule_shell(
             z = half_z * math.copysign(abs(sa) ** (2 / exponent), sa)
             verts.append((loc[0] + x, loc[1] + y, loc[2] + z))
 
+    # Cap centroids -> clean triangle fans + flat-shaded caps (see superellipse_shell).
+    front_center = len(verts)
+    verts.append((loc[0] + slices[0][0], loc[1], loc[2]))
+    back_center = len(verts)
+    verts.append((loc[0] + slices[-1][0], loc[1], loc[2]))
+
     faces: list[tuple[int, ...]] = []
     for ring in range(len(slices) - 1):
         start = ring * points
@@ -809,9 +505,12 @@ def x_capsule_shell(
                     start + (index + 1) % points,
                 )
             )
-    faces.append(tuple(reversed(range(points))))
+    side_face_count = len(faces)
+    for index in range(points):  # front cap fan (normal -X)
+        faces.append((front_center, (index + 1) % points, index))
     back_start = (len(slices) - 1) * points
-    faces.append(tuple(back_start + index for index in range(points)))
+    for index in range(points):  # back cap fan (normal +X)
+        faces.append((back_center, back_start + index, back_start + (index + 1) % points))
 
     mesh = bpy.data.meshes.new(f"{name}_mesh")
     mesh.from_pydata(verts, [], faces)
@@ -821,6 +520,8 @@ def x_capsule_shell(
     obj.data.materials.append(material_obj)
     obj.modifiers.new("capsule weighted normals", "WEIGHTED_NORMAL")
     shade_smooth(obj)
+    for poly in obj.data.polygons[side_face_count:]:
+        poly.use_smooth = False
     return obj
 
 
@@ -867,12 +568,12 @@ def variant(progress: float, refinement: float = 0.0) -> dict[str, float]:
         "wheel_x": lerp(matched["wheel_x"], 55, refinement),
         "wheel_y": lerp(matched["wheel_y"], 105, refinement),
         "head_w": lerp(matched["head_w"], 106, refinement),
-        "head_d": lerp(matched["head_d"], 58, refinement),
-        "head_h": lerp(matched["head_h"], 40, refinement),
+        "head_d": lerp(matched["head_d"], 54, refinement),
+        "head_h": lerp(matched["head_h"], 52, refinement),
         "head_bevel": lerp(matched["head_bevel"], 27, refinement),
-        "face_w": lerp(matched["face_w"], 84, refinement),
-        "face_h": lerp(matched["face_h"], 33, refinement),
-        "neck_h": lerp(matched["neck_h"], 33, refinement),
+        "face_w": lerp(matched["face_w"], 89, refinement),
+        "face_h": lerp(matched["face_h"], 36, refinement),
+        "neck_h": lerp(matched["neck_h"], 42, refinement),
         "top_black_len": lerp(matched["top_black_len"], 64, refinement),
         "side_panel_len": lerp(matched["side_panel_len"], 74, refinement),
         "estop_scale": lerp(matched["estop_scale"], 0.82, refinement),
@@ -880,74 +581,51 @@ def variant(progress: float, refinement: float = 0.0) -> dict[str, float]:
 
 
 def make_fender(side: int, v: dict[str, float], z_offset: float = 0.0) -> bpy.types.Object:
+    # Slim cream arch that caps just the top of the (larger) exposed wheel, like
+    # a car fender fairing — the tire and hub read clearly below it.
     arch = side_arch_band(
         f"cream integrated wheel arch fairing {'right' if side > 0 else 'left'}",
         center_x=v["wheel_x"] - 1,
-        y_center=side * 104.0,
-        center_z=38 + z_offset,
-        outer_radius_x=39,
-        outer_radius_z=35,
-        band_width=11,
-        depth=22,
+        y_center=side * 105.0,
+        center_z=42 + z_offset,
+        outer_radius_x=46,
+        outer_radius_z=45,
+        band_width=6.5,
+        depth=21,
         side=side,
         material_obj=mat("cream_light"),
         start_deg=12,
         end_deg=168,
-        points=42,
-        bevel=2.2,
-    )
-    rounded_box(
-        f"cream fender front blend pad {'right' if side > 0 else 'left'}",
-        (v["wheel_x"] - 31, side * 103.5, 35 + z_offset),
-        (15, 13, 13),
-        mat("cream_light"),
-        6,
-        12,
-    )
-    rounded_box(
-        f"cream fender rear blend pad {'right' if side > 0 else 'left'}",
-        (v["wheel_x"] + 31, side * 103.5, 35 + z_offset),
-        (15, 13, 13),
-        mat("cream_light"),
-        6,
-        12,
+        points=52,
+        bevel=1.8,
     )
     return arch
 
 
-def add_tire_tread_marks(side: int, wheel_loc: tuple[float, float, float], outside_y: float) -> None:
-    face_y = outside_y + side * 0.7
-    for index in range(18):
-        theta = 2 * math.pi * index / 18
-        x = wheel_loc[0] + 28.5 * math.cos(theta)
-        z = wheel_loc[2] + 28.5 * math.sin(theta)
+def add_tire_tread_marks(
+    side: int,
+    wheel_loc: tuple[float, float, float],
+    tire_radius: float,
+    tire_w: float,
+) -> None:
+    # Chunky tread lugs on the rolling (circumferential) surface, spanning the
+    # tire width, with a slight herringbone tilt like a real tire.
+    n = 34
+    lug_w = tire_w * 0.82
+    for index in range(n):
+        theta = 2 * math.pi * index / n
+        x = wheel_loc[0] + tire_radius * math.cos(theta)
+        z = wheel_loc[2] + tire_radius * math.sin(theta)
+        tilt = 0.32 if index % 2 == 0 else -0.32
         rounded_box(
-            "sidewall tire tread mark",
-            (x, face_y, z),
-            (1.2, 0.7, 6.2),
+            "tire tread lug",
+            (x, wheel_loc[1], z),
+            (4.0, lug_w, 4.6),
             mat("rubber_tread"),
-            0.25,
+            0.5,
             3,
-            rotation=(0, -theta, 0),
+            rotation=(tilt, -theta, 0),
         )
-
-
-def wheel_arch_points(
-    center_x: float,
-    y: float,
-    center_z: float,
-    radius_x: float,
-    radius_z: float,
-    start_deg: float = 28,
-    end_deg: float = 154,
-    count: int = 11,
-) -> list[tuple[float, float, float]]:
-    points: list[tuple[float, float, float]] = []
-    for index in range(count):
-        t = index / (count - 1)
-        theta = math.radians(start_deg + (end_deg - start_deg) * t)
-        points.append((center_x + radius_x * math.cos(theta), y, center_z + radius_z * math.sin(theta)))
-    return points
 
 
 def side_arch_band(
@@ -1027,12 +705,16 @@ def build_robot(progress: float = 1.0, mode: str = "assembled", refinement: floa
     safety = mode == "safety"
 
     offsets = {
-        "tray": (0, 0, -28 if exploded else 0),
-        "body": (0, 0, 36 if exploded else 0),
-        "deck": (-1 if exploded else 0, 0, 112 if exploded else 74 if service else 0),
-        "head": (0, 0, 190 if exploded else 126 if service else 0),
-        "bumper": (-34 if exploded else 0, 0, -8 if exploded else 0),
-        "wheel": (0, 0, -10 if exploded else 0),
+        "tray": (0, 0, -38 if exploded else 0),
+        "body": (0, 0, 118 if exploded else 0),
+        "deck": (-1 if exploded else 0, 0, 208 if exploded else 74 if service else 0),
+        "head": (0, 0, 292 if exploded else 126 if service else 0),
+        "bumper": (-46 if exploded else 0, 0, 118 if exploded else 0),
+        "wheel": (0, 0, -20 if exploded else 0),
+        # Internal component layers, revealed between the dropped tray and the
+        # lifted body shell in the exploded view (hidden inside in assembled).
+        "chassis": (0, 0, -24 if exploded else 0),
+        "electronics": (0, 0, 24 if exploded else 12 if service else 0),
     }
 
     def off(group: str, loc: tuple[float, float, float]) -> tuple[float, float, float]:
@@ -1055,20 +737,18 @@ def build_robot(progress: float = 1.0, mode: str = "assembled", refinement: floa
     ]:
         cylinder("lower tray service standoff", off("tray", (x, y, 31 + height / 2)), radius, height, mat("cream_light"), 36, bevel=0.6)
         cylinder("standoff screw bore marker", off("tray", (x, y, 31 + height + 0.8)), radius * 0.34, 1.6, mat("charcoal"), 24, bevel=0.2)
-    superellipse_shell(
+    body_shell = superellipse_shell(
         "molded cream body shell",
         off("body", (0, 0, 0)),
-        [
-            (16, 122, 88),
-            (28, 139, 101),
-            (50, 144, 105),
-            (68, 139, 101),
-            (76, 126, 91),
-        ],
+        BODY_RINGS,
         mat("cream_light"),
-        exponent=3.75,
+        exponent=BODY_SHELL_EXP,
         points=112,
     )
+    # Top service opening under the removable teal deck: the deck is a real
+    # service hatch, so lifting it (service view) exposes the electronics bay.
+    # The deck fully overhangs this opening, so it stays hidden when assembled.
+    boolean_carve(body_shell, box_cutter(off("body", (4, 0, 86)), (172, 108, 46)))
     rounded_box("subtle horizontal shell seam", off("body", (-14, -106, 52)), (218, 1.0, 1.8), mat("cream_shadow"), 0.25, 2)
 
     # Flush removable service deck and front black hood insert.
@@ -1122,191 +802,94 @@ def build_robot(progress: float = 1.0, mode: str = "assembled", refinement: floa
         exponent=3.75,
         points=128,
     )
-    rounded_trapezoid_plate(
-        "front black hood grille panel",
-        off("body", (-127, 0, deck_z + 0.92)),
-        length=44,
-        front_width=76,
-        rear_width=58,
-        corner=8.0,
-        material_obj=mat("panel_black"),
-    )
-    for y in (-18, -9, 0, 9, 18):
-        rounded_box("front hood grille slot", off("body", (-137, y, deck_z + 1.16)), (12, 1.35, 0.35), mat("charcoal"), 0.4, 3)
-    for y in (-22, -11, 0, 11, 22):
-        rounded_box("deck vent slot", off("deck", (8, y, deck_z + 3)), (34, 3.0, 1.5), mat("charcoal"), 1.0, 3)
+    # (The wide black hood trim band + vent louvers are built in the front
+    # fascia section below, where the shared front-curve helpers are defined.)
+    # Dense vent comb between the neck and E-stop: many thin slots running
+    # across the deck (long in Y), arrayed front-to-back, near-flush.
+    for x in range(-14, 47, 4):
+        rounded_box("deck vent slot", off("deck", (x, 0, deck_z + 0.7)), (2.0, 22.0, 1.4), mat("charcoal"), 0.4, 3)
     for x, y in [(-93, -57), (-93, 57), (86, -57), (86, 57)]:
         cylinder("black deck screw", off("deck", (x, y, deck_z + 3)), 1.55, 1.2, mat("charcoal"), 28, bevel=0.2)
     for x, y in [(-93, -57), (-93, 57), (86, -57), (86, 57), (-10, -58), (-10, 58)]:
         cylinder("deck underside alignment peg", off("deck", (x, y, deck_z - 8)), 2.2, 12, mat("teal_dark"), 28, bevel=0.25)
 
-    # Recessed front sensor fascia: every visible front element follows the
-    # same broad arc as the molded nose. The cream nose should read as one
-    # smooth front surface; the black LED strip sits back inside it.
-    front_y_half = 126
-    front_recede = 64
-    front_exponent = 1.42
-    curved_front_pill_band(
-        "smooth cream lower front nose",
-        off("body", (0, 0, 0)),
-        y_half=front_y_half,
-        z_center=32.5,
-        z_half=14.6,
-        outer_x=-161.5,
-        inner_x=-124.0,
-        side_recede=front_recede,
-        material_obj=mat("cream_light"),
-        points=104,
-        exponent=front_exponent,
-        bevel=8.0,
-    )
-    curved_front_pill_band(
-        "thin dark bumper docking shadow",
-        off("body", (0, 0, 0)),
-        y_half=116,
-        z_center=25.7,
-        z_half=1.35,
-        outer_x=-160.5,
-        inner_x=-142.4,
-        side_recede=58,
-        material_obj=mat("charcoal"),
-        points=96,
-        exponent=front_exponent,
-        bevel=0.9,
-    )
-    for y in (-78, 78):
-        socket_x = front_curve_x(y, -158.6, 120, 60, front_exponent)
-        rounded_box(
-            "cream front bumper mounting pocket",
-            off("body", (socket_x + 2.2, y, 28.4)),
-            (3.4, 9.2, 3.2),
-            mat("cream_shadow"),
-            1.8,
-            6,
-            rotation=(0, 0, 0.11 if y > 0 else -0.11),
-        )
-    curved_front_pill_frame(
-        "cream molded sensor recess raised lip",
-        off("body", (0, 0, 0)),
-        outer_y_half=91,
-        outer_z_center=42.5,
-        outer_z_half=10.6,
-        inner_y_half=79,
-        inner_z_center=42.2,
-        inner_z_half=7.2,
-        front_x=-166.4,
-        back_x=-159.3,
-        side_recede=28,
-        material_obj=mat("cream_light"),
-        points=96,
-        exponent=front_exponent,
-        bevel=1.8,
-    )
-    curved_front_pill_band(
-        "recessed black curved pill sensor insert",
-        off("body", (0, 0, 0)),
-        y_half=78,
-        z_center=42.2,
-        z_half=6.7,
-        outer_x=-162.7,
-        inner_x=-151.0,
-        side_recede=20,
-        material_obj=mat("panel_black"),
-        points=92,
-        exponent=front_exponent,
-        bevel=3.4,
-    )
+    # Smooth rounded cream front: this is just the molded body shell now (the old
+    # protruding nose pieces are gone). The black LED sensor bar sits in a
+    # RECESSED cutout BOOLEAN-carved into the smooth surface, following the
+    # shell's own superellipse so the opening hugs the curved front.
+    bloc = off("body", (0, 0, 0))
+    sensor_z = 45.0
+    cam_glass = material("cam_glass2", (0.02, 0.03, 0.05, 1.0))
+    # Capsule window carved into the smooth front, then a dark open-front cup
+    # lines the whole interior (walls + floor) so it reads solid black behind a
+    # thin cream bezel — no lit cream sill. The cup floor is the sensor face.
+    # Tall enough to fully contain the lime lights + cameras as one dark bar.
+    sensor_outline = capsule_outline(76.0, sensor_z, 12.5, 176)
+    boolean_carve(body_shell, front_recess_cutter("sensor window cutter", bloc, sensor_outline, back_off=4.5, front_off=40.0))
+    liner_outline = capsule_outline(75.4, sensor_z, 12.0, 176)
+    front_recess_liner("recessed black sensor bar", bloc, liner_outline, floor_off=4.5, rim_off=-0.2, material_obj=mat("panel_black"))
+    # Lime end lights.
     for y in (-62, 62):
-        lamp_x = front_curve_x(y, -162.7, 78, 20, front_exponent)
-        rounded_box(
-            "recessed front black lamp pocket",
-            off("body", (lamp_x - 0.30, y, 41.1)),
-            (1.0, 20, 7.3),
-            mat("black"),
-            4.0,
-            10,
-            rotation=(0, 0, 0.12 if y > 0 else -0.12),
-        )
+        sx = body_front_x(y, sensor_z)
         rounded_box(
             "front lime light",
-            off("body", (lamp_x - 0.85, y, 41.7)),
-            (1.15, 15.2, 4.7),
+            (bloc[0] - sx + 1.4, bloc[1] + y, bloc[2] + sensor_z),
+            (2.2, 6.6, 14.0),
             mat("lime"),
-            3.0,
+            2.0,
             10,
-            rotation=(0, 0, 0.12 if y > 0 else -0.12),
         )
-    for y, r in [(-18, 2.8), (18, 3.0)]:
-        lens_x = front_curve_x(y, -162.8, 78, 20, front_exponent)
-        cylinder("front subtle sensor dimple", off("body", (lens_x - 0.35, y, 42.5)), r, 0.8, mat("charcoal"), 32, rotation=(0, math.pi / 2, 0), bevel=0.2)
+    # Prominent stereo camera pair, clustered left-of-center, raised glossy lenses.
+    for y in (-16, -3):
+        sx = body_front_x(y, sensor_z)
+        cylinder("front camera lens barrel", (bloc[0] - sx + 3.0, bloc[1] + y, bloc[2] + sensor_z), 6.0, 3.0, mat("charcoal"), 44, rotation=(0, math.pi / 2, 0), bevel=0.6)
+        cylinder("front camera glass", (bloc[0] - sx + 1.6, bloc[1] + y, bloc[2] + sensor_z), 4.2, 1.4, cam_glass, 44, rotation=(0, math.pi / 2, 0), bevel=0.35)
+    # Separate round sensor, right-of-center.
+    ssx = body_front_x(24, sensor_z)
+    cylinder("front round sensor barrel", (bloc[0] - ssx + 2.8, bloc[1] + 24, bloc[2] + sensor_z), 6.8, 2.6, mat("charcoal"), 44, rotation=(0, math.pi / 2, 0), bevel=0.6)
+    cylinder("front round sensor glass", (bloc[0] - ssx + 1.6, bloc[1] + 24, bloc[2] + sensor_z), 4.4, 1.2, cam_glass, 44, rotation=(0, math.pi / 2, 0), bevel=0.35)
 
-    # Soft bumper: one continuous curved TPU front piece attached to the curved nose.
-    bumper_z = 26.4
-    curved_front_pill_band(
-        "soft continuous curved front bumper backing",
-        off("bumper", (0, 0, 0)),
-        y_half=122,
-        z_center=bumper_z,
-        z_half=8.1,
-        outer_x=-173.2,
-        inner_x=-136.4,
-        side_recede=58,
-        material_obj=mat("rubber"),
-        points=112,
-        exponent=front_exponent,
-        bevel=5.6,
+    # Wide black hood-trim vent above the sensor bar: a broad, shallow recessed
+    # panel spanning most of the front, with the louver slots clustered in the
+    # center (lighter ribs standing between dark slots).
+    vent_z = 67.0
+    vent_outline = capsule_outline(80.0, vent_z, 6.0, 176)
+    boolean_carve(body_shell, front_recess_cutter("vent window cutter", bloc, vent_outline, back_off=2.5, front_off=40.0))
+    front_recess_liner(
+        "recessed vent panel",
+        bloc,
+        capsule_outline(79.4, vent_z, 5.6, 176),
+        floor_off=2.5,
+        rim_off=-0.2,
+        material_obj=mat("panel_black"),
     )
-    curved_front_oval_band(
-        "soft puffy rounded front bumper face",
-        off("bumper", (0, 0, 0)),
-        y_half=121,
-        z_center=bumper_z - 0.1,
-        x_center=-164.0,
-        radius_x=13.8,
-        radius_z=10.5,
-        side_recede=58,
-        material_obj=mat("rubber"),
-        points=112,
-        ring_points=24,
-        exponent=front_exponent,
-    )
-    for side in (-1, 1):
-        return_start_x = front_curve_x(side * 111, -164.5, 121, 58, front_exponent)
-        curve_tube(
-            "soft curved bumper side return",
-            [off("bumper", point) for point in [
-                (return_start_x, side * 111, bumper_z + 0.1),
-                (-86, side * 105, bumper_z - 0.4),
-                (-44, side * 100.5, bumper_z - 1.1),
-            ]],
-            mat("rubber"),
-            5.4,
-            5,
-        )
+    for y in (-21, -14, -7, 0, 7, 14, 21):
+        sx = body_front_x(y, vent_z)
         rounded_box(
-            "flat side lower rubber bumper rail",
-            off("bumper", (18, side * 98.8, bumper_z - 3.0)),
-            (92, 5.0, 7.2),
-            mat("rubber"),
-            2.2,
-            12,
+            "front vent louver rib",
+            (bloc[0] - sx + 1.3, bloc[1] + y, bloc[2] + vent_z),
+            (1.4, 1.5, 8.2),
+            material("vent_rib", (0.17, 0.17, 0.18, 1.0)),
+            0.3,
+            3,
         )
-        for x in (-62, 14, 74):
-            cylinder(
-                "side bumper recessed fastener",
-                off("bumper", (x, side * 101.4, bumper_z - 0.2)),
-                1.25,
-                1.2,
-                mat("charcoal"),
-                24,
-                rotation=(math.pi / 2, 0, 0),
-                bevel=0.25,
-            )
-    for y, angle in [(-39, -0.07), (39, 0.07)]:
-        seam_x = front_curve_x(y, -176.0, 122, 58, front_exponent)
-        rounded_box("front bumper split seam", off("bumper", (seam_x, y, bumper_z - 0.2)), (0.65, 0.65, 9.2), mat("rubber_tread"), 0.10, 2, rotation=(0, 0, angle))
-    for side in (-1, 1):
-        rounded_box("short rear bumper cap", off("bumper", (74, side * 98.0, bumper_z - 2.8)), (18, 5.8, 7.0), mat("rubber"), 2.6, 8)
+
+    # Simple smooth curved black bumper across the FRONT BOTTOM only (no side
+    # wrap). One clean rounded TPU bar following the front arc from corner to
+    # corner, hanging low near the floor.
+    bumper_z = 19.0
+    bump_a, bump_b, bump_n = 148.0, 113.0, 3.4
+
+    def bumper_point(deg: float, z: float = bumper_z) -> tuple[float, float, float]:
+        t = math.radians(deg)
+        ca, sa = math.cos(t), math.sin(t)
+        x = bump_a * math.copysign(abs(ca) ** (2 / bump_n), ca)
+        y = bump_b * math.copysign(abs(sa) ** (2 / bump_n), sa)
+        return (x, y, z)
+
+    # deg 114..246 keeps the bar on the front face only (never reaches the sides).
+    bumper_path = [off("bumper", bumper_point(deg)) for deg in range(114, 247, 5)]
+    curve_tube("simple front bumper", bumper_path, mat("rubber"), 12.0, 8)
 
     # Wheels, hubs, cream fenders, and side service panels.
     for side in (-1, 1):
@@ -1314,29 +897,28 @@ def build_robot(progress: float = 1.0, mode: str = "assembled", refinement: floa
         if exploded:
             wheel_y += side * 28
         wheel_loc = off("wheel", (v["wheel_x"], wheel_y, 42))
-        tire_radius = 30
-        cylinder("black rubber tire", wheel_loc, tire_radius, 16.5, mat("rubber"), 96, rotation=(math.pi / 2, 0, 0), bevel=0.9)
-        outside_y = wheel_loc[1] + side * 8.8
-        cylinder("teal wheel accent ring", (wheel_loc[0], outside_y, wheel_loc[2]), 22.6, 3.0, mat("teal"), 72, rotation=(math.pi / 2, 0, 0), bevel=0.5)
-        cylinder("cream wheel hub", (wheel_loc[0], outside_y + side * 1.1, wheel_loc[2]), 16.8, 3.7, mat("cream_light"), 72, rotation=(math.pi / 2, 0, 0), bevel=0.65)
-        add_tire_tread_marks(side, wheel_loc, outside_y)
+        tire_radius = 37.0
+        tire_w = 20.0
+        cylinder("black rubber tire", wheel_loc, tire_radius, tire_w, mat("rubber"), 96, rotation=(math.pi / 2, 0, 0), bevel=1.0)
+        outside_y = wheel_loc[1] + side * (tire_w / 2 + 0.6)
+        # Concentric face rings sized to leave a substantial black tread band:
+        # black tread rim -> cream sidewall -> teal -> hub.
+        cylinder("cream tire sidewall ring", (wheel_loc[0], outside_y, wheel_loc[2]), 28.0, 2.4, mat("cream_light"), 84, rotation=(math.pi / 2, 0, 0), bevel=0.5)
+        cylinder("teal wheel accent ring", (wheel_loc[0], outside_y + side * 1.0, wheel_loc[2]), 23.5, 2.6, mat("teal"), 84, rotation=(math.pi / 2, 0, 0), bevel=0.5)
+        cylinder("cream wheel hub", (wheel_loc[0], outside_y + side * 2.1, wheel_loc[2]), 17.0, 3.2, mat("cream_light"), 84, rotation=(math.pi / 2, 0, 0), bevel=0.6)
+        add_tire_tread_marks(side, wheel_loc, tire_radius, tire_w)
         make_fender(side, v, offsets["body"][2])
-        curve_tube(
-            "thin wheel arch seam shadow",
-            wheel_arch_points(v["wheel_x"] - 2, side * 94.0, 35 + offsets["body"][2], 36, 29, 20, 160, 15),
-            mat("cream_shadow"),
-            1.0,
-            3,
-        )
+        # Clean flat teal side service panel recessed flush into the cream, with
+        # a row of screws set into the teal (no heavy gray frame).
         panel_len = v["side_panel_len"] + 30
-        rounded_box("side service panel recessed pocket", off("body", (8, side * 101.0, 46)), (panel_len + 10, 2.0, 30), mat("cream_shadow"), 8, 12)
-        rounded_box("teal side service panel", off("body", (8, side * 103.2, 46)), (panel_len, 3.6, 24), mat("teal"), 8, 12)
-        for x, z in [(-48, 54), (-48, 38), (68, 54), (68, 38)]:
-            cylinder("side panel screw", off("body", (x, side * 105.2, z)), 1.3, 1.4, mat("charcoal"), 24, rotation=(math.pi / 2, 0, 0), bevel=0.22)
+        rounded_box("side service panel recessed pocket", off("body", (8, side * 101.4, 46)), (panel_len + 6, 2.4, 28), mat("cream_shadow"), 3, 6)
+        rounded_box("teal side service panel", off("body", (8, side * 102.6, 46)), (panel_len, 2.2, 24), mat("teal"), 2.5, 8)
+        for x in (-46, -18, 10, 38, 66):
+            cylinder("side panel screw", off("body", (x, side * 103.9, 46)), 1.25, 1.2, mat("charcoal"), 24, rotation=(math.pi / 2, 0, 0), bevel=0.2)
 
-    # Empty mechanical service bay. These are real body features present in
-    # assembled and exploded states; no internal electronics are modeled here.
-    rounded_box("empty lower service bay pocket", off("tray", (62, 0, 40)), (142, 66, 6), mat("cream_shadow"), 4, 6)
+    # Mechanical service bay bosses/rails that carry the electronics deck and
+    # battery cradle. The representative components they hold are built below.
+    rounded_box("lower service bay pocket", off("tray", (62, 0, 40)), (142, 66, 6), mat("cream_shadow"), 4, 6)
     for x in (-4, 128):
         rounded_box("service bay end stop", off("tray", (x, 0, 51)), (8, 66, 24), mat("cream_light"), 3, 5)
     for y in (-34, 34):
@@ -1346,26 +928,93 @@ def build_robot(progress: float = 1.0, mode: str = "assembled", refinement: floa
     for x, y in [(-108, -68), (-108, 68), (-16, -68), (-16, 68), (34, -48), (34, -16), (62, -22), (62, 22)]:
         cylinder("service bay screw bore marker", off("tray", (x, y, 64)), 1.15, 2.0, mat("charcoal"), 20, bevel=0.15)
 
+    # ------------------------------------------------------------------------
+    # Representative internal components (sized to docs/bom-v0.md and the
+    # cad-mechanical-plan parameter contract), revealed in the exploded/service
+    # views so the body demonstrably houses the real build. Hidden inside the
+    # closed shell in the assembled (concept-match) view.
+    # ------------------------------------------------------------------------
+    if exploded or service:
+        # --- Low chassis layer: battery, drive motors, caster ---
+        # 12V LiFePO4 pack (~110x38x38) low and rearward of the wheel axle.
+        rounded_box("battery pack 12V LiFePO4", off("chassis", (94, 0, 33)), (40, 110, 38), mat("battery_body"), 3, 6)
+        for sy in (-30, 30):
+            rounded_box("battery strap", off("chassis", (94, sy, 33)), (44, 8, 42), mat("charcoal"), 1.5, 4)
+        for ty in (-18, 18):
+            cylinder("battery terminal", off("chassis", (74, ty, 50)), 2.6, 6, mat("copper"), 20, rotation=(0, math.pi / 2, 0), bevel=0.3)
+        for side in (-1, 1):
+            cylinder("drive gearmotor", off("chassis", (55, side * 66, 42)), 14, 46, mat("metal"), 40, rotation=(math.pi / 2, 0, 0), bevel=1.0)
+            rounded_box("motor gearbox", off("chassis", (55, side * 40, 42)), (26, 24, 26), mat("metal_dark"), 3, 6)
+            cylinder("motor encoder", off("chassis", (55, side * 90, 42)), 9, 5, mat("pcb"), 32, rotation=(math.pi / 2, 0, 0), bevel=0.4)
+            cylinder("wheel drive hub", off("chassis", (55, side * 98, 42)), 6, 10, mat("silver"), 24, rotation=(math.pi / 2, 0, 0), bevel=0.4)
+        cylinder("caster mount", off("chassis", (126, 0, 30)), 10, 12, mat("metal_dark"), 24, bevel=0.6)
+        cylinder("caster ball", off("chassis", (126, 0, 20)), 9, 9, mat("silver"), 32, bevel=2.0)
+
+        # --- Removable electronics deck layer ---
+        rounded_box("electronics deck plate", off("electronics", (-8, 0, 55)), (196, 164, 2.5), mat("metal_dark"), 2, 4)
+        # Raspberry Pi 5 (85x56) + active cooler + I/O stack, centered-forward.
+        rounded_box("Raspberry Pi 5 8GB", off("electronics", (-38, 0, 59)), (85, 56, 3.0), mat("pcb"), 0.6, 3)
+        rounded_box("Pi active cooler", off("electronics", (-38, 6, 66)), (40, 40, 11), mat("charcoal"), 1.5, 4)
+        rounded_box("Pi USB/LAN ports", off("electronics", (-79, -14, 62)), (6, 30, 8), mat("silver"), 0.6, 3)
+        for cy in (-18, 18):
+            rounded_box("Pi GPIO header", off("electronics", (-20, cy, 62)), (52, 5, 5), mat("charcoal"), 0.4, 2)
+        # Cytron dual motor driver + heatsink, rearward near the motors.
+        rounded_box("dual motor driver", off("electronics", (58, 0, 59)), (74, 56, 3.0), mat("pcb_blue"), 0.6, 3)
+        rounded_box("driver heatsink", off("electronics", (58, 0, 65)), (60, 24, 9), mat("metal"), 1.0, 4)
+        # 5V buck + secondary servo/LED regulator.
+        rounded_box("5V buck regulator", off("electronics", (16, 58, 60)), (34, 24, 9), mat("pcb"), 0.8, 3)
+        rounded_box("servo/LED regulator", off("electronics", (16, -58, 60)), (30, 22, 8), mat("pcb"), 0.8, 3)
+        # Pico 2 safety MCU + power distribution/fuse block + main switch.
+        rounded_box("Pico 2 safety MCU", off("electronics", (-40, -66, 60)), (52, 22, 3), mat("pcb"), 0.5, 3)
+        rounded_box("power distribution / fuses", off("electronics", (96, -58, 61)), (34, 30, 14), mat("metal_dark"), 2, 4)
+        cylinder("main power switch", off("electronics", (110, 46, 62)), 5, 10, mat("red"), 24, bevel=0.6)
+        # USB far-field mic array (round), mounted high/forward, isolated.
+        cylinder("USB mic array", off("electronics", (-80, 0, 66)), 34, 5, mat("pcb"), 48, bevel=0.6)
+        for mi in range(6):
+            ang = 2 * math.pi * mi / 6
+            cylinder("mic capsule", off("electronics", (-80 + 26 * math.cos(ang), 26 * math.sin(ang), 69)), 3.2, 2, mat("silver"), 20, bevel=0.3)
+
+        # --- Front sensing + speaker (mounted to the body shell front) ---
+        cylinder("3W speaker", off("body", (-131, 0, 60)), 17, 15, mat("metal_dark"), 40, rotation=(0, math.pi / 2, 0), bevel=1.0)
+        cylinder("speaker cone", off("body", (-139, 0, 60)), 13, 3, mat("charcoal"), 40, rotation=(0, math.pi / 2, 0), bevel=0.5)
+        for ty in (-70, -24, 24, 70):
+            rounded_box("VL53L1X ToF sensor", off("body", (-133, ty, 43)), (5, 12, 13), mat("pcb"), 0.8, 3)
+            cylinder("ToF lens", off("body", (-136, ty, 43)), 2.4, 2, mat("metal_dark"), 20, rotation=(0, math.pi / 2, 0), bevel=0.3)
+
     # E-stop: top/rear/right, visually obvious and mechanically proud.
     estop = v["estop_scale"]
     estop_x = 70
     estop_y = 0
-    cylinder("estop black recessed well", off("deck", (estop_x, estop_y, deck_z + 4)), 23 * estop, 5, mat("black"), 72, bevel=0.7)
-    cylinder("estop red stem", off("deck", (estop_x, estop_y, deck_z + 11.8)), 12.5 * estop, 9.4, mat("red"), 72, bevel=0.8)
-    cylinder("estop red mushroom cap", off("deck", (estop_x, estop_y, deck_z + 19.6)), 23.5 * estop, 6.8, mat("red"), 96, bevel=2.0)
-    cylinder("estop shallow top inset", off("deck", (estop_x, estop_y, deck_z + 23.25)), 15.0 * estop, 0.45, material("red_top_inset", (0.96, 0.18, 0.13, 1.0)), 96, bevel=0.35)
+    # Flush recessed black well, then a rounded red mushroom DOME on a short stem.
+    cylinder("estop black recessed well", off("deck", (estop_x, estop_y, deck_z - 0.5)), 23 * estop, 3, mat("black"), 72, bevel=0.7)
+    cylinder("estop red stem", off("deck", (estop_x, estop_y, deck_z + 6.0)), 12.5 * estop, 11.0, mat("red"), 72, bevel=0.8)
+    cylinder("estop red mushroom cap", off("deck", (estop_x, estop_y, deck_z + 14.0)), 23.5 * estop, 8.4, mat("red"), 96, bevel=4.0)
+    cylinder("estop shallow top inset", off("deck", (estop_x, estop_y, deck_z + 18.3)), 14.0 * estop, 0.45, material("red_top_inset", (0.96, 0.18, 0.13, 1.0)), 96, bevel=0.35)
 
-    # Neck and camera head.
+    # Neck and camera head. The cream column emerges from a distinct BLACK flared
+    # rubber boot; teal is only a low outer collar ring at the deck.
     neck_x = -48
-    cylinder("neck socket dark deck opening", off("deck", (neck_x, 0, deck_z + 4.0)), 18.5, 2.4, mat("black"), 72, bevel=0.45)
-    torus("neck black lower gasket", off("deck", (neck_x, 0, deck_z + 5.0)), 18.8, 2.1, mat("black"))
-    cylinder("teal retained neck collar", off("deck", (neck_x, 0, deck_z + 7.0)), 22.0, 3.4, mat("teal"), 72, bevel=0.7)
+    cylinder("neck socket dark deck opening", off("deck", (neck_x, 0, deck_z + 3.0)), 20.0, 2.0, mat("black"), 72, bevel=0.45)
+    cylinder("teal retained neck collar", off("deck", (neck_x, 0, deck_z + 2.0)), 22.5, 3.2, mat("teal"), 72, bevel=0.8)
+    superellipse_shell(
+        "neck black rubber boot",
+        off("head", (neck_x, 0, 0)),
+        [
+            (deck_z + 3.0, 19.0, 19.0),
+            (deck_z + 6.5, 17.0, 17.0),
+            (deck_z + 10.0, 15.2, 15.2),
+            (deck_z + 13.0, 14.4, 14.4),
+        ],
+        mat("black"),
+        exponent=3.2,
+        points=56,
+    )
     neck_top = deck_z + 7.8 + v["neck_h"]
     superellipse_shell(
         "cream smooth flared neck column",
         off("head", (neck_x, 0, 0)),
         [
-            (deck_z + 8.0, 15.8, 13.4),
+            (deck_z + 11.5, 14.0, 12.6),
             (deck_z + 14.0, 14.8, 12.6),
             (deck_z + 22.0, 11.0, 9.4),
             (neck_top - 12.0, 9.6, 8.3),
@@ -1379,21 +1028,23 @@ def build_robot(progress: float = 1.0, mode: str = "assembled", refinement: floa
     )
     torus("head black upper gasket", off("head", (neck_x, 0, neck_top)), 13.4, 1.8, mat("black"))
 
-    head_center = off("head", (neck_x - 11.5, 0, neck_top + 9.6))
+    # Head juts forward of the neck (the neck meets the lower-back of the head),
+    # and the back stays full then rounds off — a rounded box, not a bullet.
+    head_center = off("head", (neck_x - 16.0, 0, neck_top + 9.6))
     x_capsule_shell(
         "cream capsule camera head",
         head_center,
         [
             (-v["head_d"] / 2, v["head_w"] / 2 - 7, v["head_h"] / 2 - 5.5),
-            (-v["head_d"] / 2 + 4.0, v["head_w"] / 2 + 1.8, v["head_h"] / 2 + 1.5),
-            (-8, v["head_w"] / 2 + 4.6, v["head_h"] / 2 + 2.2),
-            (8, v["head_w"] / 2 + 4.0, v["head_h"] / 2 + 2.0),
-            (v["head_d"] / 2 - 9, v["head_w"] / 2 + 0.5, v["head_h"] / 2 + 0.6),
-            (v["head_d"] / 2 - 2.0, v["head_w"] / 2 - 7.5, v["head_h"] / 2 - 4.2),
-            (v["head_d"] / 2 + 1.8, v["head_w"] / 2 - 18, v["head_h"] / 2 - 9.5),
+            (-v["head_d"] / 2 + 4.0, v["head_w"] / 2 + 1.5, v["head_h"] / 2 + 1.2),
+            (-6, v["head_w"] / 2 + 4.2, v["head_h"] / 2 + 2.0),
+            (12, v["head_w"] / 2 + 3.4, v["head_h"] / 2 + 1.8),
+            (v["head_d"] / 2 - 3, v["head_w"] / 2 - 0.5, v["head_h"] / 2 - 0.5),
+            (v["head_d"] / 2 + 0.5, v["head_w"] / 2 - 7, v["head_h"] / 2 - 5.0),
+            (v["head_d"] / 2 + 3.0, v["head_w"] / 2 - 18, v["head_h"] / 2 - 11.0),
         ],
         mat("cream_light"),
-        exponent=2.85,
+        exponent=3.5,
         points=96,
     )
     face_x = head_center[0] - v["head_d"] / 2 - 1.4
@@ -1405,8 +1056,8 @@ def build_robot(progress: float = 1.0, mode: str = "assembled", refinement: floa
             (1.8, (v["face_w"] + 14) / 2, (v["face_h"] + 11) / 2),
         ],
         mat("cream_light"),
-        exponent=3.55,
-        points=96,
+        exponent=5.0,
+        points=112,
     )
     x_capsule_shell(
         "thin shadow line around black faceplate",
@@ -1416,8 +1067,8 @@ def build_robot(progress: float = 1.0, mode: str = "assembled", refinement: floa
             (0.9, (v["face_w"] + 0.5) / 2, (v["face_h"] - 0.5) / 2),
         ],
         mat("cream_shadow"),
-        exponent=3.7,
-        points=96,
+        exponent=5.0,
+        points=112,
     )
     x_capsule_shell(
         "inset rounded black head faceplate",
@@ -1427,36 +1078,50 @@ def build_robot(progress: float = 1.0, mode: str = "assembled", refinement: floa
             (1.0, (v["face_w"] - 6) / 2, (v["face_h"] - 3) / 2),
         ],
         mat("charcoal"),
-        exponent=3.65,
-        points=96,
+        exponent=5.2,
+        points=112,
     )
-    cylinder("camera lens outer", (face_x - 5.9, 0, head_center[2] - 0.1), 14.2, 7.0, mat("black"), 80, rotation=(0, math.pi / 2, 0), bevel=0.65)
-    cylinder("camera lens satin retaining ring", (face_x - 9.4, 0, head_center[2] - 0.1), 10.9, 2.0, material("lens_ring", (0.035, 0.043, 0.055, 1.0)), 80, rotation=(0, math.pi / 2, 0), bevel=0.35)
-    cylinder("camera lens inner barrel", (face_x - 10.8, 0, head_center[2] - 0.1), 8.0, 1.9, mat("black"), 80, rotation=(0, math.pi / 2, 0), bevel=0.3)
-    cylinder("camera lens glass", (face_x - 12.0, 0, head_center[2] - 0.1), 5.8, 1.2, material("camera_glass", (0.015, 0.038, 0.07, 1.0)), 72, rotation=(0, math.pi / 2, 0), bevel=0.25)
-    cylinder("camera lens blue glint", (face_x - 12.8, -2.4, head_center[2] + 2.7), 1.0, 0.5, material("lens_glint", (0.20, 0.42, 0.82, 1.0)), 24, rotation=(0, math.pi / 2, 0), bevel=0.08)
-    for y in (-22.5, 22.5):
+    # Large prominent fisheye camera lens (dominant focal point), with a convex
+    # domed glass and no stray offset glint.
+    lens_cz = head_center[2] - 0.1
+    cylinder("camera lens outer", (face_x - 6.2, 0, lens_cz), 12.6, 7.4, mat("black"), 84, rotation=(0, math.pi / 2, 0), bevel=0.8)
+    cylinder("camera lens satin retaining ring", (face_x - 9.6, 0, lens_cz), 10.2, 2.2, material("lens_ring", (0.035, 0.043, 0.055, 1.0)), 84, rotation=(0, math.pi / 2, 0), bevel=0.4)
+    cylinder("camera lens inner barrel", (face_x - 11.0, 0, lens_cz), 8.2, 2.0, mat("black"), 84, rotation=(0, math.pi / 2, 0), bevel=0.35)
+    cylinder("camera lens glass base", (face_x - 12.1, 0, lens_cz), 6.6, 1.4, material("camera_glass", (0.015, 0.038, 0.07, 1.0)), 80, rotation=(0, math.pi / 2, 0), bevel=0.3)
+    # Convex glass dome (UV-sphere cap scaled thin in X) so the lens reads domed.
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=6.5, location=(face_x - 12.1, 0, lens_cz), segments=48, ring_count=24)
+    dome = bpy.context.object
+    dome.name = "camera lens dome"
+    dome.scale = (0.5, 1.0, 1.0)
+    bpy.ops.object.transform_apply(scale=True)
+    dome.data.materials.append(material("camera_glass", (0.015, 0.038, 0.07, 1.0)))
+    shade_smooth(dome)
+    for y in (-24.0, 24.0):
+        sign = 1.0 if y > 0 else -1.0
         x_capsule_shell(
             "head oval lime eye",
-            (face_x - 5.9, y, head_center[2] - 0.2),
+            (face_x - 5.9, y, head_center[2] - 0.6),
             [
-                (-1.2, 3.2, 7.0),
-                (1.2, 3.2, 7.0),
+                (-1.2, 3.5, 6.7),
+                (1.2, 3.5, 6.7),
             ],
             mat("lime"),
             exponent=2.4,
             points=48,
         )
+        # Bold, thick, fairly flat blue brow riding the upper plate above the
+        # lens: inner end high toward center, sweeping gently down-and-out to
+        # the top corner (long, flat sweep like the concept).
         curve_tube(
             "curved blue brow cap",
             [
-                (face_x - 5.4, y - 9, head_center[2] + 11.7),
-                (face_x - 5.9, y, head_center[2] + 13.5),
-                (face_x - 5.4, y + 9, head_center[2] + 11.7),
+                (face_x - 3.8, sign * 9.5, head_center[2] + 15.0),
+                (face_x - 4.4, sign * 22.0, head_center[2] + 14.3),
+                (face_x - 3.6, sign * 36.0, head_center[2] + 12.0),
             ],
             mat("blue"),
-            2.1,
-            5,
+            3.8,
+            6,
         )
     for y in (-53, 53):
         rounded_box("subtle head side seam", (head_center[0] + 7, y, head_center[2] + 4), (28, 0.9, 1.8), mat("cream_shadow"), 0.35, 2)
@@ -1471,23 +1136,30 @@ def look_at(obj: bpy.types.Object, target: tuple[float, float, float]) -> None:
 
 
 def setup_camera(view: str) -> None:
+    # (position, target, scale, projection, lens)
+    # For PERSP cameras `scale` is ignored and `lens` (mm) drives the framing;
+    # for ORTHO cameras `scale` is the ortho width and `lens` is unused.
     configs = {
-        "front_3q": ((-430, -315, 195), (-6, 0, 72), 410),
-        "side": ((10, -520, 145), (12, 0, 72), 340),
-        "top": ((0, 0, 580), (0, 0, 65), 440),
-        "exploded": ((-475, -380, 300), (0, 0, 132), 610),
-        "service": ((-475, -375, 285), (0, 0, 120), 580),
-        "iteration": ((-430, -315, 195), (-6, 0, 76), 420),
+        # Concept-matched hero: raised front-left three-quarter (~26 deg above the
+        # floor so the teal deck reads), mild perspective so the near bumper looks
+        # slightly larger, exactly like the finished art.
+        "front_3q": ((-500, -410, 235), (-12, 7, 74), 410, "PERSP", 62),
+        "side": ((10, -520, 145), (12, 0, 72), 340, "ORTHO", 70),
+        "top": ((0, 0, 580), (0, 0, 65), 440, "ORTHO", 70),
+        "exploded": ((-520, -420, 360), (2, 0, 205), 900, "ORTHO", 70),
+        "service": ((-470, -380, 300), (0, 0, 120), 600, "ORTHO", 70),
+        "iteration": ((-430, -315, 195), (-6, 0, 76), 420, "ORTHO", 70),
     }
-    position, target, scale = configs[view]
+    position, target, scale, projection, lens = configs[view]
     cam_data = bpy.data.cameras.new(f"{view}_camera")
     cam = bpy.data.objects.new(f"{view}_camera", cam_data)
     bpy.context.collection.objects.link(cam)
     cam.location = position
     look_at(cam, target)
-    cam_data.type = "ORTHO"
+    cam_data.type = projection
     cam_data.ortho_scale = scale
-    cam_data.lens = 70
+    cam_data.lens = lens
+    cam_data.sensor_width = 36
     bpy.context.scene.camera = cam
 
 
@@ -1496,27 +1168,57 @@ def add_lighting() -> None:
     bpy.context.scene.world = world
     world.color = (0.965, 0.93, 0.87)
 
-    bpy.ops.object.light_add(type="AREA", location=(-230, -310, 360))
+    # Soft product-studio setup matching the warm, evenly lit concept art. Only
+    # the big key and a wide soft sun cast shadows (large sources -> soft, no hard
+    # blob shadows on the body); the fill and rim are shadowless so they lift the
+    # shadows and sculpt the form without stamping edges onto the cream shell.
+    # Warm the emitters so the cream reads as the concept's warm ivory rather
+    # than a cool studio grey (default white emitters were washing out the warm
+    # world color).
+    warm = (1.0, 0.90, 0.78)
+
+    bpy.ops.object.light_add(type="AREA", location=(-250, -330, 380))
     key = bpy.context.object
     key.name = "large softbox key"
-    key.data.energy = 90000
-    key.data.size = 230
+    key.data.energy = 95000
+    key.data.size = 360
+    key.data.color = warm
+    look_at(key, (-40, 0, 70))
 
-    bpy.ops.object.light_add(type="AREA", location=(260, 230, 250))
+    bpy.ops.object.light_add(type="AREA", location=(330, -140, 250))
     fill = bpy.context.object
-    fill.name = "warm fill"
-    fill.data.energy = 28000
-    fill.data.size = 320
+    fill.name = "warm front fill"
+    fill.data.energy = 24000
+    fill.data.size = 420
+    fill.data.color = warm
+    fill.data.use_shadow = False
+    look_at(fill, (0, 0, 70))
 
-    bpy.ops.object.light_add(type="POINT", location=(-160, 120, 170))
+    bpy.ops.object.light_add(type="AREA", location=(210, 300, 320))
+    rim = bpy.context.object
+    rim.name = "cool rim"
+    rim.data.energy = 11000
+    rim.data.size = 300
+    rim.data.color = (0.92, 0.95, 1.0)
+    rim.data.use_shadow = False
+    look_at(rim, (0, 0, 90))
+
+    bpy.ops.object.light_add(type="AREA", location=(-150, -170, 210))
     face = bpy.context.object
     face.name = "face sparkle"
-    face.data.energy = 9000
+    face.data.energy = 5200
+    face.data.size = 90
+    face.data.color = warm
+    face.data.use_shadow = False
+    look_at(face, (-70, 0, 130))
 
-    bpy.ops.object.light_add(type="SUN", location=(0, 0, 260))
+    bpy.ops.object.light_add(type="SUN", location=(-40, -60, 300))
     sun = bpy.context.object
     sun.name = "soft product sun"
-    sun.data.energy = 1.8
+    sun.data.energy = 1.1
+    sun.data.angle = math.radians(9.0)
+    sun.data.use_shadow = False  # key owns the (soft) shadow; sun is pure fill
+    look_at(sun, (10, 20, 0))
 
 
 def setup_render(width: int, height: int) -> None:
@@ -1536,7 +1238,7 @@ def setup_render(width: int, height: int) -> None:
         scene.view_settings.look = "None"
     except TypeError:
         pass
-    scene.view_settings.exposure = 0.85
+    scene.view_settings.exposure = 0.95
     scene.view_settings.gamma = 1
     if hasattr(scene, "eevee"):
         try:

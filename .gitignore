@@ -59,6 +59,9 @@ cad/exports/
 *.csg
 *.dxf
 
+# Blender fast-iteration preview output (see scripts/render_hero.py)
+cad/blender/hero_preview.png
+
 # Keep source CAD files tracked
 !cad/**/*.scad
 !cad/**/*.py
