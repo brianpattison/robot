@@ -31,3 +31,13 @@ Python 3.11 or 3.12 is the conservative target for this project. Use a virtual e
 - Keep generated meshes and solids in `cad/exports/`.
 - Treat generated `.stl` and `.step` files as build outputs unless we decide otherwise.
 
+## Concept Body Pass
+
+`cad/python/concept_body.py` is the current CadQuery/VTK visual packaging pass for matching the finished concept art more closely than the first OpenSCAD body. It writes PNG review renders to `docs/images/`:
+
+```bash
+source .venv-cad/bin/activate
+python cad/python/concept_body.py
+```
+
+Those PNGs are concept-review artifacts. Use them to compare silhouette, color placement, and service layering before turning the shapes into print-ready parts or STEP exports.

@@ -60,6 +60,7 @@ If you touch any motion, power, battery, or safety-control design, update the re
 - OpenSCAD is the default first-pass CAD tool for simple parametric printable parts.
 - Local OpenSCAD CLI is available at `/Applications/OpenSCAD-2021.01.app/Contents/MacOS/openscad`.
 - `build123d` and CadQuery are approved for Python CAD when geometry needs richer fillets, chamfers, STEP exports, or complex assemblies.
+- The current concept-art matching pass is `cad/python/concept_body.py`; it uses CadQuery plus VTK to generate the `docs/images/codex_body_python_cad_*.png` review renders.
 - Keep editable CAD source in `cad/openscad/` or `cad/python/`.
 - Keep generated exports under `cad/exports/`; generated STL/STEP/mesh files are ignored by Git by default.
 - Use shared parameters for dimensions, fastener sizes, wheel geometry, sensor offsets, keepouts, and board mount patterns.

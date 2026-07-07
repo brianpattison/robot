@@ -12,6 +12,22 @@ Nominal v0 envelope: **300 mm long**, **220 mm wide**, **80 mm wheels**, **42 mm
 
 These concept images are the visual north star for the finished body: soft rounded panels, covered wheel pinch zones, an obvious E-stop, a friendly camera head, and a bright but practical Codex color palette. The exploded concept is meant to preserve the assembled concept's colors, scale, and part language while showing the service layers. They are **not** generated from the OpenSCAD files and should not be treated as fit-checked geometry.
 
+## Python CAD Concept Pass
+
+The Python CAD concept pass in `cad/python/concept_body.py` uses CadQuery geometry and VTK-rendered previews to pull the editable CAD closer to the finished concept art while keeping visible fit evidence for the Raspberry Pi, HAT/cooling keepout, battery pack, wheel envelope, bumper, service deck, camera head, and E-stop.
+
+| View | Purpose |
+| --- | --- |
+| ![Python CAD concept comparison against concept art](images/codex_body_python_cad_concept_comparison.png) | Side-by-side visual check against the finished concept art. |
+| ![Python CAD front three-quarter render](images/codex_body_python_cad_front_3q.png) | Assembled color render with the cream body shell, teal removable service deck, friendly camera head, front sensor band, bumper, side wheels, and E-stop. |
+| ![Python CAD top render](images/codex_body_python_cad_top.png) | Top-down check of service-deck color placement, screw language, vents, E-stop position, wheel/fender coverage, and neck/head footprint. |
+| ![Python CAD side packaging render](images/codex_body_python_cad_side.png) | Side packaging check for wheel exposure, fender coverage, bumper/rail envelope, head height, and E-stop clearance. |
+| ![Python CAD exploded fit render](images/codex_body_python_cad_exploded_fit.png) | Exploded stack showing how the removable deck and head lift off the cream shell while staying aligned to the assembled concept. |
+| ![Python CAD top-off service render](images/codex_body_python_cad_service_top_off.png) | Service view exposing Pi/HAT keepout, battery, controller placeholder, and wiring path evidence under the top deck. |
+| ![Python CAD safety review render](images/codex_body_python_cad_safety_review.png) | Safety overlay view for bumper travel, Pi/HAT keepout, battery keepout, and visible E-stop placement. |
+
+This pass is still a visual and packaging iteration, not a print-ready manufacturing model. The renderings should guide the next CAD refinement pass toward softer body surfacing, better fender integration, smoother bumper segmentation, and hardware-specific mounting details.
+
 ## Preview Renders
 
 | View | Purpose |
