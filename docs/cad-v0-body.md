@@ -28,6 +28,24 @@ The Python CAD concept pass in `cad/python/concept_body.py` uses CadQuery geomet
 
 This pass is still a visual and packaging iteration, not a print-ready manufacturing model. The renderings should guide the next CAD refinement pass toward softer body surfacing, better fender integration, smoother bumper segmentation, and hardware-specific mounting details.
 
+## Blender Concept Iteration Pass
+
+The Blender concept pass in `cad/blender/concept_body_blender.py` is the current closest visual match to the finished concept art. It keeps the same compact 300 x 220 mm rover direction, visible wheel/fender/bumper/E-stop language, and body-only service views, but uses Blender to iterate faster on the soft product-design surfaces. The second refinement loop moves the model toward a darker inset rounded-rectangle teal deck, a shorter/taller custom superellipse molded cream shell, molded hood/fascia, a smooth rounded cream front with a recessed black LED/sensor pill, a continuous TPU-style bumper seated below the curved front, lower E-stop, a custom capsule camera-head shell, softer head bezel, and cleaner fender wrap.
+
+| View | Purpose |
+| --- | --- |
+| ![Blender CAD concept comparison against finished concept art](images/codex_body_blender_concept_comparison.png) | Side-by-side comparison of the finished concept art and the latest Blender CAD concept render. |
+| ![Blender first twelve-iteration concept contact sheet](images/codex_body_blender_iteration_contact_sheet.png) | Literal first 12-pass iteration sheet showing the Blender model moving from blockout toward the first matched concept pass. |
+| ![Blender second twelve-iteration refinement contact sheet](images/codex_body_blender_refinement_contact_sheet.png) | Literal second 12-pass refinement sheet showing the latest visual tuning from pass 13 through pass 24. |
+| ![Blender front three-quarter render](images/codex_body_blender_front_3q.png) | Current assembled visual target with cream shell, teal service deck, black face/sensor details, soft bumper, covered wheels, red E-stop, and friendly head. |
+| ![Blender top render](images/codex_body_blender_top.png) | Top layout check for service deck, neck/head footprint, top vents, E-stop reach, wheel/fender coverage, and front bumper span. |
+| ![Blender side render](images/codex_body_blender_side.png) | Side packaging check for body height, wheel exposure, fender coverage, bumper rail, side panel, and E-stop/head height. |
+| ![Blender exploded fit render](images/codex_body_blender_exploded_fit.png) | Exploded concept stack showing the head/deck/bumper/body parts separated from the same assembled model, without adding visible internal electronics. |
+| ![Blender top-off service render](images/codex_body_blender_service_top_off.png) | Service view exposing empty pockets, bosses, rails, alignment pegs, and the removable deck relationship. |
+| ![Blender safety review render](images/codex_body_blender_safety_review.png) | Safety overlay view showing bumper travel envelope, wheel/fender area, service envelope, and visible E-stop placement. |
+
+Treat the Blender pass as the design target for the next CAD translation pass. It is closer to the concept art, but print-ready parts still need hardware-specific mount geometry, shell splitting, wall thickness, fastener bosses, bumper switch travel, and battery/E-stop backing hardware.
+
 ## Preview Renders
 
 | View | Purpose |
@@ -84,6 +102,13 @@ Some source files include `preview_only()` geometry for placeholders such as the
 
 ```bash
 python3 scripts/render_cad_v0_previews.py
+```
+
+Refresh the Blender concept pass with:
+
+```bash
+/Applications/Blender.app/Contents/MacOS/Blender --background --python cad/blender/concept_body_blender.py
+.venv-cad/bin/python scripts/compose_blender_concept_previews.py
 ```
 
 If OpenSCAD is installed locally, refresh the source assembly preview with:
