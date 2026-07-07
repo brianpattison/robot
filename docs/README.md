@@ -17,8 +17,13 @@ Read these in order when getting oriented:
 5. [CAD Mechanical Plan](cad-mechanical-plan.md)
    Printable modules, CAD parameter strategy, rough dimensions, fit-check tests, and export workflow.
 
+<<<<<<< Updated upstream
 6. [CAD v0 Body Concept](cad-v0-body.md)
    First OpenSCAD body concept, Python/Blender concept renders, assembly strategy, and known fit-check limitations.
+=======
+6. [CAD Plan: Beige Robot Body](cad-beige-body-plan.md)
+   `build123d` plan for the main beige enclosure: two-stage (visual form then printable shell), spec envelope with concept styling, parameters, and export workflow.
+>>>>>>> Stashed changes
 
 Current MVP baseline:
 
