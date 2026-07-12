@@ -241,15 +241,18 @@ def cover_page(c: canvas.Canvas, page_no: int, plate_manifest: dict) -> None:
     c.setFillColor(CHARCOAL)
     c.rect(0, 0, PAGE_W, PAGE_H, fill=1, stroke=0)
     image_path = IMAGE_DIR / "codex_robot_body_v1_assembled.png"
-    with Image.open(image_path) as image:
-        iw, ih = image.size
-        encoded = BytesIO()
-        image.convert("RGB").save(encoded, format="PNG")
-        encoded.seek(0)
-        pdf_image = ImageReader(encoded)
-    scale = max(PAGE_W / iw, PAGE_H / ih)
-    dw, dh = iw * scale, ih * scale
-    c.drawImage(pdf_image, (PAGE_W - dw) / 2, (PAGE_H - dh) / 2, dw, dh)
+    if image_path.exists():
+        with Image.open(image_path) as image:
+            iw, ih = image.size
+            encoded = BytesIO()
+            image.convert("RGB").save(encoded, format="PNG")
+            encoded.seek(0)
+            pdf_image = ImageReader(encoded)
+        scale = max(PAGE_W / iw, PAGE_H / ih)
+        dw, dh = iw * scale, ih * scale
+        c.drawImage(pdf_image, (PAGE_W - dw) / 2, (PAGE_H - dh) / 2, dw, dh)
+    else:
+        draw_image(c, image_path, 0, 0, PAGE_W, PAGE_H)
     c.saveState()
     c.setFillAlpha(0.86)
     c.setFillColor(DARK_TEAL)
