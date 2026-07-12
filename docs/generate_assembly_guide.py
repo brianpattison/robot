@@ -22,6 +22,12 @@ OUTPUT = ROOT / "output" / "pdf" / "codex_robot_body_v1_assembly_guide.pdf"
 PRINT_MANIFEST = ROOT / "cad" / "exports" / "print_ready" / "codex_robot_body_v1_print_manifest.json"
 PLATE_MANIFEST = ROOT / "cad" / "bambu" / "codex_robot_body_v1_p1s_plates.json"
 
+PRINT_MANIFEST_REGEN = """  .venv-cad/bin/python cad/python/robot_body.py
+  .venv-cad/bin/python cad/python/robot_body_split.py --bed 256 --margin 8
+  .venv-cad/bin/python cad/python/validate_robot_body.py --bed 256 --margin 8
+  .venv-cad/bin/python cad/python/robot_body_print.py --bed 256 --margin 8"""
+PLATE_MANIFEST_REGEN = "  .venv-cad/bin/python cad/bambu/generate_bambu_project.py"
+
 PAGE_W, PAGE_H = landscape(letter)
 MARGIN = 30
 
@@ -38,8 +44,20 @@ RED = HexColor("#C83F35")
 BLUE = HexColor("#2465D8")
 
 
-def load_json(path: Path) -> dict:
-    return json.loads(path.read_text(encoding="utf-8"))
+def load_json(path: Path, regeneration_commands: str) -> dict:
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        raise SystemExit(
+            f"Missing required generated input: {path}\n"
+            f"Regenerate it from the repository root with:\n{regeneration_commands}"
+        ) from None
+    except json.JSONDecodeError as exc:
+        raise SystemExit(
+            f"Invalid JSON in generated input {path} "
+            f"(line {exc.lineno}, column {exc.colno}).\n"
+            f"Regenerate it from the repository root with:\n{regeneration_commands}"
+        ) from None
 
 
 def wrap_lines(text: str, font: str, size: float, width: float) -> list[str]:
@@ -398,8 +416,8 @@ def plate_map_page(c: canvas.Canvas, page_no: int, plate_manifest: dict) -> None
 
 def build_pdf() -> None:
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    print_manifest = load_json(PRINT_MANIFEST)
-    plate_manifest = load_json(PLATE_MANIFEST)
+    print_manifest = load_json(PRINT_MANIFEST, PRINT_MANIFEST_REGEN)
+    plate_manifest = load_json(PLATE_MANIFEST, PLATE_MANIFEST_REGEN)
     c = canvas.Canvas(str(OUTPUT), pagesize=(PAGE_W, PAGE_H), pageCompression=1)
     c.setTitle("Codex Robot Body v1 - Illustrated Assembly Guide")
     c.setAuthor("Codex robot project")
