@@ -38,5 +38,5 @@ Current MVP baseline:
 - No AI HAT+ 2 required for MVP.
 - Wheeled differential-drive body.
 - Camera head, mic array, speaker, LEDs, E-stop, bumpers, ToF sensors, and local dashboard.
-- OpenSCAD first for simple CAD; `build123d`, CadQuery, and Blender when richer geometry or visual concept iteration is better.
+- OpenSCAD first for simple CAD; `build123d` and CadQuery for richer geometry; Blender only for concept iteration and rendering the generated STL inventory.
 - Bambu Lab P1S with the standard 0.4 mm nozzle and Textured PEI Plate as the settled print-layout target.
