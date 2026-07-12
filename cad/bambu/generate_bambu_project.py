@@ -28,6 +28,14 @@ from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 
 ROOT = Path(__file__).resolve().parents[2]
+
+
+def lanczos_resample(image_module=Image):
+    """Return the Lanczos filter from current or pre-9.1 Pillow APIs."""
+    return getattr(image_module, "Resampling", image_module).LANCZOS
+
+
+LANCZOS = lanczos_resample()
 PRINT_DIR = ROOT / "cad" / "exports" / "print_ready"
 MANIFEST_PATH = PRINT_DIR / "codex_robot_body_v1_print_manifest.json"
 OUTPUT_PATH = ROOT / "cad" / "bambu" / "codex_robot_body_v1_p1s.3mf"
@@ -714,9 +722,7 @@ def render_plate_contact_sheet(output: Path, layout: list[dict]) -> None:
 
             thumbnail_name = f"Metadata/plate_{plate['plate_number']}.png"
             thumbnail = Image.open(io.BytesIO(archive.read(thumbnail_name))).convert("RGB")
-            thumbnail = ImageOps.contain(
-                thumbnail, (276, 244), Image.Resampling.LANCZOS
-            )
+            thumbnail = ImageOps.contain(thumbnail, (276, 244), LANCZOS)
             canvas.paste(
                 thumbnail,
                 (x + (tile_width - thumbnail.width) // 2, y + 58),
