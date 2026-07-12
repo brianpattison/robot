@@ -48,6 +48,7 @@ temp/
 
 # CAD generated exports
 cad/exports/
+/result.json
 *.FCStd1
 *.brep
 
