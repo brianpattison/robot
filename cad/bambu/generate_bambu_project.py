@@ -789,8 +789,14 @@ def validate_output(output: Path, manifest: dict, layout: list[dict]) -> None:
     plates = settings_root.findall("plate")
     id_to_name = {}
     for obj in settings_root.findall("object"):
+        object_id = obj.attrib.get("id", "<unknown>")
         metadata = obj.find("metadata[@key='name']")
-        id_to_name[obj.attrib["id"]] = Path(metadata.attrib["value"]).stem
+        if metadata is None or not metadata.attrib.get("value"):
+            fail(
+                f"Bambu Studio model-settings object {object_id} "
+                "is missing name metadata."
+            )
+        id_to_name[object_id] = Path(metadata.attrib["value"]).stem
     for plate in plates:
         plate_names = [
             id_to_name[instance.find("metadata[@key='object_id']").attrib["value"]]
