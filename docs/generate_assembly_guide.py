@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import json
 from io import BytesIO
-from datetime import date
 from pathlib import Path
 
 from PIL import Image
@@ -140,7 +139,7 @@ def footer(c: canvas.Canvas, page_no: int, section: str) -> None:
     c.setFont("Helvetica", 7.5)
     c.setFillColor(MID_GRAY)
     c.drawString(MARGIN, 12, f"Codex Robot Body v1 | {section}")
-    c.drawRightString(PAGE_W - MARGIN, 12, f"Page {page_no} | Generated {date.today().isoformat()}")
+    c.drawRightString(PAGE_W - MARGIN, 12, f"Page {page_no} | Assembly guide v1")
 
 
 def page_header(c: canvas.Canvas, number: str, title: str, subtitle: str, page_no: int) -> None:
@@ -232,6 +231,10 @@ def instruction_page(
     gate: str,
     gate_color=ORANGE,
 ) -> None:
+    if not 1 <= len(images) <= 3:
+        raise ValueError(
+            f"Instruction page {number} requires 1-3 images; received {len(images)}."
+        )
     page_header(c, number, title, subtitle, page_no)
     image_x, image_y, image_w, image_h = 30, 84, 474, 442
     if len(images) == 1:
