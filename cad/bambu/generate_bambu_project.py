@@ -606,6 +606,10 @@ def roundtrip_with_bambu(patched: Path, output: Path, temp_dir: Path) -> None:
     shutil.copy2(candidate, output)
 
 
+def plate_manifest_path(output: Path) -> Path:
+    return output.with_name(f"{output.stem}_plates.json")
+
+
 def write_plate_manifest(output: Path, manifest: dict, layout: list[dict]) -> None:
     payload = {
         "project": output.name,
@@ -655,7 +659,9 @@ def write_plate_manifest(output: Path, manifest: dict, layout: list[dict]) -> No
                 ],
             }
         )
-    PLATE_MANIFEST_PATH.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    manifest_output = plate_manifest_path(output)
+    manifest_output.parent.mkdir(parents=True, exist_ok=True)
+    manifest_output.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
 
 def render_plate_contact_sheet(output: Path, layout: list[dict]) -> None:
