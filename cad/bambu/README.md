@@ -4,7 +4,7 @@ The tracked [`codex_robot_body_v1_p1s.3mf`](codex_robot_body_v1_p1s.3mf)
 is the canonical Bambu Studio layout project for a Bambu Lab P1S with the
 standard 0.4 mm nozzle and a Textured PEI Plate.
 
-It contains all 101 canonical printable parts exactly once on 26 named plates.
+It contains all 103 canonical printable parts exactly once on 26 named plates.
 Each plate contains one material-profile/color group; no plate mixes PETG and
 TPU or combines colors. The project carries nine physical filament/color
 presets and uses a conservative global baseline of four walls and 25% gyroid
@@ -24,7 +24,17 @@ TPU presets into full CLI profiles, imports the canonical STLs through Bambu
 Studio, packs them with brim-aware clearance inside an 8 mm edge reserve, and
 round-trips the result through Bambu Studio. It then checks the P1S profile,
 0.4 mm nozzle, 256 mm plate, Textured PEI selection, plate grouping, bounds,
-packing-envelope separation, and the exact 101-part inventory.
+packing-envelope separation, and the exact 103-part inventory.
+
+The macOS application bundle remains the default, but custom and non-macOS
+installs can supply the official Bambu Studio CLI and BBL profile root without
+editing source:
+
+```bash
+.venv-cad/bin/python cad/bambu/generate_bambu_project.py \
+  --bambu-cli /path/to/bambu-studio \
+  --profile-root /path/to/resources/profiles/BBL
+```
 
 This is an editable layout project, not pre-sliced G-code and not a hardware
 release waiver. Review every plate in the current Bambu Studio slicer before

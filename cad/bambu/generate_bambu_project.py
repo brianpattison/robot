@@ -12,6 +12,7 @@ import argparse
 import io
 import json
 import math
+import os
 import shutil
 import subprocess
 import tempfile
@@ -32,9 +33,11 @@ OUTPUT_PATH = ROOT / "cad" / "bambu" / "codex_robot_body_v1_p1s.3mf"
 PLATE_MANIFEST_PATH = ROOT / "cad" / "bambu" / "codex_robot_body_v1_p1s_plates.json"
 PLATE_CONTACT_SHEET_PATH = ROOT / "docs" / "images" / "codex_robot_body_v1_p1s_plates.png"
 
-BAMBU_APP = Path("/Applications/BambuStudio.app")
-BAMBU_CLI = BAMBU_APP / "Contents" / "MacOS" / "BambuStudio"
-PROFILE_ROOT = BAMBU_APP / "Contents" / "Resources" / "profiles" / "BBL"
+DEFAULT_BAMBU_APP = Path("/Applications/BambuStudio.app")
+DEFAULT_BAMBU_CLI = DEFAULT_BAMBU_APP / "Contents" / "MacOS" / "BambuStudio"
+DEFAULT_PROFILE_ROOT = DEFAULT_BAMBU_APP / "Contents" / "Resources" / "profiles" / "BBL"
+BAMBU_CLI = DEFAULT_BAMBU_CLI
+PROFILE_ROOT = DEFAULT_PROFILE_ROOT
 MACHINE_PROFILE = PROFILE_ROOT / "machine" / "Bambu Lab P1S 0.4 nozzle.json"
 PROCESS_PROFILE = PROFILE_ROOT / "process" / "0.20mm Standard @BBL X1C.json"
 PETG_PROFILE = PROFILE_ROOT / "filament" / "Generic PETG HF @BBL P1S 0.4 nozzle.json"
@@ -91,6 +94,19 @@ class Placement:
 
 def fail(message: str) -> None:
     raise SystemExit(message)
+
+
+def configure_bambu_paths(cli: Path, profile_root: Path) -> None:
+    """Configure an installed official Bambu Studio CLI and its BBL profiles."""
+    global BAMBU_CLI, PROFILE_ROOT
+    global MACHINE_PROFILE, PROCESS_PROFILE, PETG_PROFILE, TPU_PROFILE
+
+    BAMBU_CLI = cli.expanduser()
+    PROFILE_ROOT = profile_root.expanduser()
+    MACHINE_PROFILE = PROFILE_ROOT / "machine" / "Bambu Lab P1S 0.4 nozzle.json"
+    PROCESS_PROFILE = PROFILE_ROOT / "process" / "0.20mm Standard @BBL X1C.json"
+    PETG_PROFILE = PROFILE_ROOT / "filament" / "Generic PETG HF @BBL P1S 0.4 nozzle.json"
+    TPU_PROFILE = PROFILE_ROOT / "filament" / "Bambu TPU 95A HF @BBL P1S.json"
 
 
 def validate_environment() -> None:
@@ -199,7 +215,7 @@ def pack_group(group: str, names: list[str], parts: dict) -> list[list[Placement
         pad = brim + OBJECT_SPACING / 2.0
         outer_w = span_x + 2.0 * pad
         outer_h = span_y + 2.0 * pad
-        if min(max(outer_w, outer_h), max(outer_h, outer_w)) > usable + 1e-6:
+        if max(outer_w, outer_h) > usable + 1e-6:
             fail(f"{name} plus brim/spacing does not fit the P1S safe area.")
 
         selected = None
@@ -815,8 +831,23 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=OUTPUT_PATH)
     parser.add_argument("--keep-temp", action="store_true")
+    parser.add_argument(
+        "--bambu-cli",
+        type=Path,
+        default=Path(os.environ.get("BAMBU_STUDIO_CLI", DEFAULT_BAMBU_CLI)),
+        help="Official Bambu Studio CLI executable (env: BAMBU_STUDIO_CLI).",
+    )
+    parser.add_argument(
+        "--profile-root",
+        type=Path,
+        default=Path(
+            os.environ.get("BAMBU_STUDIO_PROFILE_ROOT", DEFAULT_PROFILE_ROOT)
+        ),
+        help="Bambu Studio resources/profiles/BBL directory (env: BAMBU_STUDIO_PROFILE_ROOT).",
+    )
     args = parser.parse_args()
 
+    configure_bambu_paths(args.bambu_cli, args.profile_root)
     validate_environment()
     manifest = load_manifest()
     layout = build_layout(manifest)
