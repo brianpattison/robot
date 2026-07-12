@@ -200,8 +200,9 @@ def best_position(free_rects: list[Rect], width: float, height: float):
                 options.append(((short, long, free.y, free.x, rotated), free, w, h))
     if not options:
         return None
-    _, free, width, height = min(options, key=lambda option: option[0])
-    rotated = min(options, key=lambda option: option[0])[0][-1]
+    best = min(options, key=lambda option: option[0])
+    _, free, width, height = best
+    rotated = best[0][-1]
     return free, width, height, rotated
 
 
@@ -664,7 +665,11 @@ def write_plate_manifest(output: Path, manifest: dict, layout: list[dict]) -> No
     manifest_output.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
 
-def render_plate_contact_sheet(output: Path, layout: list[dict]) -> None:
+def render_plate_contact_sheet(
+    output: Path,
+    layout: list[dict],
+    contact_sheet_path: Path = PLATE_CONTACT_SHEET_PATH,
+) -> None:
     columns = 5
     tile_width = 312
     tile_height = 354
@@ -727,12 +732,26 @@ def render_plate_contact_sheet(output: Path, layout: list[dict]) -> None:
             )
 
             thumbnail_name = f"Metadata/plate_{plate['plate_number']}.png"
-            thumbnail = Image.open(io.BytesIO(archive.read(thumbnail_name))).convert("RGB")
-            thumbnail = ImageOps.contain(thumbnail, (276, 244), LANCZOS)
-            canvas.paste(
-                thumbnail,
-                (x + (tile_width - thumbnail.width) // 2, y + 58),
-            )
+            try:
+                with Image.open(io.BytesIO(archive.read(thumbnail_name))) as source:
+                    thumbnail = source.convert("RGB")
+                thumbnail = ImageOps.contain(thumbnail, (276, 244), LANCZOS)
+                canvas.paste(
+                    thumbnail,
+                    (x + (tile_width - thumbnail.width) // 2, y + 58),
+                )
+            except (KeyError, OSError):
+                placeholder = (x + 18, y + 58, x + tile_width - 18, y + 302)
+                draw.rounded_rectangle(placeholder, radius=12, fill="#E7E2D8")
+                message = "Preview unavailable"
+                bounds = draw.textbbox((0, 0), message, font=label_font)
+                message_width = bounds[2] - bounds[0]
+                draw.text(
+                    (x + (tile_width - message_width) / 2, y + 170),
+                    message,
+                    fill="#667078",
+                    font=label_font,
+                )
 
             words = plate["name"].split()
             lines = []
@@ -757,8 +776,8 @@ def render_plate_contact_sheet(output: Path, layout: list[dict]) -> None:
                     font=label_font,
                 )
 
-    PLATE_CONTACT_SHEET_PATH.parent.mkdir(parents=True, exist_ok=True)
-    canvas.save(PLATE_CONTACT_SHEET_PATH, optimize=True)
+    contact_sheet_path.parent.mkdir(parents=True, exist_ok=True)
+    canvas.save(contact_sheet_path, optimize=True)
 
 
 def validate_output(output: Path, manifest: dict, layout: list[dict]) -> None:
