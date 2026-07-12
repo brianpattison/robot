@@ -236,14 +236,17 @@ def alignment_pilot_interfaces(p: Params):
 
 
 def alignment_pilot_shape(p: Params, interface, point, recess: bool = False):
+    axis = interface["axis"]
+    if axis not in {"x", "y", "z"}:
+        raise ValueError(f"Unsupported alignment-pilot axis: {axis!r}")
     radius = p.split_pilot_radius + (p.split_pilot_radial_clearance if recess else 0.0)
     length = p.split_pilot_length + (p.split_pilot_axial_clearance if recess else 0.0)
     center_axis = interface["face"] + interface["outward_sign"] * (
         length / 2.0 - p.split_pilot_overlap
     )
-    if interface["axis"] == "x":
+    if axis == "x":
         return cylinder_x(radius, length, (center_axis, point[0], point[1]))
-    if interface["axis"] == "y":
+    if axis == "y":
         return cylinder_y(radius, length, (point[0], center_axis, point[1]))
     return cylinder_z(radius, length, (point[0], point[1], center_axis))
 
