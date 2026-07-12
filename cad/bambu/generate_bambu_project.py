@@ -13,6 +13,7 @@ import io
 import json
 import math
 import os
+import re
 import shutil
 import subprocess
 import tempfile
@@ -820,10 +821,20 @@ def validate_output(output: Path, manifest: dict, layout: list[dict]) -> None:
             capture_output=True,
             cwd=info_dir,
         )
-    if info.returncode != 0 or info.stdout.count("number_of_parts") != expected_part_count:
+    reported_part_count = sum(
+        int(match.group(1))
+        for match in re.finditer(
+            r"^\s*number_of_parts\s*=\s*(\d+)\s*$",
+            info.stdout,
+            flags=re.MULTILINE,
+        )
+    )
+    if info.returncode != 0 or reported_part_count != expected_part_count:
         fail(
             f"Bambu Studio could not read all {expected_part_count} objects "
-            "from the final 3MF.\n" + info.stdout[-2000:]
+            f"from the final 3MF (reported {reported_part_count}).\n"
+            f"stdout:\n{info.stdout[-2000:]}\n"
+            f"stderr:\n{info.stderr[-2000:]}"
         )
 
 
