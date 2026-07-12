@@ -58,11 +58,18 @@ If you touch any motion, power, battery, or safety-control design, update the re
 ## CAD And Mechanical Conventions
 
 - OpenSCAD is the default first-pass CAD tool for simple parametric printable parts.
+- Local OpenSCAD CLI is available at `/Applications/OpenSCAD-2021.01.app/Contents/MacOS/openscad`.
 - `build123d` and CadQuery are approved for Python CAD when geometry needs richer fillets, chamfers, STEP exports, or complex assemblies.
-- Keep editable CAD source in `cad/openscad/` or `cad/python/`.
+- The current concept-art matching pass is `cad/python/concept_body.py`; it uses CadQuery plus VTK to generate the `docs/images/codex_body_python_cad_*.png` review renders.
+- Blender 5.1 is available at `/Applications/Blender.app/Contents/MacOS/Blender`; `cad/blender/concept_body_blender.py` is the current closest visual target for the concept art and generates the `docs/images/codex_body_blender_*.png` review renders, including 24 iteration thumbnails and the second refinement contact sheet. The current Blender body uses a shorter, taller custom superellipse molded appliance shell, a cleaner flush rounded-rectangle removable darker-teal lid with a thin dark reveal and no visible perimeter notch blocks, centered rear E-stop, raised top-facing rounded-trapezoid vented black hood inlay, a smooth rounded cream front nose with a recessed black LED/sensor pill and embedded lime lights, one continuous lower puffy charcoal curved TPU bumper seated below that smooth front, low flattened side bumper strips tucked under shortened teal side service panels, smaller more-inboard rear wheels under lower/flatter integrated cream arch fairings with seam shadows, and a lower squatter capsule head on a smoother hourglass flared neck with a more inset black faceplate, oval eye capsules, and a detailed camera lens stack; keep that visual target in mind when translating back to printable CAD. Avoid reintroducing a flat planar front face, detached guard-rail bumper loops, separated front bumper pads, straight side bumper rails, giant slab-like wheel fenders, oversized outboard wheels, a proud front LED strip, or merging the front sensor fascia back into the rubber bumper.
+- The Blender concept should model the body parts only. Do not add visible internal electronics to it; use empty service-bay pockets, bosses, rails, alignment pegs, and review-only safety envelopes instead.
+- Assembled and exploded Blender views should use the same part inventory. The exploded view should move part groups apart, not invent special geometry that cannot be put back together into the assembled view.
+- Keep editable CAD source in `cad/openscad/`, `cad/python/`, or `cad/blender/`.
 - Keep generated exports under `cad/exports/`; generated STL/STEP/mesh files are ignored by Git by default.
 - Use shared parameters for dimensions, fastener sizes, wheel geometry, sensor offsets, keepouts, and board mount patterns.
 - Printed parts should be modular and serviceable: base tray, electronics deck, battery cradle, motor pods, bumper carrier, ToF sensor pods, camera/head bracket, and top shell.
+- Use `preview_only()` in OpenSCAD for dummy hardware, LED/status markers, keepout markers, and other review-only solids so generated STLs stay print-focused.
+- `cad/openscad/split_print_variants.scad` has smaller-bed exports for base tray halves, electronics deck halves, bumper quadrants, and seam plates; use it before assuming a one-piece 300 x 220 mm tray print.
 - Include USB storage mounting as a serviceable later module only if USB SSD/flash storage becomes part of the build.
 - Do not rely on printed plastic alone for safety-critical battery retention, E-stop mounting, axle support, or motor retention.
 
@@ -92,8 +99,8 @@ Do not install CAD packages into Apple/system Python.
 
 Likely next useful work:
 
-1. Create `cad/openscad/robot_params.scad`.
-2. Create the first OpenSCAD electronics deck.
-3. Create the first base tray fit-check model.
-4. Confirm printer build volume and filament/material assumptions.
+1. Review and fit-check the initial OpenSCAD body concept in `cad/openscad/` and the rendered overview in `docs/cad-v0-body.md`.
+2. Confirm printer build volume and filament/material assumptions before committing to one-piece tray dimensions.
+3. Replace generic motor pod, bumper switch, caster, E-stop, and battery geometry with measured real parts; the current E-stop plate is still a datasheet placeholder.
+4. Print insert/fastener coupons, then the electronics deck, before printing the whole base tray.
 5. Confirm which bench-brain parts are already owned vs need to be ordered from `docs/bom-v0.md`.
