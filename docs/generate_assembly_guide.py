@@ -237,6 +237,13 @@ def instruction_page(
     c.showPage()
 
 
+def set_fill_alpha_if_supported(c: canvas.Canvas, alpha: float) -> None:
+    """Set fill opacity when the installed ReportLab canvas supports it."""
+    setter = getattr(c, "setFillAlpha", None)
+    if setter is not None:
+        setter(alpha)
+
+
 def cover_page(c: canvas.Canvas, page_no: int, plate_manifest: dict) -> None:
     c.setFillColor(CHARCOAL)
     c.rect(0, 0, PAGE_W, PAGE_H, fill=1, stroke=0)
@@ -254,7 +261,7 @@ def cover_page(c: canvas.Canvas, page_no: int, plate_manifest: dict) -> None:
     else:
         draw_image(c, image_path, 0, 0, PAGE_W, PAGE_H)
     c.saveState()
-    c.setFillAlpha(0.86)
+    set_fill_alpha_if_supported(c, 0.86)
     c.setFillColor(DARK_TEAL)
     c.roundRect(36, 54, 430, 170, 16, fill=1, stroke=0)
     c.restoreState()
