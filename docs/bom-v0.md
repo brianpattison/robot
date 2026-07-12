@@ -40,8 +40,12 @@ This is the first-pass bill of materials for the non-AI-HAT MVP: a small indoor 
 | Item | Qty | Status | Est. subtotal | Notes |
 | --- | ---: | --- | ---: | --- |
 | Raspberry Pi Camera Module 3 Wide | 1 | Buy now | $35-$45 | Wide FOV helps indoor interaction. Raspberry Pi lists Camera Module 3 from $25 and describes the Wide variant as 120 degree FOV: https://www.raspberrypi.com/products/camera-module-3/ |
-| Pan/tilt micro servos or small pan/tilt kit | 1 set | Buy after bench | $20-$60 | Start with simple hobby servos; upgrade if noisy or jittery. |
-| 5V servo regulator or isolated servo rail | 1 | Buy after bench | $10-$30 | Keep servo noise away from Pi/audio power. |
+| Hitec D85MG 24T digital metal-gear servo | 2 | Selected; buy after static-head bench | $100-$160 | Drawing-backed pan/tilt baseline: 29 x 13 x 30 mm, 4.3 kg-cm stall torque and 1.4 A stall current at 6 V. Use the programmed motion limits and never treat stall torque as an operating target: https://www.hiteccs.com/actuators/product-details/D85MG |
+| Hitec R-ML24 24T aluminum horn | 2 | Selected; buy with servos | $20-$45 | Uses the modeled M2 x 0.4 stations at 13 and 16 mm. Confirm the delivered spline and center-screw hardware against the servo before assembly. |
+| Koyo/JTEKT 6807-2RS bearing | 1 | Selected; buy before neck print | $15-$35 | 35 x 47 x 7 mm pan support bearing; print the combined seat/journal coupon and press only the race being fitted: https://koyo.jtekt.co.jp/en/products/detail/?pno=6807+2RS |
+| MF84ZZ flanged bearing | 1 | Selected; buy with servos | $5-$15 | 4 x 8 x 3 mm with 9.2 x 0.6 mm flange for the passive tilt cartridge. |
+| McMaster 92981A143 shoulder screw | 1 | Selected; buy with servos | $10-$25 | 4 x 12 mm shoulder with M3 x 4 mm thread; fixes into the yoke without clamping the moving head. |
+| Pololu D36V50F6 6 V regulator | 1 | Selected for CAD; buy after bench | $35-$45 | Drawing-backed 25.4 mm square board on three M2 standoffs for the separate head-servo rail. Both D85MGs can demand 2.8 A combined at published stall; verify actual 12 V-input current capability, transient margin, local capacitance, heat, and wiring. [Official product](https://www.pololu.com/product/4092). |
 | Printed camera head shell and brackets | 1 set | Consumable | See filament | Source CAD only. Generated STLs belong under ignored exports, not as source assumptions. |
 
 ## Audio
@@ -49,7 +53,7 @@ This is the first-pass bill of materials for the non-AI-HAT MVP: a small indoor 
 | Item | Qty | Status | Est. subtotal | Notes |
 | --- | ---: | --- | ---: | --- |
 | USB far-field mic array | 1 | Buy now | $50-$90 | USB keeps audio independent from Pi HAT stacking. Seeed listed ReSpeaker USB Mic Array at $69.99: https://www.seeedstudio.com/ReSpeaker-USB-Mic-Array-p-4247.html |
-| I2S mono amp | 1 | Buy now | $6-$12 | Adafruit MAX98357A was listed at $5.95: https://www.adafruit.com/product/3006 |
+| Adafruit #3006 MAX98357A I2S mono amp | 2 | Buy one for current-revision fit test | $12-$24 | One board per left/right speaker. Both share BCLK/LRCLK/DIN; configure SD/MODE for separate channels. The exact PCB/two-hole pattern is modeled under each speaker plate, but Adafruit's official 2022 STEP predates the terminal block now shipped pre-soldered. Measure one current board before buying/releasing both: https://www.adafruit.com/product/3006 |
 | Enclosed 3W 4 ohm speaker or small speaker set | 1 | Buy now | $5-$20 | Adafruit's stereo enclosed 3W set was $7.50: https://www.adafruit.com/product/1669 |
 | Speaker grille, gasket, acoustic foam | 1 set | Consumable | $5-$20 | Print the grille, tune the rattle. The robot deserves dignity in tiny audio. |
 
@@ -57,19 +61,21 @@ This is the first-pass bill of materials for the non-AI-HAT MVP: a small indoor 
 
 | Item | Qty | Status | Est. subtotal | Notes |
 | --- | ---: | --- | ---: | --- |
-| Addressable RGB LED ring/strip | 1-2 | Buy now | $10-$30 | Eyes/status: listening, muted, moving, error, low battery. |
-| Physical mute switch | 1 | Buy now | $5-$20 | Should have a visible state and be readable by software. |
+| Adafruit 5975 NeoPixel JST breakout | 4 | Buy one for fit test | $6-$20 incl. cables | One RGB pixel per eye/status diffuser; M2 mounting and keyed JST-SH input/output. Four-board worst-case allowance is 240 mA at 5 V before software brightness limiting. |
+| E-Switch PVB3F230SS311 physical mute switch | 1 | Selected; buy for rear-cartridge fit | $12-$25 | Maintained SPDT with red LED ring, 16 mm two-flat panel cutout, and 1-7 mm panel range. The right rear cartridge is modeled. Route fused microphone 5 V either to mic VBUS or to the muted indication/protected state-input branch; verify LED resistor, polarity, no USB backfeed, and true capture loss: https://www.e-switch.com/wp-content/uploads/2024/01/PVB3.pdf |
+| Switchcraft 35RASMT5CHNTRX four-conductor service jack | 1 | Selected; buy for center-cartridge fit | $3-$12 plus PCB | Drawing-backed 15.5 x 6.8 x 5.3 mm low-profile TRRS jack on a removable 18 x 18 mm protected 3.3 V UART/service PCB. Tip=robot TX, ring 1=robot RX, ring 2=service-detect, sleeve=ground. It is not audio, RS-232, motor-enable, or a power output. Verify purchased fit, ESD/series protection, labeled adapter pinout, 3.3 V levels, service-mode motion inhibit, and no automatic restart. [Official drawing](https://www.switchcraft.com/assets/1/6/35RASMT5CHNTRX_CD.pdf?16023=). |
+| Optional E-Switch PVPB3WS3 socket harness | 1 | Optional for serviceability | $8-$20 | Matching SPDT/LED socket with 140 mm 22 AWG leads. Measure its rear depth and prove latch/removal clearance before replacing the modeled solder-lug service corridor. |
 | Small buttons or service switch cluster | 1 set | Buy now | $5-$20 | Pairing, safe-enable, shutdown, mode/reset as needed. |
 
 ## Safety And Sensing
 
 | Item | Qty | Status | Est. subtotal | Notes |
 | --- | ---: | --- | ---: | --- |
-| Raspberry Pi Pico 2 or Pico 2 W | 1 | Buy now | $5-$10 | Safety MCU for watchdog, bumper inputs, motor enable, and heartbeat. Raspberry Pi lists Pico 2 from $5: https://www.raspberrypi.com/products/raspberry-pi-pico-2/ |
-| Latching mushroom E-stop | 1 | Buy now | $10-$25 | Must cut motor power path, not just ask Linux politely. |
-| Motor power cutoff relay, contactor, or MOSFET switch | 1 | Buy now | $15-$50 | Rated for the motor battery voltage/current. Choose after battery and motor driver are final. |
+| Raspberry Pi Pico 2, non-W without headers | 1 | Buy now | $5-$10 | Drawing-backed safety-MCU baseline for watchdog, bumper inputs, motor enable, and heartbeat. Use wired USB/UART/GPIO links rather than giving the independent safety path an unnecessary radio. Raspberry Pi lists Pico 2 from $5: https://www.raspberrypi.com/products/raspberry-pi-pico-2/ |
+| IDEC XW1E-BV402M-R E-stop | 1 | Buy now | $60-$85 | Selected drawing-backed 40 mm red mushroom with 2NC direct-opening contacts. Use its contacts in low-voltage cutoff/enable channels rather than carrying motor current; add a durable 60 mm yellow legend. [Official IDEC product](https://www.idec.com/en-us/switches-indicator-lights/switches-pushbuttons/emergency-stop-switches/xw-22mm-estop/xw1e-bv402m-r). |
+| Albright SW60 motor contactor | 1 | Mechanical baseline; electrical review before buy | $45-$100 | Specify a normally-open SW60 with a 12 V continuously rated coil. The CAD reserves its M6 studs, body, service boots/lugs, and custom metal carrier. Exact coil, suppression, fusing, dropout, conductor sizing, and restart logic require engineering review. [Official datasheet](https://www.albrightinternational.com/wpcms/wp-content/uploads/2020/08/SW60-Data-Sheet.pdf). |
 | Inline fuse holders, fuses, XT60 or equivalent connectors | 1 set | Buy now | $20-$60 | Put the smoke back where it belongs: not in the robot. |
-| Bumper microswitches or tactile bumper switches | 6-10 | Buy now | $10-$30 | Front and side bumper segments. |
+| Omron D2HW-C202MR bumper switches | 6 | Buy two first | $35-$75 | Selected sealed SPST-NC pin-plunger switch with molded right-side leads and M3 mounting. Qualify two in the exact 0.4/2.0/2.4 mm coupon interface before buying all six. [Official Omron datasheet](https://omronfs.omron.com/en_US/ecb/products/pdf/en-d2hw.pdf). |
 | VL53L1X ToF distance sensors | 4-6 | Buy now | $60-$100 | Front, front-left, front-right, and side coverage. Adafruit lists VL53L1X boards at $14.95 each: https://www.adafruit.com/product/3967 |
 | Qwiic/STEMMA QT cables and I2C mux if needed | 1 set | Buy now | $10-$35 | Multiple same-address sensors may need a mux or switched enable lines. |
 | Optional cliff/drop sensors | 2-4 | Optional later | $10-$40 | Add if there are stairs, thresholds, or ledges in the operating area. |
@@ -78,22 +84,28 @@ This is the first-pass bill of materials for the non-AI-HAT MVP: a small indoor 
 
 | Item | Qty | Status | Est. subtotal | Notes |
 | --- | ---: | --- | ---: | --- |
-| 12V encoder gearmotors, 25D or 37D class | 2 | Buy after bench | $80-$180 | Pick ratio after target weight is known. Pololu 25D gearmotors are well documented; cheaper encoder motors exist but may cost debugging time. |
-| Differential-drive wheels | 2 | Buy after bench | $15-$50 | Aim for rubber tread, about 65-90 mm diameter. |
-| Passive caster or ball transfer units | 1-2 | Buy after bench | $10-$35 | Use placement that keeps weight on drive wheels. |
-| Motor mounts, hubs, couplers | 1 set | Buy after bench | $20-$80 | Some can be printed, but shafts/hubs should be real hardware. |
-| Cytron MDDS10 dual motor driver | 1 | Buy after bench | $55-$70 | Good default for two brushed DC motors. RobotShop listed MDDS10 at $55: https://www.robotshop.com/products/cytron-smartdriveduo-smart-dual-channel-10a-motor-driver |
+| Pololu #4867 99:1 Metal Gearmotor 25Dx69L MP 12V with 48 CPR encoder | 2 | Selected; buy for bench | $80-$180 | Drawing-backed rear-drive baseline: 98.78:1, 79 rpm/0.10 A no-load and 1.8 A/11 kg-cm extrapolated stall at 12 V, 4 mm D shaft, and 200 mm six-wire leads. The package matches the prior #4847 CAD while materially reducing battery demand. Target <=0.45 A steady per motor on intended surfaces and verify loaded torque/current/temperature: https://www.pololu.com/product/4867 |
+| Pololu #1569 metal bracket for 25D gearmotor | 2 | Selected; buy with motors | $10-$25 | Primary motor retention; three M3 tray paths per bracket use 3 mm metal spacers. Drawing: https://www.pololu.com/file/download/1569-bracket-dimensions.pdf?file_id=0J725 |
+| Pololu #1997 universal aluminum hub for 4 mm shaft, M3 holes | 2 | Selected; buy with motors | $15-$30 | Couples each 4 mm D shaft to the four-screw printed PETG wheel core. Confirm set-screw engagement and use thread-locking practice appropriate to the hardware: https://www.pololu.com/product/1997 |
+| Printed 86 mm rear wheel stack | 2 | Prototype after coupons | Filament | Annular TPU tire, PETG structural core/flange, and teal trim ring; loaded retention and floor tests required. |
+| 608 bearings | 4 | Buy after bearing coupon | $10-$30 | Two per removable front-idler pod; 8 x 22 x 7 mm. Cool and measure the coupon before selecting the seat station. |
+| Pololu #2693 universal aluminum hub for 8 mm shaft, M3 holes | 1 two-pack | Selected; buy for idler bench | $15-$25 | Each hub uses two included set screws and six threaded M3 wheel holes. The official 25.4 x 14 mm envelope and 19.05 mm bolt circle are modeled: https://www.pololu.com/product/2693 |
+| Grooved 8 mm steel front-idler shaft | 2 | Machine/source after coupon | $15-$50 | 64.5 mm overall. Cut the inboard Rotor Clip DSH-8 groove to 7.54-7.60 mm diameter x 0.90 mm width with at least 0.60 mm edge margin; deburr and reject scoring/burrs at both bearing journals. |
+| Rotor Clip DSH-8 / DIN 471 8x0.8 external ring | 2 plus spares | Selected; buy with shaft stock | $5-$20 | Positive inboard shaft retention. Use proper external-ring pliers and visually prove full groove seating: https://www.rotorclip.com/product/dsh-8/ |
+| Front-idler metal washer/spacer set | 2 sets | Source after shaft fit | $10-$30 | Per side: one 8 x 15 x 2 mm steel washer, one 12 OD x 8 ID x 14 mm inner spacer, and one 10 OD x 8 ID x 19 mm outer spacer. Measure/cut square and deburr. |
+| Cytron MDDS10 dual motor driver | 1 | Buy after bench | $55-$70 | Drawing-backed CAD baseline for two brushed DC motors: official 101.092 x 66.802 mm STEP footprint and four-hole mount are modeled with terminal, cooling, and service clearance. Cytron specifies 7-35 V, 10 A continuous per channel, and no reverse-polarity protection: https://th.cytron.io/p-10amp-7v-35v-smartdrive-dc-motor-driver-2-channels |
 | Pololu Dual G2 24v14 or similar driver | 1 | Optional alternative | $80-$110 | Pololu listed Dual G2 24v14 at $79.95: https://www.pololu.com/product/2516 |
 
 ## Mobile Power
 
 | Item | Qty | Status | Est. subtotal | Notes |
 | --- | ---: | --- | ---: | --- |
-| 12V class LiFePO4 or Li-ion pack, 5-10Ah | 1 | Buy after bench | $60-$160 | Prefer a protected pack with BMS. LiFePO4 is calmer for indoor use; Li-ion is compact. |
-| Compatible charger | 1 | Buy after bench | $25-$70 | Must match chemistry and cell count. Label it clearly. |
-| 5V high-current buck regulator for Pi | 1 | Buy after bench | $30-$45 | Pololu D24V90F5 5V/9A was listed at $36.82: https://www.pololu.com/product/2866 |
-| Secondary 5V/6V regulator for servos/LEDs | 1 | Buy after bench | $10-$35 | Keeps motor/servo noise from browning out the Pi. |
-| Power distribution board or terminal blocks | 1 set | Buy after bench | $15-$50 | Include strain relief and service labels. |
+| Bioenno BLF-1203AB 12 V/3 Ah LiFePO4 pack | 1 | Prototype baseline; buy one for fit/current test | $50-$80 | Official 110 x 27 x 75 mm pack is modeled rotated to 110 x 75 x 27 mm. Bioenno documents 7 A continuous, 14 A for two seconds, internal PCM/BMS protection, Powerpole discharge, separate DC charge lead, MSDS, and UN38.3 transport evidence. Require delivered lead fit, product-safety evidence beyond UN38.3, <=5.6 A sustained measured current, BMS/regen/thermal tests, and 45-minute runtime with 20% reserve: https://www.bioennopower.com/products/12v-3ah-lifepo4-battery-pvc |
+| Bioenno BPC-1502DC charger | 1 | Prototype baseline; buy with battery | $25-$50 | Manufacturer-matched 14.6 V/2 A LiFePO4 charger. Adapt its center-positive 5.5 x 2.1 mm output to the dedicated keyed EN2 cord connector; do not expose a generic barrel jack on the robot: https://www.bioennopower.com/products/lithium-12v-2a-amp-lifepo4-battery-charger |
+| Switchcraft EN2P3M20 + EN2C3F20G2 charge connector pair | 1 pair | Prototype baseline; buy for rear-cartridge fit | $20-$45 | Sealed, keyed, bayonet-locking, UL/CSA-listed three-contact pair rated 6.5 A. Two contacts are charge +/-; the third is CHARGER_PRESENT. Charge-only, never a battery output. Switchcraft marks it not for current interruption, so mate/unmate only with charger AC removed. [Panel connector](https://www.switchcraft.com/en2-panel-connector-3-position-20-male-pins-20-contact-size/en2p3m20/), [cord connector](https://www.switchcraft.com/en2-cord-connector-3-position-20-female-sockets-20-contact-size-0-140-0-180-3-6-4-6mm-grommet-ribbed-coupling-ring/en2c3f20g2/). |
+| Pololu D24V90F5 5 V regulator for Pi | 1 | Selected for CAD; buy after bench | $30-$45 | Drawing-backed 40.6 x 20.3 mm board on four M2 standoffs with both terminal corridors modeled. Verify Pi 5 startup/USB load, voltage drop, thermals, fusing, and power-good behavior. [Official product](https://www.pololu.com/product/2866). |
+| Pololu D36V50F6 6 V regulator for servos | 1 | See selected head rail above | $35-$45 | Keep it electrically separate from the Pi rail and validate measured dual-D85MG transients. |
+| Custom four-branch accessory-distribution PCB | 1 | Mechanical baseline selected; print exact gauge first | $35-$100 incl. PCB, cover, harness, and tooling-dependent contacts | 40 x 21 x 1.6 mm provisional 2 oz board with four [Littelfuse 01550900M OMNI-BLOK holders](https://www.littelfuse.com/products/fuses-overcurrent-protection/fuse-holders-fuse-blocks-accessories/fuse-blocks/pcb-mount-fuse-blocks/155900/01550900m), replaceable Nano2 fuses, and [Molex 43045-1000](https://www.molex.com/en-us/products/part-detail/0430451000) / [43025-1000](https://www.molex.com/en-us/products/part-detail/0430251000) ten-circuit Micro-Fit interface. Four branches use separate positive/return pairs; source positive/return occupy the remaining contacts. Before ordering, print the production-derived one-piece gauge and trial-fit it with the real deck, eight M2 stacking standoffs, and actual cover. Prototype ceiling 6 A total / 5 A any branch. Exact fuse values and contacts/wires remain measured-load selections. Require battery-near feeder fuse, reviewed copper, specified crimp tooling, pull/short/selectivity/thermal/no-backfeed tests, labels, cover, and independent strain strap. The 880024 remains rejected for collisions. |
 | Main power switch/key/link | 1 | Buy after bench | $10-$35 | Separate from E-stop; E-stop is for immediate motor cut. |
 | Battery strap, cradle, insulation, cable guards | 1 set | Consumable | $10-$40 | Print the cradle, use real straps and padding. |
 
@@ -134,18 +146,19 @@ Buy the bench-brain and safety-prototype parts first. This gets the robot hearin
 | USB mic array | $50-$90 |
 | I2S amp, speaker, audio wiring | $15-$45 |
 | Pi active cooler, bench power, storage if missing | $35-$115 |
-| Pico 2 or Pico 2 W, headers, prototyping board | $10-$30 |
+| Non-wireless Pico 2 without headers, four 6 mm M2 standoffs, and wired harness/prototyping board | $10-$30 |
 | E-stop, fuse holders, switches, wiring, connectors | $50-$140 |
 | 4x ToF sensors plus cables | $60-$90 |
 | LEDs and physical mute switch | $20-$50 |
 | PETG/PLA, inserts, M3 screw/standoff kit | $65-$170 |
 | First batch estimate | $350-$800 |
 
-## Defer Until Bench Tests Pass
+## Defer Full Mobility Purchase Until Bench Tests Pass
 
-- Drive motors, wheels, hubs, and motor mounts.
+- Buy only one BLF-1203AB/charger/EN2 set and one #4867 motor first; do not order the full mobility set until fit/current tests pass.
+- Remaining drive motor, wheels, hubs, and motor mounts.
 - Motor driver.
-- Mobile battery, charger, and mobile power distribution.
+- Final mobile power distribution and released wiring kit.
 - Pan/tilt servos if the first camera head can be static for bench testing.
 - 2D LiDAR.
 - AI HAT+ 2.
@@ -155,8 +168,8 @@ Buy the bench-brain and safety-prototype parts first. This gets the robot hearin
 
 1. Target loaded weight after bench hardware and printed tray are real, not vibes.
 2. Wheel diameter and axle height that clear common rugs/thresholds without making the robot tall.
-3. Motor ratio: slower and torquier is friendlier indoors; 0.35 m/s max means we do not need tiny race-car energy.
-4. Battery chemistry and pack format: LiFePO4 for safety and cycle life, Li-ion for compactness, RC LiPo only if we commit to careful charging/storage practices.
+3. Whether the #4867 pair meets rug/threshold and carpet skid-turn requirements at <=0.45 A steady per motor with measured loaded mass.
+4. Whether the BLF-1203AB completes the 45-minute mixed-use test with 20% measured energy reserve and <=5.6 A sustained pack current; otherwise revisit the larger BLF-1206A and body-height trade.
 5. Whether the first rolling chassis needs 2D LiDAR from day one or only a reserved top mount.
 
 ## Notes

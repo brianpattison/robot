@@ -48,16 +48,22 @@ temp/
 
 # CAD generated exports
 cad/exports/
+/result.json
 *.FCStd1
 *.brep
 
 # OpenSCAD generated/intermediate files
 *.stl
 *.3mf
+!cad/bambu/*.3mf
 *.obj
 *.off
 *.csg
 *.dxf
+
+# Blender project and fast-iteration preview output
+*.blend
+cad/blender/hero_preview.png
 
 # Keep source CAD files tracked
 !cad/**/*.scad

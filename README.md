@@ -6,7 +6,7 @@ The design goal is pet-like presence without overcomplicating the first build. T
 
 ## Current Status
 
-This repo is at the planning and early tooling stage. Start with the docs index:
+This repo is at the planning and parametric CAD-prototype stage. Start with the docs index:
 
 - Documentation index: [`docs/README.md`](docs/README.md)
 - MVP PRD: [`docs/mvp-prd.md`](docs/mvp-prd.md)
@@ -14,9 +14,13 @@ This repo is at the planning and early tooling stage. Start with the docs index:
 - MVP architecture: [`docs/mvp-architecture.md`](docs/mvp-architecture.md)
 - BOM v0: [`docs/bom-v0.md`](docs/bom-v0.md)
 - CAD mechanical plan: [`docs/cad-mechanical-plan.md`](docs/cad-mechanical-plan.md)
-- CAD v0 body concept and renders: [`docs/cad-v0-body.md`](docs/cad-v0-body.md)
+- CAD v1 body and renders: [`docs/cad-v1-body.md`](docs/cad-v1-body.md)
+- CAD component/release coverage: [`docs/cad-component-coverage.md`](docs/cad-component-coverage.md)
+- CAD calibration coupons: [`docs/cad-coupons.md`](docs/cad-coupons.md)
 - Python CAD tooling notes: [`cad/python/README.md`](cad/python/README.md)
-- Blender concept pass notes: [`cad/blender/README.md`](cad/blender/README.md)
+- Bambu Studio P1S project: [`cad/bambu/README.md`](cad/bambu/README.md)
+- Illustrated assembly guide: [`output/pdf/codex_robot_body_v1_assembly_guide.pdf`](output/pdf/codex_robot_body_v1_assembly_guide.pdf)
+- Assembly-guide generator: [`docs/generate_assembly_guide.py`](docs/generate_assembly_guide.py)
 
 ## MVP Direction
 
@@ -41,14 +45,23 @@ The body is designed around 3D-printable, modular parts:
 - Base tray.
 - Sensor pods.
 - Bumper carrier.
+- Tray-fixed bumper-switch plates and switch-body pockets.
 - Battery cradle.
 - Wheel guards.
 - Camera/head shell.
 - Service panels.
 
-OpenSCAD is the default first-pass CAD tool for simple parametric printable parts. `build123d` and CadQuery are approved for Python-based CAD when parts need nicer geometry, fillets, chamfers, STEP exports, or richer assemblies. Blender is used for fast visual concept iteration before translating final surfaces back into print-ready CAD.
+The current body is implemented in `build123d` because the rounded shell,
+service interfaces, STEP exports, and collision-checked assembly benefit from
+Python BREP geometry. OpenSCAD remains approved for simple parametric parts.
+Blender renders the generated STL inventory for concept, fit, split, and print
+review, including the fixed-plate versus compliant-TPU bumper interface; it is
+not a second source of body geometry.
 
 Generated mesh/solid exports should go under `cad/exports/` and are ignored by Git by default.
+The settled print target is a Bambu Lab P1S with a 0.4 mm nozzle. The tracked
+multi-plate Bambu Studio project is regenerated from the canonical exports in
+`cad/bambu/`; it is the intentional exception to the generated-mesh ignore rule.
 
 ## Python CAD Setup
 
@@ -69,36 +82,44 @@ python -m pip install -r cad/python/requirements.txt
 ```text
 .
 |-- cad/
-|   |-- blender/
+|   |-- bambu/
 |   |   |-- README.md
-|   |   `-- concept_body_blender.py
-|   |-- openscad/
-|   |   |-- robot_params.scad
-|   |   |-- codex_body_assembly.scad
-|   |   `-- ...
+|   |   |-- generate_bambu_project.py
+|   |   |-- codex_robot_body_v1_p1s.3mf
+|   |   `-- codex_robot_body_v1_p1s_plates.json
+|   |-- blender/
+|   |   |-- render_robot_body.py
+|   |   |-- render_print_ready.py
+|   |   |-- render_coupons.py
+|   |   `-- render_alignment_pilot.py
 |   `-- python/
 |       |-- README.md
-|       `-- requirements.txt
+|       |-- requirements.txt
+|       |-- robot_body.py
+|       |-- robot_body_split.py
+|       |-- robot_body_print.py
+|       |-- robot_body_coupons.py
+|       `-- validate_robot_body.py
 |-- docs/
 |   |-- README.md
 |   |-- bom-v0.md
-|   |-- cad-v0-body.md
+|   |-- cad-v1-body.md
+|   |-- cad-component-coverage.md
+|   |-- cad-coupons.md
 |   |-- images/
 |   |-- cad-mechanical-plan.md
 |   |-- decision-log.md
 |   |-- mvp-architecture.md
 |   `-- mvp-prd.md
-|-- scripts/
-|   |-- compose_blender_concept_previews.py
-|   `-- render_cad_v0_previews.py
 |-- .gitignore
 `-- README.md
 ```
 
 ## Next Steps
 
-1. Confirm printer model/build volume and first operating area in the house.
+1. Print and measure the P1S calibration coupons before committing to large body parts.
 2. Buy the bench-brain and safety-prototype batch from [`docs/bom-v0.md`](docs/bom-v0.md).
-3. Fit-check the v0 OpenSCAD body concept and split-print variants in [`docs/cad-v0-body.md`](docs/cad-v0-body.md).
-4. Replace generic motor, bumper switch, caster, E-stop, and battery placeholders with measured real parts.
-5. Build the stationary bench brain before powering any drive motors.
+3. Print and measure the seventeen-part calibration suite, including the 6807 pan-bearing seat/journal block, exact three-piece split-pilot, three-piece tray/PETG/TPU bumper-interface, two-piece flush-fairing recess test, and production-derived distribution-board fit gauge, before any large chassis part or PCB order.
+4. Purchase and bench-check one Pololu #4867 motor plus one BLF-1203AB/BPC-1502DC/EN2 charge set, then the selected Hitec head hardware, IDEC XW1E E-stop, two Omron D2HW bumper switches, both Pololu regulators, the E-Switch PVB3F230SS311 physical-mute switch, and one Switchcraft 35RASMT5CHNTRX service jack. Print the distribution cover and exact one-piece 40 x 21 mm board/hardware gauge, then trial-assemble them on the deck before ordering the four-holder Nano2/Micro-Fit PCB. Qualify fit, current, runtime, charger inhibit, fusing/crimps/selective faults/thermal behavior, and safety/privacy/service interfaces before buying the remaining mobility/safety set or powering both motors.
+5. Print representative harness, seam, motor-pod, idler, camera, vent, and acoustic parts before a full shell.
+6. Build the stationary bench brain and deterministic safety loop before powering drive motors.

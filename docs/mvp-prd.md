@@ -120,7 +120,7 @@ Dog-like behavior comes from motion language:
 | Motor controller | Dedicated microcontroller or motor HAT with current limiting | Keeps motor timing/safety independent from Linux. |
 | Proximity safety | Front/side ToF sensors plus physical bumper switches | Monocular camera alone is not enough for safe indoor roaming. |
 | Optional navigation sensor | 2D LiDAR or depth sensor | Strongly recommended if autonomous mapping/room-to-room navigation becomes flaky. |
-| Battery | Removable 3S/4S Li-ion pack with fused power path and buck regulators | Separate clean power rails for motors and compute. |
+| Battery | Prototype Bioenno BLF-1203AB 12 V/3 Ah LiFePO4 pack with fused feeder, separate buck rails, and matched charger | The flat documented candidate fits the body; physical current/runtime/BMS/thermal qualification remains mandatory. |
 | Kill switch | Latching physical E-stop cutting motor power | Non-negotiable. Tiny robot, big responsibility. |
 | Printed body | Modular FDM-printed chassis, head, trays, and mounts | Lets us iterate shape and serviceability quickly before finalizing the body. |
 | CAD source | OpenSCAD, `build123d`, and CadQuery parametric models | Keeps the robot body reproducible, adjustable, and code-reviewable. |
@@ -154,16 +154,24 @@ The safety controller and navigation layer must be able to reject or clamp any c
 5. As Brian, I can press a physical E-stop and motor power is cut immediately.
 6. As a visitor, I can tell from lights/sound whether the robot is listening, moving, muted, or stopped.
 7. As a developer, I can open a local dashboard, see state/logs/map/camera preview, and manually drive at capped speed.
+8. As a developer, I can connect a labeled 3.3 V UART service adapter while motor power is physically isolated, inspect local diagnostics, and disconnect it without causing motion or exposing a power output.
 
 ## 11. Functional Requirements
 
 ### Conversation
 
 - Wake word activates listening.
-- Physical mute disables microphone capture for conversation.
+- The maintained physical mute removes microphone VBUS locally, visibly indicates MUTE, and reports a conditioned state input even when conversation software or the network is unavailable; release requires proving no USB backfeed or residual capture.
 - Robot supports barge-in: speaking can be interrupted by "stop," "wait," or wake word.
 - Robot must respond verbally within 2 seconds for simple local acknowledgements.
 - If cloud AI is unavailable, robot still supports local stop, mute, battery status, and simple scripted replies.
+
+### Service And Diagnostics
+
+- The rear service jack exposes protected 3.3 V UART TX/RX, a biased service-detect input, and ground only.
+- Service mode requires physical motor-branch isolation; service detect can inhibit motion but cannot enable it or bypass any deterministic stop path.
+- Plug insertion, removal, partial insertion, and conductor shorts must not damage either side, energize the robot through the adapter, or trigger automatic motion restart.
+- The adapter and robot pinout must be durably labeled, and RS-232-level or power-sourcing adapters are prohibited.
 
 ### Motion
 
@@ -210,6 +218,8 @@ The safety controller and navigation layer must be able to reject or clamp any c
 - Bumper switches trigger immediate stop before software interpretation.
 - Robot starts in stopped mode after boot.
 - Robot requires explicit enable before movement.
+- Inserting the charge plug inhibits motor power through the deterministic safety path; unplugging it never restarts motion without explicit reset.
+- Four accessory branches are separately fused on a covered, latched-harness distribution PCB; exact fuse values follow measured loads, conductor ampacity, and selective-fault tests, while the motor branch remains separately source-fused and contactor-cut.
 - Robot emits a short audible/visible cue before moving from rest.
 - Robot avoids sleeping areas and bathrooms by default unless manually enabled.
 
@@ -221,6 +231,7 @@ The safety controller and navigation layer must be able to reject or clamp any c
 - Follow success: 5 continuous minutes in uncluttered indoor space without collision.
 - Emergency stop latency: motor power cut in under 100 ms from button press.
 - Bumper reaction: motor stop in under 100 ms from bumper trigger.
+- Bumper fault reaction: opening any normally-closed bumper circuit, including a simulated broken wire, prevents or stops motor drive in under 100 ms and requires explicit re-enable after repair/release.
 - Conversation acknowledgement: local command acknowledgement in under 2 seconds.
 - Battery runtime: at least 45 minutes of mixed idle/conversation/roaming.
 
@@ -231,7 +242,7 @@ The MVP is done when:
 1. Robot boots into stopped safe mode.
 2. Dashboard connects over local network and shows camera, battery, sensors, logs, and state.
 3. Manual drive works at capped speed.
-4. E-stop, bumper, watchdog, and low-battery stop all work.
+4. E-stop, all six normally-closed bumper zones, simulated bumper-wire break, watchdog, and low-battery stop all work and require explicit safe re-enable where applicable.
 5. Robot can map or be given a simple map of one floor area.
 6. Robot can navigate between at least three named points on the same floor.
 7. Voice commands work for stop, come here, follow me, wait, go home, mute status, and battery status.
@@ -281,16 +292,17 @@ The MVP is done when:
 | Rich conversation depends on network/cloud availability | Keep local stop, wait, mute, battery status, and basic scripted replies working without cloud AI. |
 | Future AI HAT+ 2 integration could force mechanical or power changes | Reserve physical clearance, cooling airflow, and power budget for a future HAT without making it part of MVP. |
 | Motor noise hurts voice recognition | Isolate mic mechanically, place it high, use echo cancellation, slow/stop during critical listening. |
-| Battery brownouts reset Pi | Separate motor and compute rails, fused pack, proper buck converters, brownout logging. |
+| Battery brownouts reset Pi | Separate motor and compute rails, fused pack, proper buck converters, brownout logging, and test the BLF-1203AB candidate at full and low charge under loaded turns. |
+| Charging while mobile energizes an unsafe state | Use a charge-only keyed EN2 inlet with protected charger-present detection, deterministic motor inhibit, explicit reset after removal, and AC-off mating/unmating. |
 | Robot feels creepy instead of companionable | Clear LEDs, physical mute, no silent recording, gentle motion cues, no surprise roaming. |
+| Service connector creates a new power or motion hazard | Expose only protected 3.3 V UART/detect/ground, require a labeled USB-powered adapter and physical motor isolation, test mating shorts, and prohibit automatic restart. |
 | Over-ambitious autonomy delays first joy | Build personality and voice early; keep movement behaviors simple and safe. |
 
 ## 17. Open Decisions
 
-- Printer type, build volume, nozzle size, material options, and whether threaded inserts are available.
-- Which newer Python version to install for CAD tooling; current system `python3` is 3.9.6, while `build123d` currently requires Python 3.10+.
-- Whether `build123d` and CadQuery are installed locally and which export/preview workflow we want to standardize for each CAD path.
-- Final body size and wheel diameter based on home flooring, rug thresholds, and desired battery size.
+- Physical qualification of the BLF-1203AB/BPC-1502DC/EN2 prototype set and electrical release of the custom Nano2/Micro-Fit branch board: copper, feeder/branch fuse values, contacts/wires/crimps, selective clearing, and thermal behavior.
+- Final insert, clearance, bearing, lap, wall, bumper, fairing, and pilot parameters plus distribution deck/cover preflight after printing and measuring the 17-part coupon suite.
+- Delivered-hardware fit and loaded-floor results for the settled body, wheel, motor, bearing, and head-mechanism dimensions.
 - Whether MVP includes 2D LiDAR from day one or waits until camera/proximity testing proves insufficient.
 - Exact local/cloud AI split for conversation.
 - Whether voice should run mostly local, cloud-assisted, or hybrid.
