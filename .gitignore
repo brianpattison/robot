@@ -54,12 +54,14 @@ cad/exports/
 # OpenSCAD generated/intermediate files
 *.stl
 *.3mf
+!cad/bambu/*.3mf
 *.obj
 *.off
 *.csg
 *.dxf
 
-# Blender fast-iteration preview output (see scripts/render_hero.py)
+# Blender project and fast-iteration preview output
+*.blend
 cad/blender/hero_preview.png
 
 # Keep source CAD files tracked

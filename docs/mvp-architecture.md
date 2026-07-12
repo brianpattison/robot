@@ -36,6 +36,15 @@ This layer owns immediate motor shutdown and hard limits. It should continue to 
 - Local command router for urgent commands such as `stop`, `wait`, `mute`, `unmute`, and `status`.
 - Health monitor for battery, CPU temperature, service state, network, camera, mic, speaker, sensors, and motor faults.
 
+### Local Service Interface
+
+- Rear-center Switchcraft 35RASMT5CHNTRX four-conductor jack on a protected 3.3 V UART PCB.
+- Tip is robot TX, ring 1 is robot RX, ring 2 is `SERVICE_DETECT`, and sleeve is ground.
+- Use only a labeled, USB-powered 3.3 V UART adapter. The port exposes no raw battery, 5 V output, motor enable, safety bypass, audio, or RS-232 levels.
+- Series resistance, ESD protection, defined detect biasing, connector-mating tests, and an explicit service-session reset are required.
+
+`SERVICE_DETECT` may request motion inhibit, but it cannot authorize motion or replace the E-stop, bumpers, watchdog, or motor-power isolation. Service begins with the motor branch physically isolated, and disconnecting the adapter must never restart motion automatically.
+
 ### Perception Layer
 
 - Camera capture and optional preview stream.
@@ -54,6 +63,7 @@ Perception produces structured facts such as `person_seen`, `selected_user_track
 - Codex/ChatGPT bridge for richer conversation and high-level decisions.
 - Text-to-speech output with barge-in support.
 - Conversation state, preferences, and memory hooks.
+- Maintained E-Switch PVB3F230SS311 physical mute in the rear-right service cartridge. Its SPDT common receives fused microphone 5 V; LISTEN powers microphone VBUS, while MUTE removes VBUS and drives the red ring plus a protected local state input. This hardware state must work and remain visible without the conversation process or network.
 
 Simple acknowledgements such as "stopping," "muted," "battery is low," or "I need help" should be available locally even when cloud conversation is unavailable.
 
@@ -157,6 +167,51 @@ If STT, network, or Codex fails, the robot should still handle local `stop`, `mu
 7. Safety controller stops on bumper, E-stop, watchdog timeout, overcurrent, or invalid command stream.
 8. If confidence drops, the robot stops, looks/speaks, and asks for help.
 
+The six bumper inputs should use normally-closed circuits. Any open circuit,
+including a pressed switch, disconnected plug, or broken wire, is a latched
+stop/fault until the safety controller observes a valid released loop and the
+operator explicitly re-enables motion. Do not infer bumper safety from Linux
+process health or the LLM.
+
+The motor branch's mechanical cutoff baseline is a normally-open Albright SW60
+contactor. The Pi and safety controller remain on individually fused upstream
+branches so they can report a stop; only the motor-driver positive branch passes
+through the contactor. Both IDEC direct-opening NC channels must be in the
+low-current, fail-deenergized coil-enable path, with a hardware reset latch so
+releasing the mushroom cannot restart motion. Exact coil variant, suppression,
+dropout time, fusing, conductor sizing, weld detection, and full-charge
+LiFePO4 motor-voltage limiting require electrical-engineering review and bench
+tests. The E-stop never carries motor current directly.
+
+The rolling-prototype mobile-power baseline coordinates the lower-current
+Pololu #4867 motors with one Bioenno BLF-1203AB 12 V/3 Ah LiFePO4 pack and its
+matched BPC-1502DC 14.6 V/2 A charger. The rear Switchcraft EN2 inlet is
+charge-only: two contacts go only to the pack's isolated charge lead and the
+third reports protected `CHARGER_PRESENT`. It exposes no battery output and is
+not a disconnect. Charger insertion must de-energize motor enable/SW60 through
+the deterministic safety path; removal must not restart motion without an
+explicit reset. Because EN2 is not rated for current interruption, remove
+charger AC before mating or unmating. The candidate remains blocked on
+delivered-part evidence/fit, custom distribution PCB and fuse release,
+polarity/strain relief, <=5.6 A sustained pack current, 45-minute runtime with
+20% reserve, BMS/regen/thermal behavior, and full/low-charge loaded floor tests.
+
+Accessory distribution now has a mechanical baseline: a custom 40 x 21 mm PCB
+with four Littelfuse 01550900M replaceable Nano2 holders and a latched ten-pin
+Molex Micro-Fit harness. One source positive/return pair feeds four separately
+fused positive/return branches. The board is limited provisionally to 6 A total
+and 5 A on any branch, mounts on stacked metal M2 standoffs, and sits beneath a
+removable printed touch cover with a separately strapped first cable bend.
+Exact fuse values remain unset until measured startup/transient/fault loads and
+time-current curves are reviewed. A battery-near accessory feeder fuse is still
+required; the branch board must not provide any path around the independently
+fused and contactor-cut motor branch.
+
+The calibration suite includes a nonfunctional production-derived PETG gauge
+for the complete onboard PCB/holder/fuse/header envelope. Use it with the real
+deck, M2 stacking standoffs, and production cover to reject mechanical fit
+before PCB fabrication; it does not satisfy any electrical release gate.
+
 MVP navigation should start with one-room or prepared-area behavior before full floor roaming. The body should reserve space and power for future 2D LiDAR, but camera + ToF + bumpers are enough for the first bench and supervised rolling tests.
 
 ## Dashboard
@@ -220,6 +275,9 @@ Boot behavior:
 4. Manual movement requires explicit enable.
 5. Autonomous movement requires explicit mode selection and all safety checks passing.
 
+Boot validation must reject motion if any normally-closed bumper loop is open,
+shorted into an implausible state, stale, or untested after controller reset.
+
 ## MVP Boundary
 
 ### Required For MVP
@@ -267,4 +325,4 @@ Boot behavior:
 - What is the preferred TTS voice and speaker loudness target?
 - How should Codex memory for the body be stored, synced, and privacy-scoped?
 - What local-only commands should work even with no internet?
-- What battery chemistry, charger, and fuse layout best balance runtime, safety, and serviceability?
+- Which exact source/branch fuse values, PCB copper/via geometry, Micro-Fit contacts and wire gauges pass the measured-load, selective-short, crimp-pull, and thermal review?
