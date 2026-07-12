@@ -9,7 +9,7 @@ from datetime import date
 from pathlib import Path
 
 from PIL import Image
-from reportlab.lib.colors import Color, HexColor, white
+from reportlab.lib.colors import HexColor, white
 from reportlab.lib.pagesizes import landscape, letter
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfbase.pdfmetrics import stringWidth

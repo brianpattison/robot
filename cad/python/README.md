@@ -190,10 +190,11 @@ See [`cad/bambu/README.md`](../bambu/README.md) and the generated plate manifest
 for the exact filament groups and per-plate process recommendations.
 
 After regenerating the CAD manifests and Blender review images, build the
-illustrated assembly guide with the bundled document runtime:
+illustrated assembly guide with the project CAD environment. The requirements
+file installs its Pillow and ReportLab dependencies:
 
 ```bash
-/Users/brian/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 docs/generate_assembly_guide.py
+.venv-cad/bin/python docs/generate_assembly_guide.py
 ```
 
 The result is `output/pdf/codex_robot_body_v1_assembly_guide.pdf`. Render and

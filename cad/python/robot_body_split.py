@@ -1,10 +1,11 @@
 """Printer-aware split variants for the build123d robot body.
 
-The default variant targets a nominal 220 mm square bed with a 5 mm safety
-margin. Large body parts are clipped into the same inventory used by the main
-assembly, then small printed bridge plates are exported for screw-together
-seams. The bridges are not safety-critical load paths; the real battery,
-motor, axle, and E-stop loads still require hardware-backed retention.
+The default variant targets the Bambu Lab P1S's nominal 256 mm square bed with
+an 8 mm safety margin. Large body parts are clipped into the same inventory
+used by the main assembly and remain compatible with a 220 mm bed when that
+size is selected explicitly. Small printed bridge plates are exported for
+screw-together seams. The bridges are not safety-critical load paths; the real
+battery, motor, axle, and E-stop loads still require hardware-backed retention.
 """
 
 from __future__ import annotations

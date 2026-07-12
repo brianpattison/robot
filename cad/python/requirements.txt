@@ -1,4 +1,6 @@
 build123d
 cadquery
 Pillow
+reportlab
+# CadQuery's cadquery-ocp backend requires VTK; keep it explicit for reproducible setup.
 vtk
