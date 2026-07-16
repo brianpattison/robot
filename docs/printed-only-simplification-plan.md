@@ -431,10 +431,23 @@ and then thrown that detailing away. Revised order:
    placements x4, a battery-stop clip, the pod printing on its axle
    tip, the solid Pi shelf and floating MDDS10 plate as unprintable
    ceilings, and a mispositioned head cavity), and gained a solid-free
-   thermal check plus a ring-aware bridge heuristic along the way. Four
-   ESTIMATE envelopes (neck_drop, head_roof, pi_port_svc,
-   pico_swd_svc) and six owed part merges remain the tracked gate
-   blockers.
+   thermal check plus a ring-aware bridge heuristic along the way. Update (same day, second slice): the four
+   remaining estimates are eliminated (neck_drop now derives from the
+   verified pan_servo_fit bbox; head_roof became the computed pan-sweep
+   of the v2 head; the Pi/Pico service volumes are declared cable/tool
+   specs), all six owed part merges are executed (the registry sits at
+   exactly 40 parts with zero owed — the E-stop backing collar is now a
+   lid-integrated boss in geometry), and the D026 fastener system is
+   live: a FASTENER spec + nine-family JOINTS registry (30 screws + 30
+   inserts total, all M3 x 8 into M3 x 5.7 inserts), every joint
+   holding the 3.0-3.4 mm clamp stack, with modeled bosses, counterbores,
+   and insert bores across the tray, shell, lid, towers, saddles,
+   plinth, pods, rails, plus the motor-cap and battery-clamp solids
+   (20 solids total). Validator PASSES IN GATE MODE on the encoded
+   conditions (zero estimates, zero unmodeled joints). Still to encode
+   before D027 can actually close: harness route volumes, connector
+   insertion sweeps, real-mass CG acceptance, and a fresh external
+   review round.
 3. **Fastener-system pass on v2.** Collapse `Params` to the single
    insert/screw spec; add the clamp-stack (3.0-3.4 mm) and
    engagement-limit validator checks; implement capture-or-M3 mounts for
