@@ -403,3 +403,196 @@ Rationale:
 - The custom rear UART PCB and jack are omitted. The center rear cartridge is blank; internal service requires shutdown or physical motor-branch isolation.
 - Carry handles and custom clamp plates are omitted. Lift only the unpowered robot with two hands under the tray until a complete retail lifting interface is separately selected and qualified.
 - D024 supersedes the production instructions in D018, D021, and D023 without deleting their historical rationale. Any generated manifest, image, Bambu project, or assembly-guide language that still names those interfaces is stale until regenerated from the retail-only source.
+
+## D025: Printed-Only Structural Hardware
+
+Status: accepted 2026-07-16; per-subsystem physical release gates apply
+
+No purchased metal structure remains in the body: no brackets, standoffs,
+spacers, shoulder bolts, bearings, hubs, washers, or locknuts. Structure is
+printed PETG/TPU plus heat-set inserts and screws (see D026). Electronics,
+motors, servos, switches, the battery, and hardware that ships attached to a
+purchased component (E-stop nut, relay integral bracket, servo horns and horn
+screws, connector nuts) remain purchased. Details and per-subsystem test
+gates: [`printed-only-simplification-plan.md`](printed-only-simplification-plan.md).
+
+Rationale:
+
+- Replacements: tray-integrated motor saddles with bolted clamp caps plus the
+  motor's own tapped M3 face holes (supersedes #1569 brackets as retention);
+  wheel cores with integrated calibrated 4 mm D-bores plus one radial clamp
+  screw (supersedes #1997 hubs); printed stub axles with replaceable printed
+  bushings for the passive front wheels (supersedes the WDS shoulder-bolt /
+  608 / goBILDA stack); greased printed pan journal with a bayonet collar and
+  a printed tilt shoulder bushing (supersedes 6807-2RS, MF84ZZ, and the
+  92981A143 shoulder screw); printed towers and pocket-peg-clamp PCB cradles
+  (supersede all metal standoffs/spacers); printed saddle/pocket captures for
+  the Blue Sea 5045 and Panasonic relay; printed PETG clamp bar with printed
+  TPU pads for battery retention (supersedes textile straps).
+- Torque and shear always pass through printed geometry (D-bores, keys,
+  tongues, pockets); screws only clamp. No plastic thread or friction fit
+  retains an axle — retention screws thread into metal inserts.
+- Release gates before powered motion: D-bore coupon holds 2x the 11 kg-cm
+  extrapolated stall torque without creep or slip; clamp-cap retention
+  shake/pull test; loaded skid-turn axle wear test; battery clamp inverted
+  shake and tilt-drop test; pan journal wear/current-rise cycle test.
+- Fallback geometry is preserved, with precise strength (amended 2026-07-16
+  across two reviews): the wheel core keeps the #1997 four-hole pattern and
+  hub recess (true drop-in); the motor saddles keep the #1569 bracket's
+  FULL installation envelope — 49 x 22 base, three M3 tray stations, 3 mm
+  spacer stack, and tool access — as a registered fit volume, not just the
+  holes (true drop-in); the battery bay keeps strap channels (true
+  drop-in). The idler bushing cavity matches the 608 envelope, but a 608
+  there rides the printed axle — it does not restore the WDS shoulder-bolt
+  stack. The head pan journal has no drop-in fallback; reverting to the
+  6807 requires reprinting the neck carrier/journal parts from a parametric
+  switch kept in the source.
+- D024's quantity-one US retail sourcing rule still governs everything that
+  is purchased; this decision narrows what is purchased.
+- Supersedes the metal-retention language in D011 (bracket/hub as primary
+  retention), D012 (bearing-supported pan axis), and D024's shoulder-bolt
+  idler stack. Any manifest, image, or guide naming those interfaces is stale
+  until regenerated.
+
+## D026: Single Fastener SKU
+
+Status: accepted 2026-07-16; scope wording amended same day after review
+
+The only separately purchased body-fastener SKUs are M3 x 5.7 mm x 4.6 mm OD
+heat-set inserts and M3 x 8 mm socket head cap screws — one 100-pack of
+each, one 2.5 mm hex key. Hardware bundled with purchased components (servo
+horn screws, switch/connector nuts, the relay's bracket hardware) is exempt,
+keeps its own model parameters, and requires no separate purchase. The
+validator rule is "no separately-purchased fastener other than the two
+SKUs," not "zero non-M3 references."
+
+Rationale:
+
+- The insert OD matches the existing `insert_hole_m3 = 4.6` parameter, so M3
+  insert coupon calibration carries over.
+- A validator-enforced clamp-stack rule (every screw path presents
+  3.0-3.4 mm of clamped material via counterbores) makes the single 8 mm
+  length work everywhere; an engagement-limit rule locally thickens flanges
+  where screws enter parts with limited thread depth (Pololu #4867 face
+  holes, verified against the drawing).
+- PCBs with sub-M3 mounting holes (Pi 5, Pico 2, regulators, amps, ToF,
+  NeoPixel, camera) are captured by printed pockets, locating pegs, and
+  clamp bars instead of screwed through their holes; the MDDS10's 3 mm holes
+  may take direct M3 screws.
+- Printed PETG washers are used wherever a screw head would bear on TPU.
+- Hardware bundled with purchased components is exempt and requires no
+  separate purchase.
+- Supersedes the M2/M2.5/M3/M4/M6 mixed-fastener baseline and the
+  M2.5/M3/M4 insert kit in the BOM.
+
+## D027: One-Piece 238 x 220 Body Footprint
+
+Status: accepted as direction 2026-07-16; appearance deltas approved by
+Brian the same day; the packing gate is OPEN. Three same-day review rounds
+invalidated the first three box layouts; the current box screen (layout
+v5, on verified model datums) closes with a 2 mm margin policy including
+wall margins, but the gate requires the v2 BREP packing model plus a
+passing inventory-driven production validator before any detailing builds
+on the footprint.
+
+The body shrinks from 300 x 220 to 238 x 220 and grows to 133 mm body
+height (computed on verified datums, see below) so the shell, tray, and
+lid each print as one piece on the P1S (240 mm usable with the 8 mm edge
+reserve). The 57-part split contract, nine backing plates, 18 pilots, and
+lap-lid joinery are deleted rather than simplified. The TPU bumper becomes
+two C-halves joined at the side switch plates with printed dovetail laps.
+Fairings merge into the shell as sculpted surface; the three rear
+cartridges collapse to one rear panel; the vent inlay becomes a snap-in.
+
+Rationale:
+
+- Review round 1 (2026-07-16): the first study hardcoded reduced envelopes
+  and omitted the E-stop's 66 mm panel/backing, the 28 mm battery-lead
+  corridor, the AI-HAT reserve, Pi connector service, and keepout-keepout
+  collisions, and its rotated MDDS10 kept an impossible front-facing
+  terminal corridor. Its FEASIBLE result was withdrawn.
+- Review round 2 (same day): layout v3 was also rejected, correctly — the
+  mute switch needs 42 mm (26 body + 16 terminals), the fuse block's 22 mm
+  wire service was absent, the MDDS10's 10 mm airflow contract was
+  violated by 5.8 mm, the AI-HAT reserve is 96 x 74 x 22 (not 85 x 60 x
+  18), incidental 0.1-1 mm clearances were rejected, and the battery riser
+  was unmodeled. A new wheel-envelope check also pulled the axles in to
+  ±74 (148 mm wheelbase).
+- Review round 3 (same day): layout v4's datums were wrong, verified
+  against the model: the tray top is Z=49 (`body_bottom`), the MDDS10
+  thermal ceiling is 86.275 (`motor_controller_plate_top_z()` chain; the
+  old formula also double-counted the PCB), the pan-servo drop bottom is
+  131.6 (`pan_servo_fit` bounding box), and the deck plate is 102..106.
+  Round 3 also added the D24V90F5's two terminal corridors, the D36V50F6's
+  west-facing wire corridor, the full-height fuse wire corridor, the
+  relay's full 52 x 22 bracket + body/terminal volume, and three policy
+  fixes (overlap never waivable, exact-name allowlist, wall margins).
+- Layout v5 (`cad/python/packing_study_printed_only.py`) closes with zero
+  violations and no margin under 2 mm: body 238 x 220 x 133, where +12 mm
+  is computed (thermal ceiling 86.275 + 4 shelf + 28 Pi + 22 HAT + 3
+  margin = 143.275 required drop bottom vs the v1-derived 131.6) after
+  offset-shelf alternatives failed at box level; MDDS10 terminals north;
+  Pi shelf at the thermal ceiling with the full HAT reserve above and Pico
+  on a NW wing; fuse block owning the deck's south half with a full-height
+  wire corridor; E-stop at (55, 52) dropping entirely above the 102..106
+  deck plate; EN2/mute swapped (charge north, mute south at full depth);
+  battery riser through a deck notch; relay on the floor at X -46..6 with
+  its complete envelope; regulators under the deck with all corridors;
+  mic (60, -25); vent south strip; speakers on the FORWARD side walls with
+  a 6 mm arch web. Rough CG X~7. The stacked 28+22 Pi/HAT band is
+  deliberately conservative; BREP with the real HAT drawing may recover
+  ~10 mm of height.
+- Brian approved the appearance direction (off-center E-stop, offset mic,
+  smaller vent, forward side-firing speakers, taller body, swapped rear
+  connectors) on 2026-07-16; the height was subsequently revised 144 ->
+  133 by the round-3 datum fix, within the approved direction.
+- Review round 4 (same day) reproduced v5, verified the datums, and
+  green-lit Phase 2 with four carry-in requirements (Pico USB/SWD
+  corridors — fixed at box level in v5.1 by relocating the Pico to the
+  floor NE quadrant; battery padding/clamp modeled; relay as three exact
+  volumes; AI-HAT height recovery only as a BREP-discovered bonus). The
+  gate itself stays open until the v2 model passes the inventory-driven
+  validator.
+- Fallback remains Option B (300 x 220 with integrated-flange half-splits)
+  if BREP detailing breaks the box-model margins.
+
+## D028: Part-Count Budget And Support-Free Printing
+
+Status: accepted 2026-07-16 as v2 design requirements; enforcement lands
+with the Phase-2 inventory-driven validator
+
+The v2 printed inventory has a hard budget of 40 parts for the complete
+robot (body + head + TPU tires, excluding calibration coupons and
+explicitly optional cosmetics), and a zero-support target: every part
+declares a print orientation, passes an overhang audit (no downward face
+beyond 50 degrees from vertical outside allowlisted convex-rollover
+regions) and a bridge-span audit in that orientation, and the
+support-exception list starts empty — any entry requires a named reason
+and sign-off. Details and the merge list:
+[`printed-only-simplification-plan.md`](printed-only-simplification-plan.md).
+
+Rationale:
+
+- Brian's directive: badly wants fewer parts and easier printing with
+  fewer supports; these become requirements the validator enforces, not
+  aspirations a layout drifts away from.
+- v1 baseline: 101 printed parts on 26 plates, with the shell quadrants
+  and head shells requiring build-plate supports per the print manifest's
+  own guidance. The v2 one-piece footprint already deletes the split
+  system; D028 pushes integration further (switch pockets into the tray,
+  harness rails into the deck, ToF pods into fascia/shell, pod shrouds
+  into the shell, one controller-tower part, optional vent inlay and trim
+  rings) toward ~36-42 parts.
+- Every separately printed part must justify its existence: service
+  access, material/color change, orientation conflict, calibration
+  interface, or wear-part replaceability.
+- Support-free design rules: up-opening troughs for motor saddles;
+  upright shell with the convex rollover as an allowlisted dome-like
+  region and chamfered/arched opening tops; cosmetic-face-down flat
+  parts; 45-degree gussets under interior shelves; teardrops or
+  vertical-axis redesigns for holes over 8 mm; open-section TPU; bridges
+  capped at 30 mm; insert bosses biased vertical.
+- Integration risk accepted deliberately: molding the bumper-switch
+  pockets into the tray commits the coupon-calibrated 0.4/2.0/2.4 mm
+  interface to the tray print; the recovery path if a printed tray still
+  misses is a shim plate, not a tray reprint policy.
