@@ -375,7 +375,7 @@ def build_head_shell():
     # cap (crown reaching the original cavity rear), so the interior closes
     # by converging perimeters when printed face-down.
     cav_d, cav_w, cav_h = P.head_depth - 5 - 14, P.head_width - 5, P.head_height - 5
-    cavity = rounded_slab(cav_d, cav_w, cav_h, 25.5, z0 + 2.5)
+    cavity = rounded_slab(cav_d, cav_w, cav_h, 15.5, z0 + 2.5)
     cavity = Pos(-7.0, 0, 0) * cavity                      # main box spans X -33.5..19.5
     cavity = fillet(cavity.edges().group_by(Axis.Z)[-1], 12.5)
     cavity = fillet(cavity.edges().group_by(Axis.Z)[0], 7.5)
@@ -386,8 +386,9 @@ def build_head_shell():
     cavity += rear_cap
     shell = cap - cavity
     shell = Pos(HEAD_C[0], 0, 0) * shell
-    # Front opening for the faceplate assembly.
-    shell -= Pos(HEAD_C[0] - P.head_depth / 2 + 3, 0, HEAD_C[2]) * Box(8, 120, 56)
+    # Faceplate seating recess and the through-opening behind it.
+    shell -= Pos(HEAD_C[0] - P.head_depth / 2 + 1.5, 0, HEAD_C[2]) * Box(3.1, 120.6, 56.6)
+    shell -= Pos(HEAD_C[0] - P.head_depth / 2 + 4, 0, HEAD_C[2]) * Box(8, 110, 48)
     # Underside pan-plate opening.
     shell -= Pos(HEAD_C[0], 0, z0 + 1.5) * Box(44, 76, 8)
     return shell
@@ -395,7 +396,7 @@ def build_head_shell():
 
 def build_head_faceplate():
     x0 = HEAD_C[0] - P.head_depth / 2
-    plate = Pos(x0 + 1.5, 0, HEAD_C[2]) * Box(3, P.head_faceplate_width, P.head_faceplate_height)
+    plate = Pos(x0 + 1.45, 0, HEAD_C[2]) * Box(2.9, P.head_faceplate_width, P.head_faceplate_height)
     plate -= Pos(x0 + 1.5, 0, HEAD_C[2]) * Cylinder(P.head_camera_aperture_radius, 5, rotation=(0, 90, 0))
     for sy in (1, -1):
         plate -= Pos(x0 + 1.5, sy * 40.0, HEAD_C[2]) * Box(4, 9, 14)
