@@ -368,7 +368,7 @@ PURCHASED_MASSES = [
 # design) and mass allowances for registered parts still lacking solids.
 SOLID_INSTANCES = {"rear_wheel_v2": 2, "front_wheel_v2": 2, "tire_v2": 4, "motor_cap_v2": 2}
 PRINTED_MASS_EXTRAS = [
-    ("deck", 170, (69, 0, 104)), ("mic cradle", 25, (60, -25, 172)),
+    ("mic cradle", 25, (60, -25, 172)),
     ("speaker clamps", 20, (-13, 0, 130)), ("tof clamps + pico clamp", 18, (-10, 40, 70)),
     ("head yoke/tilt/adapters", 45, (-26, 0, 250)), ("diffuser bars + washers", 25, (-60, 0, 150)),
 ]
