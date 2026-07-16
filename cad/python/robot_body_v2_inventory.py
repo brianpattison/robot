@@ -100,11 +100,12 @@ ENVELOPES = [
     E("motor", "keepout", "shellR",
       (REAR_AXLE_X - 12.5, REAR_AXLE_X + 12.5, P.motor_face_y - P.motor_body_length, IY, 53.5, 78.5),
       "motor_body_diameter 25 / motor_body_length 68.45 / motor_face_y 110 at axle Z 66", mirror_y=True),
-    E("neck_drop", "keepout", "head", (P.neck_x - 26, P.neck_x + 26, -26, 26, DROP0, Z_TOP),
-      "pan_servo_fit bbox min Z 131.6 at H=121, tracking body height; XY ESTIMATE"),
-    E("head_roof", "keepout", "head",
-      (P.head_center_x - 46, P.head_center_x + 46, -70, 70, Z_TOP - 10, Z_TOP),
-      "ESTIMATE: head shadow proxy over the roof"),
+    E("neck_drop", "keepout", "head", (-55.8, -12.0, -8.5, 8.5, DROP0, Z_TOP),
+      "pan_servo_fit bbox (x -53.8..-14, y +/-6.5, z from 131.6 at H=121) "
+      "+ 2 mm clearance, tracking body height"),
+    E("head_sweep", "keepout", "head", (-105.0, 53.0, -79.0, 79.0, 212.0, 294.0),
+      "computed pan-sweep of the v2 head capsule: disc r=78.7 about the neck "
+      "axis (sqrt(36^2+70^2)) with tilt chin allowance to Z 212"),
     E("neck_collar", "keepout", "head", (P.neck_x - 30, P.neck_x + 30, -30, 30, Z_TOP - 8, Z_TOP),
       "neck_collar_outer_diameter 60"),
     E("estop_panel", "keepout", "estop",
@@ -131,13 +132,15 @@ ENVELOPES = [
       "MDDS10 board 66.8x101 + components, PCB bottom at Z 64 on the tower "
       "standoffs (motor_controller_plate_top_z chain); plate, standoffs, and "
       "shelf are controller_tower printed geometry"),
-    E("mdds10_svc", "service", "mdds", (-89, -45, 62, 84, TRAY_TOP + 3, MDDS_TOP),
-      "mdds10_terminal_service 24x44, terminals facing NORTH (rotated board short edge)"),
+    E("mdds10_svc", "service", "mdds", (-89, -45, 62, 86, 58, MDDS_TOP),
+      "mdds10_terminal_service 24x44 facing NORTH; floor at Z 58 (terminals "
+      "live at board level 64+, leaving 6 for wire sweep) so the pod base "
+      "flange plane below stays clear"),
     E("pi_shelf", "item", "pi", (-101, -5, -34, 34, SHELF1, PI_TOP),
       "pi_clearance 96x68x28 seated on the controller_tower shelf plate "
       "(the plate itself is printed geometry at the thermal ceiling)"),
     E("pi_port_svc", "service", "pi", (-5, 19, -30, 30, SHELF1, PI_TOP),
-      "ESTIMATE: 24 mm east cable service at the port edge"),
+      "cable spec: right-angle USB-A/RJ45 plug bodies (14) + 10 bend allowance east of the port edge"),
     E("ai_hat2", "item", "pi", (-101, -5, -37, 37, PI_TOP, HAT_TOP),
       "cad-mechanical-plan.md: AI HAT+ 2 clearance 96 x 74 x 22; stacked above the Pi band (conservative)"),
     E("pico_floor", "item", "pico", (-28, 34, 47, 80, 53, 67),
@@ -145,7 +148,7 @@ ENVELOPES = [
     E("pico_usb_svc", "service", "pico", (34, 54, 58.5, 68.5, 53, 67),
       "pico2_usb_notch 20x10, facing EAST"),
     E("pico_swd_svc", "service", "pico", (-26, -6, 52, 75, 63, 80),
-      "ESTIMATE: top-access SWD service volume"),
+      "tool spec: SWD pogo/plug top access, 17 above the board + finger reach"),
     E("battery_pack", "item", "bat", (-25.3, 85.3, -38.1, 38.1, 52, 79),
       "BLF-1203AB 110x75x27 rotated + 0.6 side clearance, on 3 mm tray pads; "
       "cradle rails/stops are tray geometry, not envelope"),
@@ -209,6 +212,7 @@ ALLOWED_TOUCH = {
     frozenset(("riser", "rear_en2_N")), frozenset(("riser", "deck_mid")),
     frozenset(("riser", "deck_n1")), frozenset(("riser", "deck_n2")),
     frozenset(("mdds10", "front_bay")), frozenset(("mdds10_svc", "front_bay")),
+    frozenset(("mdds10_svc", "front_pod")),
     frozenset(("mdds10_thermal", "mdds10")), frozenset(("mdds10_thermal", "pi_shelf")),
 }
 
@@ -245,13 +249,13 @@ PRINTED_PARTS = [
        "structural floor: motor saddles, switch pockets, battery cradle, pico bosses, deck towers"),
     PP("shell", 1, "PETG", "upright, open bottom down",
        "one-piece exterior; separate from tray for assembly access (arches, speaker pockets, ToF pockets, pod shrouds integrated)"),
-    PP("lid", 1, "PETG-dark", "top face down", "roof service access; vent slots print directly"),
+    PP("lid", 1, "PETG-dark", "top face down",
+       "roof service access; vent slots print directly; integrated E-stop backing collar boss (merge executed)"),
     PP("bumper_half", 2, "TPU", "flat, open-bottom U", "compliance + material change + bed length"),
     PP("rear_panel", 1, "PETG", "flat", "connector service and independent reprintability"),
-    PP("fascia", 1, "PETG-dark", "flat", "sensor service + color break; front ToF pockets integrated"),
+    PP("fascia", 1, "PETG-dark", "flat",
+       "sensor service + color break; front ToF and status NeoPixel pockets integrated (merge executed)"),
     PP("estop_mount_panel", 1, "PETG", "flat", "IDEC 4 mm clamp-range calibration interface"),
-    PP("estop_backing_collar", 1, "PETG", "flat", "safety-critical roof reinforcement",
-       merge_candidate="lid-integrated collar boss"),
     PP("deck", 1, "PETG", "flat, ribs up", "removable power/service deck; harness ribs + fuse saddles integrated"),
     PP("controller_tower", 1, "PETG", "flat", "MDDS10 plate + Pi shelf towers as one service module"),
     PP("pico_clamp_bar", 1, "PETG", "flat", "safety-MCU capture on tray bosses"),
@@ -271,24 +275,59 @@ PRINTED_PARTS = [
     PP("tof_side_clamp", 2, "PETG", "flat", "side ToF capture in shell pockets"),
     PP("head_shell", 1, "PETG", "open face down", "one-piece head enclosure (v1 front/rear covers merged)"),
     PP("head_pan_plate", 1, "PETG", "flat", "underside service plate; pan servo mounts here"),
-    PP("head_faceplate", 1, "PETG-dark", "flat, face down", "color break + fused camera annulus"),
-    PP("camera_carrier", 1, "PETG", "flat", "camera aim/service",
-       merge_candidate="head_faceplate pocket + clamp"),
+    PP("head_faceplate", 1, "PETG-dark", "flat, face down",
+       "color break + fused camera annulus + camera pocket and eye NeoPixel pockets (merges executed)"),
     PP("neck", 1, "PETG", "flange down", "rotating pan structure with cable corridor"),
-    PP("bayonet_collar", 1, "PETG", "flat", "pan retention; tool-free head removal"),
-    PP("yoke", 1, "PETG", "TBD (BREP)", "tilt structure spanning the neck flange"),
-    PP("tilt_adapter", 1, "PETG", "flat", "servo-horn interface on the moving head",
-       merge_candidate="yoke-side integration"),
+    PP("bayonet_collar", 1, "PETG", "flat",
+       "pan retention; tool-free head removal; integrated pan-servo mount base (merge executed)"),
+    PP("yoke", 1, "PETG", "TBD (BREP)",
+       "tilt structure spanning the neck flange; integrated servo-horn adapter (merge executed)"),
     PP("tilt_bushing", 1, "PETG", "axis vertical", "designated tilt wear part"),
-    PP("pan_servo_mount", 1, "PETG", "flat", "pan servo capture",
-       merge_candidate="bayonet-collar base"),
     PP("eye_diffuser_bar", 1, "PETG-lime", "flat", "color/optics: both eye diffusers as one bar"),
-    PP("eye_clamp_bar", 1, "PETG", "flat", "eye NeoPixel capture",
-       merge_candidate="head_faceplate pocket"),
     PP("status_diffuser_bar", 1, "PETG-lime", "flat", "color/optics: both status diffusers as one bar"),
-    PP("status_clamp_bar", 1, "PETG", "flat", "status NeoPixel capture",
-       merge_candidate="fascia pocket"),
 ]
+
+
+# ---------------------------------------------------------------------------
+# D026 single-SKU fastener system and the joint registry (Phase 3).
+# ---------------------------------------------------------------------------
+FASTENER = {
+    "insert": "M3 x 5.7 x 4.6 OD heat-set (ruthex RX-M3 class)",
+    "insert_od": 4.6, "insert_len": 5.7, "insert_bore": 4.6,
+    "screw": "M3 x 8 socket head cap (ISO 4762)",
+    "screw_len": 8.0, "clearance_hole": 3.4, "cbore_d": 6.5,
+    "clamp_min": 3.0, "clamp_max": 3.4,
+}
+
+
+@dataclass(frozen=True)
+class Joint:
+    """One screwed joint family: M3 x 8 through `stack` mm of clamped
+    material into a heat-set insert. The clamp-stack rule (D026) requires
+    3.0 <= stack <= 3.4 so the single screw length works everywhere."""
+    name: str
+    positions: tuple      # (x, y) interface points
+    stack: float = 3.2
+    modeled: bool = False  # True once BOTH sides exist in robot_body_v2
+
+
+J = Joint
+JOINTS = [
+    J("shell_tray", ((105, 96), (105, -96), (-105, 96), (-105, -96)), modeled=True),
+    J("lid_shell", ((100, 90), (100, -90), (-100, 90), (-100, -90)), modeled=True),
+    J("deck_towers", ((30, -61), (86, -61), (95, 61), (107, 55)), modeled=True),
+    J("motor_caps", ((63, 83), (85, 83), (63, -83), (85, -83)), modeled=True),
+    J("battery_clamp", ((17, 42.5), (17, -42.5)), modeled=True),
+    J("controller_tower_base", ((-101, 59), (-101, -59), (-33, 59), (-33, -59)), modeled=True),
+    J("front_pods", ((-86, 85), (-62, 85), (-86, -85), (-62, -85)), modeled=True),
+    J("rear_wheel_clamps", ((74, 118), (74, -118)), modeled=True),
+    J("front_axle_retainers", ((-74, 126), (-74, -126)), modeled=True),
+]
+
+
+def fastener_tally():
+    screws = sum(len(j.positions) for j in JOINTS)
+    return screws, screws  # one insert per screw in this system
 
 
 def budget_report():
@@ -304,4 +343,8 @@ if __name__ == "__main__":
     print(f"ESTIMATE-basis envelopes needing BREP replacement ({len(est)}): {', '.join(est)}")
     print(f"printed parts: draft {draft}, after owed merges {after}, budget {budget}"
           f" -> {'OK' if after <= budget else 'OVER BUDGET'}")
+    screws, inserts = fastener_tally()
+    unmod = [j.name for j in JOINTS if not j.modeled]
+    print(f"fasteners: {screws} x {FASTENER['screw']} + {inserts} x {FASTENER['insert']}"
+          f" across {len(JOINTS)} joint families; unmodeled: {', '.join(unmod) or 'none'}")
     print(f"body {BODY_L} x {BODY_W} x {BODY_H}; axles {FRONT_AXLE_X}/{REAR_AXLE_X}; deck {DECK0}..{DECK1}")

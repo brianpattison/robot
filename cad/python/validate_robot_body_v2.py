@@ -66,6 +66,13 @@ def check_registry():
     if draft > budget:
         WARNS.append(f"D028 budget: draft {draft} > {budget}; {draft - budget} owed merges pending")
     est = [e.name for e in inv.ENVELOPES if "ESTIMATE" in e.basis]
+    for j in inv.JOINTS:
+        if not (inv.FASTENER["clamp_min"] <= j.stack <= inv.FASTENER["clamp_max"]):
+            FAILS.append(f"D026 clamp stack: joint '{j.name}' stack {j.stack} outside "
+                         f"{inv.FASTENER['clamp_min']}..{inv.FASTENER['clamp_max']}")
+    engage = inv.FASTENER["screw_len"] - inv.FASTENER["clamp_max"]
+    if engage > inv.FASTENER["insert_len"]:
+        FAILS.append("D026: screw engagement exceeds insert length")
     return est
 
 
@@ -169,10 +176,16 @@ def main():
     if estimates:
         msg = f"{len(estimates)} ESTIMATE-basis envelopes remain: {', '.join(estimates)}"
         (FAILS if gate else WARNS).append(("gate: " if gate else "gate-open: ") + msg)
+    unmodeled = [j.name for j in inv.JOINTS if not j.modeled]
+    if unmodeled:
+        msg = f"{len(unmodeled)} joint families not yet modeled: {', '.join(unmodeled)}"
+        (FAILS if gate else WARNS).append(("gate: " if gate else "gate-open: ") + msg)
 
     draft, after, budget = inv.budget_report()
+    screws, inserts = inv.fastener_tally()
     print(f"v2 validator — body {inv.BODY_L} x {inv.BODY_W} x {inv.BODY_H}; "
-          f"parts draft {draft} / after merges {after} / budget {budget}")
+          f"parts draft {draft} / after merges {after} / budget {budget}; "
+          f"fasteners {screws} screws + {inserts} inserts (single SKUs)")
     for w in WARNS:
         print("  WARN:", w)
     for f_ in FAILS:

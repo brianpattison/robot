@@ -82,12 +82,15 @@ def build_tray():
     # Deck towers at envelope-cleared positions (see the validator history).
     for tx, ty in ((30.0, -61.0), (86.0, -61.0), (95.0, 61.0), (107.0, 55.0)):
         tray += Pos(tx, ty, (inv.TRAY_TOP + inv.DECK0) / 2) * Cylinder(6.0, inv.DECK0 - inv.TRAY_TOP)
+        tray -= Pos(tx, ty, inv.DECK0 - 3.5) * Cylinder(2.3, 7)   # deck-joint insert bores
     # Motor saddles: up-opening troughs (support-free by construction).
     trough_r = P.motor_body_diameter / 2 + 0.2
     for sy in (1, -1):
         saddle = Pos(inv.REAR_AXLE_X, sy * 83.0, (inv.TRAY_TOP + 79.0) / 2) * Box(28, 26, 79.0 - inv.TRAY_TOP)
         saddle -= Pos(inv.REAR_AXLE_X, sy * 83.0, P.wheel_center_z) * Rot(90, 0, 0) * Cylinder(trough_r, 40)
         saddle -= Pos(inv.REAR_AXLE_X, sy * (inv.IY + WALL), inv.TRAY_TOP) * Box(94, 34, 90)
+        for jx in (63, 85):
+            saddle -= Pos(jx, sy * 83, 79.0 - 3.5) * Cylinder(2.3, 7)   # cap-joint inserts
         tray += saddle
     # Battery cradle: four 3 mm pads under the pack, side rails, and low end
     # stops. The pack envelope (52..79) rides the pads; rails stay outside
@@ -98,6 +101,9 @@ def build_tray():
             tray += Pos(px, py, (inv.TRAY_TOP + 52.0) / 2) * Box(14, 14, 52.0 - inv.TRAY_TOP)
     for sy in (1, -1):
         tray += Pos(17.0, sy * 41.5, (inv.TRAY_TOP + 63.0) / 2) * Box(78, 5, 63.0 - inv.TRAY_TOP)
+        # Battery-clamp posts on the rail tops, insert bores opening up.
+        tray += Pos(17.0, sy * 42.5, (63.0 + 80.0) / 2) * Cylinder(3.4, 17)
+        tray -= Pos(17.0, sy * 42.5, 80.0 - 3.5) * Cylinder(2.3, 7)
     tray += Pos(-27.5, 0, (inv.TRAY_TOP + 70.0) / 2) * Box(3, 64, 70.0 - inv.TRAY_TOP)
     tray += Pos(87.5, 0, (inv.TRAY_TOP + 63.0) / 2) * Box(3, 64, 63.0 - inv.TRAY_TOP)
     # Pico seat bosses (board bottom at Z 53; locating pegs are a later
@@ -105,6 +111,15 @@ def build_tray():
     for bx in (-21.0, 27.0):
         for by in (54.5, 72.5):
             tray += Pos(bx, by, (inv.TRAY_TOP + 53.0) / 2) * Cylinder(3.5, 53.0 - inv.TRAY_TOP)
+    # Shell-joint clearance holes: M3 up through the tray into the shell
+    # corner lugs; the underside counterbore leaves a 3.2 mm clamp stack.
+    for jx, jy in ((105, 96), (105, -96), (-105, 96), (-105, -96)):
+        tray -= Pos(jx, jy, inv.TRAY_TOP - 4) * Cylinder(1.7, 10)
+        tray -= Pos(jx, jy, TRAY_Z0 + 2.4) * Cylinder(3.25, 4.8)
+    # Controller-tower base and front-pod flange insert bores.
+    for jx, jy in ((-101, 59), (-101, -59), (-33, 59), (-33, -59),
+                   (-86, 85), (-62, 85), (-86, -85), (-62, -85)):
+        tray -= Pos(jx, jy, inv.TRAY_TOP - 3.5) * Cylinder(2.3, 7)
     # Six bumper-switch pockets molded into the tray underside (D028 merge),
     # each with an outward plunger window toward the bumper.
     for cx, cy, along_x in ((-101.0, 56.0, False), (-101.0, -56.0, False),
@@ -143,6 +158,17 @@ def build_shell():
                 2 * ARCH_R, band_w, P.wheel_center_z - inv.TRAY_TOP + 10)
             shell -= arch
 
+    # Corner lugs for the tray joint: bosses fused into the interior corner
+    # arcs, blind insert bores opening downward (screws drive up from the
+    # tray underside, v1-style).
+    for jx, jy in ((105, 96), (105, -96), (-105, 96), (-105, -96)):
+        shell += Pos(jx, jy, (inv.TRAY_TOP + 68.0) / 2) * Cylinder(7.0, 68.0 - inv.TRAY_TOP)
+        shell -= Pos(jx, jy, inv.TRAY_TOP + 3.4) * Cylinder(2.3, 7)
+    # Lid-joint insert bores in the seating ledge (screws drive down
+    # through the lid corners).
+    for jx, jy in ((100, 90), (100, -90), (-100, 90), (-100, -90)):
+        shell -= Pos(jx, jy, inv.Z_TOP - 16.0 + 8.0) * Cylinder(2.3, 8.1)
+
     # Speaker ledges on the forward side walls: a shelf below each speaker
     # envelope (Z 115..145) with a 45-degree gusset underneath (D028 rule 4).
     for sy in (1, -1):
@@ -180,6 +206,15 @@ def build_lid():
         lid -= Pos(inv.MIC[0], inv.MIC[1] - 30 + i * 7.5, inv.Z_TOP - LID_RECESS / 2) * Box(36, 3, LID_RECESS + 2)
     for i in range(5):
         lid -= Pos(60, -92 + i * 6.0, inv.Z_TOP - LID_RECESS / 2) * Box(50, 3, LID_RECESS + 2)
+    # Lid-joint clearance holes with top counterbores (3.2 mm clamp stack).
+    for jx, jy in ((100, 90), (100, -90), (-100, 90), (-100, -90)):
+        lid -= Pos(jx, jy, inv.Z_TOP - LID_RECESS / 2) * Cylinder(1.7, LID_RECESS + 2)
+        lid -= Pos(jx, jy, inv.Z_TOP - 0.4) * Cylinder(3.25, 0.9)
+    # Integrated E-stop backing collar (merge of the v1 separate collar):
+    # a reinforcing ring under the panel bore for the purchased nut clamp.
+    ring = Pos(inv.ESTOP[0], inv.ESTOP[1], inv.Z_TOP - LID_RECESS - 3.0) * Cylinder(33.0, 6)
+    ring -= Pos(inv.ESTOP[0], inv.ESTOP[1], inv.Z_TOP - LID_RECESS - 3.0) * Cylinder(13.0, 8)
+    lid += ring
     return lid
 
 
@@ -218,6 +253,11 @@ def build_front_pod(left: bool):
     body = Pos(inv.FRONT_AXLE_X, sy * 96.0, (inv.TRAY_TOP + 92.0) / 2) * Box(40, 18, 92.0 - inv.TRAY_TOP)
     axle = Pos(inv.FRONT_AXLE_X, sy * 118.0, P.wheel_center_z) * Rot(90, 0, 0) * Cylinder(9.0, 26)
     pod = body + axle
+    # Inboard base flange with the tray-joint holes (3.2 clamp stack).
+    flange = Pos(inv.FRONT_AXLE_X, sy * 85.0, inv.TRAY_TOP + 1.6) * Box(40, 6, 3.2)
+    for jx in (-86, -62):
+        flange -= Pos(jx, sy * 85.0, inv.TRAY_TOP + 1.6) * Cylinder(1.7, 5)
+    pod += flange
     # Axle-end insert bore for the retaining screw (prints axis-vertical in
     # the pod's inboard-face-down orientation).
     pod -= Pos(inv.FRONT_AXLE_X, sy * 126.0, P.wheel_center_z) * Rot(90, 0, 0) * Cylinder(2.3, 12)
@@ -253,6 +293,10 @@ def build_controller_tower():
     tower = Pos(-67, 0, (inv.TRAY_TOP + 58.0) / 2) * Box(74, 124, 58.0 - inv.TRAY_TOP)
     for cy in (-40.0, 0.0, 40.0):
         tower -= Pos(-67, cy, (inv.TRAY_TOP + 54.0) / 2) * Box(80, 22, 54.0 - inv.TRAY_TOP)
+    # Base joint: through-holes + counterbores leave a 3.2 clamp stack.
+    for jx, jy in ((-101, 59), (-101, -59), (-33, 59), (-33, -59)):
+        tower -= Pos(jx, jy, 53.5) * Cylinder(1.7, 10)
+        tower -= Pos(jx, jy, 58.0 - 2.9) * Cylinder(3.25, 5.9)
     # Board standoffs (MDDS10 95.25 x 60.96 pattern, rotated: Y-long).
     for bx in (-97.5, -36.5):
         for by in (-47.6, 47.6):
@@ -358,6 +402,26 @@ def build_head_pan_plate():
     return Pos(HEAD_C[0], 0, z0 + 2.5) * Box(42, 74, 3)
 
 
+def build_motor_cap():
+    # Clamp cap bridging the saddle: flat plate with a shallow gripping arc,
+    # printed arc-up (upside down) so it stays support-free.
+    cap = Pos(inv.REAR_AXLE_X, 83.0, 81.4) * Box(28, 26, 6)
+    cap -= Pos(inv.REAR_AXLE_X, 83.0, P.wheel_center_z) * Rot(90, 0, 0) * Cylinder(12.7, 40)
+    for jx in (63, 85):
+        cap -= Pos(jx, 83.0, 81.4) * Cylinder(1.7, 8)
+        cap -= Pos(jx, 83.0, 83.4) * Cylinder(3.25, 2.2)
+    return cap
+
+
+def build_battery_clamp():
+    # 3.2 mm bar spanning the pack between the rail posts: the bar itself is
+    # the D026 clamp stack, so no counterbores are needed.
+    bar = Pos(17.0, 0, 81.6) * Box(16, 99, 3.2)
+    for sy in (1, -1):
+        bar -= Pos(17.0, sy * 42.5, 81.6) * Cylinder(1.7, 5)
+    return bar
+
+
 def primary_solids():
     return {
         "tray_v2": build_tray(),
@@ -378,6 +442,8 @@ def primary_solids():
         "neck_v2": build_neck(),
         "bayonet_collar_v2": build_bayonet_collar(),
         "head_pan_plate_v2": build_head_pan_plate(),
+        "motor_cap_v2": build_motor_cap(),
+        "battery_clamp_v2": build_battery_clamp(),
     }
 
 
@@ -402,6 +468,8 @@ PRINT_UP = {
     "neck_v2": (0, 0, -1),             # flange down
     "bayonet_collar_v2": (0, 0, 1),    # flat
     "head_pan_plate_v2": (0, 0, 1),    # flat
+    "motor_cap_v2": (0, 0, -1),        # upside down: gripping arc opens up
+    "battery_clamp_v2": (0, 0, 1),     # flat bar
 }
 # Allowlisted overhang REGIONS per part (model-space boxes): declared
 # printable features that exceed the generic 50-degree rule — the shell's
