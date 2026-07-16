@@ -444,10 +444,20 @@ and then thrown that detailing away. Revised order:
    and insert bores across the tray, shell, lid, towers, saddles,
    plinth, pods, rails, plus the motor-cap and battery-clamp solids
    (20 solids total). Validator PASSES IN GATE MODE on the encoded
-   conditions (zero estimates, zero unmodeled joints). Still to encode
-   before D027 can actually close: harness route volumes, connector
-   insertion sweeps, real-mass CG acceptance, and a fresh external
-   review round.
+   conditions (zero estimates, zero unmodeled joints). Update (third slice): harness route volumes (motor
+   leads, speaker/mic feed, and the camera FPC threading east of the
+   AI-HAT reserve, north of the pan servo, into the neck bore),
+   connector insertion sweeps (charge plug, mute finger, E-stop slap —
+   all enforced solid-free), and a screen-grade mass/CG budget
+   (~3.06 kg, CG X=13 between the ±74 axles, support-polygon limits
+   validator-enforced) are now registered checks, all green in gate
+   mode. Encoding the sweeps surfaced finding #11: at extreme pan +
+   full down-tilt the head's corner swept within -2.4 mm of the E-stop
+   mushroom edge, so the E-stop moved to (59, 56), restoring 3.1 mm of
+   real clearance; the head sweep is registered as four exact chord
+   boxes of the r=78.7 disc. Remaining before declaring D027: the deck
+   solid + remaining detail geometry, delivered-part mass updates, and
+   a fresh external review round.
 3. **Fastener-system pass on v2.** Collapse `Params` to the single
    insert/screw spec; add the clamp-stack (3.0-3.4 mm) and
    engagement-limit validator checks; implement capture-or-M3 mounts for

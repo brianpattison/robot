@@ -58,7 +58,7 @@ Z_ROOF_IN = Z_TOP - WALL
 DROP0 = DROP_V1 + DH                                      # 143.6
 DECK0, DECK1 = P.power_deck_z - 2.0, P.power_deck_z + 2.0  # 102..106 (verified)
 FRONT_AXLE_X, REAR_AXLE_X = -74.0, 74.0                   # wheels >= 2 mm inside shell
-ESTOP = (55.0, 52.0)
+ESTOP = (59.0, 56.0)
 ESTOP_R = P.estop_backing_outer_radius
 MIC = (60.0, -25.0)
 MIC_R = (P.mic_array_diameter + 2 * P.mic_cradle_outer_margin) / 2
@@ -103,11 +103,26 @@ ENVELOPES = [
     E("neck_drop", "keepout", "head", (-55.8, -12.0, -8.5, 8.5, DROP0, Z_TOP),
       "pan_servo_fit bbox (x -53.8..-14, y +/-6.5, z from 131.6 at H=121) "
       "+ 2 mm clearance, tracking body height"),
-    E("head_sweep", "keepout", "head", (-105.0, 53.0, -79.0, 79.0, 212.0, 294.0),
-      "computed pan-sweep of the v2 head capsule: disc r=78.7 about the neck "
-      "axis (sqrt(36^2+70^2)) with tilt chin allowance to Z 212"),
-    E("neck_collar", "keepout", "head", (P.neck_x - 30, P.neck_x + 30, -30, 30, Z_TOP - 8, Z_TOP),
-      "neck_collar_outer_diameter 60"),
+    E("head_sweep_1", "keepout", "head", (-100.6, 48.6, -25.0, 25.0, 212.0, 294.0),
+      "pan-sweep disc r=78.7 about the neck axis, chord box |y|<=25"),
+    E("head_sweep_2", "keepout", "head", (-89.1, 37.1, -47.0, 47.0, 212.0, 294.0),
+      "pan-sweep chord box |y|<=47"),
+    E("head_sweep_3", "keepout", "head", (-74.5, 22.5, -62.0, 62.0, 212.0, 294.0),
+      "pan-sweep chord box |y|<=62"),
+    E("head_sweep_4", "keepout", "head", (-36.5, -15.5, -78.0, 78.0, 212.0, 294.0),
+      "pan-sweep chord box |y|<=78"),
+    E("estop_press", "keepout", "estop", (ESTOP[0] - 14, ESTOP[0] + 14, ESTOP[1] - 14, ESTOP[1] + 14, Z_TOP, Z_TOP + 48),
+      "slap-access sweep: the 40 mm mushroom footprint + 8 finger margin, "
+      "solid-free; mushroom edge clears the head sweep disc by 3.1 and the "
+      "press corner by 3.8 (finding #11: E-stop moved from (55,52))"),
+    E("neck_collar_W", "keepout", "head", (P.neck_x - 30, P.neck_x - 20.5, -30, 30, Z_TOP - 8, Z_TOP),
+      "collar ring segment (od 60 / id 41); the neck bore stays open"),
+    E("neck_collar_E", "keepout", "head", (P.neck_x + 20.5, P.neck_x + 30, -30, 30, Z_TOP - 8, Z_TOP),
+      "collar ring segment"),
+    E("neck_collar_N", "keepout", "head", (P.neck_x - 20.5, P.neck_x + 20.5, 20.5, 30, Z_TOP - 8, Z_TOP),
+      "collar ring segment"),
+    E("neck_collar_S", "keepout", "head", (P.neck_x - 20.5, P.neck_x + 20.5, -30, -20.5, Z_TOP - 8, Z_TOP),
+      "collar ring segment"),
     E("estop_panel", "keepout", "estop",
       (ESTOP[0] - ESTOP_R, ESTOP[0] + ESTOP_R, ESTOP[1] - ESTOP_R, ESTOP[1] + ESTOP_R, Z_TOP - 20, Z_TOP),
       "estop_backing_outer_radius 33"),
@@ -126,6 +141,11 @@ ENVELOPES = [
       "speaker 70x30x17 + clearance; shell ledges/gussets modeled (robot_body_v2)", mirror_y=True),
     E("mdds10_thermal", "keepout", "mddsT", (-101, -34, -50.5, 50.5, MDDS_TOP, THERM_TOP),
       "mdds10_airflow_height 10 over the board extent"),
+    E("sweep_en2", "keepout", "rear_en2_N", (BODY_L / 2 + 0.1, BODY_L / 2 + 45, 27, 43, 122, 138),
+      "charge plug insertion sweep outside the panel face: "
+      "charge_jack_plug_service_length 39.9, solid-free"),
+    E("sweep_mute", "keepout", "rear_mute_S", (BODY_L / 2 + 0.1, BODY_L / 2 + 40, -43, -27, 122, 138),
+      "mute actuation finger sweep outside the panel face, solid-free"),
 
     # -- placed items and their service volumes --
     E("mdds10", "item", "mdds", (-101, -34, -50.5, 50.5, 64, MDDS_TOP),
@@ -213,6 +233,10 @@ ALLOWED_TOUCH = {
     frozenset(("riser", "deck_n1")), frozenset(("riser", "deck_n2")),
     frozenset(("mdds10", "front_bay")), frozenset(("mdds10_svc", "front_bay")),
     frozenset(("mdds10_svc", "front_pod")),
+    frozenset(("route_motor_leads", "rail_R")), frozenset(("route_motor_leads", "rail_L")),
+    frozenset(("route_speaker_feed_b", "rail_L")), frozenset(("route_speaker_feed_b", "deck_mid")),
+    frozenset(("route_speaker_feed_a", "speaker")),
+    frozenset(("route_camera_fpc_1", "pi_port_svc")), frozenset(("route_camera_fpc_1", "deck_mid")),
     frozenset(("mdds10_thermal", "mdds10")), frozenset(("mdds10_thermal", "pi_shelf")),
 }
 
@@ -323,6 +347,36 @@ JOINTS = [
     J("rear_wheel_clamps", ((74, 118), (74, -118)), modeled=True),
     J("front_axle_retainers", ((-74, 126), (-74, -126)), modeled=True),
 ]
+
+
+# Mass budget (grams) with rough CG stations; screen-grade estimates from
+# datasheets/BOM ranges — refine each on delivered-part weighing.
+PURCHASED_MASSES = [
+    ("battery BLF-1203AB", 460, (30, 0, 65)),
+    ("motor+bracketless L", 96, (74, -90, 66)), ("motor R", 96, (74, 90, 66)),
+    ("MDDS10", 82, (-67, 0, 70)), ("Pi 5 + cooler", 85, (-53, 0, 104)),
+    ("Pico 2", 5, (3, 63, 58)), ("reg D24V90F5", 15, (102, -30, 98)),
+    ("reg D36V50F6", 10, (73, 7, 97)), ("relay CB1A", 46, (-20, -79, 62)),
+    ("fuse block 5045", 120, (46, -22, 122)), ("EN2 inlet", 25, (112, 35, 130)),
+    ("mute switch", 20, (112, -35, 130)), ("E-stop XW1E", 90, (59, 56, 150)),
+    ("mic array", 55, (60, -25, 170)), ("speaker L", 60, (-13, -90, 128)),
+    ("speaker R", 60, (-13, 90, 128)), ("amps+ToF+LEDs", 40, (-40, 0, 100)),
+    ("servos+horns", 68, (-26, 0, 200)), ("camera", 5, (-55, 0, 254)),
+    ("wiring/harness", 120, (20, 0, 90)),
+]
+# Instance multipliers for modeled solids (the model builds one of each
+# design) and mass allowances for registered parts still lacking solids.
+SOLID_INSTANCES = {"rear_wheel_v2": 2, "front_wheel_v2": 2, "tire_v2": 4, "motor_cap_v2": 2}
+PRINTED_MASS_EXTRAS = [
+    ("deck", 170, (69, 0, 104)), ("mic cradle", 25, (60, -25, 172)),
+    ("speaker clamps", 20, (-13, 0, 130)), ("tof clamps + pico clamp", 18, (-10, 40, 70)),
+    ("head yoke/tilt/adapters", 45, (-26, 0, 250)), ("diffuser bars + washers", 25, (-60, 0, 150)),
+]
+PETG_EFF_DENSITY = 0.60e-3   # g/mm^3: walls + infill, screen-grade
+TPU_EFF_DENSITY = 0.75e-3
+TPU_SOLIDS = {"bumper_front_v2", "bumper_rear_v2", "tire_v2"}
+CG_X_LIMITS = (-64.0, 64.0)  # 10 mm inside each axle
+CG_Y_LIMIT = 30.0
 
 
 def fastener_tally():
