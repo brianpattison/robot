@@ -100,12 +100,20 @@ def check_bed_fit(solids):
 SOLID_FREE_KEEPOUTS = {"mdds10_thermal", "sweep_en2", "sweep_mute", "estop_press"}
 
 
+# A solid may OWN envelope groups that describe the very part it builds
+# (the deck solid fills the registered deck-plate envelopes).
+SOLID_OWNS = {"deck_v2": {"deck"}}
+
+
 def check_interference(solids):
     envs = [b for b in inv.boxes()
             if b[1] in ("item", "service") or b[0].rstrip("~m") in SOLID_FREE_KEEPOUTS]
     for sname, solid in solids.items():
+        owned = SOLID_OWNS.get(sname, set())
         for e in envs:
-            name, _, _, x0, x1, y0, y1, z0, z1 = e
+            name, _, group, x0, x1, y0, y1, z0, z1 = e
+            if group.rstrip("~m") in owned:
+                continue
             box = Pos((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2) * Box(x1 - x0, y1 - y0, z1 - z0)
             vol = (solid & box).volume
             if vol > 1.0:

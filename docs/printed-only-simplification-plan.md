@@ -455,9 +455,17 @@ and then thrown that detailing away. Revised order:
    full down-tilt the head's corner swept within -2.4 mm of the E-stop
    mushroom edge, so the E-stop moved to (59, 56), restoring 3.1 mm of
    real clearance; the head sweep is registered as four exact chord
-   boxes of the r=78.7 disc. Remaining before declaring D027: the deck
-   solid + remaining detail geometry, delivered-part mass updates, and
-   a fresh external review round.
+   boxes of the r=78.7 disc. Update (fourth slice): the deck solid is
+   modeled (segments with the riser notch, flanking harness ribs — the
+   v1 rails as deck geometry per D028 — fuse pocket lip, counterbored
+   tower joints; prints top-face-down, ribs building upward), completing
+   geometry for every major structural part (21 solids). The validator
+   gained solid-ownership semantics (a solid may fill its own registered
+   plate envelopes). Gate mode passes with zero warnings at ~2.92 kg,
+   CG X=10. Remaining before declaring D027: detail geometry (PCB
+   pockets/pegs, snap features, coupon updates), the v2 print/plate
+   manifest chain, delivered-part mass updates, BOM and assembly-guide
+   regeneration, and a fresh external review round.
 3. **Fastener-system pass on v2.** Collapse `Params` to the single
    insert/screw spec; add the clamp-stack (3.0-3.4 mm) and
    engagement-limit validator checks; implement capture-or-M3 mounts for

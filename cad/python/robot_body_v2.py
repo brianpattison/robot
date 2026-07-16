@@ -402,6 +402,32 @@ def build_head_pan_plate():
     return Pos(HEAD_C[0], 0, z0 + 2.5) * Box(42, 74, 3)
 
 
+def build_deck():
+    # Removable power/service deck: the three registered plate segments
+    # (riser notch and trimmed NW as gaps), harness ribs flanking the two
+    # wire channels (D028 merge: the v1 rails are deck geometry), a fuse
+    # pocket lip, and counterbored tower-joint holes. Prints top-face-down
+    # so every rib and lip builds upward.
+    deck = Pos((24 + 113.8) / 2, (-67 + 23) / 2, (inv.DECK0 + inv.DECK1) / 2) * Box(89.8, 90, 4)
+    deck += Pos((56 + 98) / 2, 35, (inv.DECK0 + inv.DECK1) / 2) * Box(42, 24, 4)
+    deck += Pos((56 + 113.8) / 2, 57, (inv.DECK0 + inv.DECK1) / 2) * Box(57.8, 20, 4)
+    # Harness ribs just outside the registered channel volumes.
+    for y in (-62.0, -44.0):
+        deck += Pos(58.0, y + 1.0 if y < -50 else y - 1.0, (96 + inv.DECK0) / 2) * Box(40, 2, inv.DECK0 - 96)
+    for y in (39.0 + 1.0, 57.0 - 1.0):
+        deck += Pos(56.5, y, (96 + inv.DECK0) / 2) * Box(61, 2, inv.DECK0 - 96)
+    # Fuse block pocket lip (west/east/north; the south edge is the wire
+    # overhang) — the block drops in and the lip locates its base.
+    deck += Pos(22.0, -20.75, inv.DECK1 + 1.5) * Box(4, 92.5, 3)
+    deck += Pos(69.8, -20.75, inv.DECK1 + 1.5) * Box(4, 92.5, 3)
+    deck += Pos(45.9, 27.5, inv.DECK1 + 1.5) * Box(51.8, 4, 3)
+    # Tower joint holes: through 3.4 with a 0.8 top counterbore -> 3.2 stack.
+    for jx, jy in ((30, -61), (86, -61), (95, 61), (107, 55)):
+        deck -= Pos(jx, jy, (inv.DECK0 + inv.DECK1) / 2) * Cylinder(1.7, 6)
+        deck -= Pos(jx, jy, inv.DECK1 - 0.35) * Cylinder(3.25, 0.9)
+    return deck
+
+
 def build_motor_cap():
     # Clamp cap bridging the saddle: flat plate with a shallow gripping arc,
     # printed arc-up (upside down) so it stays support-free.
@@ -444,6 +470,7 @@ def primary_solids():
         "head_pan_plate_v2": build_head_pan_plate(),
         "motor_cap_v2": build_motor_cap(),
         "battery_clamp_v2": build_battery_clamp(),
+        "deck_v2": build_deck(),
     }
 
 
@@ -470,6 +497,7 @@ PRINT_UP = {
     "head_pan_plate_v2": (0, 0, 1),    # flat
     "motor_cap_v2": (0, 0, -1),        # upside down: gripping arc opens up
     "battery_clamp_v2": (0, 0, 1),     # flat bar
+    "deck_v2": (0, 0, -1),             # top face down: ribs and lips build up
 }
 # Allowlisted overhang REGIONS per part (model-space boxes): declared
 # printable features that exceed the generic 50-degree rule — the shell's
