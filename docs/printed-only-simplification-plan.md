@@ -470,9 +470,17 @@ and then thrown that detailing away. Revised order:
    exports every solid in its declared pose with a manifest
    (`robot_body_v2_print.py`: 21 designs, supports "none" across the
    inventory, 11 registry parts listed pending). The BOM carries the
-   two single-SKU fastener lines. Remaining before declaring D027:
-   detail geometry for the pending parts, delivered-part mass updates,
-   assembly-guide regeneration, and a fresh external review round.
+   two single-SKU fastener lines. Update (sixth slice): every registered part
+   now has a solid (31 designs; the print manifest's pending list is
+   empty). The E-stop mount panel merged into the lid — the lid itself
+   is the IDEC clamp panel at 4 mm, inside the 0.8-6 clamp range, with
+   the collar bore opened so the purchased nut lands on lid material —
+   bringing the registry to 39 of the 40-part budget. Four clamp joint
+   families were added (mic cradle, speaker clamps, ToF clamps, Pico
+   clamp), taking the fastener totals to 40 screws + 40 inserts, still
+   single 100-pack SKUs. Remaining before declaring D027:
+   delivered-part mass updates, assembly-guide regeneration, and a
+   fresh external review round.
 3. **Fastener-system pass on v2.** Collapse `Params` to the single
    insert/screw spec; add the clamp-stack (3.0-3.4 mm) and
    engagement-limit validator checks; implement capture-or-M3 mounts for

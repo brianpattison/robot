@@ -274,12 +274,13 @@ PRINTED_PARTS = [
     PP("shell", 1, "PETG", "upright, open bottom down",
        "one-piece exterior; separate from tray for assembly access (arches, speaker pockets, ToF pockets, pod shrouds integrated)"),
     PP("lid", 1, "PETG-dark", "top face down",
-       "roof service access; vent slots print directly; integrated E-stop backing collar boss (merge executed)"),
+       "roof service access; vent slots print directly; integrated E-stop backing collar "
+       "AND the lid itself is the IDEC clamp panel (4 mm within the 0.8-6 range; "
+       "mount-panel part merged away)"),
     PP("bumper_half", 2, "TPU", "flat, open-bottom U", "compliance + material change + bed length"),
     PP("rear_panel", 1, "PETG", "flat", "connector service and independent reprintability"),
     PP("fascia", 1, "PETG-dark", "flat",
        "sensor service + color break; front ToF and status NeoPixel pockets integrated (merge executed)"),
-    PP("estop_mount_panel", 1, "PETG", "flat", "IDEC 4 mm clamp-range calibration interface"),
     PP("deck", 1, "PETG", "flat, ribs up", "removable power/service deck; harness ribs + fuse saddles integrated"),
     PP("controller_tower", 1, "PETG", "flat", "MDDS10 plate + Pi shelf towers as one service module"),
     PP("pico_clamp_bar", 1, "PETG", "flat", "safety-MCU capture on tray bosses"),
@@ -346,6 +347,10 @@ JOINTS = [
     J("front_pods", ((-86, 85), (-62, 85), (-86, -85), (-62, -85)), modeled=True),
     J("rear_wheel_clamps", ((74, 118), (74, -118)), modeled=True),
     J("front_axle_retainers", ((-74, 126), (-74, -126)), modeled=True),
+    J("mic_cradle", ((30, -25), (90, -25)), modeled=True),
+    J("speaker_clamps", ((-52, 100), (26, 100), (-52, -100), (26, -100)), modeled=True),
+    J("tof_clamps", ((-32, 100), (-32, -100)), modeled=True),
+    J("pico_clamp", ((3, 43), (3, 84)), modeled=True),
 ]
 
 
@@ -367,11 +372,7 @@ PURCHASED_MASSES = [
 # Instance multipliers for modeled solids (the model builds one of each
 # design) and mass allowances for registered parts still lacking solids.
 SOLID_INSTANCES = {"rear_wheel_v2": 2, "front_wheel_v2": 2, "tire_v2": 4, "motor_cap_v2": 2}
-PRINTED_MASS_EXTRAS = [
-    ("mic cradle", 25, (60, -25, 172)),
-    ("speaker clamps", 20, (-13, 0, 130)), ("tof clamps + pico clamp", 18, (-10, 40, 70)),
-    ("head yoke/tilt/adapters", 45, (-26, 0, 250)), ("diffuser bars + washers", 25, (-60, 0, 150)),
-]
+PRINTED_MASS_EXTRAS = []  # every registered part now has a solid
 PETG_EFF_DENSITY = 0.60e-3   # g/mm^3: walls + infill, screen-grade
 TPU_EFF_DENSITY = 0.75e-3
 TPU_SOLIDS = {"bumper_front_v2", "bumper_rear_v2", "tire_v2"}

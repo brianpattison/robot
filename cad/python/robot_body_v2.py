@@ -98,7 +98,7 @@ def build_tray():
     # corridor (Z >= 65).
     for px in (-14.5, 75.5):
         for py in (-25.0, 25.0):
-            tray += Pos(px, py, (inv.TRAY_TOP + 52.0) / 2) * Box(14, 14, 52.0 - inv.TRAY_TOP)
+            tray += Pos(px, py, (inv.TRAY_TOP + 51.0) / 2) * Box(14, 14, 51.0 - inv.TRAY_TOP)
     for sy in (1, -1):
         tray += Pos(17.0, sy * 41.5, (inv.TRAY_TOP + 63.0) / 2) * Box(78, 5, 63.0 - inv.TRAY_TOP)
         # Battery-clamp posts on the rail tops, insert bores opening up.
@@ -116,6 +116,10 @@ def build_tray():
     for jx, jy in ((105, 96), (105, -96), (-105, 96), (-105, -96)):
         tray -= Pos(jx, jy, inv.TRAY_TOP - 4) * Cylinder(1.7, 10)
         tray -= Pos(jx, jy, TRAY_Z0 + 2.4) * Cylinder(3.25, 4.8)
+    # Pico clamp bosses north/south of the board seat.
+    for jy in (43.0, 84.0):
+        tray += Pos(3.0, jy, (inv.TRAY_TOP + 67.0) / 2) * Cylinder(4.0, 67.0 - inv.TRAY_TOP)
+        tray -= Pos(3.0, jy, 67.0 - 3.5) * Cylinder(2.3, 7)
     # Controller-tower base and front-pod flange insert bores.
     for jx, jy in ((-101, 59), (-101, -59), (-33, 59), (-33, -59),
                    (-86, 85), (-62, 85), (-86, -85), (-62, -85)):
@@ -178,10 +182,19 @@ def build_shell():
         gusset = Pos(-13, (wall_in + ledge_y) / 2, 106.0) * Box(64, 8, 8)
         gusset -= Pos(-13, ledge_y - sy * 1.0, 103.0) * Rot(45 * sy, 0, 0) * Box(70, 16, 16)
         shell += gusset
-    # Side ToF windows at the v1 station (X=-20) with interior pocket ledges.
+    # Speaker clamp columns flanking each speaker pocket, insert bores up.
+    for sy in (1, -1):
+        for jx in (-52.0, 26.0):
+            col_y = sy * (inv.BODY_W / 2 - WALL - 4)
+            shell += Pos(jx, col_y, (110.0 + 148.0) / 2) * Cylinder(4.0, 38)
+            shell -= Pos(jx, col_y, 148.0 - 3.5) * Cylinder(2.3, 7)
+    # Side ToF windows at the v1 station (X=-20) with interior pocket
+    # ledges and a clamp boss beside each window.
     for sy in (1, -1):
         shell -= Pos(-20, sy * (inv.BODY_W / 2 - 1.5), 96.0) * Box(12, 8, 8)
         shell += Pos(-20, sy * (inv.BODY_W / 2 - WALL - 3), 89.5) * Box(24, 6, 5)
+        shell += Pos(-32, sy * (inv.BODY_W / 2 - WALL - 4), (87.0 + 100.0) / 2) * Cylinder(4.0, 13)
+        shell -= Pos(-32, sy * (inv.BODY_W / 2 - WALL - 4), 100.0 - 3.5) * Cylinder(2.3, 7)
 
     # Fascia opening: two 27 mm sub-openings with a hidden 4 mm mullion
     # (every bridge span <= 30; the fascia panel covers the mullions).
@@ -213,8 +226,12 @@ def build_lid():
     # Integrated E-stop backing collar (merge of the v1 separate collar):
     # a reinforcing ring under the panel bore for the purchased nut clamp.
     ring = Pos(inv.ESTOP[0], inv.ESTOP[1], inv.Z_TOP - LID_RECESS - 3.0) * Cylinder(33.0, 6)
-    ring -= Pos(inv.ESTOP[0], inv.ESTOP[1], inv.Z_TOP - LID_RECESS - 3.0) * Cylinder(13.0, 8)
+    ring -= Pos(inv.ESTOP[0], inv.ESTOP[1], inv.Z_TOP - LID_RECESS - 3.0) * Cylinder(15.0, 8)
     lid += ring
+    # Mic-cradle bosses under the lid, flanking the slot field.
+    for jx, jy in ((30, -25), (90, -25)):
+        lid += Pos(jx, jy, inv.Z_TOP - LID_RECESS - 3.0) * Cylinder(4.5, 6)
+        lid -= Pos(jx, jy, inv.Z_TOP - LID_RECESS - 6.0 + 3.5) * Cylinder(2.3, 7)
     return lid
 
 
@@ -448,6 +465,79 @@ def build_battery_clamp():
     return bar
 
 
+def build_mic_cradle():
+    ring = Pos(60, -25, 173.6) * Cylinder(38.0, 3.2) - Pos(60, -25, 173.6) * Cylinder(33.0, 5)
+    for jx, jy in ((30, -25), (90, -25)):
+        ear = Pos(jx, jy, 173.6) * Cylinder(6.0, 3.2)
+        ear -= Pos(jx, jy, 173.6) * Cylinder(1.7, 5)
+        ring += ear
+        ring += Pos((jx + 60) / 2, jy, 173.6) * Box(18, 8, 3.2)
+    return ring
+
+
+def build_speaker_clamp():
+    bar = Pos(-13, 100, 149.6) * Box(86, 8, 3.2)
+    for jx in (-52.0, 26.0):
+        bar -= Pos(jx, 100, 149.6) * Cylinder(1.7, 5)
+    return bar
+
+
+def build_tof_clamp():
+    bar = Pos(-26, inv.BODY_W / 2 - WALL - 4, 101.6) * Box(20, 8, 3.2)
+    bar -= Pos(-32, inv.BODY_W / 2 - WALL - 4, 101.6) * Cylinder(1.7, 5)
+    return bar
+
+
+def build_pico_clamp():
+    bar = Pos(3, 63.5, 68.6) * Box(10, 49, 3.2)
+    for jy in (43.0, 84.0):
+        bar -= Pos(3, jy, 68.6) * Cylinder(1.7, 5)
+    return bar
+
+
+def build_battery_pad_frame():
+    frame = Pos(30.5, 0, 51.5) * Box(96, 56, 1.0)
+    frame -= Pos(30.5, 0, 51.5) * Box(60, 24, 2)
+    return frame
+
+
+def build_yoke():
+    base = Pos(P.neck_x, 0, NECK_Z1 + 2.0) * Cylinder(21.5, 4)
+    base -= Pos(P.neck_x, 0, NECK_Z1 + 2.0) * Cylinder(9.0, 6)
+    yoke = base
+    for sy in (1, -1):
+        arm = Pos(-10, sy * 38, (NECK_Z1 + 4 + 250.0) / 2) * Box(10, 6, 250.0 - NECK_Z1 - 4)
+        arm += Pos(P.neck_x + 4, sy * 38, NECK_Z1 + 6.0) * Box(24, 6, 8)
+        arm -= Pos(-10, sy * 38, 245.0 + inv.DH) * Rot(90, 0, 0) * Cylinder(1.7, 10)
+        yoke += arm
+    return yoke
+
+
+def build_tilt_bushing():
+    b = Pos(0, 0, 1.5) * Cylinder(4.0, 3.0)
+    b += Pos(0, 0, 3.3) * Cylinder(4.6, 0.6)
+    b -= Pos(0, 0, 2) * Cylinder(1.75, 6)
+    return b
+
+
+def build_eye_diffuser_bar():
+    bar = Pos(0, 0, 1.5) * Box(30, 18, 3)
+    for sy in (1, -1):
+        bar += Pos(0, sy * 5, 3.8) * Box(9, 5, 1.6)
+    return bar
+
+
+def build_status_diffuser_bar():
+    bar = Pos(0, 0, 1.0) * Box(76, 12, 2)
+    for sx in (1, -1):
+        bar += Pos(sx * 30, 0, 2.6) * Box(10, 4, 1.2)
+    return bar
+
+
+def build_printed_washer():
+    return Pos(0, 0, 0.8) * Cylinder(4.0, 1.6) - Pos(0, 0, 0.8) * Cylinder(1.75, 3)
+
+
 def primary_solids():
     return {
         "tray_v2": build_tray(),
@@ -471,6 +561,16 @@ def primary_solids():
         "motor_cap_v2": build_motor_cap(),
         "battery_clamp_v2": build_battery_clamp(),
         "deck_v2": build_deck(),
+        "mic_cradle_v2": build_mic_cradle(),
+        "speaker_clamp_v2": build_speaker_clamp(),
+        "tof_clamp_v2": build_tof_clamp(),
+        "pico_clamp_v2": build_pico_clamp(),
+        "battery_pad_frame_v2": build_battery_pad_frame(),
+        "yoke_v2": build_yoke(),
+        "tilt_bushing_v2": build_tilt_bushing(),
+        "eye_diffuser_bar_v2": build_eye_diffuser_bar(),
+        "status_diffuser_bar_v2": build_status_diffuser_bar(),
+        "printed_washer_v2": build_printed_washer(),
     }
 
 
@@ -498,6 +598,11 @@ PRINT_UP = {
     "motor_cap_v2": (0, 0, -1),        # upside down: gripping arc opens up
     "battery_clamp_v2": (0, 0, 1),     # flat bar
     "deck_v2": (0, 0, -1),             # top face down: ribs and lips build up
+    "mic_cradle_v2": (0, 0, 1), "speaker_clamp_v2": (0, 0, 1),
+    "tof_clamp_v2": (0, 0, 1), "pico_clamp_v2": (0, 0, 1),
+    "battery_pad_frame_v2": (0, 0, 1), "yoke_v2": (0, 0, 1),
+    "tilt_bushing_v2": (0, 0, 1), "eye_diffuser_bar_v2": (0, 0, 1),
+    "status_diffuser_bar_v2": (0, 0, 1), "printed_washer_v2": (0, 0, 1),
 }
 # Allowlisted overhang REGIONS per part (model-space boxes): declared
 # printable features that exceed the generic 50-degree rule — the shell's
