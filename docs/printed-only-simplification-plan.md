@@ -416,6 +416,25 @@ and then thrown that detailing away. Revised order:
    per-part declared-orientation overhang and bridge audits, and the
    (initially empty) support-exception list. Exit — and this is the D027
    packing gate — that validator passing on the v2 model.
+   Progress (2026-07-16): the registered inventory
+   (`robot_body_v2_inventory.py`), the v2 model
+   (`robot_body_v2.py`, 18 solids: tray with cradle/Pico
+   bosses/molded-in switch pockets, shell with circular arches +
+   mullioned openings + speaker ledges + ToF windows, lid with neck
+   pass, TPU bumper C-halves with concealed bridges, front pods with
+   vertical-printing axles, fascia and rear panels, the one-piece
+   controller tower on a channeled plinth with a frame-and-crossbar Pi
+   shelf, wheels, tire, and the five-part head skeleton with a domed
+   cavity), and the inventory-driven validator
+   (`validate_robot_body_v2.py`) are all green in dev mode. The
+   validator has caught nine real design errors so far (tower
+   placements x4, a battery-stop clip, the pod printing on its axle
+   tip, the solid Pi shelf and floating MDDS10 plate as unprintable
+   ceilings, and a mispositioned head cavity), and gained a solid-free
+   thermal check plus a ring-aware bridge heuristic along the way. Four
+   ESTIMATE envelopes (neck_drop, head_roof, pi_port_svc,
+   pico_swd_svc) and six owed part merges remain the tracked gate
+   blockers.
 3. **Fastener-system pass on v2.** Collapse `Params` to the single
    insert/screw spec; add the clamp-stack (3.0-3.4 mm) and
    engagement-limit validator checks; implement capture-or-M3 mounts for
