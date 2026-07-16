@@ -125,8 +125,8 @@ See [`retail-sourcing-policy.md`](retail-sourcing-policy.md) for the live audit.
 | PETG filament | 1-2 kg | Consumable | $25-$60 | Main chassis, trays, mounts, service panels. |
 | PLA filament | 1 kg | Consumable | $15-$30 | Fast fit-check prints before PETG. |
 | TPU filament or foam/rubber bumper material | 1 | Consumable | $20-$50 | Soft bumper carrier and impact padding. |
-| Heat-set threaded inserts, M2.5/M3/M4 | 1 kit | Buy now | $15-$40 | Needed for serviceable printed parts. |
-| Metric screw/standoff/washer assortment | 1 kit | Buy now | $25-$80 | M2.5/M3/M4. Do not rely on self-tapping into plastic for service parts. |
+| M3 x 5.7 x 4.6 OD heat-set inserts, 100-pack | 1 | Buy now (v2 baseline, D026) | $12-$20 | The ONLY insert SKU in the v2 printed-only body (~30 used + spares). Supersedes the old M2.5/M3/M4 kit. |
+| M3 x 8 socket head cap screws (ISO 4762), 100-pack | 1 | Buy now (v2 baseline, D026) | $8-$15 | The ONLY separately purchased screw SKU (~30 used + spares); one 2.5 mm hex key drives the robot. Supersedes the old multi-size assortment and all metal standoffs/spacers. |
 | Cable glands, zip ties, ferrules, heat-shrink | 1 set | Buy now | $15-$50 | Cable management is robot hygiene. |
 | Rubber feet/pads and anti-vibration tape | 1 set | Buy now | $5-$25 | Useful for audio and electronics isolation. |
 

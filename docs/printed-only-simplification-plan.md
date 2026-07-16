@@ -462,10 +462,17 @@ and then thrown that detailing away. Revised order:
    geometry for every major structural part (21 solids). The validator
    gained solid-ownership semantics (a solid may fill its own registered
    plate envelopes). Gate mode passes with zero warnings at ~2.92 kg,
-   CG X=10. Remaining before declaring D027: detail geometry (PCB
-   pockets/pegs, snap features, coupon updates), the v2 print/plate
-   manifest chain, delivered-part mass updates, BOM and assembly-guide
-   regeneration, and a fresh external review round.
+   CG X=10. Update (fifth slice): the v2 coupon program is
+   live (`robot_body_v2_coupons.py`, 11 coupons: insert fit, the D026
+   standard joint as a two-piece test, D-bore torque, axle/bushing
+   wear, snap and bayonet pairs, the molded switch-pocket interface,
+   tire fit, and the Pico capture-clamp pattern) and the print chain
+   exports every solid in its declared pose with a manifest
+   (`robot_body_v2_print.py`: 21 designs, supports "none" across the
+   inventory, 11 registry parts listed pending). The BOM carries the
+   two single-SKU fastener lines. Remaining before declaring D027:
+   detail geometry for the pending parts, delivered-part mass updates,
+   assembly-guide regeneration, and a fresh external review round.
 3. **Fastener-system pass on v2.** Collapse `Params` to the single
    insert/screw spec; add the clamp-stack (3.0-3.4 mm) and
    engagement-limit validator checks; implement capture-or-M3 mounts for
