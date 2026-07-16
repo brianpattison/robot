@@ -6,7 +6,9 @@ registered is itself a failure mode — this validator therefore starts
 from the registry and the D028 printed-part registry, not from whatever
 happens to be modeled.
 
-Checks in this increment:
+Checks in this increment (plus, added later: harness route volumes and
+connector-insertion sweeps as registered envelopes, solid-free sweep
+keepouts, and a screen-grade mass/CG budget with support-polygon limits):
 1. Registry hygiene: unique envelope names; every printed part declares
    an orientation and a justification; the after-merges part count meets
    the D028 budget.
@@ -95,7 +97,7 @@ def check_bed_fit(solids):
 # Keepouts that must contain NO printed material (air contracts the solids
 # themselves must honor — unlike arch/roof keepouts, which are bounded by
 # the very structure being built).
-SOLID_FREE_KEEPOUTS = {"mdds10_thermal"}
+SOLID_FREE_KEEPOUTS = {"mdds10_thermal", "sweep_en2", "sweep_mute", "estop_press"}
 
 
 def check_interference(solids):
@@ -164,6 +166,32 @@ def check_overhangs(solids):
                          f"{OVERHANG_LIMIT_DEG:.0f} deg (worst {worst:.0f} deg) outside allowances")
 
 
+def check_mass_cg(solids):
+    total, mx, my, mz = 0.0, 0.0, 0.0, 0.0
+    for name, solid in solids.items():
+        rho = inv.TPU_EFF_DENSITY if name in inv.TPU_SOLIDS else inv.PETG_EFF_DENSITY
+        n = inv.SOLID_INSTANCES.get(name, 1)
+        m = solid.volume * rho * n
+        c = solid.center()
+        total += m
+        mx += m * c.X
+        my += m * c.Y * (0 if n > 1 else 1)  # mirrored instances cancel in Y
+        mz += m * c.Z
+    for _, m, (x, y, z) in inv.PURCHASED_MASSES + inv.PRINTED_MASS_EXTRAS:
+        total += m
+        mx += m * x
+        my += m * y
+        mz += m * z
+    cgx, cgy, cgz = mx / total, my / total, mz / total
+    ok_x = inv.CG_X_LIMITS[0] <= cgx <= inv.CG_X_LIMITS[1]
+    ok_y = abs(cgy) <= inv.CG_Y_LIMIT
+    if not ok_x:
+        FAILS.append(f"CG: X={cgx:.0f} outside {inv.CG_X_LIMITS} (support polygon margin)")
+    if not ok_y:
+        FAILS.append(f"CG: |Y|={abs(cgy):.0f} exceeds {inv.CG_Y_LIMIT}")
+    return total, cgx, cgy, cgz
+
+
 def main():
     gate = "--gate" in sys.argv
     estimates = check_registry()
@@ -172,6 +200,7 @@ def main():
     check_bed_fit(solids)
     check_interference(solids)
     check_overhangs(solids)
+    total, cgx, cgy, cgz = check_mass_cg(solids)
 
     if estimates:
         msg = f"{len(estimates)} ESTIMATE-basis envelopes remain: {', '.join(estimates)}"
@@ -186,6 +215,8 @@ def main():
     print(f"v2 validator — body {inv.BODY_L} x {inv.BODY_W} x {inv.BODY_H}; "
           f"parts draft {draft} / after merges {after} / budget {budget}; "
           f"fasteners {screws} screws + {inserts} inserts (single SKUs)")
+    print(f"mass budget ~{total / 1000:.2f} kg (screen-grade); CG X={cgx:.0f} Y={cgy:.0f} Z={cgz:.0f}"
+          f" vs axles {inv.FRONT_AXLE_X:.0f}/{inv.REAR_AXLE_X:.0f}")
     for w in WARNS:
         print("  WARN:", w)
     for f_ in FAILS:
