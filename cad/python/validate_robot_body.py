@@ -25,8 +25,6 @@ try:
         body_inner_roof_z,
         build_parts,
         cable_strain_relief_mount_positions,
-        carry_anchor_fastener_positions,
-        carry_anchor_slot_positions,
         camera_board_hole_offsets,
         camera_field_of_view_keepout,
         camera_reference,
@@ -72,7 +70,7 @@ try:
         motor_controller_plate_mount_positions,
         motor_controller_plate_bottom_z,
         motor_controller_plate_top_z,
-        motor_cutoff_plate_mount_positions,
+        motor_cutoff_mount_position,
         neopixel_mount_positions,
         pan_bearing_key_positions,
         pan_bearing_retainer_mount_positions,
@@ -85,8 +83,7 @@ try:
         pico2_usb_notch_center_x,
         pi_regulator_mount_positions,
         power_deck_mount_positions,
-        power_distribution_board_mount_positions,
-        power_distribution_holder_positions,
+        power_distribution_mount_positions,
         power_distribution_strain_slots,
         power_harness_strap_slots,
         printable_parts,
@@ -95,9 +92,6 @@ try:
         rear_charge_jack_center,
         rear_charge_jack_cutout,
         rear_mute_switch_cutout,
-        rear_service_jack_cutout,
-        service_jack_carrier_mount_positions,
-        service_jack_pcb_mount_positions,
         rounded_box,
         rounded_panel_xz,
         rounded_panel_yz,
@@ -140,8 +134,6 @@ except ModuleNotFoundError:
         body_inner_roof_z,
         build_parts,
         cable_strain_relief_mount_positions,
-        carry_anchor_fastener_positions,
-        carry_anchor_slot_positions,
         camera_board_hole_offsets,
         camera_field_of_view_keepout,
         camera_reference,
@@ -187,7 +179,7 @@ except ModuleNotFoundError:
         motor_controller_plate_mount_positions,
         motor_controller_plate_bottom_z,
         motor_controller_plate_top_z,
-        motor_cutoff_plate_mount_positions,
+        motor_cutoff_mount_position,
         neopixel_mount_positions,
         pan_bearing_key_positions,
         pan_bearing_retainer_mount_positions,
@@ -200,8 +192,7 @@ except ModuleNotFoundError:
         pico2_usb_notch_center_x,
         pi_regulator_mount_positions,
         power_deck_mount_positions,
-        power_distribution_board_mount_positions,
-        power_distribution_holder_positions,
+        power_distribution_mount_positions,
         power_distribution_strain_slots,
         power_harness_strap_slots,
         printable_parts,
@@ -210,9 +201,6 @@ except ModuleNotFoundError:
         rear_charge_jack_center,
         rear_charge_jack_cutout,
         rear_mute_switch_cutout,
-        rear_service_jack_cutout,
-        service_jack_carrier_mount_positions,
-        service_jack_pcb_mount_positions,
         rounded_box,
         rounded_panel_xz,
         rounded_panel_yz,
@@ -336,63 +324,12 @@ def validate(bed: float, margin: float):
         frozenset(("fit_pi5", "fit_pi5_board")),
         frozenset(("fit_estop_switch_body", "fit_estop_threaded_barrel")),
         frozenset(("fit_estop_switch_body", "fit_estop_terminal_service")),
-        frozenset(("fit_motor_cutoff", "fit_motor_cutoff_terminal_service")),
+        frozenset(("fit_motor_cutoff_relay", "fit_motor_cutoff_terminal_service")),
         frozenset(("fit_camera_module_3", "fit_camera_fov")),
         frozenset(("fit_motor_controller", "fit_motor_controller_board")),
         frozenset(("fit_motor_controller", "fit_motor_controller_airflow")),
         frozenset(("fit_motor_controller", "fit_motor_controller_terminal_service")),
     }
-    distribution_service = "fit_power_distribution_fuse_service"
-    for fit_name in power_distribution_fit_names:
-        if fit_name != distribution_service:
-            allowed_fit_overlaps.add(frozenset((distribution_service, fit_name)))
-    allowed_fit_overlaps.add(
-        frozenset(("fit_power_distribution_board", "fit_power_distribution_header"))
-    )
-    allowed_fit_overlaps.add(
-        frozenset(("fit_power_distribution_header", "fit_power_distribution_receptacle"))
-    )
-    allowed_fit_overlaps.add(
-        frozenset(
-            (
-                "fit_power_distribution_receptacle",
-                "fit_power_distribution_harness_straight",
-            )
-        )
-    )
-    allowed_fit_overlaps.add(
-        frozenset(
-            (
-                "fit_power_distribution_receptacle",
-                "fit_power_distribution_harness_bend",
-            )
-        )
-    )
-    allowed_fit_overlaps.add(
-        frozenset(
-            (
-                "fit_power_distribution_harness_straight",
-                "fit_power_distribution_harness_bend",
-            )
-        )
-    )
-    for index in range(1, 5):
-        allowed_fit_overlaps.add(
-            frozenset(
-                (
-                    f"fit_power_distribution_holder_{index}",
-                    f"fit_power_distribution_fuse_{index}",
-                )
-            )
-        )
-        allowed_fit_overlaps.add(
-            frozenset(
-                (
-                    "fit_power_distribution_board",
-                    f"fit_power_distribution_holder_{index}",
-                )
-            )
-        )
     pico_nested_fits = (
         "fit_safety_mcu_board",
         "fit_safety_mcu_header_left",
@@ -446,18 +383,6 @@ def validate(bed: float, margin: float):
     )
     allowed_fit_overlaps.add(
         frozenset(("fit_battery", "fit_battery_lead_service"))
-    )
-    for fit_name in (
-        "fit_service_jack_body",
-        "fit_service_jack_pcb",
-        "fit_service_jack_wire_service",
-    ):
-        allowed_fit_overlaps.add(frozenset(("fit_rear_service_bay", fit_name)))
-    allowed_fit_overlaps.add(
-        frozenset(("fit_service_jack_body", "fit_service_jack_pcb"))
-    )
-    allowed_fit_overlaps.add(
-        frozenset(("fit_service_jack_pcb", "fit_service_jack_wire_service"))
     )
     for (name_a, shape_a), (name_b, shape_b) in combinations(fits.items(), 2):
         if frozenset((name_a, name_b)) in allowed_fit_overlaps:
@@ -995,15 +920,15 @@ def validate(bed: float, margin: float):
         ),
         "motor cutoff": (
             (
-                "fit_motor_cutoff",
+                "fit_motor_cutoff_relay",
                 "fit_motor_cutoff_terminal_service",
-                "fit_motor_cutoff_metal_plate",
+                "fit_motor_cutoff_bracket",
             ),
             ("power_service_deck",),
         ),
         "power distribution": (
             power_distribution_fit_names,
-            ("power_service_deck", "power_distribution_cover"),
+            ("power_service_deck",),
         ),
         "rear switches/connectors": (("fit_rear_service_bay",), ("rear_service_panel",)),
         "rear charge-only inlet": (
@@ -1025,19 +950,7 @@ def validate(bed: float, margin: float):
             ),
             ("rear_service_cartridge_mute_status", "rear_service_panel"),
         ),
-        "rear UART service jack": (
-            (
-                "fit_service_jack_body",
-                "fit_service_jack_pcb",
-                "fit_service_jack_wire_service",
-                "fit_service_jack_plug_service",
-            ),
-            (
-                "rear_service_cartridge_service_data",
-                "rear_service_data_carrier",
-                "rear_service_panel",
-            ),
-        ),
+        "blank rear access cartridge": ((), ("rear_service_cartridge_blank_access",)),
         "safety MCU": (
             (
                 "fit_safety_mcu",
@@ -1136,15 +1049,6 @@ def validate(bed: float, margin: float):
             ),
             ("estop_well", "estop_backing_plate"),
         ),
-        "carry interface": (
-            (
-                "fit_carry_clamp_plate_left",
-                "fit_carry_clamp_plate_right",
-                "fit_carry_webbing_stowed_left",
-                "fit_carry_webbing_stowed_right",
-            ),
-            ("base_tray",),
-        ),
         "power harness routing": (
             ("fit_power_harness_left", "fit_power_harness_right"),
             (
@@ -1182,98 +1086,6 @@ def validate(bed: float, margin: float):
                 f"component coverage missing for {label}: "
                 f"fits={','.join(missing_fits) or 'ok'} parts={','.join(missing_parts) or 'ok'}"
             )
-
-    # The carry loops are soft purchased webbing, but their load enters the
-    # robot through metal plates and M4 through-bolts across both tray halves.
-    # Prove every strap/bolt path is open and the stowed loops stay above the
-    # wheel-ground plane without consuming electronics or mobility geometry.
-    carry_print_targets = (
-        "body_shell",
-        "base_tray",
-        "battery_cradle",
-        "motor_controller_mount",
-        "motor_pod_left",
-        "motor_pod_right",
-        "front_idler_pod_left",
-        "front_idler_pod_right",
-    )
-    carry_stow_targets = (
-        "base_tray",
-        "bumper_carrier",
-        "motor_pod_left",
-        "motor_pod_right",
-        "front_idler_pod_left",
-        "front_idler_pod_right",
-        *wheel_names,
-    )
-    carry_ground_z = wheel_ground_z(p)
-    for side, side_sign in (("left", -1), ("right", 1)):
-        plate_name = f"fit_carry_clamp_plate_{side}"
-        strap_name = f"fit_carry_webbing_stowed_{side}"
-        plate = fits[plate_name]
-        strap = fits[strap_name]
-
-        plate_box = plate.bounding_box()
-        if not (plate_box.min.X < -0.05 and plate_box.max.X > 0.05):
-            failures.append(f"carry clamp plate does not bridge tray split: {side}")
-        if float(strap.bounding_box().min.Z) < carry_ground_z + 3.0:
-            failures.append(
-                f"stowed carry webbing lacks ground clearance: {side} "
-                f"({float(strap.bounding_box().min.Z) - carry_ground_z:.2f} mm)"
-            )
-
-        for target_name in carry_print_targets:
-            volume = intersection_volume(plate, main[target_name])
-            if volume > 0.05:
-                failures.append(
-                    f"carry clamp collision: {plate_name} vs {target_name} "
-                    f"({volume:.2f} mm^3)"
-                )
-        for target_name in carry_stow_targets:
-            volume = intersection_volume(strap, main[target_name])
-            if volume > 0.05:
-                failures.append(
-                    f"stowed carry webbing collision: {strap_name} vs {target_name} "
-                    f"({volume:.2f} mm^3)"
-                )
-
-        for x, y in carry_anchor_slot_positions(p, side_sign):
-            probe = rounded_prism_xy(
-                p.carry_slot_width - 0.2,
-                p.carry_slot_length - 0.2,
-                p.tray_thickness + p.carry_anchor_doubler_height + 5.0,
-                min(p.carry_slot_width / 2.0 - 0.3, 1.9),
-                (x, y, p.body_bottom - p.tray_thickness / 2.0),
-            )
-            for target_name in (
-                "base_tray",
-                "base_tray_half_front" if x < 0 else "base_tray_half_rear",
-            ):
-                target = main[target_name] if target_name in main else split[target_name]
-                volume = intersection_volume(probe, target)
-                if volume > 0.05:
-                    failures.append(
-                        f"blocked carry webbing slot on {side} at X={x:.0f}: "
-                        f"{target_name} ({volume:.2f} mm^3)"
-                    )
-
-        for x, y in carry_anchor_fastener_positions(p, side_sign):
-            probe = cylinder_z(
-                p.m4_clearance_hole / 2.0 - 0.1,
-                p.tray_thickness + p.carry_anchor_doubler_height + 8.0,
-                (x, y, p.body_bottom - p.tray_thickness / 2.0),
-            )
-            for target_name in (
-                "base_tray",
-                "base_tray_half_front" if x < 0 else "base_tray_half_rear",
-            ):
-                target = main[target_name] if target_name in main else split[target_name]
-                volume = intersection_volume(probe, target)
-                if volume > 0.05:
-                    failures.append(
-                        f"blocked carry M4 path on {side} at ({x:.0f},{y:.0f}): "
-                        f"{target_name} ({volume:.2f} mm^3)"
-                    )
 
     # The IDEC E-stop clamps only the removable 4 mm keyed mount panel. The
     # larger contact body passes through lid/shell/backing, while four long M3
@@ -2125,8 +1937,9 @@ def validate(bed: float, margin: float):
                     )
 
     # The two-motor MVP keeps the concept's front wheels as non-driven idlers.
-    # Each removable pod locates two 608-class bearings and an 8 mm metal shaft.
-    # The shaft must clear the pod and shell, then extend into the wheel hub.
+    # Each removable pod locates two 608-class bearings on a retail WDS
+    # 615-M6-8-65 shoulder bolt. Its head stays accessible inboard and its M6
+    # thread is positively retained by an outboard washer and locknut.
     front_idler_keepouts = (
         "fit_pi5",
         "fit_motor_controller",
@@ -2134,13 +1947,28 @@ def validate(bed: float, margin: float):
         "fit_safety_mcu",
         "fit_future_ai_hat_clearance",
     )
+    idler_dimensions = {
+        "shoulder_length": (p.front_axle_shoulder_length, 65.0),
+        "shoulder_diameter": (p.front_axle_shaft_diameter, 8.0),
+        "thread_diameter": (p.front_axle_thread_diameter, 6.0),
+        "thread_length": (p.front_axle_thread_length, 10.0),
+    }
+    for dimension, (actual, expected) in idler_dimensions.items():
+        if abs(actual - expected) > 0.05:
+            failures.append(
+                f"WDS 615-M6-8-65 {dimension} drifted: "
+                f"{actual:.2f} vs {expected:.2f} mm"
+            )
     for side, sign, wheel_name in (
         ("left", -1, "hub_left_1"),
         ("right", 1, "hub_right_1"),
     ):
         pod_name = f"front_idler_pod_{side}"
         hardware_names = front_idler_hardware_names(side)
-        shaft_name = f"fit_front_idler_{side}_shaft"
+        shoulder_name = f"fit_front_idler_{side}_shoulder_bolt"
+        thread_name = f"fit_front_idler_{side}_thread"
+        head_name = f"fit_front_idler_{side}_shoulder_head"
+        locknut_name = f"fit_front_idler_{side}_locknut"
         hub_name = f"fit_front_idler_{side}_hub"
         for hardware_name in hardware_names:
             for target_name in (pod_name, "body_shell"):
@@ -2163,33 +1991,39 @@ def validate(bed: float, margin: float):
             return tuple(sorted((sign * float(box.min.Y), sign * float(box.max.Y))))
 
         stack_names = (
-            f"fit_front_idler_{side}_retaining_ring",
-            f"fit_front_idler_{side}_inner_washer",
             f"fit_front_idler_{side}_bearing_inner",
             f"fit_front_idler_{side}_inner_spacer",
             f"fit_front_idler_{side}_bearing_outer",
             f"fit_front_idler_{side}_outer_spacer",
             hub_name,
+            f"fit_front_idler_{side}_tuning_spacer",
+            f"fit_front_idler_{side}_tuning_shim",
+            f"fit_front_idler_{side}_thread_washer",
+            locknut_name,
         )
         for first_name, second_name in zip(stack_names, stack_names[1:]):
             first_bounds = signed_y_bounds(fits[first_name])
             second_bounds = signed_y_bounds(fits[second_name])
             allowed_gap = (
-                p.front_axle_ring_groove_width - p.front_axle_ring_thickness + 0.01
-                if first_name.endswith("_retaining_ring")
+                p.front_axle_tuning_shim_length + 0.01
+                if first_name.endswith("_tuning_shim")
                 else 0.05
             )
             if abs(first_bounds[1] - second_bounds[0]) > allowed_gap:
                 failures.append(
                     f"front-idler axial stack gap on {side}: {first_name} -> {second_name}"
                 )
-        shaft_bounds = signed_y_bounds(fits[shaft_name])
+        shoulder_bounds = signed_y_bounds(fits[shoulder_name])
+        thread_bounds = signed_y_bounds(fits[thread_name])
+        head_bounds = signed_y_bounds(fits[head_name])
         hub_bounds = signed_y_bounds(fits[hub_name])
-        if abs(shaft_bounds[1] - hub_bounds[1]) > 0.05:
-            failures.append(f"front-idler shaft misses hub outer face on {side}")
-        ring_bounds = signed_y_bounds(fits[stack_names[0]])
-        if shaft_bounds[0] > ring_bounds[0] - p.front_axle_ring_edge_margin + 0.05:
-            failures.append(f"front-idler shaft lacks retaining-ring edge margin on {side}")
+        locknut_bounds = signed_y_bounds(fits[locknut_name])
+        if abs((shoulder_bounds[1] - hub_bounds[1]) - 4.0) > 0.05:
+            failures.append(f"front-idler shoulder extension past hub drifted on {side}")
+        if abs(head_bounds[1] - shoulder_bounds[0]) > 0.05:
+            failures.append(f"front-idler shoulder-bolt head is not inboard on {side}")
+        if thread_bounds[0] > locknut_bounds[0] + 0.05:
+            failures.append(f"front-idler M6 thread does not pass through locknut on {side}")
         if intersection_volume(fits[hub_name], main[wheel_name]) > 0.05:
             failures.append(f"front-idler #2693 hub collides with wheel core on {side}")
         if not inside_box(
@@ -2465,8 +2299,8 @@ def validate(bed: float, margin: float):
                 )
 
     # The battery cradle sits directly on the tray. The controller plate is
-    # lifted 5 mm on metal spacers to bridge the concealed carry-handle
-    # doubler; all shared holes and both tiers of standoffs must remain open.
+    # lifted 5 mm on metal spacers; all shared holes and both tiers of
+    # standoffs must remain open.
     for part_name in ("battery_cradle", "motor_controller_mount"):
         volume = intersection_volume(main[part_name], main["base_tray"])
         if volume > 0.05:
@@ -2996,9 +2830,9 @@ def validate(bed: float, margin: float):
         "fit_pi_buck_terminal_service_rear",
         "fit_servo_regulator",
         "fit_servo_regulator_wire_service",
-        "fit_motor_cutoff",
+        "fit_motor_cutoff_relay",
         "fit_motor_cutoff_terminal_service",
-        "fit_motor_cutoff_metal_plate",
+        "fit_motor_cutoff_bracket",
         *power_distribution_fit_names,
         *audio_amp_fit_names,
         "fit_power_harness_left",
@@ -3083,38 +2917,14 @@ def validate(bed: float, margin: float):
             "rear_service_cartridge_mute_status",
             "top_cable_strain_relief",
         ),
-        "fit_service_jack_body": (
-            "body_shell",
-            "rear_service_panel",
-            "rear_service_cartridge_service_data",
-            "rear_service_data_carrier",
-        ),
-        "fit_service_jack_pcb": (
-            "body_shell",
-            "rear_service_panel",
-            "rear_service_cartridge_service_data",
-            "rear_service_data_carrier",
-        ),
-        "fit_service_jack_wire_service": (
-            "body_shell",
-            "rear_service_panel",
-            "rear_service_cartridge_service_data",
-            "rear_service_data_carrier",
-            "top_cable_strain_relief",
-        ),
-        "fit_service_jack_plug_service": (
-            "body_shell",
-            "rear_service_panel",
-            "rear_service_cartridge_service_data",
-        ),
         "fit_pi_buck_regulator": ("power_service_deck",),
         "fit_pi_buck_terminal_service_front": ("power_service_deck",),
         "fit_pi_buck_terminal_service_rear": ("power_service_deck",),
         "fit_servo_regulator": ("power_service_deck",),
         "fit_servo_regulator_wire_service": ("power_service_deck",),
-        "fit_motor_cutoff": ("power_service_deck",),
+        "fit_motor_cutoff_relay": ("power_service_deck",),
         "fit_motor_cutoff_terminal_service": ("power_service_deck",),
-        "fit_motor_cutoff_metal_plate": ("power_service_deck",),
+        "fit_motor_cutoff_bracket": ("power_service_deck",),
         "fit_power_harness_left": ("power_harness_rail_left", "power_service_deck"),
         "fit_power_harness_right": ("power_harness_rail_right", "power_service_deck"),
         "fit_motor_controller": ("motor_controller_mount",),
@@ -3141,20 +2951,8 @@ def validate(bed: float, margin: float):
         "fit_tof_side_left": ("tof_pod_side_left", "body_shell", "side_fairing_left"),
         "fit_tof_side_right": ("tof_pod_side_right", "body_shell", "side_fairing_right"),
     }
-    distribution_cover_clearance_fits = {
-        "fit_power_distribution_board",
-        "fit_power_distribution_header",
-        "fit_power_distribution_receptacle",
-        "fit_power_distribution_harness_straight",
-        "fit_power_distribution_harness_bend",
-        *(f"fit_power_distribution_holder_{index}" for index in range(1, 5)),
-        *(f"fit_power_distribution_fuse_{index}" for index in range(1, 5)),
-    }
     for fit_name in power_distribution_fit_names:
-        targets = ["power_service_deck"]
-        if fit_name in distribution_cover_clearance_fits:
-            targets.append("power_distribution_cover")
-        service_fit_targets[fit_name] = tuple(targets)
+        service_fit_targets[fit_name] = ("power_service_deck",)
     for side in ("left", "right"):
         for fit_name in audio_amp_fit_names:
             if fit_name.startswith(f"fit_audio_amp_{side}"):
@@ -3235,155 +3033,107 @@ def validate(bed: float, margin: float):
                     )
 
 
-    # Albright SW60 drawing contract. The contactor sits on a custom metal
-    # carrier plate so the printed deck organizes the assembly but is not the
-    # sole safety-hardware retention or cable-torque path.
-    sw60_dimensions = {
-        "body_length": (p.motor_cutoff_body_length, 63.0),
-        "body_width": (p.motor_cutoff_body_width, 37.0),
-        "body_height": (p.motor_cutoff_body_height, 28.0),
-        "terminal_overall_length": (p.motor_cutoff_terminal_overall_length, 81.0),
+    # Panasonic CB1A-R-M-12V relay with its integral single-hole bracket.
+    relay_dimensions = {
+        "body_length": (p.motor_cutoff_body_length, 26.0),
+        "body_width": (p.motor_cutoff_body_width, 22.0),
+        "body_height": (p.motor_cutoff_body_height, 25.0),
+        "bracket_length": (p.motor_cutoff_bracket_length, 52.0),
+        "mount_hole": (p.motor_cutoff_mount_hole, 5.4),
     }
-    for dimension, (actual, expected) in sw60_dimensions.items():
+    for dimension, (actual, expected) in relay_dimensions.items():
         if abs(actual - expected) > 0.05:
             failures.append(
-                f"Albright SW60 {dimension} drifted: {actual:.2f} vs {expected:.2f} mm"
+                f"Panasonic CB1A-R-M-12V {dimension} drifted: "
+                f"{actual:.2f} vs {expected:.2f} mm"
             )
-    cutoff_plate = fits["fit_motor_cutoff_metal_plate"]
-    cutoff_body_box = fits["fit_motor_cutoff"].bounding_box()
-    cutoff_plate_box = cutoff_plate.bounding_box()
-    if abs(float(cutoff_plate_box.min.Z - deck_top)) > 0.05:
-        failures.append("SW60 metal carrier misses power-deck top")
-    if abs(float(cutoff_body_box.min.Z - cutoff_plate_box.max.Z)) > 0.05:
-        failures.append("SW60 body misses metal carrier top")
-    for index, (x, y) in enumerate(motor_cutoff_plate_mount_positions(p), start=1):
-        probe_bottom = p.power_deck_z - 3.0
-        probe_top = float(cutoff_plate_box.max.Z) + 1.0
-        probe = cylinder_z(
-            p.motor_cutoff_plate_mount_hole / 2.0 - 0.1,
-            probe_top - probe_bottom,
-            (x, y, (probe_bottom + probe_top) / 2.0),
-        )
-        for target_name, target in (
-            ("power_service_deck", main["power_service_deck"]),
-            ("fit_motor_cutoff_metal_plate", cutoff_plate),
-        ):
-            volume = intersection_volume(probe, target)
-            if volume > 0.05:
-                failures.append(
-                    f"blocked SW60 metal-carrier M3 path {index}: "
-                    f"{target_name} ({volume:.2f} mm^3)"
-                )
+    cutoff_bracket = fits["fit_motor_cutoff_bracket"]
+    cutoff_relay_box = fits["fit_motor_cutoff_relay"].bounding_box()
+    cutoff_bracket_box = cutoff_bracket.bounding_box()
+    cutoff_support_top = deck_top + p.motor_cutoff_mount_height
+    if abs(float(cutoff_bracket_box.min.Z - cutoff_support_top)) > 0.05:
+        failures.append("Panasonic relay bracket misses printed mounting boss")
+    if abs(float(cutoff_relay_box.min.Z - cutoff_bracket_box.max.Z)) > 0.05:
+        failures.append("Panasonic relay body misses integral bracket top")
+    mount_x, mount_y = motor_cutoff_mount_position(p)
+    cutoff_probe = cylinder_z(
+        p.motor_cutoff_mount_hole / 2.0 - 0.1,
+        14.0,
+        (mount_x, mount_y, deck_top + 3.0),
+    )
+    for target_name, target in (
+        ("power_service_deck", main["power_service_deck"]),
+        ("fit_motor_cutoff_bracket", cutoff_bracket),
+    ):
+        volume = intersection_volume(cutoff_probe, target)
+        if volume > 0.05:
+            failures.append(
+                f"blocked Panasonic relay M5 mount path: {target_name} "
+                f"({volume:.2f} mm^3)"
+            )
 
-    # Custom four-branch accessory board. The geometry is pinned to four
-    # Littelfuse 01550900M OMNI-BLOK Nano2 holders and Molex's drawing-backed
-    # 43045-1000 / 43025-1000 Micro-Fit interface. This proves packaging and
-    # service access only; PCB copper, exact fuse values, and fault behavior
-    # remain electrical-review and physical-test gates.
+    # Retail Blue Sea 5045 covered four-circuit ATO/ATC fuse block. Its
+    # purchased insulating cover replaces the deleted custom printed cover.
     distribution_dimensions = {
-        "board_length": (p.power_distribution_board_length, 40.0),
-        "board_width": (p.power_distribution_board_width, 21.0),
-        "board_thickness": (p.power_distribution_board_thickness, 1.6),
-        "holder_length": (p.power_distribution_holder_length, 9.73),
-        "holder_width": (p.power_distribution_holder_width, 5.03),
-        "holder_height": (p.power_distribution_holder_height, 3.81),
-        "header_width": (p.power_distribution_header_width, 18.65),
-        "header_depth": (p.power_distribution_header_depth, 12.24),
-        "header_height": (p.power_distribution_header_height, 9.91),
-        "receptacle_width": (p.power_distribution_receptacle_width, 15.85),
-        "receptacle_depth": (p.power_distribution_receptacle_depth, 17.56),
-        "receptacle_height": (p.power_distribution_receptacle_height, 10.81),
+        "length": (p.power_distribution_length, 92.5),
+        "width": (p.power_distribution_width, 43.8),
+        "height": (p.power_distribution_height, 32.5),
+        "mount_spacing": (p.power_distribution_mount_spacing, 65.1),
+        "mount_hole": (p.power_distribution_mount_hole, 4.5),
     }
     for dimension, (actual, expected) in distribution_dimensions.items():
         if abs(actual - expected) > 0.05:
             failures.append(
-                f"power-distribution {dimension} drifted: "
+                f"Blue Sea 5045 {dimension} drifted: "
                 f"{actual:.2f} vs {expected:.2f} mm"
             )
-    if len(power_distribution_holder_positions(p)) != 4:
-        failures.append("power-distribution board must carry exactly four fuse holders")
+    if len(power_distribution_mount_positions(p)) != 2:
+        failures.append("Blue Sea 5045 must expose exactly two M4 mount paths")
     if p.power_distribution_total_limit_a > 6.0:
         failures.append("power-distribution provisional total limit exceeds 6 A")
     if p.power_distribution_branch_limit_a > 5.0:
         failures.append("power-distribution provisional branch limit exceeds 5 A")
-    if p.power_distribution_total_limit_a > p.power_distribution_connector_limit_a:
-        failures.append("power-distribution total limit exceeds derated connector contact")
-    if p.power_distribution_branch_limit_a > p.power_distribution_holder_rating_a:
-        failures.append("power-distribution branch limit exceeds OMNI-BLOK rating")
+    if p.power_distribution_total_limit_a > p.power_distribution_block_rating_a:
+        failures.append("power-distribution total limit exceeds Blue Sea block rating")
+    if p.power_distribution_branch_limit_a > p.power_distribution_circuit_rating_a:
+        failures.append("power-distribution branch limit exceeds Blue Sea circuit rating")
 
-    distribution_board = fits["fit_power_distribution_board"]
-    distribution_cover = main["power_distribution_cover"]
-    distribution_service = fits["fit_power_distribution_fuse_service"]
-    if len(distribution_cover.solids()) != 1:
-        failures.append("power-distribution cover is not one printable solid")
-    if intersection_volume(distribution_cover, main["power_service_deck"]) > 0.05:
-        failures.append("power-distribution cover collides with power deck")
-    missing_cover_service = float(distribution_cover.volume) - intersection_volume(
-        distribution_cover, distribution_service
-    )
-    if missing_cover_service > 0.05:
-        failures.append(
-            "power-distribution cover escapes its fuse-service volume "
-            f"({missing_cover_service:.2f} mm^3)"
-        )
-
-    board_box = distribution_board.bounding_box()
-    board_bottom = deck_top + p.power_distribution_lower_standoff_height
-    board_top = board_bottom + p.power_distribution_board_thickness
-    if abs(float(board_box.min.Z - board_bottom)) > 0.05:
-        failures.append("power-distribution PCB misses lower standoff plane")
-    for index, (x, y) in enumerate(power_distribution_board_mount_positions(p), start=1):
-        lower_name = f"fit_power_distribution_lower_standoff_{index}"
-        upper_name = f"fit_power_distribution_upper_standoff_{index}"
-        lower_box = fits[lower_name].bounding_box()
-        upper_box = fits[upper_name].bounding_box()
-        if abs(float(lower_box.min.Z - deck_top)) > 0.05:
-            failures.append(f"power-distribution lower standoff {index} misses deck")
-        if abs(float(lower_box.max.Z - board_bottom)) > 0.05:
-            failures.append(f"power-distribution lower standoff {index} misses PCB")
-        if abs(float(upper_box.min.Z - board_top)) > 0.05:
-            failures.append(f"power-distribution upper standoff {index} misses PCB")
+    distribution_block = fits["fit_power_distribution_block"]
+    distribution_block_box = distribution_block.bounding_box()
+    if len(distribution_block.solids()) != 1:
+        failures.append("Blue Sea 5045 fit envelope is not one solid")
+    if abs(float(distribution_block_box.min.Z - deck_top)) > 0.05:
+        failures.append("Blue Sea 5045 misses power-deck top")
+    for index, (x, y) in enumerate(power_distribution_mount_positions(p), start=1):
         probe = cylinder_z(
             p.power_distribution_mount_hole / 2.0 - 0.1,
-            p.power_distribution_cover_height + 10.0,
-            (
-                x,
-                y,
-                deck_top + (p.power_distribution_cover_height + 4.0) / 2.0,
-            ),
+            p.power_distribution_height + 10.0,
+            (x, y, deck_top + p.power_distribution_height / 2.0),
         )
         for target_name, target in (
             ("power_service_deck", main["power_service_deck"]),
-            ("fit_power_distribution_board", distribution_board),
-            ("power_distribution_cover", distribution_cover),
+            ("fit_power_distribution_block", distribution_block),
         ):
             volume = intersection_volume(probe, target)
             if volume > 0.05:
                 failures.append(
-                    f"blocked power-distribution M2 stack path {index}: "
+                    f"blocked Blue Sea 5045 M4 path {index}: "
                     f"{target_name} ({volume:.2f} mm^3)"
                 )
 
-    for index in range(1, 5):
-        holder_name = f"fit_power_distribution_holder_{index}"
-        fuse_name = f"fit_power_distribution_fuse_{index}"
-        for fit_name in (holder_name, fuse_name):
-            shape = fits[fit_name]
-            missing = float(shape.volume) - intersection_volume(shape, distribution_service)
-            if missing > 0.05:
-                failures.append(
-                    f"power-distribution service volume misses {fit_name} "
-                    f"({missing:.2f} mm^3)"
-                )
-
+    distribution_service = fits["fit_power_distribution_fuse_service"]
     service_box = distribution_service.bounding_box()
-    expected_service_top = deck_top + p.power_distribution_fuse_service_height
+    expected_service_top = (
+        deck_top
+        + p.power_distribution_height
+        + p.power_distribution_fuse_service_height
+    )
     if abs(float(service_box.max.Z - expected_service_top)) > 0.05:
-        failures.append("power-distribution fuse-puller service height drifted")
+        failures.append("Blue Sea 5045 fuse-service height drifted")
     body_inner_rear = p.body_length / 2.0 - p.wall
-    harness_box = fits["fit_power_distribution_harness_bend"].bounding_box()
-    if float(harness_box.max.X) > body_inner_rear + 0.05:
-        failures.append("power-distribution harness bend escapes body cavity")
+    wire_box = fits["fit_power_distribution_wire_service"].bounding_box()
+    if float(wire_box.max.X) > body_inner_rear + 0.05:
+        failures.append("Blue Sea 5045 wire service escapes body cavity")
 
     for x, y in power_distribution_strain_slots(p):
         probe = rounded_box(3.1, 7.6, 12.0, 1.2, (x, y, p.power_deck_z))
@@ -3599,9 +3349,6 @@ def validate(bed: float, margin: float):
             "fit_estop_terminal_service",
             "fit_mute_switch_body",
             "fit_mute_switch_terminal_service",
-            "fit_service_jack_body",
-            "fit_service_jack_pcb",
-            "fit_service_jack_wire_service",
         ):
             volume = intersection_volume(fits[fit_name], fits[protected_name])
             if volume > 0.05:
@@ -3619,106 +3366,6 @@ def validate(bed: float, margin: float):
         inner_z_max,
     ):
         failures.append("charge-jack terminal service escaped body cavity")
-
-    # The center cartridge now exposes a shallow, protected 3.3 V UART service
-    # interface. Its right-angle TRRS jack and horizontal PCB stay entirely
-    # behind the panel but in front of the E-stop body.
-    service_cutout_probe = rear_service_jack_cutout(p, 8.0, rear_x)
-    if intersection_volume(
-        service_cutout_probe,
-        main["rear_service_cartridge_service_data"],
-    ) > 0.05:
-        failures.append("Switchcraft service-jack cartridge cutout is blocked")
-    service_dimensions = {
-        "body_length": (p.service_jack_body_length, 15.5),
-        "body_width": (p.service_jack_body_width, 6.8),
-        "body_height": (p.service_jack_body_height, 5.3),
-    }
-    for dimension, (actual, expected) in service_dimensions.items():
-        if abs(actual - expected) > 0.05:
-            failures.append(
-                f"Switchcraft 35RASMT5CHNTRX {dimension} drifted: "
-                f"{actual:.2f} vs {expected:.2f} mm"
-            )
-    carrier = main["rear_service_data_carrier"]
-    if len(carrier.solids()) != 1:
-        failures.append("rear service-data carrier is not one printable solid")
-    for index, (mount_y, mount_z) in enumerate(
-        service_jack_carrier_mount_positions(p), start=1
-    ):
-        probe = cylinder_x(
-            p.service_jack_carrier_mount_hole / 2.0 - 0.1,
-            12.0,
-            (rear_x - 1.0, mount_y, mount_z),
-        )
-        for target_name in (
-            "rear_service_cartridge_service_data",
-            "rear_service_data_carrier",
-        ):
-            volume = intersection_volume(probe, main[target_name])
-            if volume > 0.05:
-                failures.append(
-                    f"blocked service-carrier M2 path {index}: "
-                    f"{target_name} ({volume:.2f} mm^3)"
-                )
-        support = cylinder_x(3.0, 4.5, (148.0, mount_y, mount_z))
-        support = support - cylinder_x(
-            p.m2_clearance_hole / 2.0 + 0.1,
-            6.0,
-            (148.0, mount_y, mount_z),
-        )
-        if intersection_volume(support, carrier) < 25.0:
-            failures.append(f"service-carrier M2 path {index} lacks boss support")
-
-    pcb_box = fits["fit_service_jack_pcb"].bounding_box()
-    shelf_top_z = p.service_jack_pcb_bottom_z - 0.2
-    if abs(float(pcb_box.min.Z) - (shelf_top_z + 0.2)) > 0.05:
-        failures.append("service UART PCB misses carrier shelf")
-    for index, (x, y) in enumerate(service_jack_pcb_mount_positions(p), start=1):
-        probe = cylinder_z(
-            p.service_jack_pcb_mount_hole / 2.0 - 0.1,
-            p.service_jack_carrier_shelf_thickness
-            + p.service_jack_pcb_thickness
-            + 2.0,
-            (
-                x,
-                y,
-                p.service_jack_pcb_bottom_z
-                - p.service_jack_carrier_shelf_thickness / 2.0
-                + p.service_jack_pcb_thickness / 2.0,
-            ),
-        )
-        for target_name, target in (
-            ("rear_service_data_carrier", carrier),
-            ("fit_service_jack_pcb", fits["fit_service_jack_pcb"]),
-        ):
-            volume = intersection_volume(probe, target)
-            if volume > 0.05:
-                failures.append(
-                    f"blocked service-PCB M2 path {index}: "
-                    f"{target_name} ({volume:.2f} mm^3)"
-                )
-    for fit_name in (
-        "fit_service_jack_body",
-        "fit_service_jack_pcb",
-        "fit_service_jack_wire_service",
-    ):
-        for protected_name in (
-            "fit_estop_switch_body",
-            "fit_estop_terminal_service",
-            "fit_mute_switch_body",
-            "fit_mute_switch_terminal_service",
-        ):
-            volume = intersection_volume(fits[fit_name], fits[protected_name])
-            if volume > 0.05:
-                failures.append(
-                    f"service-data hardware collision: {fit_name} vs "
-                    f"{protected_name} ({volume:.2f} mm^3)"
-                )
-    estop_rear_x = float(fits["fit_estop_switch_body"].bounding_box().max.X)
-    jack_inner_x = float(fits["fit_service_jack_body"].bounding_box().min.X)
-    if jack_inner_x - estop_rear_x < 2.0:
-        failures.append("service jack has less than 2 mm E-stop body clearance")
 
     # The right cartridge clamps the exact E-Switch PVB3F230SS311 through its
     # two-flat 16 mm panel opening. Verify
@@ -4030,11 +3677,11 @@ def validate(bed: float, margin: float):
         "tilt_pivot=r_ml24_mf84zz_shoulder_screw split_joinery_collisions=0 "
         "component_contracts=ok expression_contracts=ok camera_optics=ok "
         "attachment_paths=ok sensor_sightlines=ok "
-        "motor_service_paths=ok rear_motors=pololu_4867_mp carry_paths=ok "
+        "motor_service_paths=ok rear_motors=pololu_4867_mp no_carry_hardware=ok "
         "battery=bioenno_blf1203ab_fit rear_charge=en2p3m20_charge_only "
-        "power_distribution=4x_01550900m_nano2_microfit_covered_serviced "
+        "power_distribution=blue_sea_5045_covered_4circuit_m4_serviced "
         "estop_paths=ok physical_mute=pvb3_two_flat_service_clear "
-        "rear_service=trrs_uart_clear harness_paths=ok "
+        "rear_service=blank_center_cartridge harness_paths=ok "
         "pico2=official_mount_usb_swd_service "
         f"alignment_pilots={pilot_count} head_panels=ok service_paths=ok"
     )

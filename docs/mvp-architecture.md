@@ -38,12 +38,13 @@ This layer owns immediate motor shutdown and hard limits. It should continue to 
 
 ### Local Service Interface
 
-- Rear-center Switchcraft 35RASMT5CHNTRX four-conductor jack on a protected 3.3 V UART PCB.
-- Tip is robot TX, ring 1 is robot RX, ring 2 is `SERVICE_DETECT`, and sleeve is ground.
-- Use only a labeled, USB-powered 3.3 V UART adapter. The port exposes no raw battery, 5 V output, motor enable, safety bypass, audio, or RS-232 levels.
-- Series resistance, ESD protection, defined detect biasing, connector-mating tests, and an explicit service-session reset are required.
-
-`SERVICE_DETECT` may request motion inhibit, but it cannot authorize motion or replace the E-stop, bumpers, watchdog, or motor-power isolation. Service begins with the motor branch physically isolated, and disconnecting the adapter must never restart motion automatically.
+The center rear cartridge is intentionally blank. D024 removed the custom UART
+PCB and external jack rather than adding an unnecessary powered interface.
+Development diagnostics use the Pi/Pico's internal service connectors with the
+robot shut down or the motor branch physically isolated. No service procedure
+may bypass the E-stop, bumpers, watchdog, charger inhibit, or explicit motion
+enable. A future external service interface requires its own retail-only
+decision and safety review.
 
 ### Perception Layer
 
@@ -173,13 +174,15 @@ stop/fault until the safety controller observes a valid released loop and the
 operator explicitly re-enables motion. Do not infer bumper safety from Linux
 process health or the LLM.
 
-The motor branch's mechanical cutoff baseline is a normally-open Albright SW60
-contactor. The Pi and safety controller remain on individually fused upstream
-branches so they can report a stop; only the motor-driver positive branch passes
-through the contactor. Both IDEC direct-opening NC channels must be in the
+The motor branch's mechanical cutoff baseline is a Panasonic CB1A-R-M-12V
+sealed SPST-NO automotive relay with an integral bracket, one 5.4 mm mounting
+hole, 40 A contact rating at 14 V, 12 V/134 mA coil, and built-in resistor. The
+Pi and safety controller remain on individually fused upstream branches so they
+can report a stop; only the motor-driver positive branch passes through the
+relay. Both IDEC direct-opening NC channels must be in the
 low-current, fail-deenergized coil-enable path, with a hardware reset latch so
 releasing the mushroom cannot restart motion. Exact coil variant, suppression,
-dropout time, fusing, conductor sizing, weld detection, and full-charge
+terminal/conductor sizing, driver behavior, dropout time, fusing, contact-fault detection, and full-charge
 LiFePO4 motor-voltage limiting require electrical-engineering review and bench
 tests. The E-stop never carries motor current directly.
 
@@ -188,29 +191,27 @@ Pololu #4867 motors with one Bioenno BLF-1203AB 12 V/3 Ah LiFePO4 pack and its
 matched BPC-1502DC 14.6 V/2 A charger. The rear Switchcraft EN2 inlet is
 charge-only: two contacts go only to the pack's isolated charge lead and the
 third reports protected `CHARGER_PRESENT`. It exposes no battery output and is
-not a disconnect. Charger insertion must de-energize motor enable/SW60 through
+not a disconnect. Charger insertion must de-energize motor enable/the Panasonic relay through
 the deterministic safety path; removal must not restart motion without an
 explicit reset. Because EN2 is not rated for current interruption, remove
 charger AC before mating or unmating. The candidate remains blocked on
-delivered-part evidence/fit, custom distribution PCB and fuse release,
+delivered-part evidence/fit, Blue Sea 5045 mounting and fuse release,
 polarity/strain relief, <=5.6 A sustained pack current, 45-minute runtime with
 20% reserve, BMS/regen/thermal behavior, and full/low-charge loaded floor tests.
 
-Accessory distribution now has a mechanical baseline: a custom 40 x 21 mm PCB
-with four Littelfuse 01550900M replaceable Nano2 holders and a latched ten-pin
-Molex Micro-Fit harness. One source positive/return pair feeds four separately
-fused positive/return branches. The board is limited provisionally to 6 A total
-and 5 A on any branch, mounts on stacked metal M2 standoffs, and sits beneath a
-removable printed touch cover with a separately strapped first cable bend.
+Accessory distribution uses a complete Blue Sea Systems 5045 covered four-
+circuit ATO/ATC fuse block, modeled at 92.5 x 43.8 x 32.5 mm with two mounting
+holes on 65.1 mm centers. It is limited provisionally to 6 A total and 5 A on
+any branch despite its higher catalog ratings.
 Exact fuse values remain unset until measured startup/transient/fault loads and
 time-current curves are reviewed. A battery-near accessory feeder fuse is still
-required; the branch board must not provide any path around the independently
-fused and contactor-cut motor branch.
+required; the fuse block must have covered live parts, terminal protection,
+strain relief, labels, power-off-only service, selective-fault and thermal
+tests, and no path around the independently fused and relay-cut motor branch.
 
-The calibration suite includes a nonfunctional production-derived PETG gauge
-for the complete onboard PCB/holder/fuse/header envelope. Use it with the real
-deck, M2 stacking standoffs, and production cover to reject mechanical fit
-before PCB fabrication; it does not satisfy any electrical release gate.
+D024 supersedes the custom Nano2/Micro-Fit board described by D023. The legacy
+distribution coupon is historical mechanical evidence and is not a release
+gate for the Blue Sea block.
 
 MVP navigation should start with one-room or prepared-area behavior before full floor roaming. The body should reserve space and power for future 2D LiDAR, but camera + ToF + bumpers are enough for the first bench and supervised rolling tests.
 
@@ -325,4 +326,4 @@ shorted into an implausible state, stale, or untested after controller reset.
 - What is the preferred TTS voice and speaker loudness target?
 - How should Codex memory for the body be stored, synced, and privacy-scoped?
 - What local-only commands should work even with no internet?
-- Which exact source/branch fuse values, PCB copper/via geometry, Micro-Fit contacts and wire gauges pass the measured-load, selective-short, crimp-pull, and thermal review?
+- Which exact feeder and ATO/ATC branch fuse values, terminal parts, and wire gauges pass the measured-load, selective-short, crimp-pull, and Blue Sea 5045 thermal review?

@@ -71,7 +71,7 @@ The MVP body is a compact wheeled rover with a friendly head:
 - Speaker grille facing upward/frontward.
 - Microphone array mounted high enough to avoid motor noise.
 - LED eyes or light strip for states: listening, thinking, moving, muted, error, low battery.
-- Carry handle and accessible battery compartment.
+- Accessible battery compartment; no carry handle. Lift the shut-down robot with two hands under the tray.
 
 ### 3D-Printed Body Strategy
 
@@ -154,7 +154,7 @@ The safety controller and navigation layer must be able to reject or clamp any c
 5. As Brian, I can press a physical E-stop and motor power is cut immediately.
 6. As a visitor, I can tell from lights/sound whether the robot is listening, moving, muted, or stopped.
 7. As a developer, I can open a local dashboard, see state/logs/map/camera preview, and manually drive at capped speed.
-8. As a developer, I can connect a labeled 3.3 V UART service adapter while motor power is physically isolated, inspect local diagnostics, and disconnect it without causing motion or exposing a power output.
+8. As a developer, I can open the robot for internal diagnostics after shutdown or physical motor-branch isolation; the blank center rear cartridge adds no external power or motion hazard.
 
 ## 11. Functional Requirements
 
@@ -168,10 +168,9 @@ The safety controller and navigation layer must be able to reject or clamp any c
 
 ### Service And Diagnostics
 
-- The rear service jack exposes protected 3.3 V UART TX/RX, a biased service-detect input, and ground only.
-- Service mode requires physical motor-branch isolation; service detect can inhibit motion but cannot enable it or bypass any deterministic stop path.
-- Plug insertion, removal, partial insertion, and conductor shorts must not damage either side, energize the robot through the adapter, or trigger automatic motion restart.
-- The adapter and robot pinout must be durably labeled, and RS-232-level or power-sourcing adapters are prohibited.
+- The center rear cartridge is blank: no jack, custom PCB, power output, or service-detect wiring.
+- Internal service requires shutdown or physical motor-branch isolation and cannot bypass any deterministic stop path.
+- Closing the robot after service must not enable motion automatically; explicit reset and enable remain required.
 
 ### Motion
 
@@ -219,7 +218,7 @@ The safety controller and navigation layer must be able to reject or clamp any c
 - Robot starts in stopped mode after boot.
 - Robot requires explicit enable before movement.
 - Inserting the charge plug inhibits motor power through the deterministic safety path; unplugging it never restarts motion without explicit reset.
-- Four accessory branches are separately fused on a covered, latched-harness distribution PCB; exact fuse values follow measured loads, conductor ampacity, and selective-fault tests, while the motor branch remains separately source-fused and contactor-cut.
+- Four accessory branches are separately fused in a covered Blue Sea Systems 5045 ATO/ATC block; exact fuse values follow measured loads, conductor ampacity, and selective-fault tests, while the motor branch remains separately source-fused and cut by the Panasonic CB1A-R-M-12V relay.
 - Robot emits a short audible/visible cue before moving from rest.
 - Robot avoids sleeping areas and bathrooms by default unless manually enabled.
 
@@ -295,13 +294,13 @@ The MVP is done when:
 | Battery brownouts reset Pi | Separate motor and compute rails, fused pack, proper buck converters, brownout logging, and test the BLF-1203AB candidate at full and low charge under loaded turns. |
 | Charging while mobile energizes an unsafe state | Use a charge-only keyed EN2 inlet with protected charger-present detection, deterministic motor inhibit, explicit reset after removal, and AC-off mating/unmating. |
 | Robot feels creepy instead of companionable | Clear LEDs, physical mute, no silent recording, gentle motion cues, no surprise roaming. |
-| Service connector creates a new power or motion hazard | Expose only protected 3.3 V UART/detect/ground, require a labeled USB-powered adapter and physical motor isolation, test mating shorts, and prohibit automatic restart. |
+| Service connector creates a new power or motion hazard | Keep the center rear cartridge blank; use internal access only after shutdown or physical motor isolation, and prohibit automatic restart. |
 | Over-ambitious autonomy delays first joy | Build personality and voice early; keep movement behaviors simple and safe. |
 
 ## 17. Open Decisions
 
-- Physical qualification of the BLF-1203AB/BPC-1502DC/EN2 prototype set and electrical release of the custom Nano2/Micro-Fit branch board: copper, feeder/branch fuse values, contacts/wires/crimps, selective clearing, and thermal behavior.
-- Final insert, clearance, bearing, lap, wall, bumper, fairing, and pilot parameters plus distribution deck/cover preflight after printing and measuring the 17-part coupon suite.
+- Physical qualification of the BLF-1203AB/BPC-1502DC/EN2 prototype set, Panasonic relay, and Blue Sea 5045: mounting, feeder/branch fuse values, terminals/wires/crimps, relay dropout, selective clearing, and thermal behavior.
+- Final insert, clearance, bearing, lap, wall, bumper, fairing, and pilot parameters after printing and measuring the applicable coupon suite; the legacy custom-board gauge is not a D024 release gate.
 - Delivered-hardware fit and loaded-floor results for the settled body, wheel, motor, bearing, and head-mechanism dimensions.
 - Whether MVP includes 2D LiDAR from day one or waits until camera/proximity testing proves insufficient.
 - Exact local/cloud AI split for conversation.

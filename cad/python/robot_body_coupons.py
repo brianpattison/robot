@@ -27,8 +27,7 @@ try:
         bumper_switch_travel_target,
         cylinder_z,
         electronics_fit,
-        power_distribution_board_mount_positions,
-        power_distribution_cover,
+        power_distribution_mount_positions,
         power_distribution_fit_parts,
         rounded_box,
         rounded_prism_xy,
@@ -60,8 +59,7 @@ except ModuleNotFoundError:
         bumper_switch_travel_target,
         cylinder_z,
         electronics_fit,
-        power_distribution_board_mount_positions,
-        power_distribution_cover,
+        power_distribution_mount_positions,
         power_distribution_fit_parts,
         rounded_box,
         rounded_prism_xy,
@@ -538,39 +536,60 @@ def fairing_recess_coupons(p: Params):
 
 
 def power_distribution_fit_gauge(p: Params):
-    """One-piece print gauge for the production PCB and onboard hardware stack."""
-    fits = power_distribution_fit_parts(p)
-    source_names = (
-        "fit_power_distribution_board",
-        "fit_power_distribution_header",
-        *(f"fit_power_distribution_holder_{index}" for index in range(1, 5)),
-        *(f"fit_power_distribution_fuse_{index}" for index in range(1, 5)),
+    """Lightweight one-piece envelope gauge for the retail Blue Sea 5045."""
+    deck_top = p.power_deck_z + 2.0
+    base_thickness = 2.0
+    post_size = 8.0
+    gauge = rounded_box(
+        p.power_distribution_width,
+        p.power_distribution_length,
+        base_thickness,
+        2.0,
+        (
+            p.power_distribution_center_x,
+            p.power_distribution_center_y,
+            deck_top + base_thickness / 2.0,
+        ),
     )
-    gauge = fits[source_names[0]]
-    for name in source_names[1:]:
-        gauge = gauge + fits[name]
+    post_height = p.power_distribution_height - base_thickness
+    for x_sign in (-1.0, 1.0):
+        for y_sign in (-1.0, 1.0):
+            gauge = gauge + rounded_box(
+                post_size,
+                post_size,
+                post_height,
+                1.2,
+                (
+                    p.power_distribution_center_x
+                    + x_sign * (p.power_distribution_width - post_size) / 2.0,
+                    p.power_distribution_center_y
+                    + y_sign * (p.power_distribution_length - post_size) / 2.0,
+                    deck_top + base_thickness + post_height / 2.0,
+                ),
+            )
+    for x, y in power_distribution_mount_positions(p):
+        gauge = gauge - cylinder_z(
+            p.power_distribution_mount_hole / 2.0,
+            base_thickness + 2.0,
+            (x, y, deck_top + base_thickness / 2.0),
+        )
     return "power_distribution_fit_gauge", gauge, {
-        "purpose": "exact_custom_distribution_pcb_cover_and_deck_fit_preflight",
+        "purpose": "blue_sea_5045_production_footprint_and_deck_fit_preflight",
         "material_profile": "production_petg_detail",
         "fit_only_not_electrical": True,
-        "board_reference_mm": {
-            "length": p.power_distribution_board_length,
-            "width": p.power_distribution_board_width,
-            "thickness": p.power_distribution_board_thickness,
+        "retail_module_reference": "Blue Sea Systems 5045 covered 4-circuit ATO/ATC fuse block",
+        "module_envelope_mm": {
+            "length": p.power_distribution_length,
+            "width": p.power_distribution_width,
+            "height": p.power_distribution_height,
+            "mount_spacing": p.power_distribution_mount_spacing,
             "mount_hole_diameter": p.power_distribution_mount_hole,
         },
-        "hardware_envelopes": {
-            "fuse_holders": "4 x Littelfuse 01550900M OMNI-BLOK",
-            "fuses": "4 x Littelfuse Nano2 envelope",
-            "pcb_header": "Molex 43045-1000 right-angle 10-circuit Micro-Fit",
-        },
-        "production_cover": "power_distribution_cover",
         "assembly_note": (
-            "Mount this unpowered PETG gauge on the production deck using the real "
-            "4 mm lower and 3 mm upper M2 stacking standoffs, then install the actual "
-            "four-screw touch cover. Confirm all holes start by hand, the cover seats "
-            "without bowing, and the header clears its open end. This gauge does not "
-            "validate PCB copper, fuses, contacts, crimps, current, heat, or faults."
+            "Mount this lightweight unpowered PETG gauge directly on the production "
+            "deck through the two M4 paths. Confirm the purchased block footprint, integral cover, "
+            "wire exits, labels, fuse-service reach, and neighboring clearances before "
+            "release. This solid gauge does not validate current, heat, or fault behavior."
         ),
     }
 
@@ -1038,39 +1057,34 @@ def validate_fairing_recess(p: Params, coupons):
 
 
 def validate_power_distribution_gauge(p: Params, coupons):
-    """Prove the printable gauge is the exact installed onboard stack envelope."""
+    """Prove the gauge matches the Blue Sea 5045 production footprint."""
     coupon_name = "power_distribution_fit_gauge"
     gauge = coupons[coupon_name]["shape"]
     fits = power_distribution_fit_parts(p)
-    source_names = (
-        "fit_power_distribution_board",
-        "fit_power_distribution_header",
-        *(f"fit_power_distribution_holder_{index}" for index in range(1, 5)),
-        *(f"fit_power_distribution_fuse_{index}" for index in range(1, 5)),
-    )
+    source_names = ("fit_power_distribution_block",)
     source = fits[source_names[0]]
-    for name in source_names[1:]:
-        source = source + fits[name]
-    missing = float((source - gauge).volume)
-    extra = float((gauge - source).volume)
-    if missing > 0.05 or extra > 0.05:
+    source_box = source.bounding_box()
+    gauge_box = gauge.bounding_box()
+    source_dims = (
+        float(source_box.max.X - source_box.min.X),
+        float(source_box.max.Y - source_box.min.Y),
+        float(source_box.max.Z - source_box.min.Z),
+    )
+    gauge_dims = (
+        float(gauge_box.max.X - gauge_box.min.X),
+        float(gauge_box.max.Y - gauge_box.min.Y),
+        float(gauge_box.max.Z - gauge_box.min.Z),
+    )
+    if any(abs(a - b) > 0.05 for a, b in zip(source_dims, gauge_dims)):
         raise ValueError(
-            "Power-distribution fit gauge drifted from production envelopes: "
-            f"missing={missing:.3f} extra={extra:.3f} mm^3"
+            "Power-distribution fit gauge envelope drifted from production: "
+            f"source={source_dims} gauge={gauge_dims}"
         )
     if len(gauge.solids()) != 1:
         raise ValueError("Power-distribution fit gauge is not one printable solid")
 
-    cover_overlap = float((gauge & power_distribution_cover(p)).volume)
-    if cover_overlap > 0.05:
-        raise ValueError(
-            "Power-distribution fit gauge collides with production cover: "
-            f"{cover_overlap:.3f} mm^3"
-        )
-
     open_mount_paths = 0
-    gauge_box = gauge.bounding_box()
-    for x, y in power_distribution_board_mount_positions(p):
+    for x, y in power_distribution_mount_positions(p):
         probe = cylinder_z(
             p.power_distribution_mount_hole / 2.0 - 0.05,
             float(gauge_box.max.Z - gauge_box.min.Z) + 4.0,
@@ -1079,17 +1093,16 @@ def validate_power_distribution_gauge(p: Params, coupons):
         blocked = float((gauge & probe).volume)
         if blocked > 0.05:
             raise ValueError(
-                "Power-distribution fit gauge blocks an M2 stack path: "
+                "Power-distribution fit gauge blocks an M4 mount path: "
                 f"{blocked:.3f} mm^3"
             )
         open_mount_paths += 1
 
     return {
         "source_envelopes": list(source_names),
-        "missing_mm3": missing,
-        "extra_mm3": extra,
-        "production_cover_overlap_mm3": cover_overlap,
-        "open_m2_stack_paths": open_mount_paths,
+        "source_dimensions_mm": source_dims,
+        "gauge_dimensions_mm": gauge_dims,
+        "open_m4_mount_paths": open_mount_paths,
         "fit_only_not_electrical": True,
         "status": "ok",
     }
@@ -1174,7 +1187,7 @@ def export_coupons(p: Params, bed: float, margin: float):
         f"shoulders={feature_validation['bearing_shoulders_checked']} "
         "grounded=ok contact=ok lid_lap=exact split_pilot=clear "
         "bumper_interface=clear_and_actuates fairing_recess=clear_and_seats "
-        "power_distribution_gauge=exact_and_cover_clear "
+        "power_distribution_gauge=blue_sea_5045_exact_with_2x_m4_paths "
         "pan_bearing=seat_and_journal parameters=shared"
     )
 

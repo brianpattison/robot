@@ -185,16 +185,6 @@ def orientation_for(name: str):
             (("y", 90.0),),
             "rear panel face on bed; integrated camera annulus and eye frames print upward",
         )
-    if name == "rear_service_data_carrier":
-        return (
-            (("x", 90.0),),
-            "broad carrier side on bed; flange and PCB shelf rise together",
-        )
-    if name == "power_distribution_cover":
-        return (
-            (("x", 180.0),),
-            "closed roof on bed; open service cavity and standoff feet print upward",
-        )
     if name.startswith("rear_service_cartridge_"):
         return (
             (("y", 90.0),),
@@ -297,25 +287,17 @@ ASSEMBLY_HARDWARE = {
         "front_bearing_retainers": {"thread": "M2.5", "fasteners": 8, "inserts": 8},
         "front_idler_axles": {
             "bearings": "4 x 608, 8 x 22 x 7 mm",
-            "shafts": "2 x 8 mm steel, 64.5 mm overall, DSH-8 groove at inboard end",
-            "shaft_groove": "7.54-7.60 mm diameter x 0.90 mm wide, 0.60 mm minimum edge margin",
-            "retaining_rings": "2 x Rotor Clip DSH-8 / DIN 471 8x0.8 external rings",
-            "washers": "2 x 8 x 15 x 2 mm steel",
+            "shoulder_bolts": "2 x WDS 615-M6-8-65, 8 mm x 65 mm shoulder with M6 threaded end",
+            "orientation": "Shoulder-bolt head inboard; M6 washer and prevailing-torque locknut outboard",
+            "thread_washers": "2 x stock M6 washers, 12 mm OD x 1.6 mm nominal",
+            "locknuts": "2 x stock M6 prevailing-torque locknuts",
             "inner_spacers": "2 x 12 OD x 8 ID x 14 mm metal tubes",
             "outer_spacers": "2 x 10 OD x 8 ID x 19 mm metal tubes",
+            "tuning_spacers": "2 x 10 OD x 8 ID x 3 mm stock spacers",
+            "tuning_shims": "2 x 11 OD x 8 ID x 0.5 mm stock shims",
             "hubs": "2 x Pololu #2693 8 mm-shaft M3 aluminum hubs",
             "wheel_hub_fasteners": 12,
-            "note": "Machine and deburr the shaft groove to the ring manufacturer's drawing; verify both #2693 set screws per hub, axial play, free rotation, and loaded floor behavior before driving.",
-        },
-        "recessed_carry_handles": {
-            "webbing_handles": 2,
-            "webbing_width_mm": 25,
-            "metal_clamp_plates": 2,
-            "thread": "M4 through-bolt",
-            "fasteners": 8,
-            "washers": 16,
-            "locknuts": 8,
-            "note": "Deburr every webbing-contact edge and prove the complete loaded robot with a low-height lift test before normal use.",
+            "note": "Use only stock hardware; verify bolt shoulder support, head access, full locknut engagement, #2693 set screws, axial play, free rotation, alignment, and loaded skid-turn behavior before driving.",
         },
         "battery_cradle_to_tray": {"thread": "M3", "fasteners": 4, "inserts": 4},
         "controller_plate_to_tray": {
@@ -324,7 +306,7 @@ ASSEMBLY_HARDWARE = {
             "inserts": 4,
             "standoffs": 4,
             "standoff_height_mm": 5,
-            "note": "Metal spacers lift the plate over the concealed right carry-handle doubler.",
+            "note": "Metal spacers preserve tray clearance and keep the controller plate mechanically serviceable.",
         },
         "controller_board_standoffs": {
             "thread": "M3",
@@ -353,28 +335,21 @@ ASSEMBLY_HARDWARE = {
             "note": "Use soldered appropriately sized conductors rather than a breadboard. Preserve terminal/wire service, airflow, strain relief, fusing, and the two electrically separate output rails.",
         },
         "motor_power_contactor": {
-            "contactor": "Albright SW60, normally open, 12 V continuously rated coil variant required",
-            "main_terminals": "M6 studs",
-            "coil_terminals": "6.3 mm spades",
-            "custom_metal_carrier_mm": [50, 90, 2],
-            "carrier_thread": "M3 through-bolt",
-            "carrier_fasteners": 4,
-            "carrier_washers": 8,
-            "carrier_locknuts": 4,
-            "note": "The custom metal carrier is the primary structural interface. Confirm the exact SW60 ordering code, M4 contactor-to-carrier interface, stud boots, lug torque support, coil suppression, dropout time, and conductor/fuse sizing with the purchased hardware and an electrical engineer.",
+            "relay": "Panasonic CB1A-R-M-12V sealed SPST-NO automotive relay",
+            "contact_rating": "40 A at 14 V DC",
+            "coil": "12 V, 134 mA, integral suppression resistor",
+            "terminals": "6.3 mm quick-connect",
+            "integral_bracket_mount": "One 5.4 mm path for an M5 fastener",
+            "note": "Use the relay's integral metal bracket and the single modeled mount. Verify purchased-part fit, terminal retention and insulation, conductor support, dropout time, fault current, and independent fail-stopped cutoff before motion.",
         },
-        "accessory_distribution_board": {
-            "board": "Custom 40 x 21 x 1.6 mm, provisionally 2 oz copper",
-            "fuse_holders": "4 x Littelfuse 01550900M OMNI-BLOK for replaceable Nano2 fuses",
-            "connector": "Molex 43045-1000 right-angle 10-circuit Micro-Fit header with 43025-1000 latched receptacle",
-            "pinout": "Source positive/return plus four separately fused positive/return branch pairs",
-            "thread": "M2 metal stacking standoffs",
-            "lower_standoffs": 4,
-            "upper_standoffs": 4,
-            "cover_fasteners": 4,
+        "accessory_distribution_block": {
+            "module": "Blue Sea Systems 5045 covered four-circuit ATO/ATC fuse block",
+            "module_mm": [92.5, 43.8, 32.5],
+            "mounting": "Two M4 paths on 65.1 mm centers",
+            "cover": "Purchased integral insulating cover with labels",
             "reusable_strain_strap": 1,
             "limits": "Prototype ceiling: 6 A total and 5 A any branch; exact fuse values remain measured-load selections.",
-            "note": "The printed cover is touch protection only. The PCB, connector latch, metal standoffs, source fuse, harness clamp, reviewed copper/trace layout, crimp tooling, labels, selective short tests, and thermal tests carry the real electrical contract.",
+            "note": "Confirm the delivered footprint, power-off cover removal with the service deck lifted, wire bends, terminal guards, labels, feeder protection, selective clearing, and thermal behavior before release.",
         },
         "power_harness_rails": {
             "printed_rails": 2,
@@ -414,28 +389,18 @@ ASSEMBLY_HARDWARE = {
         },
         "rear_service_cartridges": {
             "parts": 3,
-            "blank_parts": 0,
-            "roles_left_to_right_from_rear": ["power/charge", "service/data", "mute/status"],
+            "blank_parts": 1,
+            "roles_left_to_right_from_rear": ["power/charge", "blank/access", "mute/status"],
             "thread": "M2.5",
             "fasteners": 6,
             "inserts": 6,
             "mute_switch": "E-Switch PVB3F230SS311 maintained SPDT, red ring LED, 16 mm two-flat panel cutout",
             "mute_switch_cutout": "16.0 mm diameter, 14.6 mm flats, 1.25 mm cartridge face",
             "mute_wiring": "Common receives fused microphone 5 V; listen throw feeds microphone VBUS; mute throw feeds the red ring through a calculated series resistor and a protected 3.3 V-compatible state input. Verify polarity and no USB backfeed.",
-            "service_jack": "Switchcraft 35RASMT5CHNTRX four-conductor 3.5 mm jack on an 18 x 18 mm protected UART/service PCB",
-            "service_jack_wiring": "Tip/rings carry protected 3.3 V UART TX, UART RX, and service-detect; sleeve is ground. No raw battery, motor-enable, or power output is exposed. Use only a labeled USB-powered 3.3 V adapter.",
+            "center_access": "Blank removable cartridge; no UART jack, PCB, carrier, or exposed power",
             "charge_inlet": "Switchcraft EN2P3M20 three-position sealed panel connector; EN2C3F20G2 cord mate",
             "charge_wiring": "Two contacts carry charge positive/negative from the Bioenno 14.6 V/2 A charger adapter; the third is CHARGER_PRESENT. Charge-only: no battery output or motor power. Mate/unmate only with charger AC removed.",
-            "note": "All three cartridges are populated: charge-only at left, protected UART service at center, and physical mute at right.",
-        },
-        "rear_service_data_carrier": {
-            "printed_carrier": 1,
-            "thread": "M2 through-bolt",
-            "cartridge_fasteners": 2,
-            "pcb_fasteners": 2,
-            "washers": 8,
-            "locknuts": 4,
-            "note": "The removable L-carrier keeps the jack PCB in front of the E-stop and routes the four-wire harness sideways. Verify purchased-jack fit, cable insertion, ESD/series protection, 3.3 V levels, and no automatic motion restart after service.",
+            "note": "Charge-only remains at left, the center stays blank for future qualified access, and physical mute remains at right.",
         },
         "estop_backing_plate": {
             "switch": "1 x IDEC XW1E-BV402M-R, 40 mm red mushroom, 2NC direct-opening",
@@ -539,7 +504,6 @@ def material_profile_for(name: str) -> str:
             "top_vent_inlay",
             "power_harness_rail_",
             "rear_service_cartridge_",
-            "power_distribution_cover",
         )
     ):
         return "petg_detail"
@@ -646,12 +610,6 @@ def support_guidance_for(name: str):
             "brim_mm": 3,
             "note": "Print on the long sidewall so the U-channel and paired strap slots remain support-free.",
         }
-    if name == "power_distribution_cover":
-        return {
-            "supports": "none_expected",
-            "brim_mm": 2,
-            "note": "Print roof-down. Inspect the Micro-Fit opening, four M2 stack paths, internal feet, and continuous touch-protection walls.",
-        }
     if name.startswith("rear_service_cartridge_"):
         return {
             "supports": "none_expected",
@@ -675,7 +633,7 @@ def release_status_for(name: str) -> str:
     ):
         return "prototype_only_pending_adafruit_5975_fit_cable_and_diffusion_test"
     if name.startswith("base_tray_half_"):
-        return "prototype_only_pending_split_pilot_carry_and_bumper_switch_hardware_tests"
+        return "prototype_only_pending_split_pilot_and_bumper_switch_hardware_tests"
     if name.startswith("bumper_q_"):
         return "prototype_only_pending_split_pilot_tpu_material_and_six_direction_actuation_test"
     if name.startswith("bumper_switch_mount_"):
@@ -698,15 +656,13 @@ def release_status_for(name: str) -> str:
     ):
         return "prototype_only_pending_d85mg_horns_bearings_and_complete_head_motion_test"
     if name.startswith("front_idler_"):
-        return "prototype_only_pending_608_grooved_shaft_dsh8_2693_axial_play_retention_and_loaded_floor_test"
+        return "prototype_only_pending_wds_615_m6_8_65_608_stock_spacer_locknut_axial_play_and_loaded_floor_test"
     if name == "safety_mcu_mount":
         return "prototype_only_pending_pico2_board_standoff_usb_swd_and_watchdog_test"
     if name == "motor_controller_mount":
         return "prototype_only_pending_mdds10_board_terminal_cooling_polarity_and_load_test"
     if name == "power_service_deck":
-        return "prototype_only_pending_regulator_sw60_and_custom_distribution_pcb_fit_wiring_airflow_transient_fusing_and_cutoff_test"
-    if name == "power_distribution_cover":
-        return "prototype_only_pending_custom_4branch_pcb_01550900m_nano2_microfit_fuse_service_strain_fault_and_thermal_test"
+        return "prototype_only_pending_regulator_panasonic_cb1a_relay_blue_sea_5045_fit_wiring_fusing_and_cutoff_test"
     if name == "battery_cradle":
         return "prototype_only_pending_bioenno_blf1203ab_purchased_fit_lead_current_runtime_padding_and_loaded_retention_test"
     if name.startswith("speaker_mount_"):
@@ -717,8 +673,8 @@ def release_status_for(name: str) -> str:
         return "prototype_only_pending_pvb3_switch_nut_harness_led_resistor_usb_backfeed_and_privacy_test"
     if name == "rear_service_cartridge_power_charge":
         return "prototype_only_pending_en2_charge_adapter_polarity_charger_present_motion_inhibit_and_mating_test"
-    if name in ("rear_service_cartridge_service_data", "rear_service_data_carrier"):
-        return "prototype_only_pending_switchcraft_trrs_uart_pcb_esd_level_adapter_and_service_interlock_test"
+    if name == "rear_service_cartridge_blank_access":
+        return "prototype_only_blank_access_cartridge_no_connector_installed"
     if name.startswith("rear_service_cartridge_"):
         return "prototype_only_blank_pending_selected_connector_cutout_keying_strain_relief_and_electrical_test"
     return "prototype_print_candidate"
@@ -855,17 +811,16 @@ def export_print_ready(p: Params, bed: float, margin: float):
             "release_gate": "Inspect purchased revisions; use fused, strain-relieved conductors; verify polarity, output voltage, startup/inrush, Pi undervoltage margin, dual-servo transients, thermal behavior, airflow, EMI/audio behavior, and fault shutdown before mobile use.",
         },
         "accessory_distribution_contract": {
-            "board_mm": [p.power_distribution_board_length, p.power_distribution_board_width, p.power_distribution_board_thickness],
-            "board_copper": "2 oz provisional; electrical review must size copper, vias, clearances, and temperature rise",
-            "holders": "4 x Littelfuse 01550900M OMNI-BLOK",
-            "fuses": "Replaceable Littelfuse Nano2 451/453 fast or 452/454 time-delay families; exact values selected only from measured loads and time-current curves",
-            "connector": "Molex 43045-1000 right-angle 10-circuit header and 43025-1000 latched receptacle",
-            "pinout": "Source positive, source return, then four fused positive/return branch pairs",
-            "installed_cover_mm": [p.power_distribution_cover_length, p.power_distribution_cover_width, p.power_distribution_cover_height],
-            "metal_standoffs_mm": [p.power_distribution_lower_standoff_height, p.power_distribution_upper_standoff_height],
+            "module": "Blue Sea Systems 5045 covered four-circuit ATO/ATC fuse block",
+            "module_mm": [p.power_distribution_length, p.power_distribution_width, p.power_distribution_height],
+            "mount_spacing_mm": p.power_distribution_mount_spacing,
+            "mount_hole_mm": p.power_distribution_mount_hole,
+            "purchased_cover": "Integral insulating cover and labels; no printed distribution cover",
+            "block_rating_a": p.power_distribution_block_rating_a,
+            "per_circuit_rating_a": p.power_distribution_circuit_rating_a,
             "provisional_limits_a": {"total": p.power_distribution_total_limit_a, "any_branch": p.power_distribution_branch_limit_a},
-            "source_protection": "Battery-near accessory feeder fuse remains mandatory; branch fuses do not protect the feeder upstream of this board.",
-            "release_gate": "Fabricate and inspect a reviewed PCB; use specified crimp tooling and pull tests; clamp the harness independently; measure all loads; select fuse values; short each far-end output for selective clearing; thermal-soak all branches; verify labels, polarity, no backfeed, power-off-only fuse service, and no path around motor cutoff or charger inhibit.",
+            "source_protection": "Battery-near accessory feeder fuse remains mandatory; branch fuses do not protect the feeder upstream of the block.",
+            "release_gate": "Inspect the purchased module and cover; clamp the harness independently; measure all loads; select fuse values; verify terminal guards and wire bends; short each far-end output for selective clearing; thermal-soak all branches; verify labels, polarity, no backfeed, power-off-only fuse service, and no path around motor cutoff or charger inhibit.",
         },
         "mobile_power_mechanical_contract": {
             "battery_status": "Bioenno BLF-1203AB prototype fit baseline; not a household-motion release endorsement.",
@@ -875,12 +830,13 @@ def export_print_ready(p: Params, bed: float, margin: float):
             "retention": "Two 20 mm real straps, positive printed side/end locators, nonconductive padding, and four M3 cradle fasteners; printed rails are not sole retention.",
             "charger": "Bioenno BPC-1502DC 14.6 V/2 A through a dedicated EN2 adapter cable",
             "rear_charge_inlet": "Switchcraft EN2P3M20 with EN2C3F20G2 cord mate; charge-only plus CHARGER_PRESENT",
-            "motor_contactor": "Albright SW60 mechanical baseline",
-            "contactor_body_mm": [p.motor_cutoff_body_length, p.motor_cutoff_body_width, p.motor_cutoff_body_height],
-            "contactor_terminal_overall_length_mm": p.motor_cutoff_terminal_overall_length,
-            "contactor_service_envelope_mm": [p.motor_cutoff_service_width, p.motor_cutoff_service_length, p.motor_cutoff_service_height],
-            "metal_carrier_mm": [p.motor_cutoff_metal_plate_length, p.motor_cutoff_metal_plate_width, p.motor_cutoff_metal_plate_thickness],
-            "release_gate": "Inspect the purchased BLF-1203AB, charger, EN2 pair, and exact SW60 coil; verify lead exits, charging, no live output at the rear inlet, charger-present motion inhibit, fusing, reverse-polarity protection, lug/boot clearance, coil suppression/dropout, sustained current below 5.6 A, BMS behavior, 45-minute runtime with reserve, retention, thermal behavior, and independent fail-stopped motor cutoff. Electrical-engineering review is required before household motion release.",
+            "motor_cutoff_relay": "Panasonic CB1A-R-M-12V with integral metal bracket",
+            "relay_body_mm": [p.motor_cutoff_body_length, p.motor_cutoff_body_width, p.motor_cutoff_body_height],
+            "relay_bracket_mm": [p.motor_cutoff_bracket_length, p.motor_cutoff_bracket_width, p.motor_cutoff_bracket_thickness],
+            "relay_mount_hole_mm": p.motor_cutoff_mount_hole,
+            "relay_contact_rating_a": p.motor_cutoff_contact_rating_a,
+            "relay_coil_current_a": p.motor_cutoff_coil_current_a,
+            "release_gate": "Inspect the purchased BLF-1203AB, charger, EN2 pair, Panasonic relay, and Blue Sea block; verify lead exits, charging, no live output at the rear inlet, charger-present motion inhibit, fusing, reverse-polarity protection, terminal insulation and restraint, relay suppression/dropout, sustained current below 5.6 A, BMS behavior, 45-minute runtime with reserve, retention, thermal behavior, and independent fail-stopped motor cutoff. Electrical-engineering review is required before household motion release.",
         },
         "rear_drivetrain_contract": {
             "motor": "Pololu #4867 99:1 Metal Gearmotor 25Dx69L mm MP 12V with 48 CPR Encoder",

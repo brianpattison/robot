@@ -199,9 +199,9 @@ def load_fit_parts(mats):
         "fit_pi_buck_terminal_service_rear": mats["fit_service"],
         "fit_servo_regulator": mats["fit_servo"],
         "fit_servo_regulator_wire_service": mats["fit_service"],
-        "fit_motor_cutoff": mats["fit_safety"],
+        "fit_motor_cutoff_relay": mats["fit_safety"],
         "fit_motor_cutoff_terminal_service": mats["fit_power"],
-        "fit_motor_cutoff_metal_plate": mats["fit_structure"],
+        "fit_motor_cutoff_bracket": mats["fit_structure"],
         "fit_power_harness_left": mats["fit_signal"],
         "fit_power_harness_right": mats["fit_power"],
         "fit_rear_service_bay": mats["fit_service"],
@@ -216,19 +216,11 @@ def load_fit_parts(mats):
         "fit_estop_threaded_barrel": mats["fit_safety"],
         "fit_estop_terminal_service": mats["fit_service"],
         "fit_estop_yellow_legend": mats["safety_yellow"],
-        "fit_carry_clamp_plate_left": mats["carry_metal"],
-        "fit_carry_clamp_plate_right": mats["carry_metal"],
-        "fit_carry_webbing_stowed_left": mats["carry_webbing"],
-        "fit_carry_webbing_stowed_right": mats["carry_webbing"],
         "fit_mute_switch_body": mats["fit_structure"],
         "fit_mute_switch_bezel": mats["fit_structure"],
         "fit_mute_switch_actuator": mats["dark_gray"],
         "fit_mute_switch_led_ring": mats["red"],
         "fit_mute_switch_terminal_service": mats["fit_service"],
-        "fit_service_jack_body": mats["dark_gray"],
-        "fit_service_jack_pcb": mats["fit_pi_board"],
-        "fit_service_jack_wire_service": mats["fit_signal"],
-        "fit_service_jack_plug_service": mats["fit_service"],
         "fit_charge_jack_body": mats["dark_gray"],
         "fit_charge_jack_bezel": mats["dark_gray"],
         "fit_charge_jack_terminal_service": mats["fit_power"],
@@ -248,12 +240,8 @@ def load_fit_parts(mats):
             else:
                 fallback = mats["fit_audio"]
         elif path.stem.startswith("fit_power_distribution_"):
-            if "standoff_" in path.stem:
-                fallback = mats["fit_structure"]
-            elif path.stem.endswith(("_harness_straight", "_harness_bend", "_fuse_service")):
+            if path.stem.endswith(("_wire_service", "_fuse_service")):
                 fallback = mats["fit_service"]
-            elif path.stem.endswith("_board"):
-                fallback = mats["fit_pi_board"]
             else:
                 fallback = mats["fit_power"]
         elif path.stem.endswith("_jst_service"):
@@ -439,9 +427,6 @@ def explode_object(obj):
         obj.location.z += shell_lift
     elif name.startswith("rear_service_cartridge_"):
         obj.location.x += 58.0
-        obj.location.z += shell_lift
-    elif name == "rear_service_data_carrier":
-        obj.location.x += 50.0
         obj.location.z += shell_lift
     elif name == "front_sensor_fascia":
         obj.location.x -= 34.0
@@ -698,7 +683,6 @@ def render_motor_controller_interface(body_objects, fit_objects):
                 "fit_motor_controller_board",
                 "fit_motor_controller_terminal_service",
                 "fit_motor_controller_airflow",
-                "fit_carry_clamp_plate_right",
             }
             or obj.name.startswith(
                 (
@@ -826,7 +810,7 @@ def render_wheel_detail(body_objects, fit_objects):
 
 
 def render_front_idler_interface(body_objects, fit_objects):
-    """Exploded front-left 608/shaft/DIN-471/#2693 idler stack."""
+    """Exploded retail shoulder-bolt/608/#2693 front-idler stack."""
     visible_body = {
         "front_idler_pod_left",
         "front_idler_retainer_left_inner",
@@ -847,16 +831,20 @@ def render_front_idler_interface(body_objects, fit_objects):
         obj.hide_render = obj.name not in visible_body
 
     fit_offsets = {
-        "fit_front_idler_left_retaining_ring": (0.0, 58.0, 0.0),
-        "fit_front_idler_left_inner_washer": (0.0, 45.0, 0.0),
-        "fit_front_idler_left_bearing_inner": (0.0, 30.0, 0.0),
-        "fit_front_idler_left_inner_spacer": (0.0, 14.0, 0.0),
-        "fit_front_idler_left_bearing_outer": (0.0, -14.0, 0.0),
-        "fit_front_idler_left_outer_spacer": (0.0, -32.0, 0.0),
-        "fit_front_idler_left_hub": (0.0, -52.0, 0.0),
-        # Lift the long shaft so its groove, full span, and relationship to
-        # the linear stack remain visible instead of hiding inside every bore.
-        "fit_front_idler_left_shaft": (42.0, 0.0, 30.0),
+        "fit_front_idler_left_locknut": (0.0, -84.0, 0.0),
+        "fit_front_idler_left_thread_washer": (0.0, -75.0, 0.0),
+        "fit_front_idler_left_tuning_shim": (0.0, -69.0, 0.0),
+        "fit_front_idler_left_tuning_spacer": (0.0, -63.0, 0.0),
+        "fit_front_idler_left_bearing_inner": (0.0, 25.0, 0.0),
+        "fit_front_idler_left_inner_spacer": (0.0, 10.0, 0.0),
+        "fit_front_idler_left_bearing_outer": (0.0, -10.0, 0.0),
+        "fit_front_idler_left_outer_spacer": (0.0, -28.0, 0.0),
+        "fit_front_idler_left_hub": (0.0, -50.0, 0.0),
+        # Lift the one-piece retail bolt and its head/thread so the full span
+        # remains visible instead of hiding inside every bore.
+        "fit_front_idler_left_shoulder_bolt": (42.0, 0.0, 30.0),
+        "fit_front_idler_left_shoulder_head": (42.0, 0.0, 30.0),
+        "fit_front_idler_left_thread": (42.0, 0.0, 30.0),
     }
     for obj in fit_objects:
         obj.location = fit_offsets.get(obj.name, (0.0, 0.0, 0.0))
@@ -1152,7 +1140,7 @@ def render_led_interface(body_objects, fit_objects):
 
 
 def render_carry_interface(body_objects, fit_objects, split_objects):
-    """Explode the real split-tray carry load path for mechanical review."""
+    """Show the clean split tray and seam plate after handle deletion."""
     for obj in body_objects:
         obj.hide_render = True
     for obj in split_objects:
@@ -1172,23 +1160,7 @@ def render_carry_interface(body_objects, fit_objects, split_objects):
 
     for obj in fit_objects:
         obj.location = (0, 0, 0)
-        obj.hide_render = not obj.name.startswith("fit_carry_")
-        if obj.hide_render:
-            continue
-        is_left = obj.name.endswith("_left")
-        side_shift = -16.0 if is_left else 16.0
-        if "webbing" in obj.name:
-            side_shift = -42.0 if is_left else 42.0
-        obj.location.y += side_shift
-        if "webbing" in obj.name and not is_left:
-            obj.location.x -= 135.0
-            obj.location.y -= 42.0
-        if "clamp_plate" in obj.name:
-            obj.location.z += 20.0
-        else:
-            # Keep the near-side loop below the tray and lift the far-side
-            # twin above it in this exploded review so neither is occluded.
-            obj.location.z += -15.0 if is_left else 22.0
+        obj.hide_render = True
 
     floor = bpy.data.objects.get("review_floor")
     if floor:
@@ -1271,15 +1243,12 @@ def render_harness_interface(body_objects, fit_objects, split_objects):
 
 
 def render_power_deck_interface(body_objects, fit_objects, split_objects):
-    """Close mechanical review of selected power boards and SW60 carrier."""
+    """Close review of the retail relay, covered fuse block, and regulators."""
     for obj in split_objects:
         obj.hide_render = True
     for obj in body_objects:
         obj.location = (0, 0, 0)
-        obj.hide_render = obj.name not in {
-            "power_service_deck",
-            "power_distribution_cover",
-        }
+        obj.hide_render = obj.name != "power_service_deck"
 
     visible_fit_prefixes = (
         "fit_pi_buck_",
@@ -1461,14 +1430,13 @@ def render_audio_interface(body_objects, fit_objects):
 
 
 def render_rear_service_interface(body_objects, fit_objects):
-    """Rear frame with sealed charge, UART service, and physical mute."""
+    """Rear frame with sealed charge, blank access, and physical mute."""
     visible_body = {
         "body_shell",
         "rear_service_panel",
         "rear_service_cartridge_power_charge",
         "rear_service_cartridge_mute_status",
-        "rear_service_cartridge_service_data",
-        "rear_service_data_carrier",
+        "rear_service_cartridge_blank_access",
     }
     for obj in body_objects:
         obj.location = (0, 0, 0)
@@ -1477,8 +1445,6 @@ def render_rear_service_interface(body_objects, fit_objects):
             obj.location.x += 20.0
         elif obj.name.startswith("rear_service_cartridge_"):
             obj.location.x += 42.0
-        elif obj.name == "rear_service_data_carrier":
-            obj.location.x += 65.0
 
     for obj in fit_objects:
         obj.location = (0, 0, 0)
@@ -1486,14 +1452,11 @@ def render_rear_service_interface(body_objects, fit_objects):
             obj.name == "fit_rear_service_bay"
             or obj.name.startswith("fit_charge_jack_")
             or obj.name.startswith("fit_mute_switch_")
-            or obj.name.startswith("fit_service_jack_")
         )
         if obj.name.startswith("fit_charge_jack_"):
             obj.location.x += 82.0
         elif obj.name.startswith("fit_mute_switch_"):
             obj.location.x += 90.0
-        elif obj.name.startswith("fit_service_jack_"):
-            obj.location.x += 78.0
 
     floor = bpy.data.objects.get("review_floor")
     if floor:

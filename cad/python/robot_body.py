@@ -76,7 +76,8 @@ class Params:
 
     # Mobility envelope. The rear drivetrain targets Pololu 25D MP 12 V
     # 99:1 encoder gearmotors (#4867), metal brackets (#1569), and 4 mm M3
-    # universal hubs (#1997). Front axle hardware remains provisional.
+    # universal hubs (#1997). Front idlers use retail 8 mm x 65 mm shoulder
+    # bolts with M6 threaded ends, stock washers, and prevailing-torque nuts.
     wheel_radius: float = 43.0
     wheel_thickness: float = 24.0
     wheel_center_z: float = 66.0
@@ -141,22 +142,24 @@ class Params:
     front_bearing_id: float = 8.0
     front_bearing_width: float = 7.0
     front_bearing_seat_clearance: float = 0.2
-    front_axle_shaft_length: float = 64.5
+    front_axle_shoulder_length: float = 65.0
     front_axle_shaft_diameter: float = 8.0
-    # Rotor Clip DSH-8 / DIN 471 external retaining ring. The 8 mm shaft is
-    # cut with the manufacturer's 7.54-7.60 x 0.90 mm groove and a 0.60 mm
-    # minimum edge margin; the model uses nominal/conservative values.
-    front_axle_ring_groove_diameter: float = 7.6
-    front_axle_ring_groove_width: float = 0.9
-    front_axle_ring_thickness: float = 0.8
-    front_axle_ring_envelope_diameter: float = 14.4
-    front_axle_ring_edge_margin: float = 0.6
-    front_axle_inner_washer_diameter: float = 15.0
-    front_axle_inner_washer_width: float = 2.0
+    front_axle_thread_diameter: float = 6.0
+    front_axle_thread_length: float = 10.0
+    front_axle_head_diameter: float = 13.0
+    front_axle_head_height: float = 5.5
+    front_axle_locknut_diameter: float = 10.0
+    front_axle_locknut_height: float = 6.0
+    front_axle_thread_washer_diameter: float = 12.0
+    front_axle_thread_washer_width: float = 1.6
     front_axle_inner_spacer_od: float = 12.0
     front_axle_inner_spacer_length: float = 14.0
     front_axle_outer_spacer_od: float = 10.0
     front_axle_outer_spacer_length: float = 19.0
+    front_axle_tuning_spacer_od: float = 10.0
+    front_axle_tuning_spacer_length: float = 3.0
+    front_axle_tuning_shim_od: float = 11.0
+    front_axle_tuning_shim_length: float = 0.5
     front_hub_diameter: float = 25.4
     front_hub_length: float = 14.0
     front_hub_mount_circle: float = 19.05
@@ -167,23 +170,9 @@ class Params:
     side_tof_center_x: float = -20.0
     side_tof_mount_x: float = -40.0
 
-    # Recessed two-hand carry interface. Two 25 mm webbing loops pass through
-    # reinforced slots near the tray sides and are clamped above the tray by
-    # deburred metal spreader plates plus M4 through-bolts. The webbing and
-    # metal hardware remain purchased parts; the printed tray only locates and
-    # protects the interface until a loaded lift test proves it.
-    carry_anchor_center_y: float = 81.5
-    carry_anchor_slot_x: float = 38.0
-    carry_webbing_width: float = 25.0
-    carry_slot_width: float = 5.0
-    carry_slot_length: float = 28.0
-    carry_anchor_plate_length: float = 92.0
-    carry_anchor_plate_width: float = 28.0
-    carry_anchor_plate_thickness: float = 2.0
-    carry_anchor_doubler_height: float = 3.0
-    carry_anchor_doubler_overlap: float = 0.4
-    carry_stowed_webbing_thickness: float = 1.2
-    m4_clearance_hole: float = 4.5
+    # The retail-only MVP has no integrated carry handle. Lift the unpowered
+    # robot with two hands beneath the tray until a complete retail lifting
+    # interface is selected and qualified.
 
     # Head and expression.
     neck_x: float = -26.0
@@ -593,37 +582,6 @@ class Params:
     mute_switch_led_forward_voltage: float = 1.8
     mute_switch_led_current_ma: float = 20.0
 
-    # Switchcraft 35RASMT5CHNTRX four-conductor 3.5 mm service jack on a small
-    # horizontal custom PCB. This is a protected 3.3 V UART/service interface,
-    # not an audio jack and never a motor-enable or raw-power connector. The
-    # shallow right-angle package clears the center cartridge's E-stop keepout.
-    service_jack_body_length: float = 15.5
-    service_jack_body_width: float = 6.8
-    service_jack_body_height: float = 5.3
-    service_jack_port_width: float = 7.2
-    service_jack_port_height: float = 5.8
-    service_jack_port_z_offset: float = 0.75
-    service_jack_pcb_length: float = 18.0
-    service_jack_pcb_width: float = 18.0
-    service_jack_pcb_thickness: float = 1.6
-    service_jack_pcb_center_x: float = 141.9
-    service_jack_pcb_bottom_z: float = 136.5
-    service_jack_pcb_mount_x: float = 139.0
-    service_jack_pcb_mount_y_offset: float = 7.0
-    service_jack_pcb_mount_hole: float = 2.2
-    service_jack_carrier_mount_z_offset: float = 7.5
-    service_jack_carrier_mount_hole: float = 2.4
-    service_jack_carrier_insert_depth: float = 5.0
-    service_jack_carrier_flange_depth: float = 3.0
-    service_jack_carrier_flange_width: float = 24.0
-    service_jack_carrier_flange_height: float = 24.0
-    service_jack_carrier_shelf_length: float = 21.0
-    service_jack_carrier_shelf_width: float = 24.0
-    service_jack_carrier_shelf_thickness: float = 3.0
-    service_jack_wire_service_length: float = 4.0
-    service_jack_wire_service_width: float = 20.0
-    service_jack_wire_service_height: float = 6.0
-
     # Switchcraft EN2P3M20 3-position sealed charge-only inlet. Two 6.5 A
     # contacts carry the Bioenno charger's 14.6 V/2 A output through a dedicated
     # adapter cable; the third is CHARGER_PRESENT. The battery's Powerpole
@@ -646,8 +604,8 @@ class Params:
     # dedicated 5 V rail; the D36V50F6 supplies the separate 6 V head-servo
     # rail. Both mount on metal M2 standoffs and retain conservative wire,
     # airflow, and finger-service corridors around their exact board patterns.
-    pi_regulator_center_x: float = 15.0
-    pi_regulator_center_y: float = 0.0
+    pi_regulator_center_x: float = 0.5
+    pi_regulator_center_y: float = 30.0
     pi_regulator_length: float = 40.6
     pi_regulator_width: float = 20.3
     pi_regulator_height: float = 7.6
@@ -658,8 +616,8 @@ class Params:
     pi_regulator_terminal_service_length: float = 10.0
     pi_regulator_terminal_service_width: float = 16.0
     pi_regulator_terminal_service_height: float = 12.0
-    servo_regulator_center_x: float = 100.0
-    servo_regulator_center_y: float = 35.0
+    servo_regulator_center_x: float = 70.0
+    servo_regulator_center_y: float = 31.0
     servo_regulator_length: float = 25.4
     servo_regulator_width: float = 25.4
     servo_regulator_height: float = 9.5
@@ -669,61 +627,43 @@ class Params:
     servo_regulator_wire_service_length: float = 14.0
     servo_regulator_wire_service_width: float = 22.0
     servo_regulator_wire_service_height: float = 12.0
-    motor_cutoff_center_x: float = 52.5
-    motor_cutoff_center_y: float = 0.0
-    motor_cutoff_body_length: float = 63.0
-    motor_cutoff_body_width: float = 37.0
-    motor_cutoff_body_height: float = 28.0
-    motor_cutoff_terminal_overall_length: float = 81.0
-    motor_cutoff_service_length: float = 90.0
-    motor_cutoff_service_width: float = 45.0
-    motor_cutoff_service_height: float = 35.0
-    motor_cutoff_metal_plate_length: float = 50.0
-    motor_cutoff_metal_plate_width: float = 90.0
-    motor_cutoff_metal_plate_thickness: float = 2.0
-    motor_cutoff_plate_mount_spacing_x: float = 40.0
-    motor_cutoff_plate_mount_spacing_y: float = 80.0
-    motor_cutoff_plate_mount_hole: float = 3.4
+    # Panasonic CB1A-R-M-12V retail automotive relay: sealed SPST-NO, 40 A
+    # at 14 V DC, 12 V / 134 mA coil, internal suppression resistor, 6.3 mm
+    # quick-connect terminals, and integral 5.4 mm mounting tab.
+    motor_cutoff_center_x: float = 45.0
+    motor_cutoff_center_y: float = 55.0
+    motor_cutoff_body_length: float = 26.0
+    motor_cutoff_body_width: float = 22.0
+    motor_cutoff_body_height: float = 25.0
+    motor_cutoff_bracket_length: float = 52.0
+    motor_cutoff_bracket_width: float = 22.0
+    motor_cutoff_bracket_thickness: float = 0.8
+    motor_cutoff_mount_x: float = 68.0
+    motor_cutoff_mount_hole: float = 5.4
+    motor_cutoff_mount_height: float = 8.0
+    motor_cutoff_terminal_height: float = 10.0
+    motor_cutoff_terminal_service_height: float = 16.0
+    motor_cutoff_contact_rating_a: float = 40.0
+    motor_cutoff_coil_current_a: float = 0.134
 
-    # Compact four-branch accessory distribution PCB. Four Littelfuse
-    # 01550900M OMNI-BLOK holders accept replaceable Nano2 fuses; a Molex
-    # 43045-1000 right-angle 10-circuit Micro-Fit header mates with a latched
-    # 43025-1000 harness. Exact fuse values remain load-test selections. The
-    # board is mechanically capped at 6 A total / 5 A per branch pending a
-    # reviewed 2 oz-copper layout, trace-temperature analysis, and fault tests.
-    power_distribution_center_x: float = 100.0
-    power_distribution_center_y: float = -35.0
-    power_distribution_board_length: float = 40.0
-    power_distribution_board_width: float = 21.0
-    power_distribution_board_thickness: float = 1.6
-    power_distribution_lower_standoff_height: float = 4.0
-    power_distribution_upper_standoff_height: float = 3.0
-    power_distribution_mount_hole: float = 2.2
-    power_distribution_holder_length: float = 9.73
-    power_distribution_holder_width: float = 5.03
-    power_distribution_holder_height: float = 3.81
-    power_distribution_fuse_length: float = 6.10
-    power_distribution_fuse_width: float = 2.69
-    power_distribution_fuse_height: float = 2.69
-    power_distribution_header_width: float = 18.65
-    power_distribution_header_depth: float = 12.24
-    power_distribution_header_height: float = 9.91
-    power_distribution_receptacle_width: float = 15.85
-    power_distribution_receptacle_depth: float = 17.56
-    power_distribution_receptacle_height: float = 10.81
-    power_distribution_cover_length: float = 44.0
-    power_distribution_cover_width: float = 24.0
-    power_distribution_cover_height: float = 11.4
-    power_distribution_cover_wall: float = 1.2
-    power_distribution_cover_top: float = 1.6
+    # Blue Sea Systems 5045 four-circuit ATO/ATC fuse block. The complete
+    # quantity-one retail module includes its insulating cover and labels.
+    power_distribution_center_x: float = 33.0
+    power_distribution_center_y: float = -8.0
+    power_distribution_length: float = 92.5
+    power_distribution_width: float = 43.8
+    power_distribution_height: float = 32.5
+    power_distribution_mount_spacing: float = 65.1
+    power_distribution_mount_hole: float = 4.5
+    power_distribution_terminal_height: float = 9.5
+    power_distribution_bus_height: float = 8.6
+    power_distribution_block_rating_a: float = 100.0
+    power_distribution_circuit_rating_a: float = 30.0
     power_distribution_total_limit_a: float = 6.0
     power_distribution_branch_limit_a: float = 5.0
-    power_distribution_holder_rating_a: float = 10.0
-    power_distribution_connector_limit_a: float = 7.0
-    power_distribution_fuse_service_height: float = 35.0
-    power_distribution_harness_straight_length: float = 5.0
-    power_distribution_harness_bend_length: float = 22.0
-    power_distribution_harness_bend_width: float = 12.0
+    power_distribution_fuse_service_height: float = 10.0
+    power_distribution_wire_service_length: float = 22.0
+    power_distribution_wire_service_width: float = 43.8
 
     # Removable under-deck harness rails. The left rail is reserved for
     # signal/audio/sensor wiring and the right rail for fused switched power
@@ -994,43 +934,27 @@ def servo_regulator_mount_positions(p: Params):
     )
 
 
-def motor_cutoff_plate_mount_positions(p: Params):
-    """Four M3 paths through the printed deck into a metal SW60 carrier."""
+def motor_cutoff_mount_position(p: Params):
+    """M5 through-path for the Panasonic relay's integral metal tab."""
+    return (p.motor_cutoff_mount_x, p.motor_cutoff_center_y)
+
+
+def power_distribution_mount_positions(p: Params):
+    """Two M4 stations from Blue Sea 5045's 65.1 mm center spacing."""
     return tuple(
         (
-            p.motor_cutoff_center_x + x_sign * p.motor_cutoff_plate_mount_spacing_x / 2.0,
-            p.motor_cutoff_center_y + y_sign * p.motor_cutoff_plate_mount_spacing_y / 2.0,
+            p.power_distribution_center_x,
+            p.power_distribution_center_y + y_sign * p.power_distribution_mount_spacing / 2.0,
         )
-        for x_sign in (-1.0, 1.0)
         for y_sign in (-1.0, 1.0)
     )
 
 
-def power_distribution_board_mount_positions(p: Params):
-    """Four M2 stack points clear of the fuse holders and Micro-Fit header."""
-    return tuple(
-        (p.power_distribution_center_x + dx, p.power_distribution_center_y + dy)
-        for dx in (-17.5, 4.5)
-        for dy in (-8.5, 8.5)
-    )
-
-
-def power_distribution_holder_positions(p: Params):
-    """Four closely packed OMNI-BLOK centers, source side to connector side."""
-    return tuple(
-        (
-            p.power_distribution_center_x - 5.0,
-            p.power_distribution_center_y + offset_y,
-        )
-        for offset_y in (-7.65, -2.55, 2.55, 7.65)
-    )
-
-
 def power_distribution_strain_slots(p: Params):
-    """Paired deck slots for a clamp immediately after the Micro-Fit bend."""
+    """Paired deck slots at the Blue Sea block's single-side wire exit."""
     return (
-        (128.0, -52.0),
-        (136.0, -52.0),
+        (22.0, -53.0),
+        (38.0, -53.0),
     )
 
 
@@ -1119,48 +1043,6 @@ def mobility_pod_shell_center_z(p: Params):
     """Center pod shells above the four tray pads while axles sit lower."""
     mobility_pad_top = p.body_bottom + 4.0
     return mobility_pad_top + p.mobility_pod_shell_height / 2.0
-
-
-def carry_anchor_slot_positions(p: Params, side_sign: int):
-    """Webbing pass-through slots for one recessed side carry loop."""
-    return tuple(
-        (x, side_sign * p.carry_anchor_center_y)
-        for x in (-p.carry_anchor_slot_x, p.carry_anchor_slot_x)
-    )
-
-
-def carry_anchor_fastener_positions(p: Params, side_sign: int):
-    """Four M4 through-bolts clamping each metal load-spreader plate."""
-    return tuple(
-        (x, side_sign * p.carry_anchor_center_y + y_offset)
-        for x in (-26.0, 26.0)
-        for y_offset in (-8.0, 8.0)
-    )
-
-
-def carry_anchor_clamp_plate(p: Params, side_sign: int):
-    """Review-only purchased metal clamp plate with open M4 paths."""
-    plate_bottom = (
-        p.body_bottom
-        + p.carry_anchor_doubler_height
-        - p.carry_anchor_doubler_overlap
-        + 0.2
-    )
-    plate_z = plate_bottom + p.carry_anchor_plate_thickness / 2.0
-    plate = rounded_box(
-        p.carry_anchor_plate_length,
-        p.carry_anchor_plate_width,
-        p.carry_anchor_plate_thickness,
-        3.0,
-        (0.0, side_sign * p.carry_anchor_center_y, plate_z),
-    )
-    for x, y in carry_anchor_fastener_positions(p, side_sign):
-        plate = plate - cylinder_z(
-            p.m4_clearance_hole / 2.0,
-            p.carry_anchor_plate_thickness + 4.0,
-            (x, y, plate_z),
-        )
-    return plate
 
 
 def motor_controller_board_mount_positions(p: Params):
@@ -1284,13 +1166,17 @@ def front_idler_hub_mount_positions(p: Params):
 
 def front_idler_hardware_names(side: str):
     return (
-        f"fit_front_idler_{side}_shaft",
-        f"fit_front_idler_{side}_retaining_ring",
-        f"fit_front_idler_{side}_inner_washer",
+        f"fit_front_idler_{side}_shoulder_bolt",
+        f"fit_front_idler_{side}_shoulder_head",
+        f"fit_front_idler_{side}_thread",
+        f"fit_front_idler_{side}_thread_washer",
+        f"fit_front_idler_{side}_locknut",
         f"fit_front_idler_{side}_bearing_inner",
         f"fit_front_idler_{side}_bearing_outer",
         f"fit_front_idler_{side}_inner_spacer",
         f"fit_front_idler_{side}_outer_spacer",
+        f"fit_front_idler_{side}_tuning_spacer",
+        f"fit_front_idler_{side}_tuning_shim",
         f"fit_front_idler_{side}_hub",
     )
 
@@ -1311,7 +1197,7 @@ def safety_shelf_standoff_positions(p: Params):
 
 
 def motor_controller_plate_mount_positions(p: Params):
-    """Four tray-to-controller-plate anchors kept clear of the carry clamps."""
+    """Four tray-to-controller-plate anchors."""
     return tuple(
         (p.controller_center_x + dx, p.controller_center_y + dy)
         for dx in (-56.0, 56.0)
@@ -1325,7 +1211,7 @@ def mdds10_board_bottom_z(p: Params):
 
 
 def motor_controller_plate_bottom_z(p: Params):
-    """Elevate the plate over the concealed carry-handle doubler."""
+    """Elevate the plate for underside hardware and service clearance."""
     return p.body_bottom + p.mdds10_plate_lift
 
 
@@ -2059,26 +1945,6 @@ def base_tray(p: Params):
     )
     tray = tray + (lip_outer - lip_inner)
 
-    # Reinforced side zones support two recessed webbing carry loops without
-    # adding a visible handle to the concept silhouette. Each metal clamp plate
-    # crosses the printer split at X=0 and through-bolts into both tray halves;
-    # the raised printed doubler is a locator/load spreader, not the sole lift
-    # retention. Slots and bolt paths are cut after all tray unions below.
-    carry_doubler_z = (
-        p.body_bottom
-        + p.carry_anchor_doubler_height / 2.0
-        - p.carry_anchor_doubler_overlap
-    )
-    for side_sign in (-1, 1):
-        tray = tray + rounded_prism_xy(
-            p.carry_anchor_plate_length + 4.0,
-            p.carry_anchor_plate_width + 4.0,
-            p.carry_anchor_doubler_height,
-            4.0,
-            (0.0, side_sign * p.carry_anchor_center_y, carry_doubler_z),
-            edge_radius=0.6,
-        )
-
     # Four-point pads bridge each removable mobility pod to the tray. Their
     # tops meet the pod flanges at Z=body_bottom+4 without overlap; the final
     # hole pass below keeps the heat-set-insert paths open after all unions.
@@ -2149,24 +2015,6 @@ def base_tray(p: Params):
             )
     for x, y in (*motor_controller_plate_mount_positions(p), *battery_cradle_mount_positions(p)):
         tray = tray - cylinder_z(p.insert_hole_m3 / 2.0, 30.0, (x, y, tray_z))
-
-    # Re-open the two strap slots and four M4 clamp paths per side after the
-    # locating lip and carry doublers have been fused into the tray.
-    for side_sign in (-1, 1):
-        for x, y in carry_anchor_slot_positions(p, side_sign):
-            tray = tray - rounded_prism_xy(
-                p.carry_slot_width,
-                p.carry_slot_length,
-                p.tray_thickness + p.carry_anchor_doubler_height + 8.0,
-                min(p.carry_slot_width / 2.0 - 0.2, 2.0),
-                (x, y, tray_z + p.carry_anchor_doubler_height / 2.0),
-            )
-        for x, y in carry_anchor_fastener_positions(p, side_sign):
-            tray = tray - cylinder_z(
-                p.m4_clearance_hole / 2.0,
-                p.tray_thickness + p.carry_anchor_doubler_height + 8.0,
-                (x, y, tray_z + p.carry_anchor_doubler_height / 2.0),
-            )
 
     # Six rigid switch plates clamp to blind inserts from below. Their switch
     # bodies pass through local tray pockets while the surrounding TPU bumper
@@ -2521,23 +2369,6 @@ def electronics_mounts(p: Params):
         (p.controller_center_x, p.controller_center_y, mount_z),
         edge_radius=0.8,
     )
-    # The board barely shares this lane with the right carry-handle doubler.
-    # A local corner notch preserves 0.3 mm clearance to the metal clamp while
-    # retaining the nearby MDDS10 screw ring and the board's full outline.
-    carry_notch_min_y = (
-        p.carry_anchor_center_y - p.carry_anchor_plate_width / 2.0 - 0.3
-    )
-    controller = controller - rounded_box(
-        p.carry_anchor_plate_length / 2.0 + 4.0,
-        40.0,
-        10.0,
-        1.0,
-        (
-            -p.carry_anchor_plate_length / 4.0,
-            carry_notch_min_y + 20.0,
-            mount_z,
-        ),
-    )
     for x, y in motor_controller_board_mount_positions(p):
         controller = controller - cylinder_z(
             p.mdds10_mount_clearance / 2.0,
@@ -2604,80 +2435,23 @@ def electronics_mounts(p: Params):
     return parts
 
 
-def power_distribution_cover(p: Params):
-    """Open-bottom touch cover over the custom four-fuse distribution PCB."""
+def motor_cutoff_mount_pedestal(p: Params):
+    """Local PETG boss beneath the retail relay's integral mounting tab."""
     deck_top = p.power_deck_z + 2.0
-    cover_bottom = deck_top + 0.2
-    cover_top = cover_bottom + p.power_distribution_cover_height
-    center = (
-        p.power_distribution_center_x,
-        p.power_distribution_center_y,
-        (cover_bottom + cover_top) / 2.0,
-    )
-    cover = rounded_prism_xy(
-        p.power_distribution_cover_length,
-        p.power_distribution_cover_width,
-        p.power_distribution_cover_height,
-        3.0,
-        center,
+    x, y = motor_cutoff_mount_position(p)
+    pedestal = rounded_prism_xy(
+        18.0,
+        18.0,
+        p.motor_cutoff_mount_height,
+        4.0,
+        (x, y, deck_top + p.motor_cutoff_mount_height / 2.0),
         edge_radius=0.8,
     )
-    inner_bottom = cover_bottom - 1.0
-    inner_top = cover_top - p.power_distribution_cover_top
-    cover = cover - rounded_prism_xy(
-        p.power_distribution_cover_length - 2.0 * p.power_distribution_cover_wall,
-        p.power_distribution_cover_width - 2.0 * p.power_distribution_cover_wall,
-        inner_top - inner_bottom,
-        2.0,
-        (
-            p.power_distribution_center_x,
-            p.power_distribution_center_y,
-            (inner_bottom + inner_top) / 2.0,
-        ),
-        edge_radius=0.4,
+    return pedestal - cylinder_z(
+        p.motor_cutoff_mount_hole / 2.0 + 0.2,
+        14.0,
+        (x, y, deck_top + p.motor_cutoff_mount_height / 2.0),
     )
-
-    # The Micro-Fit header and receptacle are already shrouded. Open the
-    # cover's connector end rather than trapping the latch or forcing the wire
-    # bend through a decorative wall.
-    connector_cut_center_x = (
-        p.power_distribution_center_x
-        + p.power_distribution_cover_length / 2.0
-        - 6.5
-    )
-    cover = cover - rounded_box(
-        17.0,
-        p.power_distribution_header_width + 2.0,
-        p.power_distribution_header_height + 7.0,
-        1.5,
-        (
-            connector_cut_center_x,
-            p.power_distribution_center_y,
-            deck_top + 9.0,
-        ),
-    )
-
-    # Metal stacking standoffs retain the PCB independently. Four hollow
-    # printed feet bridge only from the cover roof to the upper standoff faces.
-    board_top = (
-        deck_top
-        + p.power_distribution_lower_standoff_height
-        + p.power_distribution_board_thickness
-    )
-    upper_standoff_top = board_top + p.power_distribution_upper_standoff_height
-    foot_height = cover_top - upper_standoff_top
-    for x, y in power_distribution_board_mount_positions(p):
-        cover = cover + cylinder_z(
-            2.7,
-            foot_height,
-            (x, y, upper_standoff_top + foot_height / 2.0),
-        )
-        cover = cover - cylinder_z(
-            p.m2_clearance_hole / 2.0,
-            p.power_distribution_cover_height + 4.0,
-            (x, y, (cover_bottom + cover_top) / 2.0),
-        )
-    return cover
 
 
 def power_mounts(p: Params):
@@ -2690,6 +2464,7 @@ def power_mounts(p: Params):
         (p.power_deck_center_x, 0.0, p.power_deck_z),
         edge_radius=0.8,
     )
+    deck = deck + motor_cutoff_mount_pedestal(p)
     for x, y in power_deck_mount_positions(p):
         deck = deck - cylinder_z(
             p.m3_clearance_hole / 2.0,
@@ -2705,15 +2480,15 @@ def power_mounts(p: Params):
             10.0,
             (x, y, p.power_deck_z),
         )
-    for x, y in motor_cutoff_plate_mount_positions(p):
+    mount_x, mount_y = motor_cutoff_mount_position(p)
+    deck = deck - cylinder_z(
+        p.motor_cutoff_mount_hole / 2.0 + 0.2,
+        20.0,
+        (mount_x, mount_y, p.power_deck_z + 4.0),
+    )
+    for x, y in power_distribution_mount_positions(p):
         deck = deck - cylinder_z(
-            p.motor_cutoff_plate_mount_hole / 2.0,
-            10.0,
-            (x, y, p.power_deck_z),
-        )
-    for x, y in power_distribution_board_mount_positions(p):
-        deck = deck - cylinder_z(
-            p.m2_clearance_hole / 2.0,
+            p.power_distribution_mount_hole / 2.0,
             10.0,
             (x, y, p.power_deck_z),
         )
@@ -2748,10 +2523,7 @@ def power_mounts(p: Params):
             1.4,
             (x, y, p.power_deck_z),
         )
-    return {
-        "power_service_deck": deck,
-        "power_distribution_cover": power_distribution_cover(p),
-    }
+    return {"power_service_deck": deck}
 
 
 def power_harness_rails(p: Params):
@@ -2808,7 +2580,7 @@ def rear_service_cartridge_layout(p: Params):
     spacing = p.rear_service_cartridge_center_spacing
     return (
         ("power_charge", -spacing, p.rear_service_panel_z),
-        ("service_data", 0.0, p.rear_service_panel_z),
+        ("blank_access", 0.0, p.rear_service_panel_z),
         ("mute_status", spacing, p.rear_service_panel_z),
     )
 
@@ -2847,26 +2619,6 @@ def rear_mute_switch_cutout(
     return circular & flat_clip
 
 
-def rear_service_jack_center(p: Params):
-    return (
-        p.body_length / 2.0 + 4.0,
-        0.0,
-        p.rear_service_panel_z + p.service_jack_port_z_offset,
-    )
-
-
-def rear_service_jack_cutout(p: Params, depth: float, center_x: float):
-    """Rounded center-cartridge opening for the shallow TRRS service jack."""
-    _outer_x, center_y, center_z = rear_service_jack_center(p)
-    return rounded_box(
-        depth,
-        p.service_jack_port_width,
-        p.service_jack_port_height,
-        1.5,
-        (center_x, center_y, center_z),
-    )
-
-
 def rear_charge_jack_center(p: Params):
     """Exterior center of the rear-left 14.6 V charge-only inlet."""
     return (
@@ -2883,23 +2635,6 @@ def rear_charge_jack_cutout(p: Params, depth: float, center_x: float):
         (p.charge_jack_cutout_diameter + p.charge_jack_cutout_clearance) / 2.0,
         depth,
         (center_x, center_y, center_z),
-    )
-
-
-def service_jack_carrier_mount_positions(p: Params):
-    """Two exterior M2 screws retain the removable service-jack carrier."""
-    center_z = p.rear_service_panel_z + p.service_jack_port_z_offset
-    return tuple(
-        (0.0, center_z + z_sign * p.service_jack_carrier_mount_z_offset)
-        for z_sign in (-1.0, 1.0)
-    )
-
-
-def service_jack_pcb_mount_positions(p: Params):
-    """Two M2 insert stations hold the custom UART PCB to its shelf."""
-    return tuple(
-        (p.service_jack_pcb_mount_x, y_sign * p.service_jack_pcb_mount_y_offset)
-        for y_sign in (-1.0, 1.0)
     )
 
 
@@ -2981,7 +2716,7 @@ def rear_service_panel(p: Params):
 
 
 def rear_service_cartridges(p: Params):
-    """Charge-only, service-data, and physical-mute cartridges."""
+    """Charge-only, blank-access, and physical-mute cartridges."""
     rear_x = p.body_length / 2.0 + 2.0
     panel_outer_x = rear_x + 2.0
     cap_center_x = panel_outer_x - p.rear_service_cartridge_cap_thickness / 2.0
@@ -3029,111 +2764,8 @@ def rear_service_cartridges(p: Params):
                 8.0,
                 rear_x,
             )
-        elif role == "service_data":
-            cartridge = cartridge - rear_service_jack_cutout(p, 8.0, rear_x)
-            for mount_y, mount_z in service_jack_carrier_mount_positions(p):
-                cartridge = cartridge - cylinder_x(
-                    p.service_jack_carrier_mount_hole / 2.0,
-                    8.0,
-                    (rear_x, mount_y, mount_z),
-                )
         cartridges[f"rear_service_cartridge_{role}"] = cartridge
     return cartridges
-
-
-def rear_service_data_carrier(p: Params):
-    """Two-piece-friendly L carrier for the shallow UART service PCB."""
-    panel_outer_x, _center_y, port_z = rear_service_jack_center(p)
-    flange_front_x = (
-        panel_outer_x
-        - p.rear_service_cartridge_cap_thickness
-        - p.rear_service_cartridge_tongue_depth
-        - 1.0
-    )
-    flange_center_x = flange_front_x - p.service_jack_carrier_flange_depth / 2.0
-    flange = rounded_panel_yz(
-        p.service_jack_carrier_flange_depth,
-        p.service_jack_carrier_flange_width,
-        p.service_jack_carrier_flange_height,
-        2.5,
-        (flange_center_x, 0.0, port_z),
-    )
-    flange = flange - rounded_box(
-        p.service_jack_carrier_flange_depth + 4.0,
-        p.service_jack_pcb_width + 1.4,
-        p.service_jack_body_height + p.service_jack_pcb_thickness + 2.8,
-        1.0,
-        (
-            flange_center_x,
-            0.0,
-            p.service_jack_pcb_bottom_z
-            - 0.8
-            + (
-                p.service_jack_body_height
-                + p.service_jack_pcb_thickness
-                + 2.8
-            )
-            / 2.0,
-        ),
-    )
-    for mount_y, mount_z in service_jack_carrier_mount_positions(p):
-        boss_length = p.service_jack_carrier_insert_depth + 1.0
-        boss = cylinder_x(
-            3.2,
-            boss_length,
-            (flange_front_x - boss_length / 2.0, mount_y, mount_z),
-        )
-        flange = flange + boss
-        flange = flange - cylinder_x(
-            p.m2_clearance_hole / 2.0,
-            p.service_jack_carrier_insert_depth + 0.5,
-            (
-                flange_front_x - p.service_jack_carrier_insert_depth / 2.0 + 0.1,
-                mount_y,
-                mount_z,
-            ),
-        )
-
-    shelf_front_x = flange_front_x + 0.2
-    shelf_rear_x = shelf_front_x - p.service_jack_carrier_shelf_length
-    shelf_top_z = p.service_jack_pcb_bottom_z - 0.2
-    shelf = rounded_prism_xy(
-        p.service_jack_carrier_shelf_length,
-        p.service_jack_carrier_shelf_width,
-        p.service_jack_carrier_shelf_thickness,
-        2.0,
-        (
-            (shelf_front_x + shelf_rear_x) / 2.0,
-            0.0,
-            shelf_top_z - p.service_jack_carrier_shelf_thickness / 2.0,
-        ),
-        edge_radius=0.6,
-    )
-    for x, y in service_jack_pcb_mount_positions(p):
-        shelf = shelf - cylinder_z(
-            p.m2_clearance_hole / 2.0,
-            p.service_jack_carrier_shelf_thickness + 1.0,
-            (x, y, shelf_top_z - p.service_jack_carrier_shelf_thickness / 2.0),
-        )
-    carrier = flange + shelf
-    # Existing frame-insert bosses sit immediately above and below the center
-    # cartridge. Matching scallops prevent the removable carrier from borrowing
-    # their volume while preserving the cartridge's original M2.5 interface.
-    for _mount_y, frame_mount_z in rear_service_cartridge_mount_positions(
-        p, 0.0, p.rear_service_panel_z
-    ):
-        carrier = carrier - cylinder_x(
-            4.0,
-            12.0,
-            (flange_front_x - 3.0, 0.0, frame_mount_z),
-        )
-    for mount_y, mount_z in service_jack_carrier_mount_positions(p):
-        carrier = carrier - cylinder_x(
-            p.m2_clearance_hole / 2.0,
-            12.0,
-            (flange_front_x - 3.0, mount_y, mount_z),
-        )
-    return carrier
 
 
 def charge_jack_fit_parts(p: Params):
@@ -3185,60 +2817,6 @@ def charge_jack_fit_parts(p: Params):
         "fit_charge_jack_bezel": bezel,
         "fit_charge_jack_terminal_service": terminal_service,
         "fit_charge_jack_plug_service": plug_service,
-    }
-
-
-def service_jack_fit_parts(p: Params):
-    """Drawing-backed jack plus provisional custom-PCB and harness envelopes."""
-    panel_outer_x, center_y, port_z = rear_service_jack_center(p)
-    jack = rounded_box(
-        p.service_jack_body_length,
-        p.service_jack_body_width,
-        p.service_jack_body_height,
-        1.2,
-        (
-            panel_outer_x - p.service_jack_body_length / 2.0,
-            center_y,
-            port_z,
-        ),
-    )
-    pcb_center_z = p.service_jack_pcb_bottom_z + p.service_jack_pcb_thickness / 2.0
-    pcb = rounded_prism_xy(
-        p.service_jack_pcb_length,
-        p.service_jack_pcb_width,
-        p.service_jack_pcb_thickness,
-        1.5,
-        (p.service_jack_pcb_center_x, center_y, pcb_center_z),
-        edge_radius=0.4,
-    )
-    for x, y in service_jack_pcb_mount_positions(p):
-        pcb = pcb - cylinder_z(
-            p.service_jack_pcb_mount_hole / 2.0,
-            p.service_jack_pcb_thickness + 1.0,
-            (x, y, pcb_center_z),
-        )
-    wire_service = rounded_box(
-        p.service_jack_wire_service_length,
-        p.service_jack_wire_service_width,
-        p.service_jack_wire_service_height,
-        1.5,
-        (
-            p.service_jack_pcb_center_x - p.service_jack_pcb_length / 2.0
-            + p.service_jack_wire_service_length / 2.0,
-            -p.service_jack_wire_service_width / 2.0,
-            p.service_jack_pcb_bottom_z + p.service_jack_wire_service_height / 2.0,
-        ),
-    )
-    plug_service = cylinder_x(
-        4.5,
-        22.0,
-        (panel_outer_x + 11.0, center_y, port_z),
-    )
-    return {
-        "fit_service_jack_body": jack,
-        "fit_service_jack_pcb": pcb,
-        "fit_service_jack_wire_service": wire_service,
-        "fit_service_jack_plug_service": plug_service,
     }
 
 
@@ -4423,6 +4001,20 @@ def wheel_parts(p: Params):
                         p.wheel_center_z,
                     ),
                 )
+                # The stock shoulder-bolt nut remains accessible from the
+                # wheel exterior; positive metal retention never depends on a
+                # plastic thread or hidden custom-machined shaft feature.
+                head_access_length = p.front_axle_head_height + 1.0
+                hub = hub - cylinder_y(
+                    p.front_axle_head_diameter / 2.0 + 0.3,
+                    head_access_length,
+                    (
+                        wheel_x,
+                        core_outer_y
+                        - sign * head_access_length / 2.0,
+                        p.wheel_center_z,
+                    ),
+                )
                 for dx, dz in front_idler_hub_mount_positions(p):
                     hub = hub - cylinder_y(
                         p.m3_clearance_hole / 2.0,
@@ -4782,8 +4374,8 @@ def drive_motor_cable_service_fit(p: Params, side_sign: int):
 def front_idler_pods(p: Params):
     """Two-bearing front support pods for the non-driven concept wheels.
 
-    Printed plastic locates the bearings; an 8 mm metal shaft, two 608-class
-    bearings, washers, and positive shaft retention carry the actual load.
+    Printed plastic locates the bearings; a retail 8 mm shoulder bolt, two
+    608-class bearings, stock spacers, washer, and locknut carry the load.
     """
     parts = {}
     center_x = p.wheel_x_positions[0]
@@ -4821,9 +4413,9 @@ def front_idler_pods(p: Params):
         )
         retainers = {}
         for face_name, face_y, outward_sign in front_idler_retainer_interfaces(p, sign):
-            # The inboard recess also clears the installed DIN 471 ring lugs
-            # below the pod's mounting flange; the outer recess only needs to
-            # seat the printed bearing-retainer ring.
+            # The deeper inboard recess clears the retail shoulder-bolt head
+            # below the pod flange; the outer recess seats the printed
+            # bearing-retainer ring and preserves locknut tool access.
             recess_depth = 3.2 if face_name == "inner" else 2.2
             recess_offset = 0.6 if face_name == "inner" else 1.1
             recess_center_y = face_y - outward_sign * recess_offset
@@ -4867,70 +4459,70 @@ def front_idler_pods(p: Params):
 
 
 def front_idler_fit_parts(p: Params, side_sign: int):
-    """Metal-retained 608/shaft/spacer/#2693 stack for one front wheel."""
+    """Retail shoulder-bolt/608/spacer/#2693 stack for one front wheel."""
     side = "left" if side_sign < 0 else "right"
     center_x = p.wheel_x_positions[0]
     center_y = side_sign * (p.body_width / 2.0 - 21.0)
     core_center_y = wheel_center_y(p, side_sign) + side_sign * (
         (p.wheel_core_length - p.wheel_thickness) / 2.0
     )
-    shaft_outer_y = core_center_y + side_sign * p.wheel_core_length / 2.0
-    shaft_inner_y = shaft_outer_y - side_sign * p.front_axle_shaft_length
-    shaft_center_y = (shaft_inner_y + shaft_outer_y) / 2.0
+    hub_outer_y = core_center_y + side_sign * p.wheel_core_length / 2.0
+    # The 61 mm bearing/spacer/hub stack leaves 4 mm of the stock 65 mm
+    # shoulder outside the hub. Stock 3 mm + 0.5 mm tuning hardware occupies
+    # 3.5 mm there, retaining 0.5 mm nominal axial freedom and moving the
+    # compact bolt head clear of the internal board envelopes.
+    shoulder_outer_y = hub_outer_y + side_sign * 4.0
+    shoulder_inner_y = shoulder_outer_y - side_sign * p.front_axle_shoulder_length
+    shoulder_center_y = (shoulder_inner_y + shoulder_outer_y) / 2.0
     fits = {}
-    inner_face_y = center_y - side_sign * 16.0
-    groove_outboard_y = inner_face_y
-    groove_inboard_y = groove_outboard_y - side_sign * p.front_axle_ring_groove_width
-    groove_center_y = (groove_inboard_y + groove_outboard_y) / 2.0
-    shaft = cylinder_y(
+    shoulder = cylinder_y(
         p.front_axle_shaft_diameter / 2.0,
-        p.front_axle_shaft_length,
-        (center_x, shaft_center_y, p.wheel_center_z),
+        p.front_axle_shoulder_length,
+        (center_x, shoulder_center_y, p.wheel_center_z),
     )
-    groove_cut = cylinder_y(
-        p.front_axle_shaft_diameter / 2.0 + 0.1,
-        p.front_axle_ring_groove_width,
-        (center_x, groove_center_y, p.wheel_center_z),
-    ) - cylinder_y(
-        p.front_axle_ring_groove_diameter / 2.0,
-        p.front_axle_ring_groove_width + 0.2,
-        (center_x, groove_center_y, p.wheel_center_z),
-    )
-    fits[f"fit_front_idler_{side}_shaft"] = shaft - groove_cut
+    fits[f"fit_front_idler_{side}_shoulder_bolt"] = shoulder
 
-    # Keep a 0.10 mm modeling gap at the pod face so the conservative lug
-    # envelope does not numerically fuse to printed plastic. The real ring
-    # floats within the 0.90 mm groove around its 0.75-0.80 mm thickness.
-    ring_center_y = groove_outboard_y - side_sign * (
-        p.front_axle_ring_thickness / 2.0 + 0.10
+    head_center_y = shoulder_inner_y - side_sign * p.front_axle_head_height / 2.0
+    fits[f"fit_front_idler_{side}_shoulder_head"] = cylinder_y(
+        p.front_axle_head_diameter / 2.0,
+        p.front_axle_head_height,
+        (center_x, head_center_y, p.wheel_center_z),
     )
-    retaining_ring = cylinder_y(
-        p.front_axle_ring_envelope_diameter / 2.0,
-        p.front_axle_ring_thickness,
-        (center_x, ring_center_y, p.wheel_center_z),
+    thread_center_y = shoulder_outer_y + side_sign * p.front_axle_thread_length / 2.0
+    fits[f"fit_front_idler_{side}_thread"] = cylinder_y(
+        p.front_axle_thread_diameter / 2.0,
+        p.front_axle_thread_length,
+        (center_x, thread_center_y, p.wheel_center_z),
+    )
+    washer_center_y = shoulder_outer_y + side_sign * (
+        p.front_axle_thread_washer_width / 2.0
+    )
+    washer = cylinder_y(
+        p.front_axle_thread_washer_diameter / 2.0,
+        p.front_axle_thread_washer_width,
+        (center_x, washer_center_y, p.wheel_center_z),
     ) - cylinder_y(
-        p.front_axle_ring_groove_diameter / 2.0,
-        p.front_axle_ring_thickness + 0.2,
-        (center_x, ring_center_y, p.wheel_center_z),
+        p.front_axle_thread_diameter / 2.0,
+        p.front_axle_thread_washer_width + 2.0,
+        (center_x, washer_center_y, p.wheel_center_z),
     )
-    fits[f"fit_front_idler_{side}_retaining_ring"] = retaining_ring
+    fits[f"fit_front_idler_{side}_thread_washer"] = washer
+    locknut_center_y = shoulder_outer_y + side_sign * (
+        p.front_axle_thread_washer_width + p.front_axle_locknut_height / 2.0
+    )
+    locknut = cylinder_y(
+        p.front_axle_locknut_diameter / 2.0,
+        p.front_axle_locknut_height,
+        (center_x, locknut_center_y, p.wheel_center_z),
+    ) - cylinder_y(
+        p.front_axle_thread_diameter / 2.0,
+        p.front_axle_locknut_height + 2.0,
+        (center_x, locknut_center_y, p.wheel_center_z),
+    )
+    fits[f"fit_front_idler_{side}_locknut"] = locknut
 
     bearing_inner_y = center_y - side_sign * 10.5
     bearing_outer_y = center_y + side_sign * 10.5
-    washer_center_y = inner_face_y + side_sign * (
-        p.front_axle_inner_washer_width / 2.0
-    )
-    washer = cylinder_y(
-        p.front_axle_inner_washer_diameter / 2.0,
-        p.front_axle_inner_washer_width,
-        (center_x, washer_center_y, p.wheel_center_z),
-    )
-    fits[f"fit_front_idler_{side}_inner_washer"] = washer - cylinder_y(
-        p.front_axle_shaft_diameter / 2.0,
-        p.front_axle_inner_washer_width + 2.0,
-        (center_x, washer_center_y, p.wheel_center_z),
-    )
-
     for position, bearing_y in (
         ("inner", bearing_inner_y),
         ("outer", bearing_outer_y),
@@ -4958,7 +4550,7 @@ def front_idler_fit_parts(p: Params, side_sign: int):
         (center_x, inner_spacer_y, p.wheel_center_z),
     )
 
-    hub_center_y = shaft_outer_y - side_sign * p.front_hub_length / 2.0
+    hub_center_y = hub_outer_y - side_sign * p.front_hub_length / 2.0
     hub = cylinder_y(
         p.front_hub_diameter / 2.0,
         p.front_hub_length,
@@ -4980,8 +4572,9 @@ def front_idler_fit_parts(p: Params, side_sign: int):
     outer_bearing_outboard_face = bearing_outer_y + side_sign * (
         p.front_bearing_width / 2.0
     )
-    hub_inboard_face = hub_center_y - side_sign * p.front_hub_length / 2.0
-    outer_spacer_y = (outer_bearing_outboard_face + hub_inboard_face) / 2.0
+    outer_spacer_y = outer_bearing_outboard_face + side_sign * (
+        p.front_axle_outer_spacer_length / 2.0
+    )
     outer_spacer = cylinder_y(
         p.front_axle_outer_spacer_od / 2.0,
         p.front_axle_outer_spacer_length,
@@ -4991,6 +4584,32 @@ def front_idler_fit_parts(p: Params, side_sign: int):
         p.front_axle_shaft_diameter / 2.0,
         p.front_axle_outer_spacer_length + 2.0,
         (center_x, outer_spacer_y, p.wheel_center_z),
+    )
+    tuning_spacer_y = hub_outer_y + side_sign * (
+        p.front_axle_tuning_spacer_length / 2.0
+    )
+    tuning_spacer = cylinder_y(
+        p.front_axle_tuning_spacer_od / 2.0,
+        p.front_axle_tuning_spacer_length,
+        (center_x, tuning_spacer_y, p.wheel_center_z),
+    )
+    fits[f"fit_front_idler_{side}_tuning_spacer"] = tuning_spacer - cylinder_y(
+        p.front_axle_shaft_diameter / 2.0,
+        p.front_axle_tuning_spacer_length + 2.0,
+        (center_x, tuning_spacer_y, p.wheel_center_z),
+    )
+    tuning_shim_y = hub_outer_y + side_sign * (
+        p.front_axle_tuning_spacer_length + p.front_axle_tuning_shim_length / 2.0
+    )
+    tuning_shim = cylinder_y(
+        p.front_axle_tuning_shim_od / 2.0,
+        p.front_axle_tuning_shim_length,
+        (center_x, tuning_shim_y, p.wheel_center_z),
+    )
+    fits[f"fit_front_idler_{side}_tuning_shim"] = tuning_shim - cylinder_y(
+        p.front_axle_shaft_diameter / 2.0,
+        p.front_axle_tuning_shim_length + 2.0,
+        (center_x, tuning_shim_y, p.wheel_center_z),
     )
     return fits
 
@@ -6205,151 +5824,59 @@ def front_expression(p: Params):
 
 
 def power_distribution_fit_parts(p: Params):
-    """Drawing-backed custom fuse-board hardware and serviced keepouts."""
+    """Retail Blue Sea 5045 covered four-circuit fuse block and keepouts."""
     deck_top = p.power_deck_z + 2.0
-    board_bottom = deck_top + p.power_distribution_lower_standoff_height
-    board_top = board_bottom + p.power_distribution_board_thickness
-    board = rounded_box(
-        p.power_distribution_board_length,
-        p.power_distribution_board_width,
-        p.power_distribution_board_thickness,
-        0.6,
-        (
-            p.power_distribution_center_x,
-            p.power_distribution_center_y,
-            board_bottom + p.power_distribution_board_thickness / 2.0,
-        ),
-    )
-    for x, y in power_distribution_board_mount_positions(p):
-        board = board - cylinder_z(
-            p.power_distribution_mount_hole / 2.0,
-            p.power_distribution_board_thickness + 2.0,
-            (x, y, board_bottom + p.power_distribution_board_thickness / 2.0),
-        )
-
-    fits = {"fit_power_distribution_board": board}
-    for index, (x, y) in enumerate(power_distribution_holder_positions(p), start=1):
-        holder = rounded_box(
-            p.power_distribution_holder_length,
-            p.power_distribution_holder_width,
-            p.power_distribution_holder_height,
-            0.7,
-            (
-                x,
-                y,
-                board_top + p.power_distribution_holder_height / 2.0,
-            ),
-        )
-        fuse = rounded_box(
-            p.power_distribution_fuse_length,
-            p.power_distribution_fuse_width,
-            p.power_distribution_fuse_height,
-            0.45,
-            (
-                x,
-                y,
-                board_top
-                + p.power_distribution_holder_height
-                - p.power_distribution_fuse_height / 2.0
-                + 0.2,
-            ),
-        )
-        fits[f"fit_power_distribution_holder_{index}"] = holder
-        fits[f"fit_power_distribution_fuse_{index}"] = fuse
-
-    header_center_x = (
-        p.power_distribution_center_x
-        + p.power_distribution_board_length / 2.0
-        - p.power_distribution_header_depth / 2.0
-    )
-    fits["fit_power_distribution_header"] = rounded_box(
-        p.power_distribution_header_depth,
-        p.power_distribution_header_width,
-        p.power_distribution_header_height,
-        1.0,
-        (
-            header_center_x,
-            p.power_distribution_center_y,
-            board_top + p.power_distribution_header_height / 2.0,
-        ),
-    )
-    receptacle_center_x = (
-        p.power_distribution_center_x
-        + p.power_distribution_board_length / 2.0
-        + p.power_distribution_receptacle_depth / 2.0
-    )
-    fits["fit_power_distribution_receptacle"] = rounded_box(
-        p.power_distribution_receptacle_depth,
-        p.power_distribution_receptacle_width,
-        p.power_distribution_receptacle_height,
-        1.2,
-        (
-            receptacle_center_x,
-            p.power_distribution_center_y,
-            board_top + p.power_distribution_receptacle_height / 2.0,
-        ),
-    )
-    harness_straight_center_x = (
-        p.power_distribution_center_x
-        + p.power_distribution_board_length / 2.0
-        + p.power_distribution_receptacle_depth
-        + p.power_distribution_harness_straight_length / 2.0
-    )
-    fits["fit_power_distribution_harness_straight"] = rounded_box(
-        p.power_distribution_harness_straight_length,
-        16.0,
-        10.0,
-        1.5,
-        (
-            harness_straight_center_x,
-            p.power_distribution_center_y,
-            board_top + 5.0,
-        ),
-    )
-    fits["fit_power_distribution_harness_bend"] = rounded_box(
-        p.power_distribution_harness_bend_width,
-        p.power_distribution_harness_bend_length,
-        10.0,
-        2.0,
-        (
-            harness_straight_center_x - 1.0,
-            p.power_distribution_center_y
-            - p.power_distribution_harness_bend_length / 2.0
-            + 2.0,
-            board_top + 5.0,
-        ),
-    )
-    fits["fit_power_distribution_fuse_service"] = rounded_prism_xy(
-        p.power_distribution_cover_length,
-        p.power_distribution_cover_width,
-        p.power_distribution_fuse_service_height,
+    block_center_z = deck_top + p.power_distribution_height / 2.0
+    block = rounded_box(
+        p.power_distribution_width,
+        p.power_distribution_length,
+        p.power_distribution_height,
         3.0,
         (
             p.power_distribution_center_x,
             p.power_distribution_center_y,
-            deck_top + p.power_distribution_fuse_service_height / 2.0,
+            block_center_z,
         ),
-        edge_radius=0.8,
     )
-    for index, (x, y) in enumerate(power_distribution_board_mount_positions(p), start=1):
-        fits[f"fit_power_distribution_lower_standoff_{index}"] = cylinder_z(
-            1.7,
-            p.power_distribution_lower_standoff_height,
-            (
-                x,
-                y,
-                deck_top + p.power_distribution_lower_standoff_height / 2.0,
-            ),
+    for x, y in power_distribution_mount_positions(p):
+        block = block - cylinder_z(
+            p.power_distribution_mount_hole / 2.0,
+            p.power_distribution_height + 2.0,
+            (x, y, block_center_z),
         )
-        fits[f"fit_power_distribution_upper_standoff_{index}"] = cylinder_z(
-            1.7,
-            p.power_distribution_upper_standoff_height,
+    wire_center_y = (
+        p.power_distribution_center_y
+        - p.power_distribution_length / 2.0
+        - p.power_distribution_wire_service_length / 2.0
+    )
+    fits = {
+        "fit_power_distribution_block": block,
+        "fit_power_distribution_wire_service": rounded_box(
+            p.power_distribution_wire_service_width,
+            p.power_distribution_wire_service_length,
+            p.power_distribution_height,
+            2.0,
             (
-                x,
-                y,
-                board_top + p.power_distribution_upper_standoff_height / 2.0,
+                p.power_distribution_center_x,
+                wire_center_y,
+                block_center_z,
             ),
-        )
+        ),
+        "fit_power_distribution_fuse_service": rounded_prism_xy(
+            p.power_distribution_width,
+            p.power_distribution_length,
+            p.power_distribution_fuse_service_height,
+            3.0,
+            (
+                p.power_distribution_center_x,
+                p.power_distribution_center_y,
+                deck_top
+                + p.power_distribution_height
+                + p.power_distribution_fuse_service_height / 2.0,
+            ),
+            edge_radius=0.8,
+        ),
+    }
     return fits
 
 
@@ -6644,7 +6171,7 @@ def electronics_fit(p: Params):
                 servo_regulator_bottom + p.servo_regulator_wire_service_height / 2.0,
             ),
         ),
-        "fit_motor_cutoff": rounded_box(
+        "fit_motor_cutoff_relay": rounded_box(
             p.motor_cutoff_body_width,
             p.motor_cutoff_body_length,
             p.motor_cutoff_body_height,
@@ -6653,32 +6180,36 @@ def electronics_fit(p: Params):
                 p.motor_cutoff_center_x,
                 p.motor_cutoff_center_y,
                 deck_top
-                + p.motor_cutoff_metal_plate_thickness
+                + p.motor_cutoff_mount_height
+                + p.motor_cutoff_bracket_thickness
                 + p.motor_cutoff_body_height / 2.0,
             ),
         ),
         "fit_motor_cutoff_terminal_service": rounded_box(
-            p.motor_cutoff_service_width,
-            p.motor_cutoff_service_length,
-            p.motor_cutoff_service_height,
+            p.motor_cutoff_bracket_width,
+            p.motor_cutoff_body_length,
+            p.motor_cutoff_terminal_service_height,
             3.0,
             (
                 p.motor_cutoff_center_x,
                 p.motor_cutoff_center_y,
                 deck_top
-                + p.motor_cutoff_metal_plate_thickness
-                + p.motor_cutoff_service_height / 2.0,
+                + p.motor_cutoff_mount_height
+                + p.motor_cutoff_bracket_thickness
+                + p.motor_cutoff_terminal_service_height / 2.0,
             ),
         ),
-        "fit_motor_cutoff_metal_plate": rounded_box(
-            p.motor_cutoff_metal_plate_length,
-            p.motor_cutoff_metal_plate_width,
-            p.motor_cutoff_metal_plate_thickness,
+        "fit_motor_cutoff_bracket": rounded_box(
+            p.motor_cutoff_bracket_length,
+            p.motor_cutoff_bracket_width,
+            p.motor_cutoff_bracket_thickness,
             2.0,
             (
                 p.motor_cutoff_center_x,
                 p.motor_cutoff_center_y,
-                deck_top + p.motor_cutoff_metal_plate_thickness / 2.0,
+                deck_top
+                + p.motor_cutoff_mount_height
+                + p.motor_cutoff_bracket_thickness / 2.0,
             ),
         ),
         "fit_rear_service_bay": rear_service_bay,
@@ -6718,7 +6249,6 @@ def electronics_fit(p: Params):
     fits.update(power_distribution_fit_parts(p))
     fits.update(mute_switch_fit_parts(p))
     fits.update(charge_jack_fit_parts(p))
-    fits.update(service_jack_fit_parts(p))
     eye_carrier_x = (
         head_neopixel_pcb_front_x(p)
         + p.neopixel_pcb_thickness
@@ -6785,12 +6315,18 @@ def electronics_fit(p: Params):
             p.servo_regulator_height + 2.0,
             (x, y, servo_regulator_bottom + p.servo_regulator_height / 2.0),
         )
-    for x, y in motor_cutoff_plate_mount_positions(p):
-        fits["fit_motor_cutoff_metal_plate"] = fits["fit_motor_cutoff_metal_plate"] - cylinder_z(
-            p.motor_cutoff_plate_mount_hole / 2.0,
-            p.motor_cutoff_metal_plate_thickness + 2.0,
-            (x, y, deck_top + p.motor_cutoff_metal_plate_thickness / 2.0),
-        )
+    x, y = motor_cutoff_mount_position(p)
+    fits["fit_motor_cutoff_bracket"] = fits["fit_motor_cutoff_bracket"] - cylinder_z(
+        p.motor_cutoff_mount_hole / 2.0,
+        p.motor_cutoff_bracket_thickness + 2.0,
+        (
+            x,
+            y,
+            deck_top
+            + p.motor_cutoff_mount_height
+            + p.motor_cutoff_bracket_thickness / 2.0,
+        ),
+    )
     controller_plate_top = motor_controller_plate_top_z(p)
     controller_board_bottom = mdds10_pcb_bottom
     for index, (x, y) in enumerate(motor_controller_board_mount_positions(p), start=1):
@@ -6905,24 +6441,6 @@ def electronics_fit(p: Params):
             p, orientation, x, y
         )
 
-    # Purchased carry hardware is represented as fit-only geometry. The metal
-    # clamp plate sits above the reinforced tray zone; the soft webbing loop
-    # stows flat below the tray, above the wheel-ground plane, while driving.
-    stowed_webbing_z = (
-        p.body_bottom
-        - p.tray_thickness
-        - 0.25
-        - p.carry_stowed_webbing_thickness / 2.0
-    )
-    for side, side_sign in (("left", -1), ("right", 1)):
-        fits[f"fit_carry_clamp_plate_{side}"] = carry_anchor_clamp_plate(p, side_sign)
-        fits[f"fit_carry_webbing_stowed_{side}"] = rounded_box(
-            p.carry_anchor_plate_length - 4.0,
-            p.carry_webbing_width,
-            p.carry_stowed_webbing_thickness,
-            2.5,
-            (0.0, side_sign * p.carry_anchor_center_y, stowed_webbing_z),
-        )
     panel_bottom = estop_mount_panel_bottom_z(p)
     panel_top = estop_mount_panel_top_z(p)
     fits["fit_estop_switch_body"] = rounded_box(
@@ -7003,7 +6521,6 @@ def build_parts(p: Params):
     parts.update(front_expression(p))
     parts["rear_service_panel"] = rear_service_panel(p)
     parts.update(rear_service_cartridges(p))
-    parts["rear_service_data_carrier"] = rear_service_data_carrier(p)
     return parts
 
 
@@ -7015,17 +6532,17 @@ def component_coverage_status():
         "motor_controller": "cytron_mdds10_official_step_board_hole_terminal_airflow_and_standoff_contract",
         "safety_sensors_estop": "idec_xw1e_bv402m_r_keyed_panel_body_terminal_and_backing_contract_pending_physical_cutoff_test",
         "bumper_switches": "six_omron_d2hw_c202mr_drawing_backed_mount_gap_actuation_and_rigid_stop_contract_pending_coupon_and_motor_cut_test",
-        "power_distribution_and_cutoff": "custom_four_branch_littelfuse_01550900m_nano2_molex_microfit_board_with_touch_cover_service_and_strain_contract_plus_sw60_and_pololu_regulators",
+        "power_distribution_and_cutoff": "retail_blue_sea_5045_covered_four_circuit_ato_atc_block_plus_panasonic_cb1a_r_m_12v_relay_and_pololu_regulators",
         "internal_harness_routing": "modeled_dual_under_deck_rails_pending_bundle_measurement",
         "rear_drive_motors": "pololu_4867_mp_motor_1569_bracket_1997_hub_drawing_backed_contract_pending_loaded_test",
         "pan_tilt_servos": "two_hitec_d85mg_r_ml24_horns_6807_pan_bearing_mf84zz_passive_tilt_drawing_backed_contract_pending_physical_motion_test",
         "battery": "bioenno_blf_1203ab_110x75x27_rotated_pack_with_wide_strapped_end_stopped_cradle_and_rear_lead_service_pending_purchased_fit_current_and_household_release_tests",
-        "rear_switches_and_connectors": "drawing_backed_switchcraft_en2p3m20_charge_only_inlet_plus_35rasmt5chntrx_uart_service_and_pvb3f230ss311_physical_mute_cartridges",
-        "front_support_or_caster": "modeled_two_bearing_idler_pending_hardware_test",
+        "rear_switches_and_connectors": "drawing_backed_switchcraft_en2p3m20_charge_only_inlet_plus_blank_access_cartridge_and_pvb3f230ss311_physical_mute_cartridge",
+        "front_support_or_caster": "retail_wds_615_m6_8_65_shoulder_bolt_two_608_bearings_stock_spacers_and_locknut_pending_hardware_test",
         "physical_led_hardware": "four_adafruit_5975_neopixel_jst_breakouts_with_exact_step_envelopes_m2_spacers_and_plug_service_paths_pending_diffusion_test",
         "head_expression_and_bezel": "modeled_vertical_diffusers_integrated_camera_bezel_and_validated_panel_paths",
         "camera_optics": "modeled_102deg_fov_keepout_pending_physical_image_test",
-        "carry_handle": "modeled_recessed_webbing_and_metal_clamps_pending_loaded_test",
+        "carry_handle": "omitted_use_two_hand_lift_under_unpowered_tray",
         "optional_lidar": "deferred",
     }
 

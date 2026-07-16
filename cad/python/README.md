@@ -42,34 +42,30 @@ radius, preserving the full 3.2 mm roof while leaving the lower tray and seam
 interfaces crisp. The validator probes three quiet roof locations and pins the
 visible rollover to a 10 mm minimum so this concept-facing form cannot silently
 regress into a box. The current packaging pass also includes a
-Camera Module 3 Wide carrier, upper power/safety deck, and a modular rear service frame with a drawing-backed Switchcraft EN2 charge-only inlet, a protected-UART service cartridge on a separate L-carrier, and a drawing-backed PVB3 physical-mute cartridge,
+Camera Module 3 Wide carrier, upper power/safety deck, and a modular rear service frame with a drawing-backed Switchcraft EN2 charge-only inlet, a blank center cartridge, and a drawing-backed PVB3 physical-mute cartridge,
 speaker/airflow paths with dual exact-pattern MAX98357A mounts beneath the speaker plates, rear motor pods with removable inboard service covers,
 removable two-bearing front idler pods, and a stacked controller/safety-MCU
-shelf. The base tray now includes reinforced slots for two recessed 25 mm
-webbing carry loops whose review-only metal clamp plates bridge the split seam.
+shelf. The retail-only base tray has no carry handles or custom clamp plates;
+lift the unpowered robot with two hands under the tray.
 Two removable U-channel rails beneath the power deck provide separate
 signal/audio/sensor and fused switched-power/motor bundle paths; paired deck
 and rail slots let reusable straps retain the wiring as one serviced assembly.
 The 145 x 116 mm deck uses Pololu's exact four-hole D24V90F5 and triangular
-three-hole D36V50F6 patterns on 6 mm M2 metal standoffs. It also reserves the
-Albright SW60 body, M6-stud service volume, and a custom 50 x 90 x 2 mm metal
-carrier bolted through four M3 paths. The printed deck remains an organizer,
-not primary contactor retention.
-The former anonymous 60 x 26 x 18 mm distribution reserve is now a covered
-custom 40 x 21 mm PCB reference. Four Littelfuse 01550900M OMNI-BLOK holders
-carry replaceable Nano2 fuses, and a drawing-backed Molex 43045-1000/43025-1000
-ten-circuit Micro-Fit pair carries source positive/return plus four separately
-fused positive/return branches. Four lower and four upper M2 metal standoffs
-retain the board independently of its printable touch cover; dedicated
-fuse-service, connector, bend, and strain-strap paths remain open. The 6 A
-total / 5 A branch ceilings are provisional mechanical/electrical design limits,
-not release approval or final fuse values.
+three-hole D36V50F6 patterns on 6 mm M2 metal standoffs. The motor-cut interface
+models the Panasonic CB1A-R-M-12V sealed SPST-NO automotive relay, including its
+integral bracket, one 5.4 mm mounting hole, 40 A at 14 V contact baseline,
+12 V/134 mA coil, built-in resistor, 6.3 mm terminals, and service envelope.
+The printed deck locates the purchased bracket but does not carry terminal load.
+Accessory distribution models the complete Blue Sea Systems 5045 covered four-
+circuit ATO/ATC block at 92.5 x 43.8 x 32.5 mm with two mounting holes on
+65.1 mm centers. The 6 A total / 5 A branch ceilings remain conservative design
+limits, not release approval or final fuse values.
 Audio cradles, the front fascia, all four ToF pods, the battery cradle,
 and the controller stack now have explicit shell/tray attachment paths. The
 controller baseline is the official Cytron MDDS10 STEP footprint and 95.25 x
 60.96 mm hole pattern, mounted on four 6 mm M3 standoffs above a locally
-notched plate. Four additional 5 mm metal spacers lift that plate over the
-concealed carry-handle doubler; front terminal fan-out and a 10 mm cooling
+notched plate. Four additional 5 mm metal spacers lift that plate above the
+tray; front terminal fan-out and a 10 mm cooling
 keepout remain open below the Pico shelf. The
 E-stop now targets the IDEC XW1E-BV402M-R. A removable 4 mm keyed panel carries
 the purchased nut and yellow legend; a raised-collar backing ring, four cardinal
@@ -147,8 +143,10 @@ and nominal TPU actuation, mobility-pod seating, front bearing and shaft paths,
 safety-shelf alignment, motor-pod, tray, and wheel clearances,
 bumper-switch keepouts, interior bounds, the printer envelope, split-part
 reconstruction, open shared fastener paths, and the head at its configured
-pan/tilt limits. It also checks the carry slots, M4 paths, metal-plate
-clearances, stowed webbing ground clearance, complete E-stop barrel path, four
+pan/tilt limits. The D024 validator contract also requires the WDS 615-M6-8-65
+shoulder-bolt/washer/prevailing-locknut/stock-goBILDA-spacer stack, absence of
+carry hardware, the blank center cartridge, Panasonic relay, and Blue Sea 5045.
+It checks the complete E-stop barrel path, four
 removable E-stop backing screws, both harness corridors, all shared strap
 slots, the head-bezel recess, and all eight head-panel screw paths with:
 
@@ -160,7 +158,7 @@ The validator also proves all 18 alignment pilots are fused to their backing
 plates, clear both mating recess halves, retain at least 1.2 mm of exterior
 shell wall, and do not introduce split-joinery overlap.
 
-Export the canonical 103-part prototype inventory in deliberate slicer
+Export the canonical 101-part prototype inventory in deliberate slicer
 orientations with:
 
 ```bash
@@ -173,7 +171,7 @@ the usable bed span and first-layer contact, and writes material/support/release
 guidance to `cad/exports/print_ready/codex_robot_body_v1_print_manifest.json`.
 The same manifest includes current interface-level fastener, insert, standoff,
 and locknut counts; lengths and final threads remain coupon/hardware dependent.
-"Print-ready" describes orientation and bed fit; battery, axle, carry, harness,
+"Print-ready" describes orientation and bed fit; battery, axle, lifting, harness,
 and selected drivetrain/safety parts remain prototype-only until purchased hardware,
 physical coupons, measured bundles, and the applicable loaded tests pass.
 The faceplate and LED expression parts carry additional physical camera-image
@@ -185,7 +183,7 @@ Build the tracked P1S 0.4 mm Bambu Studio project after the canonical exports:
 .venv-cad/bin/python cad/bambu/generate_bambu_project.py
 ```
 
-The project contains all 103 parts on 26 single-material/single-color plates.
+The project contains all 101 parts on 26 single-material/single-color plates.
 See [`cad/bambu/README.md`](../bambu/README.md) and the generated plate manifest
 for the exact filament groups and per-plate process recommendations.
 
@@ -212,11 +210,13 @@ three-journal Koyo 6807 pan-bearing test, the wall-thickness test,
 the exact production lid-lap pair, and a three-piece pilot/recess fit test
 clipped from the real shell joinery. It also includes the exact three-piece
 bumper-switch interface, a two-piece shell/fairing corner that proves the
-flush recess enters freely and reaches its backing floor, and a one-piece
-production-derived distribution-board gauge that proves the PCB/holder/fuse/header
-stack fits its deck, M2 paths, and actual cover before a PCB order. See the tracked
+flush recess enters freely and reaches its backing floor, and a lightweight
+production-derived Blue Sea 5045 envelope gauge. See the tracked
 [coupon protocol](../../docs/cad-coupons.md) before selecting a station or
 changing `Params`.
+
+The source, split/print/coupon generators, validator, Bambu project, renders,
+and illustrated PDF are synchronized to the D024 retail-only baseline.
 
 The head mechanism targets two drawing-backed 29 x 13 x 30 mm Hitec D85MG 24T
 servos and two R-ML24 aluminum horns. A Koyo/JTEKT 6807-2RS bearing carries the

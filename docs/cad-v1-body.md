@@ -88,10 +88,8 @@ paths inside separately printable TPU tires.
 The rear-right cartridge now carries a drawing-backed E-Switch PVB3F230SS311
 maintained SPDT physical-mute control. Its exact 16.0 mm / 14.6 mm-flat opening,
 18 mm bezel, red ring, 26 mm rear body, and terminal corridor clear the nearby
-IDEC E-stop only in that right lane. The center cartridge now carries a
-drawing-backed Switchcraft 35RASMT5CHNTRX four-conductor jack on an 18 x 18 mm
-protected 3.3 V UART PCB and separate M2-retained L-carrier. Its shallow stack
-stays in front of the E-stop and routes sideways. Rear-left now carries a
+IDEC E-stop only in that right lane. The center cartridge is blank, with no
+jack, PCB, or wiring. Rear-left carries a
 drawing-backed Switchcraft EN2P3M20 charge-only inlet with an EN2C3F20G2 cord
 mate; two contacts are charger +/- and the third is protected
 `CHARGER_PRESENT`, with no battery output exposed.
@@ -101,13 +99,12 @@ MAX98357A mono amplifiers. Their official 17.78 x 19.05 mm PCB outlines and
 signal/header paths face inward and speaker terminals face outward. Adafruit's
 official STEP predates the current pre-soldered terminal block, so the modeled
 screwdriver and wire corridors remain conservative physical-test gates.
-The mobility pass now makes the concept's front wheels functional as removable
-non-driven idlers: each pod locates two 608-class bearings around a retained
-8 mm metal shaft, uses two flush screw-on bearing-retainer rings, and all four
-mobility pods clamp to deliberate tray pads. Each 64.5 mm shaft now has a
-drawing-backed Rotor Clip DSH-8 groove at its inboard end, followed by a DIN
-471 ring, steel washer, paired bearings and metal spacer tubes; a Pololu #2693
-8 mm hub provides two-set-screw outboard retention and six M3 wheel-core paths.
+The mobility pass makes the concept's front wheels functional as removable
+non-driven idlers: each pod locates two 608-class bearings around a retail WDS
+615-M6-8-65 shoulder bolt, uses two flush screw-on bearing-retainer rings, and
+all four mobility pods clamp to deliberate tray pads. An M6 washer,
+prevailing-torque locknut, and stock goBILDA spacers/shim provide positive metal
+retention without a machined groove or cut-to-length spacer.
 The safety MCU is now a
 drawing-backed non-wireless Raspberry Pi Pico 2 on four 6 mm M2 standoffs, with
 its official 48.26 x 17.78 mm hole pattern, front-facing micro-USB notch/cable
@@ -115,8 +112,7 @@ path, and rear SWD service corridor on a serviceable shelf above the controller,
 the front-right volume without sacrificing its independent wiring path.
 The motor controller beneath it is now a drawing-backed Cytron MDDS10 rather
 than a generic box: its official board and four-hole pattern sit on 6 mm M3
-standoffs, the lower plate floats 5 mm above the tray to clear the concealed
-carry-handle doubler, the six high-current terminals face robot-front, and a
+standoffs, the lower plate floats 5 mm above the tray, the six high-current terminals face robot-front, and a
 10 mm cooling keepout remains below the Pico shelf.
 The latest stance refinement lowers every 43 mm-radius wheel center to Z=66,
 partly nests each tire 4 mm into the body envelope, and derives the review floor
@@ -155,10 +151,9 @@ screw interfaces, while both side ToF pods use shell bosses behind real openings
 through the shell and fairings. Audio supports, the battery cradle, and the
 controller/safety stack are likewise anchored to shell or tray interfaces
 instead of floating at their fit coordinates.
-The tray now also has a concealed two-hand carry system: two recessed 25 mm
-webbing loops clamp to metal plates that bridge both printer-split halves. It
-does not alter the concept silhouette and remains gated on a physical loaded
-lift test.
+The retail-only tray has no carry handles or custom load-bearing metal. Lift the
+unpowered robot with two hands under the tray, never by the shell, lid, head,
+bumper, fairings, wiring, or rear cartridges.
 The rear E-stop is now drawing-backed to an IDEC XW1E-BV402M-R. Its 40 mm red
 operator clamps only a removable 4 mm keyed top panel, avoiding the former
 over-thick printed stack. A 40 mm service passage continues through the lid,
@@ -171,28 +166,23 @@ The power deck now lifts with its wiring: two removable under-deck U rails use
 four paired reusable-strap stations each, with signal/audio/sensors on the left
 and fused switched power/motors on the right. Conservative bundle envelopes
 clear the battery, mobility pods, deck standoffs, and future AI-HAT volume.
-The deck now also carries exact Pololu D24V90F5 and D36V50F6 mounting patterns,
-seven metal-standoff paths, and terminal/wire corridors. An Albright SW60
-normally-open contactor fits on a separate custom metal carrier with four open
-deck paths; the printed deck is not its primary structural or cable-torque
-interface. The battery cradle targets one Bioenno BLF-1203AB prototype candidate
+The deck carries exact Pololu D24V90F5 and D36V50F6 mounting patterns,
+seven metal-standoff paths, and terminal/wire corridors. A Panasonic
+CB1A-R-M-12V sealed SPST-NO automotive relay uses its integral bracket and one
+5.4 mm deck path; the model includes its 40 A at 14 V contact baseline,
+12 V/134 mA coil, built-in resistor, 6.3 mm terminals, and service envelope.
+The battery cradle targets one Bioenno BLF-1203AB prototype candidate
 rotated flat to 110 x 75 x 27 mm. The 117 x 92 mm cradle adds two 20 mm straps,
 four support pads, positive side/end locators, standoff scallops, and a rear
 lead corridor. Delivered geometry, product-safety evidence, <=5.6 A sustained
 pack current, runtime, BMS/regen/thermal behavior, and loaded retention remain
-open release gates. A full drawing-backed fit attempt also ruled
-out the Littelfuse 880024 four-way MINI fuse block: its housing, terminal, and
-cover service volumes collide with the E-stop/rear-service/audio stack. The
-replacement is a custom 40 x 21 mm four-branch PCB with four Littelfuse
-01550900M OMNI-BLOK Nano2 holders and a Molex 43045-1000/43025-1000 latched
-ten-circuit harness. Eight stacked M2 metal standoffs retain the board beneath
-a separate 44 x 24 mm printed touch cover; the CAD also protects fuse-puller,
-connector, first-bend, and strain-strap access. The board stays capped at 6 A
-total / 5 A any branch pending reviewed copper, measured fuse selection, and
-fault/thermal tests. The calibration suite includes an exact one-piece PETG
-board/holder/fuse/header gauge so the deck, eight M2 standoffs, header opening,
-and production cover can be trial-assembled before ordering the PCB; the gauge
-is mechanical only.
+open release gates. Accessory distribution is the complete covered Blue Sea
+Systems 5045 four-circuit ATO/ATC fuse block, modeled at 92.5 x 43.8 x 32.5 mm
+with two mounting holes on 65.1 mm centers plus fuse, terminal, wire-bend, and
+strain-relief service volumes. The conservative 6 A total / 5 A branch ceilings,
+feeder fuse, measured-load fuse selection, selective faults, and thermal tests
+remain release gates. The old custom-board gauge remains only as a superseded
+D023 artifact and must not drive a PCB order.
 See [CAD Component Coverage](cad-component-coverage.md) for the honest line
 between modeled references and hardware decisions that remain open.
 
@@ -254,7 +244,7 @@ and hardware release gates; export commands remove obsolete generated STL names
 before rebuilding.
 
 The tracked [P1S Bambu Studio project](../cad/bambu/codex_robot_body_v1_p1s.3mf)
-targets the standard 0.4 mm nozzle and Textured PEI Plate. It contains all 103
+targets the standard 0.4 mm nozzle and Textured PEI Plate. It contains all 101
 canonical parts exactly once on 26 named, brim-aware plates grouped by material
 profile and color. The adjacent JSON plate manifest records every placement,
 filament color, recommended process, and part release status. It is an editable

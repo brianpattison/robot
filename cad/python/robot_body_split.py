@@ -566,14 +566,8 @@ def export_split(p: Params, bed: float, margin: float):
                 "joiners": ["base_seam_plate"],
                 "m3_fasteners": 8,
                 "alignment_pilots": 2,
-                "carry_hardware": {
-                    "webbing_handles": 2,
-                    "metal_clamp_plates": 2,
-                    "m4_through_bolts": 8,
-                    "m4_washers": 16,
-                    "m4_locknuts": 8,
-                },
-                "note": "Each metal carry plate bridges X=0 and through-bolts both tray halves; it supplements rather than replaces the underside M3 seam plate.",
+                "carry_hardware": "none",
+                "note": "The retail-only tray has no integrated carry hardware. Lift the unpowered robot with two hands beneath the tray.",
             },
             "bumper": {
                 "pieces": [
@@ -624,7 +618,7 @@ def export_split(p: Params, bed: float, margin: float):
                 "m3_fasteners_to_tray": 16,
                 "m3_motor_cover_fasteners": 8,
                 "m2_5_bearing_retainer_fasteners": 8,
-                "front_idler_hardware": "Two 608-class bearings, four M2.5 retainer screws, and one positively retained 8 mm metal shaft per side.",
+                "front_idler_hardware": "Per side: one WDS 615-M6-8-65 shoulder bolt with inboard head, two 608 bearings, stock spacers and tuning shim, outboard M6 washer and prevailing-torque locknut, plus four M2.5 retainer screws.",
                 "note": "The front pods are a removable two-motor skid-support baseline and may be swapped after cornering tests.",
             },
             "estop_mount": {
@@ -661,7 +655,7 @@ def export_split(p: Params, bed: float, margin: float):
         "provisional_hardware": {
             "unique_m3_split_assembly_fasteners": 44,
             "m3_heat_set_inserts": 44,
-            "warning": "Choose screw lengths only after measuring the purchased inserts and printed coupons. Pilot fit requires a physical print test; carry hardware dimensions and working load require a loaded lift test.",
+            "warning": "Choose screw lengths only after measuring the purchased inserts and printed coupons. Pilot fit requires a physical print test. No integrated carry interface is released; use a two-handed lift beneath the unpowered tray.",
         },
         "parts": {},
     }

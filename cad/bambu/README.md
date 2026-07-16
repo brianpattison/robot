@@ -4,7 +4,7 @@ The tracked [`codex_robot_body_v1_p1s.3mf`](codex_robot_body_v1_p1s.3mf)
 is the canonical Bambu Studio layout project for a Bambu Lab P1S with the
 standard 0.4 mm nozzle and a Textured PEI Plate.
 
-It contains all 103 canonical printable parts exactly once on 26 named plates.
+It contains all 101 canonical printable parts exactly once on 26 named plates.
 Each plate contains one material-profile/color group; no plate mixes PETG and
 TPU or combines colors. The project carries nine physical filament/color
 presets and uses a conservative global baseline of four walls and 25% gyroid
@@ -24,7 +24,7 @@ TPU presets into full CLI profiles, imports the canonical STLs through Bambu
 Studio, packs them with brim-aware clearance inside an 8 mm edge reserve, and
 round-trips the result through Bambu Studio. It then checks the P1S profile,
 0.4 mm nozzle, 256 mm plate, Textured PEI selection, plate grouping, bounds,
-packing-envelope separation, and the exact 103-part inventory.
+packing-envelope separation, and the exact 101-part inventory.
 
 The macOS application bundle remains the default, but custom and non-macOS
 installs can supply the official Bambu Studio CLI and BBL profile root without
@@ -44,10 +44,14 @@ metal brackets, and aluminum hubs; the head targets two Hitec D85MG servos,
 R-ML24 horns, a 6807 pan bearing, and an MF84ZZ passive-tilt bearing. Both still
 require delivered-part inspection and loaded testing. The IDEC XW1E E-stop and
 Omron D2HW bumper interfaces are also drawing-backed but remain gated on exact
-coupons and deterministic cutoff tests. The two Pololu regulator patterns and
-Albright SW60 mechanical carrier are now explicit, but still require
-purchased-part, thermal, wiring, and electrical-safety review. Select and
-measure the battery, LEDs, distribution hardware, and rear connectors before
-committing to the full body.
+coupons and deterministic cutoff tests. D024 replaces the Albright/custom-
+carrier and custom-distribution interfaces with the Panasonic CB1A-R-M-12V
+relay and Blue Sea Systems 5045 fuse block, replaces the machined front axle
+with the WDS 615-M6-8-65 retail shoulder-bolt stack, removes the carry handles,
+and leaves the center rear cartridge blank. The tracked 3MF and plate manifest
+predate that synchronization and may still contain legacy names or parts; do
+not use them as a D024 hardware release. Regenerate them only after the split
+and print generators are updated, then inspect the Panasonic, Blue Sea, WDS,
+blank-cartridge, and handle-free inventory before committing to the full body.
 
 ![P1S plate layout](../../docs/images/codex_robot_body_v1_p1s_plates.png)

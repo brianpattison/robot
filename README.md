@@ -13,6 +13,7 @@ This repo is at the planning and parametric CAD-prototype stage. Start with the 
 - Decision log: [`docs/decision-log.md`](docs/decision-log.md)
 - MVP architecture: [`docs/mvp-architecture.md`](docs/mvp-architecture.md)
 - BOM v0: [`docs/bom-v0.md`](docs/bom-v0.md)
+- Retail sourcing policy: [`docs/retail-sourcing-policy.md`](docs/retail-sourcing-policy.md)
 - CAD mechanical plan: [`docs/cad-mechanical-plan.md`](docs/cad-mechanical-plan.md)
 - CAD v1 body and renders: [`docs/cad-v1-body.md`](docs/cad-v1-body.md)
 - CAD component/release coverage: [`docs/cad-component-coverage.md`](docs/cad-component-coverage.md)
@@ -31,6 +32,7 @@ This repo is at the planning and parametric CAD-prototype stage. Start with the 
 - Pan/tilt camera head for expression and perception.
 - Physical E-stop, bumper switches, watchdog, velocity limits, and conservative movement defaults.
 - Local dashboard for health, logs, camera preview, manual drive, and emergency stop.
+- Quantity-one US retail hardware throughout the production design: Panasonic CB1A-R-M-12V motor-cut relay, Blue Sea Systems 5045 covered fuse block, WDS 615-M6-8-65 front shoulder bolts with stock hardware, no carry handles, and a blank center rear cartridge.
 
 ## Safety First
 
@@ -119,7 +121,7 @@ python -m pip install -r cad/python/requirements.txt
 
 1. Print and measure the P1S calibration coupons before committing to large body parts.
 2. Buy the bench-brain and safety-prototype batch from [`docs/bom-v0.md`](docs/bom-v0.md).
-3. Print and measure the seventeen-part calibration suite, including the 6807 pan-bearing seat/journal block, exact three-piece split-pilot, three-piece tray/PETG/TPU bumper-interface, two-piece flush-fairing recess test, and production-derived distribution-board fit gauge, before any large chassis part or PCB order.
-4. Purchase and bench-check one Pololu #4867 motor plus one BLF-1203AB/BPC-1502DC/EN2 charge set, then the selected Hitec head hardware, IDEC XW1E E-stop, two Omron D2HW bumper switches, both Pololu regulators, the E-Switch PVB3F230SS311 physical-mute switch, and one Switchcraft 35RASMT5CHNTRX service jack. Print the distribution cover and exact one-piece 40 x 21 mm board/hardware gauge, then trial-assemble them on the deck before ordering the four-holder Nano2/Micro-Fit PCB. Qualify fit, current, runtime, charger inhibit, fusing/crimps/selective faults/thermal behavior, and safety/privacy/service interfaces before buying the remaining mobility/safety set or powering both motors.
+3. Print and measure the applicable calibration suite, including the 6807 pan-bearing seat/journal block, exact three-piece split-pilot, three-piece tray/PETG/TPU bumper-interface, two-piece flush-fairing recess test, and the production-derived Blue Sea 5045 fit gauge before any large chassis part.
+4. Purchase and bench-check one Pololu #4867 motor plus one BLF-1203AB/BPC-1502DC/EN2 charge set, then the selected Hitec head hardware, IDEC XW1E E-stop, two Omron D2HW bumper switches, both Pololu regulators, the Panasonic CB1A-R-M-12V relay, Blue Sea Systems 5045 fuse block, WDS 615-M6-8-65 shoulder-bolt hardware, and E-Switch PVB3F230SS311 physical-mute switch. Qualify delivered fit, current, runtime, charger inhibit, relay dropout, branch fusing/selective faults/thermal behavior, axle retention, and safety/privacy interfaces before buying the remaining mobility/safety set or powering both motors.
 5. Print representative harness, seam, motor-pod, idler, camera, vent, and acoustic parts before a full shell.
 6. Build the stationary bench brain and deterministic safety loop before powering drive motors.

@@ -109,15 +109,15 @@
           "name": "power_service_deck",
           "center_mm": [
             82.5,
-            68.0
+            71.0
           ],
           "rotated_z_degrees": 0,
           "span_xy_mm": [
             145.0,
-            116.0
+            122.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype_only_pending_regulator_sw60_and_custom_distribution_pcb_fit_wiring_airflow_transient_fusing_and_cutoff_test"
+          "release_status": "prototype_only_pending_regulator_panasonic_cb1a_relay_blue_sea_5045_fit_wiring_fusing_and_cutoff_test"
         }
       ]
     },
@@ -181,7 +181,7 @@
             212.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype_only_pending_split_pilot_carry_and_bumper_switch_hardware_tests"
+          "release_status": "prototype_only_pending_split_pilot_and_bumper_switch_hardware_tests"
         },
         {
           "name": "base_seam_plate",
@@ -279,7 +279,7 @@
             31.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype_only_pending_608_grooved_shaft_dsh8_2693_axial_play_retention_and_loaded_floor_test"
+          "release_status": "prototype_only_pending_wds_615_m6_8_65_608_stock_spacer_locknut_axial_play_and_loaded_floor_test"
         }
       ]
     },
@@ -311,7 +311,7 @@
             212.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype_only_pending_split_pilot_carry_and_bumper_switch_hardware_tests"
+          "release_status": "prototype_only_pending_split_pilot_and_bumper_switch_hardware_tests"
         },
         {
           "name": "safety_mcu_mount",
@@ -525,7 +525,7 @@
             31.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype_only_pending_608_grooved_shaft_dsh8_2693_axial_play_retention_and_loaded_floor_test"
+          "release_status": "prototype_only_pending_wds_615_m6_8_65_608_stock_spacer_locknut_axial_play_and_loaded_floor_test"
         },
         {
           "name": "front_idler_retainer_right_inner",
@@ -539,7 +539,7 @@
             31.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype_only_pending_608_grooved_shaft_dsh8_2693_axial_play_retention_and_loaded_floor_test"
+          "release_status": "prototype_only_pending_wds_615_m6_8_65_608_stock_spacer_locknut_axial_play_and_loaded_floor_test"
         },
         {
           "name": "front_idler_retainer_right_outer",
@@ -553,7 +553,7 @@
             31.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype_only_pending_608_grooved_shaft_dsh8_2693_axial_play_retention_and_loaded_floor_test"
+          "release_status": "prototype_only_pending_wds_615_m6_8_65_608_stock_spacer_locknut_axial_play_and_loaded_floor_test"
         }
       ]
     },
@@ -599,7 +599,7 @@
             42.0
           ],
           "brim_mm": 5.0,
-          "release_status": "prototype_only_pending_608_grooved_shaft_dsh8_2693_axial_play_retention_and_loaded_floor_test"
+          "release_status": "prototype_only_pending_wds_615_m6_8_65_608_stock_spacer_locknut_axial_play_and_loaded_floor_test"
         },
         {
           "name": "front_idler_pod_left",
@@ -613,7 +613,7 @@
             42.0
           ],
           "brim_mm": 5.0,
-          "release_status": "prototype_only_pending_608_grooved_shaft_dsh8_2693_axial_play_retention_and_loaded_floor_test"
+          "release_status": "prototype_only_pending_wds_615_m6_8_65_608_stock_spacer_locknut_axial_play_and_loaded_floor_test"
         },
         {
           "name": "head_tilt_drive_adapter",
@@ -1157,7 +1157,7 @@
         "infill_percent": 15,
         "note": "Cosmetic shell baseline; tune temperature and flow with a wall coupon."
       },
-      "part_count": 5,
+      "part_count": 4,
       "parts": [
         {
           "name": "hub_left_1",
@@ -1214,20 +1214,6 @@
           ],
           "brim_mm": 0.0,
           "release_status": "prototype_only_pending_purchased_pololu_drivetrain_and_loaded_floor_test"
-        },
-        {
-          "name": "rear_service_data_carrier",
-          "center_mm": [
-            214.0,
-            20.5
-          ],
-          "rotated_z_degrees": 90,
-          "span_xy_mm": [
-            24.0,
-            21.0
-          ],
-          "brim_mm": 0.0,
-          "release_status": "prototype_only_pending_switchcraft_trrs_uart_pcb_esd_level_adapter_and_service_interlock_test"
         }
       ]
     },
@@ -1323,7 +1309,7 @@
         "infill_percent": 25,
         "note": "Small service/detail part baseline."
       },
-      "part_count": 25,
+      "part_count": 24,
       "parts": [
         {
           "name": "power_harness_rail_left",
@@ -1424,24 +1410,10 @@
           "release_status": "prototype_print_candidate"
         },
         {
-          "name": "power_distribution_cover",
-          "center_mm": [
-            169.951,
-            89.4
-          ],
-          "rotated_z_degrees": 0,
-          "span_xy_mm": [
-            43.902,
-            24.0
-          ],
-          "brim_mm": 2.0,
-          "release_status": "prototype_only_pending_custom_4branch_pcb_01550900m_nano2_microfit_fuse_service_strain_fault_and_thermal_test"
-        },
-        {
           "name": "tof_pod_side_left",
           "center_mm": [
-            218.027,
-            95.9
+            166.125,
+            87.9
           ],
           "rotated_z_degrees": 0,
           "span_xy_mm": [
@@ -1454,8 +1426,8 @@
         {
           "name": "tof_pod_side_right",
           "center_mm": [
-            166.125,
-            119.9
+            210.375,
+            95.9
           ],
           "rotated_z_degrees": 0,
           "span_xy_mm": [
@@ -1468,13 +1440,13 @@
         {
           "name": "bumper_switch_mount_side_left",
           "center_mm": [
-            212.25,
-            125.4
+            159.0,
+            126.4
           ],
-          "rotated_z_degrees": 0,
+          "rotated_z_degrees": 90,
           "span_xy_mm": [
-            40.0,
-            22.0
+            22.0,
+            40.0
           ],
           "brim_mm": 2.0,
           "release_status": "prototype_only_pending_purchased_d2hw_fit_actuation_rebound_and_broken_wire_test"
@@ -1482,8 +1454,8 @@
         {
           "name": "bumper_switch_mount_side_right",
           "center_mm": [
-            72.0,
-            122.4
+            198.0,
+            125.4
           ],
           "rotated_z_degrees": 0,
           "span_xy_mm": [
@@ -1496,8 +1468,8 @@
         {
           "name": "bumper_switch_mount_front_left",
           "center_mm": [
-            120.0,
-            122.4
+            198.0,
+            155.4
           ],
           "rotated_z_degrees": 90,
           "span_xy_mm": [
@@ -1510,8 +1482,8 @@
         {
           "name": "bumper_switch_mount_front_right",
           "center_mm": [
-            159.0,
-            158.4
+            63.0,
+            194.4
           ],
           "rotated_z_degrees": 0,
           "span_xy_mm": [
@@ -1525,7 +1497,7 @@
           "name": "bumper_switch_mount_rear_left",
           "center_mm": [
             63.0,
-            206.4
+            131.4
           ],
           "rotated_z_degrees": 0,
           "span_xy_mm": [
@@ -1538,8 +1510,8 @@
         {
           "name": "bumper_switch_mount_rear_right",
           "center_mm": [
-            72.0,
-            152.4
+            102.0,
+            122.4
           ],
           "rotated_z_degrees": 90,
           "span_xy_mm": [
@@ -1552,8 +1524,8 @@
         {
           "name": "tof_pod_front_left",
           "center_mm": [
-            116.775,
-            151.15
+            68.775,
+            232.15
           ],
           "rotated_z_degrees": 90,
           "span_xy_mm": [
@@ -1566,13 +1538,13 @@
         {
           "name": "tof_pod_front_right",
           "center_mm": [
-            116.775,
-            178.65
+            91.75,
+            191.175
           ],
-          "rotated_z_degrees": 90,
+          "rotated_z_degrees": 0,
           "span_xy_mm": [
-            37.55,
-            23.5
+            23.5,
+            37.55
           ],
           "brim_mm": 0.0,
           "release_status": "prototype_print_candidate"
@@ -1580,13 +1552,13 @@
         {
           "name": "front_status_led_carrier_2",
           "center_mm": [
-            96.0,
-            211.4
+            108.55,
+            229.95
           ],
-          "rotated_z_degrees": 0,
+          "rotated_z_degrees": 90,
           "span_xy_mm": [
-            32.0,
-            34.0
+            34.0,
+            32.0
           ],
           "brim_mm": 0.0,
           "release_status": "prototype_only_pending_adafruit_5975_fit_cable_and_diffusion_test"
@@ -1594,22 +1566,36 @@
         {
           "name": "front_status_led_carrier_1",
           "center_mm": [
-            132.0,
-            211.4
+            124.5,
+            155.4
           ],
-          "rotated_z_degrees": 0,
+          "rotated_z_degrees": 90,
           "span_xy_mm": [
-            32.0,
-            34.0
+            34.0,
+            32.0
           ],
           "brim_mm": 0.0,
           "release_status": "prototype_only_pending_adafruit_5975_fit_cable_and_diffusion_test"
         },
         {
+          "name": "rear_service_cartridge_blank_access",
+          "center_mm": [
+            123.5,
+            191.4
+          ],
+          "rotated_z_degrees": 90,
+          "span_xy_mm": [
+            30.0,
+            30.0
+          ],
+          "brim_mm": 1.0,
+          "release_status": "prototype_only_blank_access_cartridge_no_connector_installed"
+        },
+        {
           "name": "rear_service_cartridge_mute_status",
           "center_mm": [
-            168.0,
-            200.4
+            145.55,
+            227.4
           ],
           "rotated_z_degrees": 90,
           "span_xy_mm": [
@@ -1622,8 +1608,8 @@
         {
           "name": "rear_service_cartridge_power_charge",
           "center_mm": [
-            192.0,
-            158.4
+            159.5,
+            191.4
           ],
           "rotated_z_degrees": 90,
           "span_xy_mm": [
@@ -1634,29 +1620,15 @@
           "release_status": "prototype_only_pending_en2_charge_adapter_polarity_charger_present_motion_inhibit_and_mating_test"
         },
         {
-          "name": "rear_service_cartridge_service_data",
-          "center_mm": [
-            228.0,
-            158.4
-          ],
-          "rotated_z_degrees": 0,
-          "span_xy_mm": [
-            30.0,
-            30.0
-          ],
-          "brim_mm": 1.0,
-          "release_status": "prototype_only_pending_switchcraft_trrs_uart_pcb_esd_level_adapter_and_service_interlock_test"
-        },
-        {
           "name": "head_eye_led_carrier_1",
           "center_mm": [
-            227.0,
-            192.4
+            179.55,
+            226.4
           ],
-          "rotated_z_degrees": 0,
+          "rotated_z_degrees": 90,
           "span_xy_mm": [
-            30.0,
-            28.0
+            28.0,
+            30.0
           ],
           "brim_mm": 0.0,
           "release_status": "prototype_only_pending_adafruit_5975_fit_cable_and_diffusion_test"
@@ -1664,8 +1636,8 @@
         {
           "name": "head_eye_led_carrier_2",
           "center_mm": [
-            202.0,
-            225.4
+            193.5,
+            187.4
           ],
           "rotated_z_degrees": 90,
           "span_xy_mm": [

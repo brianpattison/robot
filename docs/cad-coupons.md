@@ -43,7 +43,7 @@ larger 6807 block uses separate outer-seat and journal rows.
 | Bumper interface TPU | Exact clipped production bumper inner wall and local switch-plate relief; print with the candidate production TPU profile |
 | Flush-fairing shell | Exact clipped cream-shell corner with the production 2.2 mm recess, 1 mm backing wall, and one M3 boss/path |
 | Flush-fairing skin | Exact clipped 2 mm cream wheel-arch skin corner with 0.3 mm perimeter clearance and 0.2 mm nominal depth gap |
-| Power-distribution fit gauge | One exact 40 x 21 x 1.6 mm PCB envelope with four 01550900M holder/Nano2 stacks, the 43045-1000 header envelope, and four production M2 paths fused into a single PETG preflight part |
+| Blue Sea 5045 fit gauge | One-piece production-derived 92.5 x 43.8 x 32.5 mm retail-block envelope with both 4.5 mm paths on 65.1 mm centers and the current deck orientation; mechanical preflight only |
 
 The generator validates 32 modeled openings, six bearing shoulders, all
 seventeen single-solid exports, first-layer contact, bed fit, exact lid-lap
@@ -54,9 +54,9 @@ worst-case D2HW actuation after 2 mm of TPU-wall travel, paired stop contact at
 2.4 mm, no total-travel bottoming, and all four plate/switch screw paths. It also proves exact
 production reconstruction for both fairing coupons, free insertion through the
 nominal 0.2 mm depth gap, and positive backing-floor contact after another
-0.1 mm of test overtravel. The distribution-gauge validator additionally proves
-exact reconstruction from the production PCB/holder/fuse/header envelopes,
-zero overlap with the actual printed cover, and four open M2 stack paths.
+0.1 mm of test overtravel. The distribution-gauge validator also proves the
+current Blue Sea 5045 envelope, orientation, two-hole spacing, deck paths, and
+surrounding mechanical clearances.
 
 ## Test protocol
 
@@ -99,14 +99,13 @@ zero overlap with the actual printed cover, and four open M2 stack paths.
    the seam clamps flush without bowing the 2 mm skin. If it binds or remains
    proud, tune the shared perimeter or depth clearance and regenerate the body,
    split, print-ready, and coupon inventories together.
-12. Print the power-distribution gauge in the detail PETG profile and the actual
-   `power_distribution_cover` roof-down in its production orientation. On the
-   production deck, install the gauge using four 4 mm lower and four 3 mm upper
-   M2 stacking standoffs. Start all four screws by hand, fit the cover, and
-   confirm it seats without bowing while the header envelope clears the open
-   end. Record hole, foot, wall, and opening fit. This is mechanical preflight
-   only; it proves nothing about PCB copper, fuses, contacts, crimps, current,
-   heat, selective clearing, or fault safety.
+12. Print the Blue Sea 5045 gauge, install it on the production deck through
+   both M4 paths, and check its 92.5 x 43.8 x 32.5 mm envelope, 65.1 mm spacing,
+   terminal side, wire bend, strain relief, and surrounding keepouts. Then
+   repeat the check with the purchased complete block. Fuse access is performed
+   with power off and the removable deck lifted. Mechanical fit proves nothing
+   about fuse selection, conductor ampacity, selective clearing, or thermal
+   safety.
 13. Inspect the wall coupon for perimeter fusion, ringing, surface quality, and
    flex before accepting the shell wall setting.
 14. Update the shared `Params` values and rerun the entire CAD validation and

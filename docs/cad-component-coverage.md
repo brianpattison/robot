@@ -14,17 +14,17 @@ interface. It does **not** mean an unpurchased placeholder is release-ready.
 | Optional I2C mux | No dedicated board frozen; ToF XSHUT/address assignment is the first baseline, with strap-serviced signal-harness space retained if a mux proves necessary | Deferred unless bench wiring proves it is needed |
 | Raspberry Pi Pico 2 safety MCU | Official 51 x 21 x 1 mm board and 52.3 x 21 x 3.8 mm STEP envelope, 48.26 x 17.78 mm four-hole pattern, four 6 mm M2 standoffs, front micro-USB notch/cable corridor, rear SWD corridor, optional-header keepouts, and removable upper shelf above the controller | Drawing-backed mechanical baseline; physical connector, watchdog, NC-input, and motor-cut tests required |
 | E-stop | IDEC XW1E-BV402M-R 40 mm/2NC reference; removable 4 mm keyed clamp panel; 37 x 37 x 48.7 mm body and 20 mm terminal-service envelopes; 40 mm lid/shell/backing/deck passage; 66 mm raised-collar backing; four cardinal M3 paths; purchased-nut retention; 60 mm yellow legend | Drawing-backed mechanical baseline; purchased-part, terminal, push/twist, dual-NC, and independent cutoff tests required |
-| Motor cutoff, Pi regulator, servo regulator, distribution | Drawing-backed Pololu D24V90F5 and D36V50F6 boards on seven metal M2 standoffs with exact holes/service corridors; Albright SW60 body and metal carrier; custom 40 x 21 mm four-branch PCB with four Littelfuse 01550900M OMNI-BLOK Nano2 holders, Molex 43045-1000/43025-1000 Micro-Fit interface, eight stacked M2 standoffs, removable 44 x 24 mm touch cover, fuse-puller volume, cable-bend keepout, dedicated strain strap, and an exact one-piece printable board/holder/fuse/header fit gauge | All are prototype mechanical baselines. Print the gauge and production cover for deck/standoff/opening preflight before ordering the PCB. The custom board is capped at 6 A total / 5 A any branch and remains blocked on PCB/copper review, source/branch fuse selection, crimp tooling, selective fault clearing, no-backfeed, thermal, transient, and cutoff tests. Littelfuse 880024 remains rejected for collisions |
+| Motor cutoff, Pi regulator, servo regulator, distribution | Drawing-backed Pololu D24V90F5 and D36V50F6 boards on seven metal M2 standoffs; Panasonic CB1A-R-M-12V sealed SPST-NO relay with 26 x 22 x 25 mm body, integral 52 x 22 x 0.8 mm bracket, one 5.4 mm mount, 6.3 mm terminals, 40 A at 14 V contacts, 12 V/134 mA coil, and built-in resistor; Blue Sea Systems 5045 complete covered four-circuit ATO/ATC block at 92.5 x 43.8 x 32.5 mm with two 4.5 mm paths on 65.1 mm centers, terminal/wire/fuse service, and strain slots | Retail-only mechanical baselines. Require purchased identity/fit, relay terminal and conductor sizing, driver/suppression/dropout/fault/thermal tests, battery-near feeder fuse, measured-load branch fuses, covered terminals, strain relief, labels, selective clearing, all-branch thermal soak, no-backfeed, and independent cutoff tests. Keep 6 A total / 5 A any-branch prototype ceilings |
 | Internal wiring harness | Two removable 108 x 14 mm under-deck U rails, separate signal and switched-power bundle envelopes, 7.6 x 5 mm channels, four paired reusable-strap stations per rail, shared deck openings, and validated clearance from battery, mobility, standoffs, and future AI-HAT volume | Modeled routing baseline; measure real bundles and connectors |
-| Main power, charging, mute, service connectors | 100 x 34 x 23 internal bay with six local insert-boss notches; screw-on 126 x 58 rear frame; three flush 30 x 30 cartridges with two M2.5 screws each; rear-left Switchcraft EN2P3M20 charge-only inlet, rear-center Switchcraft 35RASMT5CHNTRX protected-UART jack/carrier, and rear-right E-Switch PVB3F230SS311 physical mute | All three cartridges are drawing-backed prototype baselines. Require purchased-part fit, EN2 polarity and charger-present motion inhibit, UART protection/service inhibit, privacy behavior, strain relief, and external removability tests. Neither rear electrical port exposes raw battery output or motor enable |
+| Main power, charging, mute, rear cartridges | 100 x 34 x 23 internal bay with six local insert-boss notches; screw-on 126 x 58 rear frame; three flush 30 x 30 cartridges with two M2.5 screws each; rear-left Switchcraft EN2P3M20 charge-only inlet, blank center cartridge, and rear-right E-Switch PVB3F230SS311 physical mute | Require purchased EN2/mute fit, charge polarity and charger-present motion inhibit, privacy behavior, strain relief, and external removability tests. The blank center has no jack, PCB, wiring, power, or service-detect path |
 | Battery | Bioenno BLF-1203AB modeled flat at 110 x 75 x 27 mm; 117 x 92 mm removable cradle with four support pads, two 20 mm strap channels, positive side/end locators, four screw tabs, standoff scallops, and a rear lead corridor | Prototype candidate only; require delivered pack/lead fit, product-safety evidence beyond UN38.3, <=5.6 A sustained current, BMS/regen/thermal behavior, retention, and 45-minute runtime with 20% reserve |
 | Rear drive motors | Two Pololu #4867 99:1 25D MP 12 V encoder motors, #1569 metal brackets on three tray-backed M3 spacer paths per side, #1997 4 mm aluminum hubs, four-screw PETG wheel cores, annular TPU tires, removable protective pods/covers, and routed encoder-lead corridors | Drawing-backed mechanical and electrical prototype baseline; purchased-revision, <=0.45 A-per-motor target-surface current, thermal, retention, cutoff, and floor tests required |
 | Cytron MDDS10 motor controller | Official 101.092 x 66.802 mm STEP footprint, 1.57 mm PCB, 1.93 mm underside protrusion, 12.275 mm component height, 95.25 x 60.96 mm four-hole pattern, four 6 mm M3 board standoffs, locally notched plate on four 5 mm metal spacers, front terminal fan-out, 10 mm cooling keepout, and four-standoff safety shelf | Drawing-backed mechanical baseline; purchased-board revision, polarity, terminal bend, cooling, and loaded-motor tests required |
 | ToF + bumper switches | Keyed front fascia and four ToF pods; six Omron D2HW-C202MR sealed SPST-NC switches on tray-fixed PETG plates; 13 mm M3 switch patterns; 12 blind tray inserts; side-lead corridors; independent TPU reliefs; validated 0.4 mm rest gap, 2 mm worst-case actuation, and paired 2.4 mm stops below total travel | Drawing-backed mechanical baseline; purchased-switch/TPU coupon, strain, rebound, broken-wire, and six-direction motor-cut tests required |
 | Pan/tilt | Two drawing-backed Hitec D85MG servos and R-ML24 horns; keyed Koyo/JTEKT 6807-2RS fixed carrier; 34.8 mm rotating journal, upper shoulder, and four-screw inner-ring retainer; flat ribbon corridor; fixed tilt yoke; active adapter; MF84ZZ passive bearing; McMaster 92981A143 shoulder screw; and complete moving-head collision sweep through +/-20 degrees tilt at sampled +/-60 degrees pan | Drawing-backed mechanical baseline; 6807 coupon, purchased-part fit, measured head mass/torque, regulated-power, cable-sweep, backlash, and repeated-motion tests required |
 | LED eyes/status | Four Adafruit 5975 NeoPixel JST breakout STEP envelopes; 12.192 x 11.43 mm PCB, 5.93 mm overall component depth, two 2.0 mm holes on 8.636 mm spacing, two 3-pin JST-SH ports, eight 3 mm-OD M2 spacers, open plug/latch corridors, removable M2.5 carrier frames, stepped pockets, separate diffusers, 9 x 14 mm vertical head eyes, and horizontal body indicators | Drawing-backed mechanical baseline; buy one first and verify delivered dimensions, cable bends, brightness/current cap, diffuser hotspotting/color, camera reflections, and software-off behavior |
-| Front support/idlers | Two removable pods; two 608 seats and flush screw-on outer-race retainers per side; 64.5 mm grooved 8 mm steel shafts; DSH-8 / DIN 471 inboard rings; steel washers; two metal spacer tubes per side; Pololu #2693 two-set-screw hubs with six M3 core paths; four-point tray pads | Drawing-backed shaft-ring and hub baseline; machined-shaft inspection, purchased-hardware fit, axial-play, retention, and loaded cornering tests required |
-| Carry interface | Two recessed 25 mm webbing loops, reinforced rounded tray slots, two fit-modeled 92 x 28 x 2 mm metal clamp plates bridging the split seam, eight open M4 through-bolt paths, and validated stowed ground clearance | Modeled hardware-backed baseline; loaded lift test required |
+| Front support/idlers | Two removable pods; two 608 seats and flush screw-on outer-race retainers per side; WDS 615-M6-8-65 shoulder bolt; M6 washer; prevailing-torque locknut; stock goBILDA spacers/shim; four-point tray pads | Retail-only metal retention baseline; purchased-hardware fit, shoulder/thread engagement, spacer squareness, axial play without bearing preload, locknut retention, wheel alignment, and loaded cornering tests required |
+| Lifting | No integrated carry interface or custom load-bearing metal | Power down and lift with two hands under the tray; never lift by shell, lid, head, bumper, fairings, wiring, or cartridges |
 | Optional LiDAR | Space not yet proven by a keepout | Deferred |
 
 ## Camera reference
@@ -127,10 +127,9 @@ the PCB datum.
 
 The long axis runs along robot X with the six high-current terminals facing
 robot-front. Four 6 mm M3 standoffs leave more than 4 mm beneath the pins. The
-printed plate sits on four additional 5 mm metal spacers to clear the concealed
-right carry-handle doubler, while a 10 mm cooling keepout remains below the
-Pico shelf. The validator checks the official dimensions, all twelve standoff
-endpoints, terminal corridor, cooling volume, carry-clamp clearance, and full
+printed plate sits on four additional 5 mm metal spacers, while a 10 mm cooling
+keepout remains below the Pico shelf. The validator checks the official dimensions, all twelve standoff
+endpoints, terminal corridor, cooling volume, and full
 interior collision audit. Cytron warns that the board has no reverse-polarity
 protection; keyed power connectors, fuse/cutoff behavior, terminal strain
 relief, temperature under real motor load, and the purchased board revision
@@ -151,7 +150,7 @@ This is a charge-only interface for the Bioenno BPC-1502DC 14.6 V/2 A charger,
 not a battery outlet or main-power disconnect. The cord side is female so an
 energized adapter does not expose pins. Switchcraft specifies that EN2 is not
 for current interruption: remove charger AC before mating or unmating. Insertion
-must request a deterministic motor inhibit, de-energize the SW60 coil/motor
+must request a deterministic motor inhibit, de-energize the Panasonic relay/motor
 enable, and require explicit reset after removal. Purchased-part fit, pinout,
 polarity, insulation, strain relief, charge current, BMS interaction, insertion
 shorts, and no-automatic-restart behavior remain physical release gates.
@@ -183,14 +182,12 @@ tests, and skid-turn testing on carpet, rugs, and hard floors.
 The non-driven front wheel pods preserve the four-wheel concept silhouette
 without adding two more motors. Each side reserves two 608-class bearings using
 the [SKF 608 reference dimensions](https://www.skf.com/sg/products/rolling-bearings/ball-bearings/deep-groove-ball-bearings/productid-608-2Z%2FC3LHT23):
-8 mm bore, 22 mm outside diameter, and 7 mm width. A 64.5 mm x 8 mm metal shaft
-runs through both bearings into a Pololu #2693 aluminum wheel hub. The shaft
-uses a Rotor Clip DSH-8 / DIN 471 8x0.8 ring in a 7.54-7.60 x 0.90 mm inboard
-groove with 0.60 mm minimum edge margin. A steel washer, 12 x 8 x 14 mm inner
-spacer, and 10 x 8 x 19 mm outer spacer establish the axial stack; the #2693
-uses both supplied set screws and six M3 core screws. The printed pod locates the bearings
+8 mm bore, 22 mm outside diameter, and 7 mm width. A WDS 615-M6-8-65 shoulder
+bolt runs its 65 mm-long, 8 mm shoulder through both bearings. An M6 washer,
+prevailing-torque locknut, and stock goBILDA spacers/shim establish the axial
+stack and positive metal retention. The printed pod locates the bearings
 and transmits their reaction into the four-point tray interface; the
-bearings, shaft, hub, low-profile axle hardware, and positive metal retention
+bearings, shoulder bolt, washer, locknut, stock spacers/shim, and positive metal retention
 must prevent plastic threads or friction fits from becoming the axle-retention
 system. Four flush printed rings and eight M2.5 screws retain the bearing outer
 races for service.
@@ -269,24 +266,14 @@ that mute removes microphone capture locally, remains visibly indicated with
 software stopped, cannot back-power the microphone over USB data, and restores
 capture only after an intentional maintained-switch change.
 
-## Rear UART service reference
+## Blank center rear cartridge
 
-The center cartridge targets the
-[Switchcraft 35RASMT5CHNTRX](https://www.switchcraft.com/assets/1/6/35RASMT5CHNTRX_CD.pdf?16023=)
-four-conductor 3.5 mm jack. The drawing-backed body is 15.5 x 6.8 x 5.3 mm and
-sits on an 18 x 18 x 1.6 mm custom interface PCB. A separate PETG L-carrier is
-retained through the cartridge by two M2 through-bolts and carries the PCB on
-two more; the complete stack and sideways wire corridor remain in front of the
-E-stop body.
-
-Tip is robot TX, ring 1 robot RX, ring 2 service-detect, and sleeve ground.
-All active signals are protected 3.3 V logic. The port exposes no power output,
-raw battery, motor-enable, or safety bypass and is not compatible with audio,
-RS-232, or arbitrary headset wiring. The final PCB requires series resistance,
-ESD protection, defined biasing, labeled adapter pinout, and a USB-powered
-3.3 V UART adapter. Purchased-part fit, plug shorts during mating, signal
-levels, repeated insertion, deterministic motion-inhibit request, and
-intentional reset after service remain release gates.
+The center cartridge is a plain 30 x 30 mm removable cap with the shared
+26 x 18 mm tongue and two M2.5 frame screws. It has no connector, PCB, carrier,
+wiring, power output, or service-detect function. Internal diagnostics require
+shutdown or physical motor-branch isolation, and closure never authorizes an
+automatic restart. D024 supersedes the D021 UART design while preserving it in
+the decision log as rejected history.
 
 ## Upper service deck
 
@@ -295,19 +282,18 @@ standoffs. It carries or reserves independent volumes for:
 
 - Pi 5 V regulator: Pololu D24V90F5, 40.6 x 20.3 x 7.6 mm, four M2 stations on 35.56 x 15.24 mm spacing, two wire/terminal corridors.
 - Servo regulator: Pololu D36V50F6, 25.4 x 25.4 x 9.5 mm overall envelope, triangular three-M2 pattern, one wire corridor.
-- Motor cutoff: Albright SW60, 63 x 37 x 28 mm body, 81 mm terminal span inside a 90 x 45 x 35 mm lug/boot/tool envelope, on a custom 50 x 90 x 2 mm metal carrier.
-- Accessory distribution: custom 40 x 21 x 1.6 mm PCB with four Littelfuse 01550900M OMNI-BLOK holders for replaceable Nano2 fuses, a Molex 43045-1000 right-angle ten-circuit header and 43025-1000 latched receptacle, four 4 mm lower plus four 3 mm upper M2 metal standoffs, a 44 x 24 x 11.4 mm removable printed touch cover, and a separately clamped cable bend. Installed hardware remains below the former 60 x 26 x 18 reserve; cover/fuse service is modeled to 35 mm above the deck.
+- Motor cutoff: Panasonic CB1A-R-M-12V, 26 x 22 x 25 mm body, integral 52 x 22 x 0.8 mm bracket, one 5.4 mm mounting hole, 6.3 mm terminals, and terminal-service envelope.
+- Accessory distribution: complete Blue Sea Systems 5045 covered four-circuit ATO/ATC block, 92.5 x 43.8 x 32.5 mm, two mounting holes on 65.1 mm centers, and modeled cover/fuse/terminal/wire service plus deck strain slots.
 
-The two MAX98357A boards now mount below their matching speaker plates rather
-than consuming deck area. The regulators, contactor, and custom distribution
-board are mechanical selections, not electrical release approval. The board's
-provisional ceiling is 6 A total and 5 A on any branch. Exact 451/452/453/454
-fuse values must follow measured startup, steady, transient, fault, conductor,
+The two MAX98357A boards mount below their matching speaker plates rather
+than consuming deck area. The regulators, relay, and fuse block are mechanical
+selections, not electrical release approval. The distribution system's
+provisional ceiling is 6 A total and 5 A on any branch. Exact ATO/ATC fuse
+values must follow measured startup, steady, transient, fault, conductor,
 and time-current data; a battery-near feeder fuse remains mandatory because the
-four branch fuses cannot protect the cable upstream of this board.
-Use metal standoffs/carrier, ferrules or correctly crimped lugs, fused
-conductors, stud boots, and strain relief; the printed deck is an organizer,
-not a safety device or the primary contactor retention.
+four branch fuses cannot protect the cable upstream of the block. Use correctly
+crimped terminals, fused conductors, terminal protection, and strain relief;
+the printed deck is an organizer, not a safety device or relay-bracket substitute.
 
 Two removable rails run beneath the deck outside the battery envelope. The
 left rail is reserved for signal, audio, and sensor wiring; the right rail is
@@ -319,72 +305,39 @@ bend radii, and abrasion protection still come from the selected hardware.
 
 ### Accessory distribution reference
 
-No complete four-way catalog module fits honestly. The rejected Littelfuse
-880024 is 85 x 47 x 49.2 mm once its cover and terminals are included. The
-custom board instead uses four
-[Littelfuse 01550900M OMNI-BLOK holders](https://www.littelfuse.com/products/fuses-overcurrent-protection/fuse-holders-fuse-blocks-accessories/fuse-blocks/pcb-mount-fuse-blocks/155900/01550900m),
-each 9.73 x 5.03 x 3.81 mm and rated 10 A from -55 to 125 C. They accept
-replaceable 6.10 x 2.69 x 2.69 mm Nano2 fuses from the 451/453 fast-acting or
-452/454 time-delay families. Exact amperages remain deliberately unset.
+The Blue Sea Systems 5045 is a complete quantity-one retail four-circuit
+ATO/ATC fuse block with insulating cover and labels. The model uses its
+92.5 x 43.8 x 32.5 mm assembly envelope, two mounting holes on 65.1 mm centers,
+fuse-service height, terminal side, single-side wire exit, and deck strain slots.
 
-The harness uses a
-[Molex 43045-1000](https://www.molex.com/en-us/products/part-detail/0430451000)
-right-angle ten-circuit header and
-[43025-1000](https://www.molex.com/en-us/products/part-detail/0430251000)
-latched receptacle. The header is 18.65 mm across ten circuits, shrouded,
-polarized, UL94 V-0, and specified from -40 to 105 C. The current contract uses
-a conservative 7 A/contact ten-circuit derating, then caps the complete board
-below that at 6 A total. One source positive and return feed four separately
-fused positive/return pairs. The connector latch and insulation crimps do not
-replace the modeled deck strap immediately after the first bend.
-
-The printed cover prevents casual contact with the bus, holders, and solder
-joints but is not an electrical enclosure certification. Release requires a
-reviewed 2 oz-copper PCB, correct Molex terminals and tooling, inspected crimp
-and pull tests, durable source/branch labels, a battery-near feeder fuse,
-power-off-only fuse changes, measured load-based fuse selection, selective
+Release requires a battery-near feeder fuse, power-off-only fuse changes,
+measured-load fuse selection, conductor and terminal sizing, inspected crimps
+and pull tests, covered live parts, durable source/branch labels, selective
 far-end short tests, all-branch thermal soak, vibration/tug tests, and proof
-that the board cannot feed the motor controller around the separate source
-fuse, SW60, E-stop chain, or charger-present inhibit.
+that the block cannot feed the motor controller around the separate source
+fuse, Panasonic relay, E-stop chain, or charger-present inhibit. The legacy
+D023 gauge and cover qualify none of this hardware.
 
-The seventeen-part calibration suite now includes
-`power_distribution_fit_gauge`, a one-piece PETG union of the exact production
-PCB, four holder/fuse envelopes, 43045-1000 header, and four open M2 holes. Fit
-it on the production deck with the specified 4 mm lower and 3 mm upper stacking
-standoffs, then install the actual cover and inspect screw start, foot seating,
-wall clearance, header opening, and bow. The validator proves the gauge exactly
-reconstructs those onboard envelopes and has zero modeled cover overlap. It is
-deliberately nonfunctional and cannot validate copper, fuses, connector mating,
-crimps, current, heat, selective clearing, or fault containment.
+## Lifting
 
-## Carry interface
-
-The normal assembled silhouette remains handle-free. A 25 mm webbing loop
-stows beneath each side of the base tray and passes through two rounded slots
-into a raised reinforcement zone. A deburred metal plate above the tray clamps
-each loop with four M4 through-bolts, washers, and locknuts. Both plates cross
-the split at X=0, adding a second metal-backed bridge without replacing the
-underside M3 seam plate.
-
-The validator proves the slots and bolt paths are open in both tray halves,
-the plates clear the controller, bumper switches, and mobility pods, and the
-stowed loops remain above the nominal wheel-ground plane. It cannot prove
-webbing strength, bolt preload, edge finishing, layer adhesion, loaded center
-of mass, or human grip. Deburr every webbing-contact edge and pass a low-height
-loaded lift test over a padded surface before normal carrying.
+The normal assembled silhouette and tray are handle-free. There are no webbing
+slots, carry doubler, custom clamp plates, or M4 carry paths. Power down and lift
+with two hands under the tray. Do not lift by the shell, lid, head, bumper,
+fairings, wiring, or rear cartridges. Any future integrated handle requires a
+new retail-only load-path decision and physical qualification.
 
 ## Gates before release printing
 
 1. Purchase the selected Pololu motors, brackets, and hubs; inspect the delivered revisions, print one rear core/pod interface, and bench-test encoder direction, D-shaft/set-screw engagement, wheel retention, current, temperature, and independent cutoff before powered floor tests.
-2. Purchase and measure the 608 bearings, 8 mm shafts, hubs, spacers, washers,
-   and positive retention hardware; then load-test the removable idler pods and
+2. Purchase and measure the 608 bearings, WDS 615-M6-8-65 shoulder bolts, M6
+   washers, prevailing-torque locknuts, and stock goBILDA spacers/shims; then load-test the removable idler pods and
    verify acceptable skid steering on the target floors. Swap the pods if scrub
    torque or carpet snagging is excessive.
 3. Buy and measure one BLF-1203AB, BPC-1502DC, EN2P3M20/EN2C3F20G2 pair, and
    #4867 motor before ordering the full mobility set. Inspect purchased regulator
-   revisions, trial-fit the exact printed distribution gauge and cover, then
-   fabricate and inspect the selected covered distribution PCB and obtain electrical review
-   of charger inhibit, SW60 coil/suppression/reset, branch fusing, conductor
+   revisions, trial-fit the purchased Panasonic CB1A-R-M-12V relay and Blue Sea
+   5045 complete assembly, then obtain electrical review of charger inhibit,
+   relay drive/suppression/reset, feeder and branch fusing, terminal and conductor
    sizing, regen/BMS behavior, and full-charge motor-voltage behavior.
 4. Purchase the selected D85MG, R-ML24, 6807, MF84ZZ, and shoulder-screw head hardware. Buy one Adafruit 5975 breakout plus representative JST-SH cables; print and measure the 6807 coupon and one eye carrier/diffuser, assemble the complete bearing/servo stack, weigh the moving head, and test regulated current, cable sweep, backlash, heat, repeated motion, LED hotspotting, and camera reflections.
    Print one eye carrier/diffuser set first and verify brightness, hotspots,
@@ -396,9 +349,8 @@ loaded lift test over a padded surface before normal carrying.
    material/profile with the exact coupon; verify no preload, positive
    actuation, rigid-stop protection, lead strain relief, rebound, broken-wire
    fail-stop, and motor cutoff before buying/installing all six.
-7. Select rated 25 mm webbing and real metal clamp hardware, then perform a
-   low-height loaded lift test of both modeled tray handles and inspect the
-   split seam, slots, layer lines, bolts, and webbing for damage or slip.
+7. Verify the tray is handle-free and document an unpowered two-hand lift from
+   beneath the tray. Do not install webbing or custom load-bearing metal.
 8. Print the insert, split-pilot, deck-standoff, camera-carrier, motor-pod,
    front-bearing-seat, vent, and acoustic coupons before full PETG parts.
 9. Print one harness rail and load it with representative power and signal

@@ -197,7 +197,7 @@ Rationale:
 
 ## D014: Use Separate Pololu Rails And An SW60 Motor Contactor Baseline
 
-Status: accepted for CAD; battery portion refined by D022, electrical release remains open
+Status: superseded for sourcing by D024; legacy CAD remains until replacement fit is validated
 
 The Pi 5 rail targets a Pololu D24V90F5 5 V regulator, and the head servos use
 a separate Pololu D36V50F6 6 V regulator. The motor branch's mechanical cutoff
@@ -268,7 +268,7 @@ Rationale:
 
 ## D018: Retain Each Front Idler With A DIN 471 Ring And Pololu Hub
 
-Status: accepted for CAD; machined-shaft and loaded-floor release remain gated
+Status: superseded by D024; retained as the rejected machined-shaft history
 
 Each removable front idler uses a 64.5 mm x 8 mm steel shaft with a Rotor Clip
 DSH-8 / DIN 471 external ring at the inboard end and a Pololu #2693 aluminum
@@ -320,7 +320,7 @@ Rationale:
 
 ## D021: Use A Shallow Protected TRRS UART Service Port
 
-Status: accepted for CAD; purchased-jack, PCB, adapter, and service-mode release remain gated
+Status: superseded by D024; center rear cartridge is blank
 
 The center rear cartridge now targets the Switchcraft 35RASMT5CHNTRX
 four-conductor 3.5 mm jack on an 18 x 18 mm custom 3.3 V UART/service PCB. A
@@ -360,7 +360,7 @@ Rationale:
 
 ## D023: Use A Covered Four-Branch Nano2 Distribution PCB
 
-Status: accepted for prototype CAD; PCB, fusing, crimp, fault, and thermal release remain gated
+Status: superseded by D024; retained as the rejected custom-PCB history
 
 The upper power deck uses a custom 40 x 21 x 1.6 mm accessory-distribution PCB
 with four Littelfuse 01550900M OMNI-BLOK holders for replaceable Nano2 fuses.
@@ -381,3 +381,25 @@ Rationale:
 - A one-piece production-derived PETG gauge reproduces the PCB, four holder/fuse stacks, header, and four M2 paths so deck/standoff/cover fit can be rejected cheaply before ordering a PCB. It is mechanically exact but intentionally nonfunctional.
 - Exact fuse values follow measured startup, steady, transient, fault, conductor, and time-current data. A battery-near feeder fuse remains mandatory because branch fuses do not protect the upstream cable.
 - Release requires a reviewed 2 oz-copper layout, correct Molex contacts and tooling, crimp inspection/pull tests, durable labels, power-off-only fuse replacement, far-end selective short tests, all-branch thermal soak, vibration/tug testing, no cross-branch backfeed, and proof that the board cannot bypass the motor source fuse, SW60/E-stop chain, or charger-present inhibit.
+
+## D024: Require Quantity-One US Retail Hardware
+
+Status: accepted and implemented in the current body source; physical release remains gated
+
+Every production hardware item must be purchasable in quantity one through a
+normal US online checkout. Printed parts and wiring harnesses assembled from
+retail components remain in scope, but RFQ-only parts, overseas-only sources,
+factory minimums, custom-machined metal, custom sheet metal, and
+custom-fabricated PCBs are rejected unless the user explicitly approves an
+exception.
+
+Rationale:
+
+- A reproducible home build cannot depend on distributor quotes, export ordering, machine-shop work, or one-off PCB fabrication.
+- Safety- and power-critical parts should preferably have two independent US sources, a manufacturer part number, a primary datasheet, and visible quantity-one stock before CAD is frozen.
+- The Albright SW60/custom-carrier path and the intermediate Cole Hersee/Littelfuse 24117-01-BP candidate are rejected. The implemented cutoff is the Panasonic CB1A-R-M-12V sealed SPST-NO automotive relay: integral bracket with one 5.4 mm mounting hole, 40 A contacts at 14 V, 12 V/134 mA coil, built-in resistor, and retail availability. Release still requires delivered-part fit, correct terminal/conductor sizing, driver and suppression review, dropout, thermal, fault, and deterministic cutoff tests.
+- The custom four-branch distribution PCB is rejected. The implemented replacement is the complete Blue Sea Systems 5045 covered four-circuit ATO/ATC fuse block, modeled at 92.5 x 43.8 x 32.5 mm with two mounting holes on 65.1 mm centers. Preserve the conservative 6 A total / 5 A any-branch ceilings, battery-near feeder fuse, branch selection from measured loads, touch protection, strain relief, labels, selective clearing, and thermal release gates.
+- The custom grooved front-idler shafts, DSH-8 rings, and cut-to-length spacer tubes are rejected. Each implemented idler uses a WDS 615-M6-8-65 shoulder bolt, M6 washer, prevailing-torque locknut, and stock goBILDA spacers/shim. Purchased fit, thread engagement, axial play, retention, alignment, and loaded skid-turn tests remain mandatory.
+- The custom rear UART PCB and jack are omitted. The center rear cartridge is blank; internal service requires shutdown or physical motor-branch isolation.
+- Carry handles and custom clamp plates are omitted. Lift only the unpowered robot with two hands under the tray until a complete retail lifting interface is separately selected and qualified.
+- D024 supersedes the production instructions in D018, D021, and D023 without deleting their historical rationale. Any generated manifest, image, Bambu project, or assembly-guide language that still names those interfaces is stale until regenerated from the retail-only source.
