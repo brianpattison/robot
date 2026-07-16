@@ -43,6 +43,11 @@ REGISTRY_MAP = {
     "neck_v2": "neck", "bayonet_collar_v2": "bayonet_collar",
     "head_pan_plate_v2": "head_pan_plate", "motor_cap_v2": "motor_clamp_cap",
     "battery_clamp_v2": "battery_clamp_bar", "deck_v2": "deck",
+    "mic_cradle_v2": "mic_cradle", "speaker_clamp_v2": "speaker_clamp_bar",
+    "tof_clamp_v2": "tof_side_clamp", "pico_clamp_v2": "pico_clamp_bar",
+    "battery_pad_frame_v2": "battery_pad_frame", "yoke_v2": "yoke",
+    "tilt_bushing_v2": "tilt_bushing", "eye_diffuser_bar_v2": "eye_diffuser_bar",
+    "status_diffuser_bar_v2": "status_diffuser_bar", "printed_washer_v2": "printed_washer_set",
 }
 
 
