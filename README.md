@@ -7,14 +7,19 @@ The design goal is pet-like presence without overcomplicating the first build. T
 ## Current Status
 
 The current direction is the **v2 printed-only body** (decision log D025-D029): a
-44-piece, 11-plate, zero-support print with one screw size, one insert size, and a
-retail-grade builder's book that a kid can follow end to end.
+44-piece, 11-plate, zero-support prototype with one screw size and one insert size.
 
-- **The Builder's Book (v2, start here):** [`output/pdf/codex_robot_body_v2_assembly_guide.pdf`](output/pdf/codex_robot_body_v2_assembly_guide.pdf)
+> **Prototype assembly preview — do not use for powered motion.** The tracked v2
+> 3MF and builder's book are geometry and dry-assembly artifacts. The head/neck
+> load paths, executable harness schedule, released fuse values, Pi/Pico software,
+> and commissioning evidence are still open.
+
+- **The Builder's Book (v2 prototype preview):** [`output/pdf/codex_robot_body_v2_assembly_guide.pdf`](output/pdf/codex_robot_body_v2_assembly_guide.pdf)
 - v2 Bambu Studio project: [`cad/bambu/codex_robot_body_v2_p1s.3mf`](cad/bambu/codex_robot_body_v2_p1s.3mf)
 - v2 book generator: [`docs/generate_assembly_guide_v2.py`](docs/generate_assembly_guide_v2.py)
 
-Everything below the book is the engineering paper trail. Start with the docs index:
+Everything below the book is the engineering paper trail and the current source
+of truth for open release gates. Start with the docs index:
 
 - Documentation index: [`docs/README.md`](docs/README.md)
 - MVP PRD: [`docs/mvp-prd.md`](docs/mvp-prd.md)

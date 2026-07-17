@@ -129,7 +129,7 @@ STRIP_NAME_OVERRIDES = {
 # computed at assembly time.
 CHAPTERS = [
     ("SHOP", "#B8892E", "Shop", "every spool, screw, and circuit board"),
-    ("PRINT", "#0B6E84", "Print", "eleven plates, test parts, and a piece check"),
+    ("PRINT", "#0B6E84", "Print", "prototype plates, test parts, and a piece check"),
     ("BUILD", "#075365", "Build", "twenty steps from flat tray to finished robot"),
     ("WIRE", "#C4230F", "Wire", "the power and signal maps, checked with a meter"),
     ("PLAY", "#74A22D", "Check &amp; play", "safety tests first, then floor time"),
@@ -164,7 +164,7 @@ SHOP_ELECTRONICS = [
     ("Pololu D36V50F6 regulator (6 V)", "1", "Makes 6 V for the neck servos."),
     ("Panasonic CB1A-R-M-12V relay", "1", "The motor power switch the red button controls."),
     ("Blue Sea Systems 5045 fuse block", "1", "Splits power safely into four fused branches."),
-    ("ATO fuses: 2 A, 3 A, 5 A, 7.5 A assortment", "1 kit", "Branches start at 2–3 A (5 A max); feeder 7.5 A; motor branch 5 A. Confirm each with the meter."),
+    ("ATO fuse assortment (values not released)", "1 kit", "Prototype starting values require measured load, conductor, inrush, selective-clearing, and thermal tests before use."),
     ("IDEC XW1E-BV402M-R emergency stop", "1", "THE BIG RED BUTTON."),
     ("E-Switch PVB3F230SS311 mute switch", "1", "The microphone privacy switch (glows red when muted)."),
     ("Omron D2HW-C202MR bumper switches", "6", "Feelers inside the bumpers."),
@@ -172,7 +172,7 @@ SHOP_ELECTRONICS = [
     ("Adafruit 5975 NeoPixel breakouts + JST-SH cables", "4", "The glowing eyes and status lights."),
     ("ReSpeaker USB mic array", "1", "The robot’s ears."),
     ("Enclosed 3 W 4 ohm speakers + 2× Adafruit MAX98357A amps", "1 set", "The robot’s voice."),
-    ("18 AWG (power) + 22 AWG (signal) silicone wire, JST/spade connectors, ferrules, zip ties, heat-shrink", "1 kit", "Everything the wiring chapter needs."),
+    ("Prototype wire, terminal, and connector kit", "not released", "The exact harness schedule and crimp tooling are still open; do not improvise a powered harness from this preview."),
 ]
 SHOP_TOOLS = [
     ("2.5 mm hex key", "Turns every screw in this robot. Seriously, all of them."),
@@ -183,9 +183,9 @@ SHOP_TOOLS = [
 ]
 
 PRINT_TIPS = [
-    ("Open the project", f"Open <b>codex_robot_body_v2_p1s.3mf</b> in Bambu Studio. All {N_PLATES} plates are already laid out for the P1S with a 0.4 mm nozzle and Textured PEI plate."),
+    ("Open the prototype project", f"Open <b>codex_robot_body_v2_p1s.3mf</b> in Bambu Studio. Its {N_PLATES} plates are laid out for geometry review on a P1S with a 0.4 mm nozzle and Textured PEI plate; physical release gates remain open."),
     ("Load the right color", "Each plate’s name says the filament to load (cream, teal, charcoal, lime, or TPU). Print plates one at a time and change filament between groups."),
-    ("No supports. Ever.", "Every part is designed to print with zero supports. If the slicer asks for supports, something is wrong — don’t add them, re-check the plate."),
+    ("No supports", "Every part targets zero supports. If the slicer asks for supports, stop and re-check the source, plate, and declared orientation."),
     ("TPU is slow and squishy", "Print the tire and bumper plates slowly (the profile already does this). Dry TPU prints much better."),
     ("Big flat parts stay put", "The tray, shell, and bumper plates fill the whole bed. Clean the plate with dish soap first so they stick."),
 ]
@@ -242,17 +242,19 @@ STEPS = [
       "Its USB ports face the BACK of the robot so the cables can reach.",
       "Don’t screw anything — the shelf pocket holds it, and the head’s cable will come down to it later."],
      "The Pi sits in its pocket, ports facing backward."),
-    ("step_09_battery", "Strap in the battery", SCREWS["battery_clamp"],
+    ("step_09_battery", "Dry-fit the battery, then remove it", SCREWS["battery_clamp"],
      [("battery_pad_frame_v2", 1), ("px_battery", 1), ("battery_clamp_v2", 1)],
      ["Lay the soft TPU pad frame onto the four pads behind the tower.",
       "Set the battery on it, wires pointing at the BACK of the robot.",
-      "Bridge the clamp bar across the battery onto the two posts and screw it down with 2 screws — firm, so the battery cannot slide."],
-     "Grab the battery and try to wiggle it. It shouldn’t move."),
+      "Bridge the clamp bar across the battery onto the two posts and screw it down with 2 screws — firm, so the battery cannot slide.",
+      "This is a DRY FIT only. Remove the screws, clamp, battery, and soft pad; put the battery in a safe box away from the build until the meter-check page calls for it."],
+     "The battery fits without wrapper pinch or lead strain, and is now outside the robot."),
     ("step_10_pico", "Add the safety helper", SCREWS["pico_clamp"],
      [("px_pico", 1), ("pico_clamp_v2", 1)],
-     ["The tiny green Pico sits on its little posts to the right of the tower, USB plug facing the BACK of the robot.",
+     ["The tiny green Pico sits on its little posts to the right of the tower, USB service end facing the BACK of the robot.",
+      "USB and SWD are service-only. Never cable either one to the Pi inside the robot.",
       "Lay the small clamp bar across it and screw it down with 2 screws, gently — it’s a small board."],
-     "The Pico is held snug, its USB end pointing at the back."),
+     "The Pico is held snug, its USB end points back, and no USB/SWD cable is installed."),
     ("step_11_relay", "Mount the power relay", 0,
      [("px_relay", 1)],
      ["The relay drops into its floor pocket on the left, behind the tower.",
@@ -299,20 +301,19 @@ STEPS = [
      ["Melt the lid’s 2 mic-boss inserts, then drop the red emergency-stop through the lid’s round hole and spin its nut on underneath — the lid IS its mounting panel, and the printed ring under the lid makes it strong.",
       "Set the round microphone under the lid’s slotted area and screw its ring cradle to the two bosses (2 screws).",
       "Rest the lid in its ledge — DON’T screw it yet. The neck, the head, and all the wiring still need the inside. Its 4 corner screws are the very last thing in this book."],
-     "Slap test: the red button clicks down hard and twists to release."),
-    ("step_18_neck", "Grow the neck", 0,
+     "With the lid supported and the nut tight, a centered firm press latches the red button; twist to release."),
+    ("step_18_neck", "Neck mechanism — prototype hold", 0,
      [("neck_v2", 1), ("bayonet_collar_v2", 1), ("px_servo", 1)],
-     ["Feed the neck tube down through the lid’s front hole.",
-      "Reach in under the lid’s edge and twist the bayonet collar onto the neck’s bottom — a quarter turn locks it, like a camera lens. The picture shows the hole you’re working through.",
-      "The neck servo sits in the collar’s cradle underneath (its wire joins the wiring chapter)."],
-     "The neck turns smoothly by hand and cannot pull up and out."),
-    ("step_19_head", "Build the head", 1,
+     ["STOP: the current collar and pan plate do not yet contain the complete servo capture and retention geometry shown by this concept render.",
+      "Do not fit the servo or rely on this page as a load-bearing assembly instruction.",
+      "Keep the neck, collar, servo, and lid loose until a regenerated book shows the validated mechanism and bundled servo hardware."],
+     "No head mechanism has been assembled from unfinished geometry."),
+    ("step_19_head", "Head mechanism — prototype hold", 1,
      [("head_shell_v2", 1), ("yoke_v2", 1), ("head_pan_plate_v2", 1), ("px_camera", 1), ("px_servo", 1), ("tilt_bushing_v2", 1), ("px_insert", 1)],
-     ["Melt the last insert into the small boss on the head’s right side (the tilt pivot), then screw the yoke’s ring onto the top of the neck.",
-      "Slide the camera into the pocket behind the face opening, lens forward; its flat ribbon cable runs down through the hollow neck to the Pi.",
-      "Lower the head shell over the yoke: one side takes the tilt servo, the other side gets the little bushing and 1 pivot screw.",
-      "Close the underside with the pan plate."],
-     "The head nods up-down and the neck turns left-right, smoothly."),
+     ["STOP: the complete pan/tilt load paths, servo capture, horn engagement, hard stops, cable corridor, and service access are not yet modeled.",
+      "Do not install the camera, yoke, servo, bushing, or pivot from this preview.",
+      "Store the head parts together. A later regenerated book will show the real geometry and every piece of bundled Hitec hardware."],
+     "The unfinished head mechanism remains unassembled."),
     ("step_20_face", "Give it a face", 0,
      [("head_faceplate_v2", 1), ("eye_diffuser_bar_v2", 1), ("status_diffuser_bar_v2", 1)],
      ["Clip the lime eye bar behind the face panel’s eye slots (glow boards ride behind it).",
@@ -327,7 +328,7 @@ WIRE_RULES = [
     "The battery stays OUT of the robot until every wire is checked against these maps.",
     "Use wire colors: RED = battery 12 V, YELLOW = switched motor 12 V, BLUE = 5 V, GREEN = 6 V, BLACK = ground, WHITE = signals.",
     "Crimp or solder every joint; no bare twists. Label both ends of every wire with tape.",
-    "Fuses go in LAST, after a meter check — the sizes are on the shopping page (2–3 A branches, 5 A motor, 7.5 A feeder).",
+    "Fuse values are PROTOTYPE STARTING VALUES — NOT RELEASED. A meter alone cannot select them; measured loads, conductor ampacity, inrush, selective-clearing, and thermal tests must close first.",
     "The robot must FAIL STOPPED: if any of this feels wrong, it stays off.",
 ]
 POWER_MAP = [
@@ -341,16 +342,16 @@ POWER_MAP = [
     ("Charger EN2 pins 1+2", "direct to battery charge lead", "pin 3 = charger-present to Pico"),
 ]
 SIGNAL_MAP = [
-    ("Raspberry Pi", "MDDS10", "serial motor commands (through the Pico’s watchful eye)"),
-    ("Raspberry Pi", "Pico 2", "USB: heartbeat + status; Pico can always stop motors"),
+    ("Raspberry Pi / robotd", "Pico 2", "framed UART commands + heartbeat; no flash or config-write path"),
+    ("Pico 2", "MDDS10", "clamped velocity outputs after leases, watchdog, and latch checks"),
     ("Motor encoders (6 wires each)", "Pico 2", "wheel speed feedback"),
-    ("Bumper switches ×6", "Pico 2", "any press = stop, instantly, no software needed"),
+    ("Bumper switches ×6", "Pico 2", "any open NC loop = latched stop in independent safety firmware"),
     ("ToF boards ×4", "Raspberry Pi", "I2C daisy chain (STEMMA cables)"),
     ("NeoPixels ×4", "Raspberry Pi", "one data line, chained eye→eye→status→status"),
     ("Camera", "Raspberry Pi", "flat FPC ribbon down the hollow neck"),
     ("Servos ×2", "Raspberry Pi", "PWM signal wires (power from the 6 V rail)"),
     ("Mic array", "Raspberry Pi", "USB (its 5 V passes through the mute switch)"),
-    ("Pi I2S pins", "MAX98357A amps", "digital sound out; the amps zip-tie beside each speaker (a future version adds printed pockets)"),
+    ("Pi I2S pins", "MAX98357A amps", "digital sound out; board mounts, channel straps, terminals, and strain relief not released"),
 ]
 
 # "Meet Rover Bean" callouts: (x%, y%, legend). Percentages are positions
@@ -659,8 +660,8 @@ def build_body_pages():
     for part_i, chunk in enumerate((SHOP_ELECTRONICS[:half], SHOP_ELECTRONICS[half:]), start=1):
         elec = "".join(f"<tr><td><b>{esc(a)}</b></td><td style='text-align:center'>{esc(b)}</td><td>{esc(c)}</td></tr>"
                        for a, b, c in chunk)
-        intro = ("Every item is a normal buy-one-online part in the US. Fuse sizes and wire gauges are right "
-                 "here in the list; the wiring chapter shows where each one goes."
+        intro = ("Every named production component must be a normal buy-one-online part in the US. This prototype "
+                 "preview does not yet release the harness terminals, wire schedule, crimp tooling, or fuse values."
                  if part_i == 1 else "The rest of the electronics box:")
         add(f"""
           {eyebrow(0)}
@@ -694,13 +695,14 @@ def build_body_pages():
         ]))
     add(f"""
       {eyebrow(1)}
+      <div style="display:inline-block; margin-bottom:.1in; background:var(--red); color:#fff; padding:.07in .12in; font-size:11px; font-weight:800; letter-spacing:.08em;">PROTOTYPE PLATES — PHYSICAL RELEASE GATES OPEN</div>
       <h2>Print it with Bambu Studio</h2>
       <div class="cols">
         <div>{tips}</div>
         <div>
           <img src="{img_uri(IMG / 'codex_robot_body_v2_p1s_plates.png')}"
                style="width:100%; border-radius:.12in; border:1px solid var(--line-soft);">
-          <p style="font-size:10px; margin-top:.06in; color:var(--ink2);">All {N_PLATES} plates, exactly as they open in Bambu Studio.</p>
+          <p style="font-size:10px; margin-top:.06in; color:var(--ink2);">All {N_PLATES} prototype plates, exactly as they open in Bambu Studio. Layout is not powered-motion release.</p>
         </div>
       </div>
       <div style="display:flex; align-items:center; gap:.12in; border-top:1px solid var(--line);
@@ -732,7 +734,7 @@ def build_body_pages():
             f"<td>{parts_txt}</td></tr>")
     add(f"""
       {eyebrow(1)}
-      <h2>The {N_PLATES} plates, in printing order</h2>
+      <h2>The {N_PLATES} prototype plates, in printing order</h2>
       <table class="roomy" style="font-size:10.5px;"><tr><th style="width:.35in;">#</th><th style="width:2.4in;">Plate (load this filament)</th><th style="width:.5in;">Parts</th><th>What’s on it</th></tr>{rows}</table>
       <p style="margin-top:.12in; font-size:11px;"><b>Tip:</b> print plates 1–5 (cream) back to back, then change color once
       per group. Keep every part in a labeled box — the next chapter uses them in order.</p>""",
@@ -747,7 +749,7 @@ def build_body_pages():
       {eyebrow(1)}
       <h2>Print the little test parts first</h2>
       <p style="margin-bottom:.1in;">Before the big plates, print the little TEST PARTS that come with the project
-      (the <b>coupons</b> folder next to the Bambu file). They make sure your printer’s holes, snaps, and fits are
+      (generated with <b>cad/python/robot_body_v2_coupons.py</b>). They make sure your printer’s holes, snaps, and fits are
       dialed in — like tasting the batter before baking the whole cake. Each one has a simple pass test:</p>
       <table class="roomy" style="font-size:11px;"><tr><th>Test part</th><th>Filament</th><th>What it proves</th></tr>{crows}</table>""",
         chapter=1)
@@ -839,12 +841,12 @@ def build_body_pages():
             <tr><th>Part</th><th>Home</th><th>Faces</th></tr>
             <tr><td><b>MDDS10 motor board</b></td><td>tower posts, front-center</td><td>terminals RIGHT</td></tr>
             <tr><td><b>Raspberry Pi 5</b></td><td>tower top shelf</td><td>USB ports BACK</td></tr>
-            <tr><td><b>Pico 2</b></td><td>floor, right of tower</td><td>USB BACK, pins UP</td></tr>
+            <tr><td><b>Pico 2</b></td><td>floor, right of tower</td><td>USB/SWD service ends accessible; never cabled to Pi</td></tr>
             <tr><td><b>Battery</b></td><td>middle-back floor</td><td>wires BACK</td></tr>
             <tr><td><b>Relay</b></td><td>floor pocket, left</td><td>terminals UP</td></tr>
             <tr><td><b>Fuse block</b></td><td>deck, left half</td><td>wire exit LEFT edge</td></tr>
             <tr><td><b>Regulators (5 V + 6 V)</b></td><td>hang UNDER deck, back half</td><td>6 V wire exit FRONT</td></tr>
-            <tr><td><b>Big red button</b></td><td>through the lid</td><td>UP (slap it!)</td></tr>
+            <tr><td><b>Big red button</b></td><td>through the lid</td><td>UP; test with a centered firm press</td></tr>
             <tr><td><b>Mic array</b></td><td>under the lid slots</td><td>UP</td></tr>
             <tr><td><b>Speakers</b></td><td>side shelves</td><td>grilles OUT</td></tr>
             <tr><td><b>ToF distance boards</b></td><td>2 behind face, 2 side windows</td><td>lenses OUT</td></tr>
@@ -854,8 +856,8 @@ def build_body_pages():
             <tr><td><b>Pan + tilt servos</b></td><td>pan inside the neck, tilt in the head’s side</td><td>pan shaft UP, tilt shaft SIDEWAYS</td></tr>
             <tr><td><b>Glow boards ×4</b></td><td>pockets behind the eye + status bars</td><td>lights OUT</td></tr>
           </table>
-          <p style="font-size:10px; margin-top:.08in; color:var(--ink2);">The two speaker amp boards (MAX98357A)
-          zip-tie beside their speakers — a future version of the body adds printed pockets for them.</p>
+          <p style="font-size:10px; margin-top:.08in; color:var(--red);"><b>PROTOTYPE HOLD:</b> The populated routing
+          render, MAX98357A mounts, NeoPixel installation, and exact harness schedule are not released yet.</p>
         </div>
       </div>""",
         chapter=3, mark="ch3")
@@ -939,6 +941,9 @@ def build_body_pages():
     add(f"""
       {eyebrow(3)}
       <h2>The signal map (thin wires)</h2>
+      <div style="padding:.1in .14in; margin-bottom:.12in; border:2px solid var(--red); color:var(--red); font-size:11px; font-weight:700;">
+        PICO USB/SWD ARE SERVICE-ONLY. DO NOT CONNECT THEM TO THE PI INSIDE THE ROBOT.
+      </div>
       <table style="font-size:11px;"><tr><th>From</th><th>To</th><th>What travels</th></tr>{srow}</table>
       <div class="cols" style="margin-top:.15in;">
         <div>
@@ -953,9 +958,9 @@ def build_body_pages():
           <ol style="font-size:11.5px; margin-left:.25in;">
           <li>Red button held down = relay coil circuit reads OPEN.</li>
           <li>Regulator outputs read 5.0–5.2 V and 6.0 V on the bench before their loads connect.</li>
-          <li>Fuses go in smallest-first, one branch at a time (the sizes are on the shopping page).</li>
+          <li>Do not choose or install fuses until the measured-load, conductor, inrush, selective-clearing, and thermal evidence is released.</li>
           <li>Charger plug in = motors will not run.</li>
-          <li>Only then: drive the lid’s 4 corner screws — the last 4 of the robot’s {N_SCREWS}. NOW it’s closed for good.</li></ol>
+          <li>For the first powered test, close the lid with its 4 corner screws. Reopen only while shut down with the motor branch physically isolated.</li></ol>
         </div>
       </div>""",
         chapter=3)
@@ -965,18 +970,17 @@ def build_body_pages():
       <img class="hero" src="{img_uri(IMG / 'codex_robot_body_v2_assembled.png')}">
       <div style="width:4.4in; padding-top:.6in;">
         {eyebrow(4)}
-        <h2 style="font-size:40px; letter-spacing:-.8px;">You built a robot!</h2>
-        <p style="font-size:14px; margin-top:.1in;">High five, builder. Rover Bean’s body is done.</p>
-        <h3 style="margin-top:.25in;">Before it ever moves</h3>
-        <p style="font-size:12px; width:3.9in;">Slap the red button while the wheels spin on blocks — everything must stop instantly.
-        Press each bumper — stop. Unplug the Pi’s heartbeat — stop. Plug in the charger — it refuses to drive.
-        Only after every one of these passes does Rover Bean get floor time, supervised, at walking pace.</p>
-        <h3 style="margin-top:.18in;">Load the brain</h3>
-        <p style="font-size:12px; width:3.9in;">Flash <b>Raspberry Pi OS</b> onto the microSD with Raspberry Pi Imager, then
-        follow the README at <b>github.com/brianpattison/robot</b> to install the robot’s programs on the Pi and
-        the safety code on the Pico. The tests above only work once the brain is loaded.</p>
-        <p style="font-size:12px; margin-top:.12in; width:3.9in;">The robot’s number one rule, forever:
-        <b>when anything is wrong, it stops.</b></p>
+        <div style="display:inline-block; background:var(--red); color:white; padding:.06in .12in; font-size:11px; font-weight:800; letter-spacing:.08em;">PROTOTYPE PREVIEW — NO POWERED MOTION</div>
+        <h2 style="font-size:36px; letter-spacing:-.8px; margin-top:.12in;">The body preview is assembled</h2>
+        <p style="font-size:13px; margin-top:.08in; width:3.9in;">The Pi installer, Pico firmware release, executable harness schedule,
+        head mechanism, and signed commissioning procedure are not shipped yet. Do not energize the motor branch from this book.</p>
+        <h3 style="margin-top:.2in;">Commissioning gate</h3>
+        <p style="font-size:11.5px; width:3.9in;">A released checklist must cover both E-stop NC channels and physical reset;
+        all six NC bumper zones plus a broken wire; watchdog and setpoint-lease expiry; velocity/acceleration clamps;
+        charger inhibit; low-battery cutoff; hardware mic mute with no backfeed; regulator polarity and voltage;
+        branch-by-branch power-up; stop latency; motor direction; and a wheels-off-ground run before any floor test.</p>
+        <p style="font-size:11.5px; margin-top:.1in; width:3.9in;">Until those artifacts and physical results exist,
+        Rover Bean’s number one rule is wonderfully easy: <b>admire, measure, and keep the battery out.</b></p>
       </div>""",
         chapter=4, footer=False, mark="ch4")
 
@@ -993,18 +997,19 @@ def build_body_pages():
              f"Every one of the {N_SCREWS} screws is the same M3 × 8, and one 2.5 mm hex key turns them all."),
             ('<svg width="18" height="18" viewBox="0 0 18 18"><path d="M2.5 13.5 H15.5 M2.5 10 H15.5 M2.5 6.5 H15.5" stroke="#B9E44A" stroke-width="1.8" stroke-linecap="round"/><path d="M9 4.5 V1.5 M7.2 3 L9 1.2 L10.8 3" stroke="#B9E44A" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>',
              "ZERO SUPPORTS",
-             f"All {N_PIECES} pieces print clean off {N_PLATES} ready-made plates. Nothing to cut, sand, or snap away."),
+             f"All {N_PIECES} pieces target clean prints on {N_PLATES} prototype plates. Physical gates remain open."),
             ('<svg width="18" height="18" viewBox="0 0 18 18"><path d="M5.6 2.2 H12.4 L15.8 5.6 V12.4 L12.4 15.8 H5.6 L2.2 12.4 V5.6 Z" fill="none" stroke="#B9E44A" stroke-width="1.8" stroke-linejoin="round"/></svg>',
              "FAILS STOPPED",
-             "A real red button, six bumper feelers, and a hardware watchdog can each cut motor power — no software needed."),
+             "The E-stop is physical; bumper latches and the watchdog live in independent safety firmware, with no Pi software required."),
         ])
     add(f"""
       <div style="position:absolute; inset:0; background:var(--teal-dk); padding:.65in .75in; display:flex; flex-direction:column;">
         <div style="font-size:11px; font-weight:700; letter-spacing:.24em; color:#7FB6C4;">CODEX ROVER BEAN</div>
+        <div style="position:absolute; left:.75in; top:.92in; background:#C4230F; color:#fff; padding:.07in .12in; font-size:10px; font-weight:800; letter-spacing:.08em;">PROTOTYPE PREVIEW — NO POWERED MOTION</div>
         <div style="display:flex; gap:.55in; flex:1; align-items:center;">
           <div style="width:4.1in;">
             <div style="font-size:33px; font-weight:800; color:#fff; line-height:1.12; letter-spacing:-.5px; margin-bottom:.32in;">
-              Print it.<br>Screw it together.<br>Meet your robot.</div>
+              Print coupons.<br>Dry-build the chassis.<br>Measure everything.</div>
             {features}
           </div>
           <div style="flex:1;">
@@ -1036,11 +1041,12 @@ def build_cover(chapter_pages):
     return f"""
       <img class="hero" src="{img_uri(IMG / 'codex_robot_body_v2_assembled.png')}">
       <div style="width:4.4in; padding-top:.55in;">
-        <div class="eyebrow" style="color:var(--gold);"><i style="background:var(--gold)"></i>A print-and-build robot kit</div>
+        <div class="eyebrow" style="color:var(--gold);"><i style="background:var(--gold)"></i>A prototype print-and-build preview</div>
+        <div style="display:inline-block; margin:.08in 0 .04in; background:var(--red); color:#fff; padding:.07in .12in; font-size:11px; font-weight:800; letter-spacing:.08em;">DO NOT USE FOR POWERED MOTION</div>
         <h1 style="font-size:55px;">CODEX<br>ROVER BEAN</h1>
         <p style="font-size:19px; font-weight:600; margin-top:.16in;">The Robot Body Builder’s Book</p>
-        <p style="font-size:13px; margin-top:.08in; color:var(--ink2);">Print it. Screw it together. Meet your robot.<br>
-        Everything you need is in this book and one Bambu Studio file.</p>
+        <p style="font-size:13px; margin-top:.08in; color:var(--ink2);">Review the geometry, print coupons, and dry-build the released chassis steps.<br>
+        Software, firmware, the production harness, head mechanics, and commissioning remain open.</p>
         <div style="display:flex; gap:.09in; margin-top:.22in; flex-wrap:wrap;">{chips}</div>
         <div class="toc">{toc_rows}</div>
         <p style="font-size:9.5px; font-weight:600; letter-spacing:.14em; color:#A2967C; margin-top:.28in;">
