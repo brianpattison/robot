@@ -41,6 +41,10 @@ Read these in order when getting oriented:
     inventory, twenty picture-first steps with progress bars and CHECK tests, wiring
     maps, and first safety checks. Child-followable by design, with no "grown-up"
     callouts (D029). Regenerate with `docs/generate_assembly_guide_v2.py`.
+    The 2026-07-17 review audit behind the current render/text conventions
+    (insertion arrows, insert markers, insets, mirrored-direction fixes, the tire
+    port, and the goalpost eye bar) is in
+    [guide-v2-improvement-notes.md](guide-v2-improvement-notes.md).
 
 13. [v1 Illustrated Assembly Guide (historical)](../output/pdf/codex_robot_body_v1_assembly_guide.pdf)
     Twenty-page visual build sequence synchronized with the D024 retail-only CAD, current renders, 101-part print manifest, and 26-plate P1S project.
