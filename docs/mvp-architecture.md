@@ -258,6 +258,10 @@ systemd
     websocket/event stream
     manual drive API
     agent panel: live session view, session recordings, software stop
+
+  cloudflared.service
+    outbound-only Cloudflare Tunnel (D033)
+    SSH ingress via Access service tokens; no inbound ports anywhere
 ```
 
 For early development, these can be Python processes with simple JSON/WebSocket or ROS 2 topics between them. If ROS 2 is adopted, keep `robotd` independent enough that it can still fail stopped when ROS nodes crash. The agent may reorganize anything above `robotd`; `robotd` and the firmware contract are the parts to keep boring.
@@ -285,7 +289,7 @@ shorted into an implausible state, stale, or untested after controller reset.
 - Watchdog-driven motor disable.
 - Local dashboard.
 - Local urgent commands for `stop`, `wait`, `mute/status`.
-- A resident agent seat (Claude or Codex) with full shell authority, live tailnet SSH, and the `robotd` body API.
+- A resident agent seat (Claude or Codex) with full shell authority, live SSH through the Cloudflare Tunnel, and the `robotd` body API.
 - Append-only command blackbox and recorded agent sessions.
 - Cautious one-room or prepared-area movement.
 - Manual drive and supervised follow/come/go-home demos.

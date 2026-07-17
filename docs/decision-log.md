@@ -709,3 +709,33 @@ Rationale:
 - Policy violations become visible and auditable; physics violations stay
   impossible from software. The worst honest failure is a capped-speed
   bump that latches stopped.
+
+## D033: Remote Agent Ingress Is A Cloudflare Tunnel
+
+Status: accepted 2026-07-17 (Brian's direction)
+
+Remote access for agents and humans is a Cloudflare Tunnel: `cloudflared`
+runs as a systemd service on the Pi, dials out over HTTPS, and exposes no
+inbound port anywhere. SSH rides the tunnel end-to-end via
+`ProxyCommand cloudflared access ssh` — never the browser-rendered
+terminal — gated by Cloudflare Access with service tokens for agent
+clients and SSO for humans. sshd remains key-only and bound to
+loopback/LAN. The dashboard and off-host audit mirror may be published
+only behind the same Access gate. A personal WireGuard/Tailscale mesh
+remains an optional complement for Brian's own devices; the standard
+agent path is the tunnel.
+
+Rationale:
+
+- Outbound-only ingress: nothing listens on the WAN and the home firewall
+  stays closed, which strengthens rather than weakens the no-inbound-port
+  posture.
+- Agent-friendly by construction: any sandbox with outbound 443 and the
+  small `cloudflared` binary can connect — no VPN membership, TUN device,
+  or device enrollment, which is exactly the shape cloud agent
+  environments have.
+- Revocation and audit at the edge: Access service tokens can be killed
+  per-client without touching the Pi, and Access logs every connection —
+  an off-host record that complements D030's blackbox mirror.
+- ProxyCommand mode keeps SSH end-to-end encrypted; Cloudflare transports
+  the stream but cannot read it.

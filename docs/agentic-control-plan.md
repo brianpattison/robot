@@ -37,7 +37,7 @@ supervised, and fully in charge. Below it, nothing negotiates.
 | Agent authority on the Pi | Conversation plus nine intents | Full: shell, sudo, installs, services, cron, self-modification |
 | Motion commands | Canned intents only | Direct velocity/head setpoints via `robotd`, clamped in firmware |
 | Behaviors | Fixed vocabulary in the runtime | Code the agent writes, tests, and hot-swaps (`~/agent/behaviors/`) |
-| Remote access | Dashboard only | Live SSH for the agent over the tailnet, plus the dashboard |
+| Remote access | Dashboard only | Live SSH for the agent through an outbound-only Cloudflare Tunnel, plus the dashboard |
 | E-stop, bumpers, watchdog, speed caps | Deterministic, non-LLM | Unchanged — and explicitly unreachable from the Pi |
 | No-go zones, quiet hours, supervision | Described as hard limits | Reclassified honestly as policy the agent is instructed to honor |
 | Identity | Codex only (old D005) | Pluggable seat: Claude or Codex, one narrator at a time (D031) |
@@ -101,7 +101,7 @@ unsafe" precisely because these caps and cutoffs are part of the hardware
 ```text
 Claude / Codex
   resident session on the Pi (robot-agent-host.service)
-  or remote session over tailnet SSH
+  or remote session over SSH through the Cloudflare Tunnel
     |-- shell: code, installs, services, cron, self-modification
     |-- robotd API: drive, head, speak, listen, LEDs, senses, events
           |
@@ -133,9 +133,13 @@ Physical E-stop relay path — above everything, independent of the Pi
   feeds it conversation turns from the voice service, robot state from
   `robotd`, and its own journal. Between conversations the agent may run
   background turns on its own schedule (cron it manages itself).
-- Remote access is live SSH over a WireGuard/Tailscale tailnet, key-only,
-  with no public port. A cloud session (claude.ai or Codex cloud) can drive
-  the same machine the resident seat uses.
+- Remote access is live SSH through a Cloudflare Tunnel (D033):
+  `cloudflared` on the Pi dials out over HTTPS, so nothing listens on the
+  WAN, and clients connect with `cloudflared access ssh` gated by
+  Cloudflare Access service tokens. Any cloud session (claude.ai or Codex
+  cloud) that can run the small `cloudflared` binary with outbound 443 —
+  which is all of them — can drive the same machine the resident seat
+  uses.
 
 ## robotd: The Body Daemon
 
@@ -248,14 +252,27 @@ so at a capped walking pace, bumps, stops, and gets audited.
   agent takes over the serial contract itself, which is allowed, visible
   in the off-host mirror as a `robotd` outage, and makes the agent the
   safety client of record. The firmware envelope binds it all the same.
-- Compromised or misbehaving seat: revoke its SSH key and the seat's API
-  credentials, reflash the Pi. The blast radius of the agent account is the
-  Pi, by design.
+- Compromised or misbehaving seat: revoke its Cloudflare Access service
+  token at the edge, its SSH key, and the seat's API credentials, then
+  reflash the Pi. The blast radius of the agent account is the Pi, by
+  design.
 
 ## Security Posture
 
-- SSH is tailnet-only, key-only, `agent` user; no public ports, no
-  password auth. The dashboard stays LAN/tailnet-local.
+- Remote ingress is a Cloudflare Tunnel (`cloudflared` as a systemd
+  service, D033): the Pi dials out over HTTPS and exposes no inbound port
+  anywhere — the home firewall stays closed. SSH rides the tunnel
+  end-to-end via `ProxyCommand cloudflared access ssh`, never the
+  browser-rendered terminal, so Cloudflare transports the stream but
+  cannot read it. Cloudflare Access gates the hostname: service tokens
+  for agent clients, SSO for humans, both revocable per-client at the
+  edge without touching the Pi, and every connection logged there — a
+  second audit trail that conveniently lives off-host.
+- sshd stays key-only, no password auth, `agent` user, bound to
+  loopback/LAN only. A WireGuard/Tailscale mesh remains a fine complement
+  for Brian's own devices; the standard agent path is the tunnel.
+- The dashboard and off-host mirror stay LAN-local by default; publishing
+  either is allowed only behind the same Cloudflare Access gate.
 - The agent's API credentials and any secrets it needs live in a store
   scoped to the `agent` user; the seat never needs Brian's accounts.
 - Privacy floor stays physical: the mute switch removes mic VBUS in
