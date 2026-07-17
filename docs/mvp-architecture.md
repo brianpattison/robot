@@ -2,15 +2,15 @@
 
 ## Overview
 
-The MVP is a small wheeled indoor companion body for Codex. It runs on the existing Raspberry Pi 5 8GB, with no AI HAT+ 2 required for the first build. The robot listens, talks, looks around through a camera head, moves cautiously around approved indoor areas, and exposes a local dashboard for debugging and control.
+The MVP is a small wheeled indoor companion body for the resident agent — Claude or Codex. It runs on the existing Raspberry Pi 5 8GB, with no AI HAT+ 2 required for the first build. The robot listens, talks, looks around through a camera head, moves cautiously around approved indoor areas, and exposes a local dashboard for debugging and control.
 
-Codex/ChatGPT is the primary conversational and agentic identity. The robot may still use other subsystems and models for wake word detection, speech-to-text, text-to-speech, person detection, navigation, and safety monitoring. Those subsystems are tools and reflexes; they are not alternate personalities. The tiny body gets one narrator, many nerves.
+The agent seat is pluggable: Claude or Codex is the primary conversational and agentic identity (D031), with full authority over the robot computer (D030; see [`agentic-control-plan.md`](agentic-control-plan.md)). The robot may still use other subsystems and models for wake word detection, speech-to-text, text-to-speech, person detection, navigation, and safety monitoring. Those subsystems are tools and reflexes; they are not alternate personalities. The tiny body gets one narrator, many nerves.
 
 ## Principles
 
 - **Fail stopped:** boot, faults, watchdog timeouts, and low-confidence autonomy all end in stopped or manual-help states.
 - **Safety is deterministic:** E-stop, bumpers, watchdog, motor enable, speed limits, and obstacle stops are not LLM-driven.
-- **LLM issues intents, not wheel commands:** Codex can request `come_here`, `follow_user`, `look_at_speaker`, `go_home`, or `stop`; lower layers validate and execute.
+- **The agent owns the computer, firmware owns physics:** the resident agent (Claude or Codex) has full Linux authority — shell, installs, code on the fly, direct velocity setpoints — while the safety MCU firmware clamps speed and latches stops no matter what the Pi says (D030, D032).
 - **Cloud can enrich, but not unblock safety:** network loss may reduce conversation quality, but local stop/mute/status/manual-control paths keep working.
 - **Visible state:** LEDs/audio cues make listening, speaking, moving, muted, stopped, and error states obvious.
 - **Modular body and software:** the MVP should be easy to print, inspect, service, and replace in small pieces.
@@ -26,13 +26,13 @@ Codex/ChatGPT is the primary conversational and agentic identity. The robot may 
 - Physical E-stop that cuts motor power independently of the Pi.
 - Watchdog input from the Pi; timeout disables motion.
 
-This layer owns immediate motor shutdown and hard limits. It should continue to make safe decisions even if Linux, ROS, the dashboard, or Codex is confused.
+This layer owns immediate motor shutdown and hard limits. It should continue to make safe decisions even if Linux, ROS, the dashboard, or the agent is confused.
 
 ### Raspberry Pi Robot Runtime
 
 - Sensor drivers for camera, mic array, proximity sensors, battery monitor, motor controller, and LEDs.
-- Motion gateway that converts validated velocity or navigation requests into low-level controller messages.
-- Behavior state machine for `booting`, `stopped`, `idle`, `listening`, `speaking`, `manual_drive`, `come_here`, `follow`, `go_home`, `mapping`, `fault`, and `muted`.
+- `robotd` body daemon: exclusive serial link to the safety MCU, motion/head/speak/senses/LED API, mode and state tracking (`booting`, `stopped`, `idle`, `listening`, `speaking`, `manual_drive`, `fault`, `muted`, active behavior), event stream, command blackbox, and the firmware heartbeat, emitted only while its health checks pass.
+- Agent-authored behaviors under `/home/agent/behaviors/`: the starter library (`come_here`, `follow_user`, `go_home`, ...) plus whatever the agent writes next, running as ordinary processes against `robotd`.
 - Local command router for urgent commands such as `stop`, `wait`, `mute`, `unmute`, and `status`.
 - Health monitor for battery, CPU temperature, service state, network, camera, mic, speaker, sensors, and motor faults.
 
@@ -61,7 +61,7 @@ Perception produces structured facts such as `person_seen`, `selected_user_track
 - Wake word listener.
 - Streaming or chunked speech-to-text.
 - Local urgent-intent recognizer for safety-sensitive phrases.
-- Codex/ChatGPT bridge for richer conversation and high-level decisions.
+- Resident agent seat (Claude or Codex) for conversation and everything the agent decides to do about it.
 - Text-to-speech output with barge-in support.
 - Conversation state, preferences, and memory hooks.
 - Maintained E-Switch PVB3F230SS311 physical mute in the rear-right service cartridge. Its SPDT common receives fused microphone 5 V; LISTEN powers microphone VBUS, while MUTE removes VBUS and drives the red ring plus a protected local state input. This hardware state must work and remain visible without the conversation process or network.
@@ -77,7 +77,7 @@ Simple acknowledgements such as "stopping," "muted," "battery is low," or "I nee
 - Come-here behavior that approaches, stops, and looks up rather than crowding.
 - Go-home behavior that navigates to a manually defined home area or asks for help.
 
-Navigation can reject commands from Codex if the map, sensors, battery, or confidence state makes movement unsafe.
+Navigation code is agent-maintained under D030. It should still refuse to move on low confidence as a matter of good behavior, but the guarantee that a bad plan ends in a capped-speed latched stop comes from the firmware envelope, not from navigation.
 
 ### Local Dashboard
 
@@ -94,33 +94,22 @@ The dashboard is a development and supervision tool, not a replacement for the p
 
 ## Safety And Control Boundary
 
-Codex can request high-level actions:
+The resident agent has full authority over everything that runs on the Pi (D030): it commands velocity and head setpoints directly through `robotd`, writes and hot-swaps its own behaviors, installs software, and works over live SSH. The old intent list (`stop`, `look_at_speaker`, `come_here`, `follow_user`, `wait`, `go_home`, `explore_nearby`, `say`, `set_led_state`) survives as the starter behavior library, not as a boundary.
 
-- `stop`
-- `look_at_speaker`
-- `come_here`
-- `follow_user`
-- `wait`
-- `go_home`
-- `explore_nearby`
-- `say`
-- `set_led_state`
+The boundary that remains is the one the Pi cannot reach (D032). The agent cannot exceed the firmware velocity/acceleration clamps, clear an E-stop latch, bypass the watchdog, defeat the normally-closed bumper stops, restart motion past the charger inhibit, or un-mute the hardware microphone switch. Those live in safety MCU firmware and physical controls, and the Pi-to-MCU protocol has no flash or config-write path.
 
-Codex cannot directly set unbounded wheel speeds, disable bumpers, disable E-stop behavior, bypass the watchdog, ignore low battery, or override no-go zones.
-
-Movement requests pass through this chain:
+Motion commands pass through this chain:
 
 ```text
-Codex intent
-  -> behavior state machine
-  -> navigation / motion validator
-  -> velocity and acceleration limiter
-  -> Pi motion gateway
-  -> safety controller / motor controller
+Agent command (robotd call, or code the agent wrote)
+  -> robotd body daemon: blackbox logging, telemetry, heartbeat
+  -> serial contract to the safety MCU
+  -> firmware envelope: clamps, watchdog, latched stops
+  -> motor controller
   -> motors
 ```
 
-Any layer may downgrade the request to `stop`, `wait`, or `ask_for_help`. The safety controller has the final say. Very democratic until safety votes no.
+No-go zones, quiet hours, and supervision rules are policy the agent is instructed to honor and the blackbox audits (see [`agentic-control-plan.md`](agentic-control-plan.md)). The firmware has the final say on physics. Very democratic until safety votes no.
 
 ## Data And Control Flow
 
@@ -131,7 +120,7 @@ Sensors
       -> perception facts, health state, odometry, audio events
         -> behavior state machine
           -> dashboard updates
-          -> Codex context
+          -> agent context
           -> navigation requests
             -> motion gateway
               -> safety controller
@@ -149,13 +138,13 @@ Recommended message pattern:
 1. Wake word listener runs locally.
 2. On wake, LEDs show listening state and audio is sent to STT.
 3. Local urgent-intent recognizer checks for commands like `stop`, `wait`, or `mute` as early as possible.
-4. Non-urgent transcript goes to the Codex/ChatGPT bridge with relevant robot state.
-5. Codex returns speech plus optional structured intents.
-6. Behavior layer validates intents against safety, battery, map, and confidence state.
+4. Non-urgent transcript becomes a turn in the resident agent session, with relevant robot state attached.
+5. The agent answers however it sees fit: speak, drive through `robotd`, look something up, or write and run new code.
+6. The firmware envelope clamps whatever motion results; policy and confidence shape what the agent chooses to do.
 7. TTS speaks the response.
 8. Barge-in can interrupt TTS for `stop`, `wait`, wake word, or dashboard stop.
 
-If STT, network, or Codex fails, the robot should still handle local `stop`, `mute`, `status`, and dashboard/manual-control commands.
+If STT, network, or the agent seat fails, the robot still handles local `stop`, `mute`, `status`, and dashboard/manual-control commands — plus any behaviors the agent already deployed, since those are local code and do not need the agent in the loop.
 
 ## Perception And Navigation Flow
 
@@ -236,18 +225,19 @@ Target layout on the Raspberry Pi:
 systemd
   robot-supervisor.service
     health monitor
-    behavior state machine
     service restart policy
 
-  robot-safety-bridge.service
-    watchdog heartbeat
-    motor-controller link
-    E-stop / bumper state ingestion
+  robotd.service
+    serial contract to the safety MCU
+    watchdog heartbeat, emitted only while health checks pass
+    motion / head / speak / senses / LED API
+    event stream and command blackbox
 
   robot-perception.service
     camera capture
     person tracking
     proximity fusion
+    agent-managed; the agent may replace or extend it
 
   robot-voice.service
     wake word
@@ -255,18 +245,19 @@ systemd
     urgent local intents
     TTS
 
-  robot-agent.service
-    Codex/ChatGPT bridge
-    conversation state
-    high-level intent output
+  robot-agent-host.service
+    resident agent seat: Claude Code / Agent SDK or Codex CLI, headless
+    conversation turns in, actions out
+    agent journal and background schedule
 
   robot-dashboard.service
     local web UI
     websocket/event stream
     manual drive API
+    agent panel: live session view, session recordings, software stop
 ```
 
-For early development, these can be Python processes with simple JSON/WebSocket or ROS 2 topics between them. If ROS 2 is adopted, keep the safety bridge independent enough that it can still fail stopped when ROS nodes crash.
+For early development, these can be Python processes with simple JSON/WebSocket or ROS 2 topics between them. If ROS 2 is adopted, keep `robotd` independent enough that it can still fail stopped when ROS nodes crash. The agent may reorganize anything above `robotd`; `robotd` and the firmware contract are the parts to keep boring.
 
 Boot behavior:
 
@@ -291,7 +282,8 @@ shorted into an implausible state, stale, or untested after controller reset.
 - Watchdog-driven motor disable.
 - Local dashboard.
 - Local urgent commands for `stop`, `wait`, `mute/status`.
-- Cloud-assisted Codex/ChatGPT conversation.
+- A resident agent seat (Claude or Codex) with full shell authority, live tailnet SSH, and the `robotd` body API.
+- Append-only command blackbox and recorded agent sessions.
 - Cautious one-room or prepared-area movement.
 - Manual drive and supervised follow/come/go-home demos.
 
@@ -309,7 +301,7 @@ shorted into an implausible state, stale, or untested after controller reset.
 
 ## Future Upgrade Boundaries
 
-- **AI HAT+ 2:** add later for local LLM/VLM experiments, privacy-sensitive scene summaries, and offline fallback intelligence.
+- **AI HAT+ 2:** add later for local LLM/VLM experiments, privacy-sensitive scene summaries, offline fallback intelligence, and eventually a local agent seat.
 - **2D LiDAR or depth sensor:** add if navigation reliability with camera + ToF is not good enough.
 - **Docking:** add after manual charging and go-home behavior are reliable.
 - **LeRobot:** add as an optional learning/data layer after deterministic safety and teleop are stable.
@@ -324,6 +316,6 @@ shorted into an implausible state, stale, or untested after controller reset.
 - Do we want 2D LiDAR in the first rolling chassis, or only reserve the mount and power budget?
 - What is the first safe test area in the house, and what no-go zones should be hardcoded before mapping?
 - What is the preferred TTS voice and speaker loudness target?
-- How should Codex memory for the body be stored, synced, and privacy-scoped?
+- How should the agent's journal/memory be stored, synced, and privacy-scoped, now that the agent manages it itself?
 - What local-only commands should work even with no internet?
 - Which exact feeder and ATO/ATC branch fuse values, terminal parts, and wire gauges pass the measured-load, selective-short, crimp-pull, and Blue Sea 5045 thermal review?

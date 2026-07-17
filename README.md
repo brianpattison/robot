@@ -20,6 +20,7 @@ Everything below the book is the engineering paper trail. Start with the docs in
 - MVP PRD: [`docs/mvp-prd.md`](docs/mvp-prd.md)
 - Decision log: [`docs/decision-log.md`](docs/decision-log.md)
 - MVP architecture: [`docs/mvp-architecture.md`](docs/mvp-architecture.md)
+- Agentic control plan: [`docs/agentic-control-plan.md`](docs/agentic-control-plan.md)
 - BOM v0: [`docs/bom-v0.md`](docs/bom-v0.md)
 - Retail sourcing policy: [`docs/retail-sourcing-policy.md`](docs/retail-sourcing-policy.md)
 - CAD mechanical plan: [`docs/cad-mechanical-plan.md`](docs/cad-mechanical-plan.md)
@@ -39,14 +40,15 @@ Everything below the book is the engineering paper trail. Start with the docs in
 - Wheeled differential-drive base for the first physical body.
 - Pan/tilt camera head for expression and perception.
 - Physical E-stop, bumper switches, watchdog, velocity limits, and conservative movement defaults.
-- Local dashboard for health, logs, camera preview, manual drive, and emergency stop.
+- The resident agent (Claude or Codex) owns the robot's computer: live SSH, code on the fly, package installs, and direct motion setpoints above a firmware safety floor it cannot alter (D030-D032).
+- Local dashboard for health, logs, camera preview, manual drive, emergency stop, and the agent panel.
 - Quantity-one US retail hardware throughout the production design: Panasonic CB1A-R-M-12V motor-cut relay, Blue Sea Systems 5045 covered fuse block, WDS 615-M6-8-65 front shoulder bolts with stock hardware, no carry handles, and a blank center rear cartridge.
 
 ## Safety First
 
-The robot should fail stopped. Codex should issue high-level intents like `come here`, `follow`, or `stop`, not raw unbounded motor commands.
+The robot should fail stopped. The resident agent (Claude or Codex) has full authority over the robot's computer — live SSH, code written on the fly, package installs, direct motion setpoints — but not over physics: the safety MCU firmware clamps every velocity setpoint and latches stops on bumper, E-stop, watchdog, or charger events, and it cannot be reflashed from the Pi (D030-D032, [`docs/agentic-control-plan.md`](docs/agentic-control-plan.md)).
 
-The safety controller and navigation layer must be able to reject or clamp movement commands. Motor power must be cut by a physical E-stop independent of the Raspberry Pi.
+Motor power must be cut by a physical E-stop independent of the Raspberry Pi. Root on the Pi is not root on physics.
 
 ## CAD Strategy
 

@@ -624,3 +624,78 @@ Rationale:
   TOC, annotated meet-the-robot spread, piece-inventory chart, hairline
   tables, back cover) is the retail-grade baseline; future edits should
   extend it rather than regress to the earlier utilitarian layout.
+
+## D030: The Resident Agent Has Full Authority Over The Robot Computer
+
+Status: accepted 2026-07-17 (Brian's direction)
+
+The resident agent (Claude or Codex, per D031) gets full control of the
+Raspberry Pi: live SSH access, code and scripts written on the fly, package
+and service installs, direct velocity and head setpoints through the
+`robotd` body daemon, and management of its own behaviors, schedules, and
+memory. The fixed high-level intent vocabulary is retired as the control
+boundary; the old intents survive only as the starter behavior library the
+agent inherits and rewrites. Every `robotd` command and agent shell session
+is captured in an append-only blackbox. See
+`docs/agentic-control-plan.md`.
+
+Rationale:
+
+- Brian's directive: give Claude or Codex full control — live SSH, code on
+  the fly, software installs, whatever the robot needs to get around, talk,
+  and answer questions.
+- An agentic model's value is writing code against reality. Nine canned
+  intents cap the robot at its author's imagination and waste the model.
+- Full software authority is safe to grant because the deterministic floor
+  moved into hardware and firmware the Pi cannot alter (D032).
+- The blackbox and recorded sessions keep trust inspectable after the fact
+  instead of pretending to enforce it up front.
+
+## D031: The Agent Seat Is Pluggable: Claude Or Codex
+
+Status: accepted 2026-07-17 (Brian's direction)
+
+Revises D005. The robot has one agent seat, and either Claude (via Claude
+Code or the Claude Agent SDK) or Codex (via the Codex CLI) occupies it. One
+resident narrator at a time; wake word, STT, TTS, perception, and other
+subsystems remain tools, not alternate personalities. D005's coherence goal
+stands — only its exclusivity to Codex is revised.
+
+Rationale:
+
+- Brian consistently frames the operator as "Claude or Codex"; the
+  architecture should make the seat a choice, not a rebuild.
+- Everything below the seat (voice services, `robotd`, firmware) is
+  identity-agnostic, so pluggability costs one abstraction, not a redesign.
+- One-narrator-at-a-time preserves the coherent-companion experience D005
+  was protecting.
+
+## D032: The Safety Floor Is Physical And Firmware Only, And The Pi Cannot Reach It
+
+Status: accepted 2026-07-17 (Brian's direction)
+
+Refines D004, which stands. The deterministic floor is exactly: E-stop,
+normally-closed bumper loops with latched stops, watchdog, firmware
+velocity/acceleration clamps, charger-present motion inhibit, low-battery
+cutoff, and the hardware microphone mute. It is enforced by the safety MCU
+firmware and physical controls. The Pi-to-MCU link carries only the framed
+command/heartbeat protocol with no flash, bootloader, or config-write path;
+the Pico's USB/SWD are service corridors never cabled to the Pi in
+operation, so reflashing requires opening the robot. Firmware accepts a
+rate-limited budget of remote bumper latch clears; past it, and always for
+E-stop, recovery requires a physical reset input.
+
+Software guardrails the firmware cannot sense — no-go zones, quiet hours,
+supervision expectations, upload rules — are reclassified as policy the
+agent is instructed to honor and the blackbox audits, not enforcement.
+
+Rationale:
+
+- Under D030 the agent has root on the Pi, so any Pi-side gate is a
+  convention. Drawing the line where it can actually hold is more honest
+  and therefore safer than layered software theater.
+- The Pico 2 safety shelf, relay coil path, NC loops, and service-corridor
+  wiring already position the hardware for exactly this boundary.
+- Policy violations become visible and auditable; physics violations stay
+  impossible from software. The worst honest failure is a capped-speed
+  bump that latches stopped.

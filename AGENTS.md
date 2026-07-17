@@ -25,9 +25,10 @@ Do not turn this into a full changelog. Keep it short, actionable, and project-s
 - AI HAT+ 2: not required for MVP. Reserve mechanical clearance, cooling airflow, and power budget for a future upgrade.
 - Storage: start MVP with a reliable microSD card. USB 3 storage is an easy later upgrade. Official M.2/NVMe HAT storage and official AI HAT+ 2 both use the Pi 5 PCIe connector, so do not assume they can coexist.
 - If USB 3 storage is added later, design a printed cradle with cable strain relief and service access. Avoid dangling external drives inside the body.
-- Personality: Codex/ChatGPT is the primary conversational and agentic identity.
+- Personality: the agent seat is pluggable — Claude or Codex is the primary conversational and agentic identity, one resident narrator at a time (D031).
 - Subsystems may use other models/services for wake word, STT, TTS, perception, or fallback, but they are tools, not alternate personalities.
 - Safety/reflexes are deterministic and must not depend on an LLM.
+- ACCEPTED CONTROL DIRECTION (2026-07-17, D030-D032): the resident agent has full authority over the robot computer — live SSH over the tailnet, code and scripts written on the fly, package/service installs, and direct velocity/head setpoints through the `robotd` body daemon, all captured in an append-only blackbox plus recorded shell sessions. Every hard safety guarantee (velocity/accel clamps, watchdog, latched NC-bumper/E-stop/charger stops, low-battery cutoff, hardware mic mute) lives in safety-MCU firmware and physical controls the Pi cannot reach: the Pi-to-Pico UART protocol has no flash/config-write path, and the Pico's USB/SWD are service corridors never cabled to the Pi in operation. The fixed intent vocabulary is retired as a boundary and survives as the starter behavior library; no-go zones/quiet hours/supervision are audited policy, not enforcement. See `docs/agentic-control-plan.md`.
 - Build order: documentation -> bench brain -> safety loop -> CAD fit checks -> rolling chassis -> supervised autonomy.
 - Purchased-part sourcing: every production hardware item must be available in quantity one through a normal US online checkout from a mainstream retailer or distributor. Printed parts and assembled wiring harnesses are expected; RFQ-only parts, overseas-only sources, factory minimums, custom-machined metal, custom sheet metal, and custom-fabricated PCBs are not acceptable unless the user explicitly approves an exception. Prefer two US sources for safety- and power-critical parts.
 - ACCEPTED v2 DIRECTION (2026-07-16, D025-D027): the body will be reworked to printed-only structure — no purchased metal brackets, standoffs, spacers, shoulder bolts, bearings, or hubs; the only separately purchased body fasteners become one insert SKU + one screw SKU (M3 x 5.7 heat-set inserts + M3 x 8 SHCS, bundled component hardware exempt); the footprint targets a 238 x 220 x 133 one-piece shell/tray/lid (height computed on verified datums: MDDS10 thermal ceiling 86.275 + Pi clearance + full 96 x 74 x 22 AI-HAT reserve + 3 mm to the pan-servo drop at 131.6). See `docs/printed-only-simplification-plan.md` and decision-log D025-D027. The D027 packing gate is OPEN, but Phase 2 is GREEN-LIT (review round 4 reproduced the screen and approved): the box screen (`cad/python/packing_study_printed_only.py`, layout v5.1 after four review rounds) closes with a 2 mm margin policy including wall margins; the v2 BREP packing model must pass an inventory-driven production validator, carrying four registered round-4 requirements (Pico USB/SWD corridors — Pico now floor NE; battery padding/clamp; relay as bracket/body/terminal volumes; AI-HAT height recovery only as a BREP-discovered bonus) plus D028: a hard <= 40 printed-part budget with per-part justification and a zero-support inventory (declared orientations, overhang/bridge audits, empty exception list). Brian approved the layout's appearance deltas on 2026-07-16 (off-center E-stop, offset mic, smaller vent, forward side-firing speakers, taller body, EN2/mute swapped; height later revised 144 -> 133 by a datum fix). The v2 chain so far: `cad/python/robot_body_v2_inventory.py` (registered envelopes, joints, masses) -> `robot_body_v2.py` (21 solids) -> `validate_robot_body_v2.py [--gate]` -> `robot_body_v2_print.py` (oriented print exports + manifest) and `robot_body_v2_coupons.py` (11 calibration coupons; print and pass these before any large v2 part), plus `cad/blender/render_robot_body_v2.py` (review renders), `cad/blender/render_assembly_steps_v2.py` (LEGO-style step renders + part thumbnails with purchased-part proxies, into docs/images/guide_v2), `docs/generate_assembly_guide_v2.py` (the 37-page builder's book: print-first HTML pages rendered to PDF via headless Chrome — cover with computed TOC, annotated meet-the-robot spread, shopping, Bambu printing, coupons, LEGO-style piece inventory, 20 illustrated steps with progress bars, electronics placement, the wiring chapter with SVG power/signal maps, and a back cover; the design system is Avenir Next type, chapter thumb tabs, and hairline tables, and per Brian's 2026-07-16 direction the book must stay child-followable WITHOUT any "grown-up needed" callouts — do not reintroduce them; verify pages with pypdfium2 from .venv-cad since poppler is not installed here), and `cad/bambu/generate_bambu_project_v2.py` (drives the v1 Bambu machinery with instance staging and solo plates for the 238 mm parts; tracked outputs codex_robot_body_v2_p1s.3mf + plates json). Run the validator after ANY v2 change. The v1 conventions and regen instructions below remain authoritative for the v1 source only; do not mix the two.
@@ -41,9 +42,10 @@ Start with:
 3. `docs/decision-log.md`
 4. `docs/mvp-prd.md`
 5. `docs/mvp-architecture.md`
-6. `docs/bom-v0.md`
-7. `docs/cad-mechanical-plan.md`
-8. `output/pdf/codex_robot_body_v2_assembly_guide.pdf` (the current builder's book; the v1 guide is historical)
+6. `docs/agentic-control-plan.md`
+7. `docs/bom-v0.md`
+8. `docs/cad-mechanical-plan.md`
+9. `output/pdf/codex_robot_body_v2_assembly_guide.pdf` (the current builder's book; the v1 guide is historical)
 
 The docs intentionally separate product requirements, decisions, architecture, BOM, and CAD/mechanical planning. Keep new details in the most specific doc rather than stuffing everything into the README.
 
@@ -51,9 +53,10 @@ The docs intentionally separate product requirements, decisions, architecture, B
 
 - The robot should fail stopped.
 - Physical E-stop must cut motor power independently of the Pi.
-- Bumper switches and watchdog timeout must stop motion without consulting Codex/ChatGPT.
-- Codex may issue high-level intents like `stop`, `come_here`, `follow_user`, `go_home`, or `look_at_speaker`.
-- Codex must not directly control raw unbounded wheel speeds, disable safety hardware, bypass no-go zones, or override low-battery behavior.
+- Bumper switches and watchdog timeout must stop motion without consulting the agent.
+- The resident agent (Claude or Codex) has full authority over the Pi (D030): shell, sudo, installs, code on the fly, and direct velocity/head setpoints through `robotd`, all blackbox-logged.
+- The agent cannot exceed firmware velocity/accel clamps, clear an E-stop latch, bypass the watchdog or NC bumper loops, restart motion past the charger inhibit, or un-mute the hardware microphone switch (D032). Never give the safety MCU a remote flash or config-write path, and never cable its USB/SWD to the Pi in normal operation.
+- No-go zones, quiet hours, and supervision rules are policy the agent is instructed to honor and the blackbox audits — do not describe them as hard enforcement.
 - Local `stop`, `wait`, `mute`, and basic `status` should work even if network/cloud AI is unavailable.
 
 If you touch any motion, power, battery, or safety-control design, update the relevant docs and make the safety implications explicit.
