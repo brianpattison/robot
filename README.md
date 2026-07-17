@@ -6,7 +6,15 @@ The design goal is pet-like presence without overcomplicating the first build. T
 
 ## Current Status
 
-This repo is at the planning and parametric CAD-prototype stage. Start with the docs index:
+The current direction is the **v2 printed-only body** (decision log D025-D029): a
+44-piece, 11-plate, zero-support print with one screw size, one insert size, and a
+retail-grade builder's book that a kid can follow end to end.
+
+- **The Builder's Book (v2, start here):** [`output/pdf/codex_robot_body_v2_assembly_guide.pdf`](output/pdf/codex_robot_body_v2_assembly_guide.pdf)
+- v2 Bambu Studio project: [`cad/bambu/codex_robot_body_v2_p1s.3mf`](cad/bambu/codex_robot_body_v2_p1s.3mf)
+- v2 book generator: [`docs/generate_assembly_guide_v2.py`](docs/generate_assembly_guide_v2.py)
+
+Everything below the book is the engineering paper trail. Start with the docs index:
 
 - Documentation index: [`docs/README.md`](docs/README.md)
 - MVP PRD: [`docs/mvp-prd.md`](docs/mvp-prd.md)
@@ -20,8 +28,8 @@ This repo is at the planning and parametric CAD-prototype stage. Start with the 
 - CAD calibration coupons: [`docs/cad-coupons.md`](docs/cad-coupons.md)
 - Python CAD tooling notes: [`cad/python/README.md`](cad/python/README.md)
 - Bambu Studio P1S project: [`cad/bambu/README.md`](cad/bambu/README.md)
-- Illustrated assembly guide: [`output/pdf/codex_robot_body_v1_assembly_guide.pdf`](output/pdf/codex_robot_body_v1_assembly_guide.pdf)
-- Assembly-guide generator: [`docs/generate_assembly_guide.py`](docs/generate_assembly_guide.py)
+- v1 illustrated assembly guide (historical): [`output/pdf/codex_robot_body_v1_assembly_guide.pdf`](output/pdf/codex_robot_body_v1_assembly_guide.pdf)
+- v1 assembly-guide generator (historical): [`docs/generate_assembly_guide.py`](docs/generate_assembly_guide.py)
 
 ## MVP Direction
 

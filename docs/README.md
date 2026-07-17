@@ -32,7 +32,14 @@ Read these in order when getting oriented:
 10. [Bambu Studio P1S Project](../cad/bambu/README.md)
    Reproducible 101-part, 26-plate P1S 0.4 mm layout split into 14 material-profile/color groups, with an exact plate manifest and visual overview.
 
-11. [Illustrated Assembly Guide](../output/pdf/codex_robot_body_v1_assembly_guide.pdf)
+11. [The Builder's Book — v2 Assembly Guide](../output/pdf/codex_robot_body_v2_assembly_guide.pdf)
+    The current 37-page retail-grade kit manual for the printed-only v2 body: computed
+    cover TOC, annotated meet-the-robot spread, shopping and printing chapters, piece
+    inventory, twenty picture-first steps with progress bars and CHECK tests, wiring
+    maps, and first safety checks. Child-followable by design, with no "grown-up"
+    callouts (D029). Regenerate with `docs/generate_assembly_guide_v2.py`.
+
+12. [v1 Illustrated Assembly Guide (historical)](../output/pdf/codex_robot_body_v1_assembly_guide.pdf)
     Twenty-page visual build sequence synchronized with the D024 retail-only CAD, current renders, 101-part print manifest, and 26-plate P1S project.
 
 > **D024 retail-only baseline:** CAD, validation, split and print manifests,
