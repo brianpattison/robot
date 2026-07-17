@@ -354,6 +354,11 @@ def build_front_wheel():
 def build_tire():
     tire = Pos(0, 0, 0) * Rot(90, 0, 0) * Cylinder(P.wheel_radius, P.wheel_thickness)
     tire -= Rot(90, 0, 0) * Cylinder(20.8, P.wheel_thickness + 2)
+    # One radial screw port through the tread: the rear wheel's clamp screw
+    # lives under the mounted tire (rim bore at the wheel's Y-center), so
+    # the tire carries a 7.2 mm access port to line up over it. Fronts use
+    # the same tire design; their port is simply unused.
+    tire -= Pos(0, 0, (20.8 + P.wheel_radius) / 2) * Cylinder(3.6, P.wheel_radius - 20.8 + 4)
     return tire
 
 
@@ -527,16 +532,28 @@ def build_tilt_bushing():
 
 
 def build_eye_diffuser_bar():
-    bar = Pos(0, 0, 1.5) * Box(30, 18, 3)
-    for sy in (1, -1):
-        bar += Pos(0, sy * 5, 3.8) * Box(9, 5, 1.6)
-    return bar
+    # One bar serves BOTH faceplate eye slots (registry: "both eye diffusers
+    # as one bar"). The slots sit at Y +/-40, 9 x 14 each, with the camera
+    # aperture dead center between them, so the bar is a goalpost: an eye
+    # plate behind each slot (riser pad entering at 0.6 mm total clearance)
+    # joined by a bridge routed ABOVE the camera aperture so no lime plastic
+    # crosses the optical path. Mounted: local X runs along world Y, local Y
+    # along world Z, pads toward the faceplate.
+    plates = None
+    for sx in (1, -1):
+        plate = Pos(sx * 38, 0, 1.5) * Box(22, 30, 3)
+        plate += Pos(sx * 40, 0, 3.8) * Box(8.4, 13.4, 1.6)
+        plates = plate if plates is None else plates + plate
+    bridge = Pos(0, 15.5, 1.5) * Box(98, 4.5, 3)
+    return plates + bridge
 
 
 def build_status_diffuser_bar():
+    # Fascia status slots are 10 x 5 at Y +/-30; pads sized 9.4 x 4.4 leave
+    # a real 0.6 mm snap clearance (they previously matched the slot exactly).
     bar = Pos(0, 0, 1.0) * Box(76, 12, 2)
     for sx in (1, -1):
-        bar += Pos(sx * 30, 0, 2.6) * Box(10, 4, 1.2)
+        bar += Pos(sx * 30, 0, 2.6) * Box(9.4, 4.4, 1.2)
     return bar
 
 

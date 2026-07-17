@@ -739,6 +739,15 @@ def render_plate_contact_sheet(
             try:
                 with Image.open(io.BytesIO(archive.read(thumbnail_name))) as source:
                     thumbnail = source.convert("RGB")
+                # Bambu's plate previews put charcoal parts on a near-black
+                # background; lift the shadows on dark thumbnails so those
+                # silhouettes stay readable on the printed page.
+                histogram = thumbnail.convert("L").histogram()
+                pixel_count = sum(histogram)
+                mean_luma = sum(i * n for i, n in enumerate(histogram)) / max(pixel_count, 1)
+                if mean_luma < 70:
+                    gamma_lut = [round(255 * (i / 255) ** 0.5) for i in range(256)]
+                    thumbnail = thumbnail.point(gamma_lut * 3)
                 thumbnail = ImageOps.contain(thumbnail, (276, 244), LANCZOS)
                 canvas.paste(
                     thumbnail,

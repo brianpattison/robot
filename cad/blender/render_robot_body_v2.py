@@ -15,7 +15,7 @@ import math
 from pathlib import Path
 
 import bpy
-from mathutils import Vector
+from mathutils import Matrix, Vector
 
 ROOT = Path(__file__).resolve().parents[2]
 EXPORT_DIR = ROOT / "cad" / "exports" / "v2"
@@ -47,22 +47,46 @@ MIRROR_Y = {"rear_wheel_v2", "front_wheel_v2", "motor_cap_v2", "speaker_clamp_v2
             "tof_clamp_v2"}
 # The tire design places at all four wheel stations.
 TIRE_STATIONS = [(-74, 118, 66), (-74, -118, 66), (74, 118, 66), (74, -118, 66)]
-# Small internal parts that only clutter exterior views.
-HIDE_ALWAYS = {"printed_washer_v2", "tilt_bushing_v2", "battery_pad_frame_v2",
-               "eye_diffuser_bar_v2", "status_diffuser_bar_v2"}  # unplaced part designs
+# Small internal parts that only clutter exterior views. The lime diffuser
+# bars are exported in local coordinates but get placed into their fascia
+# and faceplate seats by place_diffuser_bars(), so they render lit-up in
+# the assembled views instead of hiding.
+HIDE_ALWAYS = {"printed_washer_v2", "tilt_bushing_v2", "battery_pad_frame_v2"}
+# The chassis view hides the shell, so also hide every clamp bar whose
+# purchased part is not in this printed-only scene — otherwise the bars
+# float in mid-air where the battery/Pico/speakers/ToF boards would be.
 CHASSIS_HIDE = {"shell_v2", "lid_v2", "head_shell_v2", "head_faceplate_v2", "neck_v2",
                 "bayonet_collar_v2", "yoke_v2", "head_pan_plate_v2", "eye_diffuser_bar_v2",
-                "mic_cradle_v2", "fascia_v2", "rear_panel_v2"}
+                "status_diffuser_bar_v2", "mic_cradle_v2", "fascia_v2", "rear_panel_v2",
+                "speaker_clamp_v2", "tof_clamp_v2", "battery_clamp_v2", "pico_clamp_v2"}
 
 
-def material(name, color, roughness=0.42):
+def material(name, color, roughness=0.42, emission=0.0):
     mat = bpy.data.materials.new(name)
     mat.use_nodes = True
     bsdf = mat.node_tree.nodes.get("Principled BSDF")
     bsdf.inputs["Base Color"].default_value = color
     bsdf.inputs["Roughness"].default_value = roughness
+    if emission and "Emission Color" in bsdf.inputs:
+        bsdf.inputs["Emission Color"].default_value = color
+        bsdf.inputs["Emission Strength"].default_value = emission
     mat.diffuse_color = color
     return mat
+
+
+def place_diffuser_bars(objects):
+    """Seat the locally-exported lime bars behind their slot fields: the
+    status bar behind the fascia (slots at Z 116), the eye bar behind the
+    head faceplate (slots at Z 254). Local X spans world Y, local Y spans
+    world Z, and the riser pads point world -X into the slots."""
+    rot = Matrix.Rotation(math.radians(90), 4, "X") @ Matrix.Rotation(math.radians(-90), 4, "Y")
+    for bar_name, host_name, z in (("status_diffuser_bar_v2", "fascia_v2", 116.0),
+                                   ("eye_diffuser_bar_v2", "head_faceplate_v2", 254.0)):
+        bar, host = objects.get(bar_name), objects.get(host_name)
+        if not bar or not host:
+            continue
+        host_inner_x = max((host.matrix_world @ Vector(c)).x for c in host.bound_box)
+        bar.matrix_world = Matrix.Translation(Vector((host_inner_x + 3.0, 0, z))) @ rot
 
 
 def look_at(obj, target):
@@ -73,7 +97,8 @@ def look_at(obj, target):
 def setup_scene():
     bpy.ops.object.select_all(action="SELECT")
     bpy.ops.object.delete(use_global=False)
-    mats = {k: material(k, v) for k, v in COLORS.items()}
+    mats = {k: material(k, v, emission=(1.4 if k == "lime" else 0.0))
+            for k, v in COLORS.items()}
 
     objects = {}
     for stl in sorted(EXPORT_DIR.glob("*_v2.stl")):
@@ -103,6 +128,8 @@ def setup_scene():
             dup.location = Vector(station)
             bpy.context.collection.objects.link(dup)
             objects[dup.name] = dup
+
+    place_diffuser_bars(objects)
 
     bpy.ops.mesh.primitive_plane_add(size=1600, location=(0, 0, GROUND_Z))
     floor = bpy.context.object
@@ -178,12 +205,33 @@ def render_view(objects, filename, cam_loc, cam_target, lens=55, hide=frozenset(
     print("rendered", filename)
 
 
+def add_hero_estop():
+    """The red emergency stop for the assembled/rear hero views: the body
+    renders unfinished without its defining button. Review-only proxy."""
+    made = []
+    for name, radius, depth, z, color in (
+        ("hero_estop_base", 30, 2, 183, (0.95, 0.75, 0.05, 1.0)),
+        ("hero_estop_stem", 11, 14, 191, (0.08, 0.08, 0.08, 1.0)),
+        ("hero_estop_cap", 20, 14, 203, (0.8, 0.06, 0.05, 1.0)),
+    ):
+        bpy.ops.mesh.primitive_cylinder_add(radius=radius, depth=depth, location=(59, 56, z))
+        obj = bpy.context.object
+        obj.name = name
+        mat = material(name, color)
+        obj.data.materials.append(mat)
+        made.append(obj)
+    return made
+
+
 def main():
     objects = setup_scene()
+    hero_estop = add_hero_estop()
     render_view(objects, "codex_robot_body_v2_assembled.png",
                 (-460, -400, 300), (0, 0, 140))
     render_view(objects, "codex_robot_body_v2_rear.png",
-                (430, 330, 290), (0, 0, 125))
+                (500, 400, 350), (0, 0, 152))
+    for obj in hero_estop:
+        obj.hide_render = True
     render_view(objects, "codex_robot_body_v2_chassis.png",
                 (-320, -300, 420), (0, 0, 85), hide=CHASSIS_HIDE)
 

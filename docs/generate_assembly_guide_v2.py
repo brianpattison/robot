@@ -84,6 +84,11 @@ FRONT_LABEL = {
     "step_15_panels": "&#8601; FRONT",
     "step_04_wheels_bench": None,   # bench shot, no robot orientation
 }
+# Inset panels overlaid on a step's big picture: render name + caption.
+INSETS = {
+    "step_13_shell": ("step_13b_shell_inserts", "All 14 insert spots"),
+    "step_17_lid": ("step_17b_lid_inserts", "Lid flipped: the 2 mic bosses"),
+}
 N_SCREWS, N_INSERTS = inv.fastener_tally()
 
 # Friendly names for parts (printed and purchased) used in strips and the
@@ -206,10 +211,11 @@ STEPS = [
      "Motors don’t wiggle. Shafts spin freely when you twist them."),
     ("step_04_wheels_bench", "Make the wheels", 0,
      [("rear_wheel_v2", 2), ("front_wheel_v2", 2), ("tire_v2", 4), ("px_insert", 2)],
-     ["Melt 1 insert into the little bump on each BACK wheel’s rim (2 total) — the iron again, same flush finish.",
+     ["Melt 1 insert into the screw hole on each BACK wheel’s rim (2 total) — the iron again, same flush finish.",
       "Stretch a stretchy printed tire over each of the four wheels, like putting a rubber band on a yo-yo.",
-      "Work it around evenly until it sits flat in the groove all the way around."],
-     "No tire bulges. All four look the same."),
+      "Every tire has one little round port in its tread. On the BACK wheels, spin the tire until the port sits right over the rim’s screw hole (the front wheels don’t care).",
+      "Work each tire around evenly until it sits flat in the groove all the way around."],
+     "No tire bulges, and each BACK tire’s port shows its screw hole."),
     ("step_05_front_pods", "Bolt on the front pods", SCREWS["front_pods"],
      [("front_pod_left_v2", 2), ("px_insert", 2)],
      ["Melt 1 insert into the end of each pod’s peg (2 total).",
@@ -219,17 +225,17 @@ STEPS = [
     ("step_06_wheels_on", "Put the wheels on",
      SCREWS["rear_wheel_clamps"] + SCREWS["front_axle_retainers"],
      [("rear_wheel_v2", 2), ("front_wheel_v2", 2), ("printed_washer_v2", 2)],
-     ["BACK wheels: the hole has a flat side, and so does the motor shaft. Line the flats up, push the wheel on, then tighten the one clamp screw on the wheel’s rim.",
+     ["BACK wheels: the hole has a flat side, and so does the motor shaft. Line the flats up, push the wheel on, then drive the clamp screw in through the tire’s little port until it’s snug against the shaft.",
       "FRONT wheels: slide onto the pegs — they should spin freely. Put a printed washer on, then a screw into the end of the peg to keep the wheel from sliding off.",
       "Don’t overtighten the front screws: the wheels must still spin.",
       "You printed extra washers — drop the leftovers in your spares box."],
      "Back wheels should NOT spin freely by hand (the motor holds them). Front wheels spin freely."),
     ("step_07_tower", "Build the brain tower", SCREWS["controller_tower_base"],
      [("controller_tower_v2", 1), ("px_mdds10", 1)],
-     ["Set the tower over the front-left of the tray — its screw holes match the four inserts.",
+     ["Set the tower over the front of the tray — its screw holes match the four inserts.",
       "Drive 4 screws down through the base tabs.",
-      "Rest the purple motor board on the four little posts, its green terminal blocks facing the LEFT side of the robot."],
-     "The board sits level on all four posts, terminals facing left."),
+      "Rest the purple motor board on the four little posts, its green terminal blocks facing the RIGHT side of the robot."],
+     "The board sits level on all four posts, terminals facing right."),
     ("step_08_pi", "Add the computer", 0,
      [("px_pi", 1)],
      ["The Raspberry Pi lies flat on the tower’s top shelf frame.",
@@ -244,9 +250,9 @@ STEPS = [
      "Grab the battery and try to wiggle it. It shouldn’t move."),
     ("step_10_pico", "Add the safety helper", SCREWS["pico_clamp"],
      [("px_pico", 1), ("pico_clamp_v2", 1)],
-     ["The tiny green Pico sits on its little posts to the right of the tower, USB plug facing RIGHT.",
+     ["The tiny green Pico sits on its little posts to the right of the tower, USB plug facing the BACK of the robot.",
       "Lay the small clamp bar across it and screw it down with 2 screws, gently — it’s a small board."],
-     "The Pico is held snug and its USB port is reachable."),
+     "The Pico is held snug, its USB end pointing at the back."),
     ("step_11_relay", "Mount the power relay", 0,
      [("px_relay", 1)],
      ["The relay drops into its floor pocket on the left, behind the tower.",
@@ -255,10 +261,10 @@ STEPS = [
      "The relay clicks into its pocket and doesn’t rattle."),
     ("step_12_deck", "Put on the power deck", SCREWS["deck_towers"],
      [("deck_v2", 1), ("px_fuse", 1), ("px_reg1", 2)],
-     ["First hang the two small green regulator boards under the deck’s RIGHT end (they clip under; wires come later).",
+     ["First hang the two small green regulator boards under the deck’s BACK half (they clip under; wires come later).",
       "Lower the deck onto the four towers — the notch at the back-right corner goes around the battery wires.",
       "Drive 4 screws down into the tower tops.",
-      "Set the black fuse box into its raised outline on the deck’s right half, wire end hanging over the edge."],
+      "Set the black fuse box into its raised outline on the deck’s LEFT half, wire tail hanging over the left edge."],
      "The deck is level and the fuse box sits inside its printed fence."),
     ("step_13_shell", "Lower the body shell", SCREWS["shell_tray"],
      [("shell_v2", 1), ("px_insert", 14)],
@@ -297,12 +303,12 @@ STEPS = [
     ("step_18_neck", "Grow the neck", 0,
      [("neck_v2", 1), ("bayonet_collar_v2", 1), ("px_servo", 1)],
      ["Feed the neck tube down through the lid’s front hole.",
-      "From inside, twist the bayonet collar onto the neck’s bottom — a quarter turn locks it, like a camera lens.",
+      "Reach in under the lid’s edge and twist the bayonet collar onto the neck’s bottom — a quarter turn locks it, like a camera lens. The picture shows the hole you’re working through.",
       "The neck servo sits in the collar’s cradle underneath (its wire joins the wiring chapter)."],
      "The neck turns smoothly by hand and cannot pull up and out."),
     ("step_19_head", "Build the head", 1,
      [("head_shell_v2", 1), ("yoke_v2", 1), ("head_pan_plate_v2", 1), ("px_camera", 1), ("px_servo", 1), ("tilt_bushing_v2", 1), ("px_insert", 1)],
-     ["Melt the last insert (the tilt-pivot side), then screw the yoke’s ring onto the top of the neck.",
+     ["Melt the last insert into the small boss on the head’s right side (the tilt pivot), then screw the yoke’s ring onto the top of the neck.",
       "Slide the camera into the pocket behind the face opening, lens forward; its flat ribbon cable runs down through the hollow neck to the Pi.",
       "Lower the head shell over the yoke: one side takes the tilt servo, the other side gets the little bushing and 1 pivot screw.",
       "Close the underside with the pan plate."],
@@ -351,16 +357,16 @@ SIGNAL_MAP = [
 # on the uncropped 4:3 render.
 MEET_FRONT = [
     (38.5, 13, "The head — camera in the middle, glowing eyes beside it. It nods and turns to look at you."),
-    (62, 39, "The teal lid. It lifts off for service, and it screws down dead last."),
-    (28, 67, "Face panel — two distance eyes low, glowing status bars above."),
+    (55, 44, "The teal lid. It lifts off for service, and it screws down dead last."),
+    (27, 66, "Face panel — two distance eyes low, glowing status bars above."),
     (23, 83, "Soft bumper — a squishy ring that feels walls and tells the robot to stop."),
     (83, 72, "Four wheels with grippy printed tires. The back pair are the motor wheels."),
 ]
 MEET_REAR = [
-    (29, 30, "Cooling vents — warm air from the computer leaves here."),
-    (54, 37, "The BIG RED BUTTON locks in here. Push = everything stops."),
-    (27.5, 55.5, "The charging plug and the mic mute switch bolt into these two holes."),
-    (69, 78, "Motor wheels. Each one has its own motor and its own speed sensor."),
+    (28, 32, "Cooling vents — warm air from the computer leaves here."),
+    (51.5, 39, "The BIG RED BUTTON. Push = everything stops; twist to release."),
+    (27, 57, "The charging plug and the mic mute switch bolt into these two holes."),
+    (70, 77, "Motor wheels. Each one has its own motor and its own speed sensor."),
 ]
 
 
@@ -435,7 +441,7 @@ td b { font-weight: 600; }
 .stepbody { display: flex; gap: .28in; flex: 1; min-height: 0; }
 .stepbody .imgwrap { width: 6.15in; height: 4.85in; border-radius: .14in; overflow: hidden;
   position: relative; flex: none; border: 1px solid var(--line-soft); }
-.stepbody .imgwrap img { width: 118%; height: 118%; object-fit: cover; object-position: 50% 55%; margin: -4.5% 0 0 -9%; }
+.stepbody .imgwrap img.main { width: 107%; height: 107%; object-fit: cover; object-position: 50% 55%; margin: -2.5% 0 0 -3.5%; }
 .frontchip { position: absolute; left: .12in; bottom: .12in; background: rgba(34,35,31,.85); color: #fff;
   font-weight: 700; font-size: 10.5px; letter-spacing: .04em; padding: .04in .1in; border-radius: .1in; }
 .instr { flex: 1; display: flex; flex-direction: column; }
@@ -704,14 +710,19 @@ def build_body_pages():
       </div>""",
         chapter=1, mark="ch1")
 
-    # Plate table
+    # Plate table: aggregate instances and use the same friendly part names
+    # as the piece chart and step strips, so a kid can match them.
     rows = ""
     for p in PLATES["plates"]:
-        parts_txt = esc(", ".join(pp["name"].replace("_v2", "").replace("_i", " #")
-                                  .replace("_", " ").replace("fascia", "face panel")
-                                  for pp in p["parts"]))
-        if "printed washer" in parts_txt:
-            parts_txt += " <i>(the robot uses 2 washers — the rest are spares)</i>"
+        plate_counts: dict[str, int] = {}
+        for pp in p["parts"]:
+            base = re.sub(r"_i\d+$", "", pp["name"])
+            plate_counts[base] = plate_counts.get(base, 0) + 1
+        parts_txt = esc(", ".join(
+            friendly(base) if n == 1 else f"{friendly(base)} ×{n}"
+            for base, n in plate_counts.items()))
+        if "washer" in parts_txt:
+            parts_txt += " <i>(the robot uses 2 — the rest are spares)</i>"
         rows += (
             f"<tr><td style='text-align:center'><b>{p['plate_number']}</b></td>"
             f"<td><span style='display:inline-block;width:.13in;height:.13in;border-radius:50%;"
@@ -792,6 +803,16 @@ def build_body_pages():
     for i, (img_name, title, screws, items, subs, check) in enumerate(STEPS, start=1):
         label = FRONT_LABEL.get(img_name, "&#8601; FRONT")
         front_chip = f'<div class="frontchip">{label}</div>' if label else ""
+        inset = ""
+        if img_name in INSETS:
+            inset_img, inset_caption = INSETS[img_name]
+            inset = (
+                f'<div style="position:absolute; top:.1in; right:.1in; width:2.05in; background:#fff;'
+                f' border:1px solid var(--line); border-radius:.1in; overflow:hidden;'
+                f' box-shadow:0 1px 6px rgba(0,0,0,.2);">'
+                f'<img src="{img_uri(GUIDE_IMG / (inset_img + ".png"))}" style="width:100%; display:block;">'
+                f'<div style="font-size:8.5px; font-weight:700; letter-spacing:.06em; padding:.035in .06in;'
+                f' color:var(--teal-dk); text-transform:uppercase;">{inset_caption}</div></div>')
         cells = strip_cells(img_name, items, screws)
         strip_cls = "strip dense" if len(items) + (1 if screws else 0) >= 6 else "strip"
         lis = "".join(f"<li>{esc(s)}</li>" for s in subs)
@@ -799,8 +820,8 @@ def build_body_pages():
           <div class="stephead"><div class="stepnum">{i}</div><h2>{esc(title)}</h2>{progress(i)}</div>
           <div class="{strip_cls}"><span class="gather">GATHER</span>{cells}</div>
           <div class="stepbody">
-            <div class="imgwrap"><img src="{img_uri(GUIDE_IMG / (img_name + '.png'))}">
-              {front_chip}</div>
+            <div class="imgwrap"><img class="main" src="{img_uri(GUIDE_IMG / (img_name + '.png'))}">
+              {front_chip}{inset}</div>
             <div class="instr"><ol>{lis}</ol>
               <div class="check"><span class="box"></span><div><b>CHECK</b>{esc(check)}</div></div></div>
           </div>""",
@@ -816,13 +837,13 @@ def build_body_pages():
         <div>
           <table style="font-size:10.5px;">
             <tr><th>Part</th><th>Home</th><th>Faces</th></tr>
-            <tr><td><b>MDDS10 motor board</b></td><td>tower posts, front-left</td><td>terminals LEFT</td></tr>
+            <tr><td><b>MDDS10 motor board</b></td><td>tower posts, front-center</td><td>terminals RIGHT</td></tr>
             <tr><td><b>Raspberry Pi 5</b></td><td>tower top shelf</td><td>USB ports BACK</td></tr>
-            <tr><td><b>Pico 2</b></td><td>floor, right of tower</td><td>USB RIGHT, pins UP</td></tr>
+            <tr><td><b>Pico 2</b></td><td>floor, right of tower</td><td>USB BACK, pins UP</td></tr>
             <tr><td><b>Battery</b></td><td>middle-back floor</td><td>wires BACK</td></tr>
             <tr><td><b>Relay</b></td><td>floor pocket, left</td><td>terminals UP</td></tr>
-            <tr><td><b>Fuse block</b></td><td>deck, right half</td><td>wire exit RIGHT edge</td></tr>
-            <tr><td><b>Regulators (5 V + 6 V)</b></td><td>hang UNDER deck, right end</td><td>6 V wire exit LEFT</td></tr>
+            <tr><td><b>Fuse block</b></td><td>deck, left half</td><td>wire exit LEFT edge</td></tr>
+            <tr><td><b>Regulators (5 V + 6 V)</b></td><td>hang UNDER deck, back half</td><td>6 V wire exit FRONT</td></tr>
             <tr><td><b>Big red button</b></td><td>through the lid</td><td>UP (slap it!)</td></tr>
             <tr><td><b>Mic array</b></td><td>under the lid slots</td><td>UP</td></tr>
             <tr><td><b>Speakers</b></td><td>side shelves</td><td>grilles OUT</td></tr>
