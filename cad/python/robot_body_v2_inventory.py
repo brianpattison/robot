@@ -278,7 +278,7 @@ PRINTED_PARTS = [
        "AND the lid itself is the IDEC clamp panel (4 mm within the 0.8-6 range; "
        "mount-panel part merged away)"),
     PP("bumper_half", 2, "TPU", "flat, open-bottom U", "compliance + material change + bed length"),
-    PP("rear_panel", 1, "PETG", "flat", "connector service and independent reprintability"),
+    PP("rear_panel", 1, "PETG-dark", "flat", "connector service and independent reprintability"),
     PP("fascia", 1, "PETG-dark", "flat",
        "sensor service + color break; front ToF and status NeoPixel pockets integrated (merge executed)"),
     PP("deck", 1, "PETG", "flat, ribs up", "removable power/service deck; harness ribs + fuse saddles integrated"),
@@ -292,7 +292,7 @@ PRINTED_PARTS = [
        "wear part; bore is the bearing surface (bushing merged into the wheel; worn wheel = reprint)"),
     PP("front_pod", 2, "PETG", "inboard face down (axle rises vertical)",
        "orientation conflict with the flat-printed tray: the stub axle must print axis-vertical"),
-    PP("printed_washer_set", 1, "PETG", "flat",
+    PP("printed_washer_set", 6, "PETG", "flat",
        "plan rule 4: printed washers under screw heads on TPU/soft parts and the axle-end retainers"),
     PP("motor_clamp_cap", 2, "PETG", "flat", "motor service without tray removal"),
     PP("speaker_clamp_bar", 2, "PETG", "flat", "speaker capture in shell side pockets"),
@@ -351,6 +351,7 @@ JOINTS = [
     J("speaker_clamps", ((-52, 100), (26, 100), (-52, -100), (26, -100)), modeled=True),
     J("tof_clamps", ((-32, 100), (-32, -100)), modeled=True),
     J("pico_clamp", ((3, 43), (3, 84)), modeled=True),
+    J("head_tilt_pivot", ((-10, 38),), modeled=True),
 ]
 
 
@@ -385,8 +386,13 @@ def fastener_tally():
     return screws, screws  # one insert per screw in this system
 
 
+# Fastener accessories print in multiples but count once against the D028
+# assembly-part budget, exactly like the screws and inserts they serve.
+FASTENER_ACCESSORY_PARTS = {"printed_washer_set"}
+
+
 def budget_report():
-    draft = sum(p.qty for p in PRINTED_PARTS)
+    draft = sum(1 if p.name in FASTENER_ACCESSORY_PARTS else p.qty for p in PRINTED_PARTS)
     owed = sum(p.qty for p in PRINTED_PARTS if p.merge_candidate)
     return draft, draft - owed, PART_BUDGET
 

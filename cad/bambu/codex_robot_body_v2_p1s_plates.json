@@ -102,7 +102,7 @@
         "material": "PETG",
         "role": "structural chassis parts"
       },
-      "part_count": 16,
+      "part_count": 22,
       "parts": [
         {
           "name": "deck_v2",
@@ -133,29 +133,15 @@
           "release_status": "prototype: coupons + purchased-part fit gates apply"
         },
         {
-          "name": "rear_panel_v2",
+          "name": "battery_clamp_v2",
           "center_mm": [
-            132.5,
-            164.7
+            115.8,
+            162.5
           ],
           "rotated_z_degrees": 0,
           "span_xy_mm": [
-            49.4,
-            103.4
-          ],
-          "brim_mm": 0.0,
-          "release_status": "prototype: coupons + purchased-part fit gates apply"
-        },
-        {
-          "name": "battery_clamp_v2",
-          "center_mm": [
-            59.5,
-            228.4
-          ],
-          "rotated_z_degrees": 90,
-          "span_xy_mm": [
-            99.0,
-            16.0
+            16.0,
+            99.0
           ],
           "brim_mm": 0.0,
           "release_status": "prototype: coupons + purchased-part fit gates apply"
@@ -191,8 +177,8 @@
         {
           "name": "yoke_v2",
           "center_mm": [
-            202.2,
-            211.5
+            51.0,
+            169.5
           ],
           "rotated_z_degrees": 90,
           "span_xy_mm": [
@@ -203,10 +189,24 @@
           "release_status": "prototype: coupons + purchased-part fit gates apply"
         },
         {
+          "name": "mic_cradle_v2",
+          "center_mm": [
+            165.8,
+            151.0
+          ],
+          "rotated_z_degrees": 0,
+          "span_xy_mm": [
+            76.0,
+            76.0
+          ],
+          "brim_mm": 0.0,
+          "release_status": "prototype: coupons + purchased-part fit gates apply"
+        },
+        {
           "name": "head_pan_plate_v2",
           "center_mm": [
             47.0,
-            169.0
+            216.0
           ],
           "rotated_z_degrees": 90,
           "span_xy_mm": [
@@ -220,7 +220,7 @@
           "name": "pico_clamp_v2",
           "center_mm": [
             93.0,
-            172.5
+            219.5
           ],
           "rotated_z_degrees": 0,
           "span_xy_mm": [
@@ -231,15 +231,29 @@
           "release_status": "prototype: coupons + purchased-part fit gates apply"
         },
         {
-          "name": "front_pod_left_v2_i1",
+          "name": "front_pod_left_v2",
           "center_mm": [
-            182.7,
-            133.0
+            147.8,
+            214.5
           ],
-          "rotated_z_degrees": 90,
+          "rotated_z_degrees": 0,
           "span_xy_mm": [
-            43.0,
-            40.0
+            40.0,
+            43.0
+          ],
+          "brim_mm": 0.0,
+          "release_status": "prototype: coupons + purchased-part fit gates apply"
+        },
+        {
+          "name": "front_pod_right_v2",
+          "center_mm": [
+            191.8,
+            214.5
+          ],
+          "rotated_z_degrees": 0,
+          "span_xy_mm": [
+            40.0,
+            43.0
           ],
           "brim_mm": 0.0,
           "release_status": "prototype: coupons + purchased-part fit gates apply"
@@ -247,8 +261,8 @@
         {
           "name": "motor_cap_v2_i1",
           "center_mm": [
-            174.2,
-            171.0
+            220.8,
+            127.0
           ],
           "rotated_z_degrees": 90,
           "span_xy_mm": [
@@ -261,8 +275,8 @@
         {
           "name": "motor_cap_v2_i2",
           "center_mm": [
-            204.2,
-            171.0
+            220.8,
+            159.0
           ],
           "rotated_z_degrees": 90,
           "span_xy_mm": [
@@ -275,8 +289,8 @@
         {
           "name": "tof_clamp_v2_i1",
           "center_mm": [
-            123.0,
-            241.0
+            112.0,
+            220.0
           ],
           "rotated_z_degrees": 0,
           "span_xy_mm": [
@@ -289,8 +303,8 @@
         {
           "name": "tof_clamp_v2_i2",
           "center_mm": [
-            147.0,
-            224.4
+            112.0,
+            232.0
           ],
           "rotated_z_degrees": 0,
           "span_xy_mm": [
@@ -303,8 +317,8 @@
         {
           "name": "tilt_bushing_v2",
           "center_mm": [
-            117.6,
-            225.0
+            212.4,
+            181.6
           ],
           "rotated_z_degrees": 0,
           "span_xy_mm": [
@@ -315,10 +329,80 @@
           "release_status": "prototype: coupons + purchased-part fit gates apply"
         },
         {
-          "name": "printed_washer_v2",
+          "name": "printed_washer_v2_i1",
           "center_mm": [
-            141.0,
-            241.0
+            225.0,
+            181.0
+          ],
+          "rotated_z_degrees": 0,
+          "span_xy_mm": [
+            8.0,
+            8.0
+          ],
+          "brim_mm": 0.0,
+          "release_status": "prototype: coupons + purchased-part fit gates apply"
+        },
+        {
+          "name": "printed_washer_v2_i2",
+          "center_mm": [
+            225.0,
+            193.0
+          ],
+          "rotated_z_degrees": 0,
+          "span_xy_mm": [
+            8.0,
+            8.0
+          ],
+          "brim_mm": 0.0,
+          "release_status": "prototype: coupons + purchased-part fit gates apply"
+        },
+        {
+          "name": "printed_washer_v2_i3",
+          "center_mm": [
+            237.0,
+            194.0
+          ],
+          "rotated_z_degrees": 0,
+          "span_xy_mm": [
+            8.0,
+            8.0
+          ],
+          "brim_mm": 0.0,
+          "release_status": "prototype: coupons + purchased-part fit gates apply"
+        },
+        {
+          "name": "printed_washer_v2_i4",
+          "center_mm": [
+            219.8,
+            205.0
+          ],
+          "rotated_z_degrees": 0,
+          "span_xy_mm": [
+            8.0,
+            8.0
+          ],
+          "brim_mm": 0.0,
+          "release_status": "prototype: coupons + purchased-part fit gates apply"
+        },
+        {
+          "name": "printed_washer_v2_i5",
+          "center_mm": [
+            231.8,
+            206.0
+          ],
+          "rotated_z_degrees": 0,
+          "span_xy_mm": [
+            8.0,
+            8.0
+          ],
+          "brim_mm": 0.0,
+          "release_status": "prototype: coupons + purchased-part fit gates apply"
+        },
+        {
+          "name": "printed_washer_v2_i6",
+          "center_mm": [
+            219.8,
+            217.0
           ],
           "rotated_z_degrees": 0,
           "span_xy_mm": [
@@ -341,69 +425,13 @@
         "material": "PETG",
         "role": "structural chassis parts"
       },
-      "part_count": 8,
+      "part_count": 4,
       "parts": [
-        {
-          "name": "mic_cradle_v2",
-          "center_mm": [
-            48.0,
-            48.0
-          ],
-          "rotated_z_degrees": 0,
-          "span_xy_mm": [
-            76.0,
-            76.0
-          ],
-          "brim_mm": 0.0,
-          "release_status": "prototype: coupons + purchased-part fit gates apply"
-        },
-        {
-          "name": "front_pod_left_v2_i2",
-          "center_mm": [
-            111.5,
-            30.0
-          ],
-          "rotated_z_degrees": 90,
-          "span_xy_mm": [
-            43.0,
-            40.0
-          ],
-          "brim_mm": 0.0,
-          "release_status": "prototype: coupons + purchased-part fit gates apply"
-        },
-        {
-          "name": "front_pod_right_v2_i1",
-          "center_mm": [
-            158.5,
-            30.0
-          ],
-          "rotated_z_degrees": 90,
-          "span_xy_mm": [
-            43.0,
-            40.0
-          ],
-          "brim_mm": 0.0,
-          "release_status": "prototype: coupons + purchased-part fit gates apply"
-        },
-        {
-          "name": "front_pod_right_v2_i2",
-          "center_mm": [
-            205.5,
-            30.0
-          ],
-          "rotated_z_degrees": 90,
-          "span_xy_mm": [
-            43.0,
-            40.0
-          ],
-          "brim_mm": 0.0,
-          "release_status": "prototype: coupons + purchased-part fit gates apply"
-        },
         {
           "name": "front_wheel_v2_i1",
           "center_mm": [
-            111.0,
-            75.0
+            31.0,
+            31.0
           ],
           "rotated_z_degrees": 0,
           "span_xy_mm": [
@@ -416,8 +444,8 @@
         {
           "name": "front_wheel_v2_i2",
           "center_mm": [
-            31.0,
-            111.0
+            77.0,
+            31.0
           ],
           "rotated_z_degrees": 0,
           "span_xy_mm": [
@@ -430,8 +458,8 @@
         {
           "name": "rear_wheel_v2_i1",
           "center_mm": [
-            157.0,
-            75.0
+            123.0,
+            31.0
           ],
           "rotated_z_degrees": 0,
           "span_xy_mm": [
@@ -444,8 +472,8 @@
         {
           "name": "rear_wheel_v2_i2",
           "center_mm": [
-            203.0,
-            75.0
+            169.0,
+            31.0
           ],
           "rotated_z_degrees": 0,
           "span_xy_mm": [
@@ -583,7 +611,7 @@
         "material": "PETG",
         "role": "dark cosmetic panels"
       },
-      "part_count": 2,
+      "part_count": 3,
       "parts": [
         {
           "name": "head_faceplate_v2",
@@ -600,9 +628,23 @@
           "release_status": "prototype: coupons + purchased-part fit gates apply"
         },
         {
+          "name": "rear_panel_v2",
+          "center_mm": [
+            34.7,
+            185.7
+          ],
+          "rotated_z_degrees": 0,
+          "span_xy_mm": [
+            49.4,
+            103.4
+          ],
+          "brim_mm": 0.0,
+          "release_status": "prototype: coupons + purchased-part fit gates apply"
+        },
+        {
           "name": "fascia_v2",
           "center_mm": [
-            29.7,
+            83.1,
             171.7
           ],
           "rotated_z_degrees": 0,
@@ -660,7 +702,7 @@
     },
     {
       "plate_number": 9,
-      "name": "Charcoal TPU 95A - Flexible 1 of 5",
+      "name": "Charcoal TPU 95A - Flexible 1 of 3",
       "filament_group": "tpu_95a:charcoal",
       "material": "TPU 95A",
       "color_profile": "charcoal",
@@ -672,7 +714,7 @@
       "part_count": 1,
       "parts": [
         {
-          "name": "bumper_front_v2_i1",
+          "name": "bumper_front_v2",
           "center_mm": [
             128.0,
             128.0
@@ -689,7 +731,7 @@
     },
     {
       "plate_number": 10,
-      "name": "Charcoal TPU 95A - Flexible 2 of 5",
+      "name": "Charcoal TPU 95A - Flexible 2 of 3",
       "filament_group": "tpu_95a:charcoal",
       "material": "TPU 95A",
       "color_profile": "charcoal",
@@ -701,7 +743,7 @@
       "part_count": 1,
       "parts": [
         {
-          "name": "bumper_front_v2_i2",
+          "name": "bumper_rear_v2",
           "center_mm": [
             128.0,
             128.0
@@ -718,65 +760,7 @@
     },
     {
       "plate_number": 11,
-      "name": "Charcoal TPU 95A - Flexible 3 of 5",
-      "filament_group": "tpu_95a:charcoal",
-      "material": "TPU 95A",
-      "color_profile": "charcoal",
-      "color_hex": "#15171B",
-      "recommended_process": {
-        "material": "TPU 95A",
-        "role": "tires, bumper halves, battery pads"
-      },
-      "part_count": 1,
-      "parts": [
-        {
-          "name": "bumper_rear_v2_i1",
-          "center_mm": [
-            128.0,
-            128.0
-          ],
-          "rotated_z_degrees": 0,
-          "span_xy_mm": [
-            128.0,
-            238.0
-          ],
-          "brim_mm": 0.0,
-          "release_status": "prototype: coupons + purchased-part fit gates apply"
-        }
-      ]
-    },
-    {
-      "plate_number": 12,
-      "name": "Charcoal TPU 95A - Flexible 4 of 5",
-      "filament_group": "tpu_95a:charcoal",
-      "material": "TPU 95A",
-      "color_profile": "charcoal",
-      "color_hex": "#15171B",
-      "recommended_process": {
-        "material": "TPU 95A",
-        "role": "tires, bumper halves, battery pads"
-      },
-      "part_count": 1,
-      "parts": [
-        {
-          "name": "bumper_rear_v2_i2",
-          "center_mm": [
-            128.0,
-            128.0
-          ],
-          "rotated_z_degrees": 0,
-          "span_xy_mm": [
-            128.0,
-            238.0
-          ],
-          "brim_mm": 0.0,
-          "release_status": "prototype: coupons + purchased-part fit gates apply"
-        }
-      ]
-    },
-    {
-      "plate_number": 13,
-      "name": "Charcoal TPU 95A - Flexible 5 of 5",
+      "name": "Charcoal TPU 95A - Flexible 3 of 3",
       "filament_group": "tpu_95a:charcoal",
       "material": "TPU 95A",
       "color_profile": "charcoal",

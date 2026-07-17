@@ -55,9 +55,15 @@ PROXIES = {
     "px_tof_R": ("box", (25, 5, 17), (-20, -100, 95), (0.2, 0.35, 0.7, 1)),
     "px_servo": ("box", (13, 29, 30), (-30, 0, 200), (0.45, 0.47, 0.5, 1)),
     "px_camera": ("box", (4, 25, 24), (-58, 0, 254), (0.15, 0.45, 0.2, 1)),
+    "px_switch": ("box", (18.5, 6.5, 6.5), (0, -99, 45), (0.2, 0.22, 0.25, 1)),
     "px_insert": ("cyl_z", 2.3, 5.7, (0, 0, 60), (0.72, 0.55, 0.2, 1)),
-    "px_screw": ("cyl_z", 2.8, 8.0, (0, 0, 40), (0.55, 0.57, 0.6, 1)),
+    "px_insert_rib": ("cyl_z", 2.65, 1.4, (0, 0, 61.8), (0.6, 0.44, 0.14, 1)),
+    "px_insert_rib2": ("cyl_z", 2.65, 1.4, (0, 0, 58.6), (0.6, 0.44, 0.14, 1)),
+    "px_screw": ("cyl_z", 1.5, 8.0, (0, 0, 40), (0.55, 0.57, 0.6, 1)),
+    "px_screw_head": ("cyl_z", 2.85, 3.0, (0, 0, 45.5), (0.35, 0.37, 0.4, 1)),
 }
+FASTENER_GROUPS = {"px_insert": ["px_insert", "px_insert_rib", "px_insert_rib2"],
+                   "px_screw": ["px_screw", "px_screw_head"]}
 
 # (title_key, printed parts added, proxies added, camera)
 STEPS = [
@@ -67,25 +73,34 @@ STEPS = [
     ("wheels_bench", ["rear_wheel_v2", "rear_wheel_v2_m", "front_wheel_v2", "front_wheel_v2_m",
                       "tire_v2", "tire_v2_1", "tire_v2_2", "tire_v2_3"], [], "bench"),
     ("front_pods", ["front_pod_left_v2", "front_pod_right_v2"], [], "front"),
+    ("wheels_on", ["rear_wheel_v2", "rear_wheel_v2_m", "front_wheel_v2", "front_wheel_v2_m",
+                   "tire_v2", "tire_v2_1", "tire_v2_2", "tire_v2_3"], [], "rear"),
     ("tower", ["controller_tower_v2"], ["px_mdds10"], "body"),
     ("pi", [], ["px_pi"], "body"),
     ("battery", ["battery_pad_frame_v2", "battery_clamp_v2"], ["px_battery"], "body"),
-    ("pico", ["pico_clamp_v2"], ["px_pico"], "body"),
+    ("pico", ["pico_clamp_v2"], ["px_pico"], "pico"),
     ("relay", [], ["px_relay"], "body"),
     ("deck", ["deck_v2"], ["px_reg1", "px_reg2", "px_fuse"], "body"),
-    ("speakers", ["speaker_clamp_v2", "speaker_clamp_v2_m", "tof_clamp_v2", "tof_clamp_v2_m"],
-     ["px_speaker_L", "px_speaker_R", "px_tof_L", "px_tof_R"], "body"),
     ("shell", ["shell_v2"], [], "body"),
     ("bumpers", ["bumper_front_v2", "bumper_rear_v2"], [], "body"),
-    ("panels", ["fascia_v2", "rear_panel_v2"], [], "rear"),
+    ("panels", ["fascia_v2", "rear_panel_v2"], [], "body"),
+    ("speakers", ["speaker_clamp_v2", "speaker_clamp_v2_m", "tof_clamp_v2", "tof_clamp_v2_m"],
+     ["px_speaker_L", "px_speaker_R", "px_tof_L", "px_tof_R"], "body"),
     ("lid", ["lid_v2", "mic_cradle_v2"], ["px_estop_base", "px_estop_stem", "px_estop_cap", "px_mic"], "body"),
-    ("neck", ["neck_v2", "bayonet_collar_v2"], ["px_servo"], "head"),
+    ("neck", ["neck_v2", "bayonet_collar_v2"], ["px_servo"], "neckcam"),
     ("head", ["head_shell_v2", "yoke_v2", "head_pan_plate_v2"], ["px_camera"], "head"),
     ("face", ["head_faceplate_v2", "eye_diffuser_bar_v2"], [], "head"),
 ]
 
+POP_DIR = {
+    "fascia_v2": (-34, 0, 0), "rear_panel_v2": (40, 0, 0),
+    "bayonet_collar_v2": (0, 0, -42), "px_servo": (0, 0, -42),
+    "px_pico": (0, 0, 64), "pico_clamp_v2": (0, 0, 64),
+}
 CAMS = {
     "body": ((-430, -380, 330), (0, 0, 110)),
+    "pico": ((-60, -470, 340), (5, 40, 80)),
+    "neckcam": ((-170, -150, 440), (-26, 0, 195)),
     "rear": ((380, 330, 300), (20, 20, 90)),
     "front": ((-420, -300, 240), (-40, 0, 80)),
     "bench": ((-260, -240, 240), (0, 0, 60)),
@@ -161,16 +176,21 @@ def thumbs(objects):
     if floor:
         floor.hide_render = True
     printed = [n for n in objects if not n.startswith("px_") and not n.endswith(("_m", "_1", "_2", "_3"))]
-    for name in printed + [n for n in PROXIES if n not in ("px_insert", "px_screw")] + ["px_insert", "px_screw"]:
-        obj = objects[name]
-        obj.hide_render = False
-        bb = [obj.matrix_world @ Vector(c) for c in obj.bound_box]
-        center = sum(bb, Vector()) / 8
-        radius = max((p - center).length for p in bb)
+    skip = {"px_insert_rib", "px_insert_rib2", "px_screw_head"}
+    for name in printed + [n for n in PROXIES if n not in skip]:
+        group = FASTENER_GROUPS.get(name, [name])
+        for g in group:
+            objects[g].hide_render = False
+        pts = []
+        for g in group:
+            pts += [objects[g].matrix_world @ Vector(c) for c in objects[g].bound_box]
+        center = sum(pts, Vector()) / len(pts)
+        radius = max((p - center).length for p in pts)
         direction = Vector((-1, -0.85, 0.75)).normalized()
         camera_to(center + direction * max(radius * 3.2, 60), center, lens=70)
         render(OUT / f"thumb_{name}.png", res=(560, 560))
-        obj.hide_render = True
+        for g in group:
+            objects[g].hide_render = True
     if floor:
         floor.hide_render = False
 
@@ -185,12 +205,17 @@ def steps(objects):
         if not bench:
             for obj in placed:
                 obj.hide_render = False
+        pops = {}
         for obj in new:
             obj.hide_render = False
             if key == "inserts":
                 obj.hide_render = True     # inserts page uses markers below
             else:
-                obj.location.z += POP
+                d = POP_DIR.get(obj.name.rstrip("_m"), (0, 0, POP))
+                pops[obj.name] = d
+                obj.location.x += d[0]
+                obj.location.y += d[1]
+                obj.location.z += d[2]
         markers = []
         if key == "inserts":
             import json
@@ -205,16 +230,17 @@ def steps(objects):
         render(OUT / f"step_{idx:02d}_{key}.png")
         for obj in new:
             if key != "inserts":
-                obj.location.z -= POP
+                d = pops.get(obj.name, (0, 0, POP))
+                obj.location.x -= d[0]
+                obj.location.y -= d[1]
+                obj.location.z -= d[2]
         for m in markers:
             bpy.data.objects.remove(m, do_unlink=True)
-        if not bench:
-            placed.extend(new)
-        else:
+        if bench:
             for obj in new:
-                obj.hide_render = True
-        if key == "wheels_bench":
-            placed.extend(new)   # they mount with the pods/motors steps visually
+                obj.hide_render = True   # bench parts wait for the wheels_on step
+        else:
+            placed.extend(new)
 
 
 def main():
