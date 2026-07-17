@@ -669,6 +669,7 @@ def render_plate_contact_sheet(
     output: Path,
     layout: list[dict],
     contact_sheet_path: Path = PLATE_CONTACT_SHEET_PATH,
+    title: str = "Codex Robot Body v1 - P1S Plate Layout",
 ) -> None:
     columns = 5
     tile_width = 312
@@ -689,14 +690,17 @@ def render_plate_contact_sheet(
         label_font = ImageFont.truetype(
             "/System/Library/Fonts/Supplemental/Arial.ttf", 16
         )
+        subtitle_font = ImageFont.truetype(
+            "/System/Library/Fonts/Supplemental/Arial.ttf", 24
+        )
         number_font = ImageFont.truetype(
             "/System/Library/Fonts/Supplemental/Arial Bold.ttf", 17
         )
     except OSError:
-        title_font = label_font = number_font = ImageFont.load_default()
+        title_font = label_font = subtitle_font = number_font = ImageFont.load_default()
     draw.text(
         (margin, 20),
-        "Codex Robot Body v1 - P1S Plate Layout",
+        title,
         fill="#20272B",
         font=title_font,
     )
@@ -704,7 +708,7 @@ def render_plate_contact_sheet(
         (margin, 58),
         f"{sum(len(plate['placements']) for plate in layout)} parts / {len(layout)} plates / P1S 0.4 mm / Textured PEI / one material and color per plate",
         fill="#526066",
-        font=label_font,
+        font=subtitle_font,
     )
 
     with zipfile.ZipFile(output) as archive:

@@ -60,6 +60,9 @@ GROUP_BY_MATERIAL = {
     "TPU": "tpu_95a:charcoal",
 }
 SHELL_GROUP_DESIGNS = {"shell_v2", "head_shell_v2", "neck_v2", "bayonet_collar_v2"}
+# Designs whose left/right twin is a separate solid: each prints once, not
+# at the registry quantity (which already counts both sides).
+PER_SIDE_DESIGNS = {"front_pod_left_v2", "front_pod_right_v2", "bumper_front_v2", "bumper_rear_v2"}
 
 
 def build_instance_manifest() -> dict:
@@ -73,11 +76,12 @@ def build_instance_manifest() -> dict:
     for design, entry in sorted(v2["parts"].items()):
         group = ("petg_shell:cream" if design in SHELL_GROUP_DESIGNS
                  else GROUP_BY_MATERIAL[entry["material"]])
+        qty = 1 if design in PER_SIDE_DESIGNS else int(entry["qty"])
         span_x, span_y, _ = entry["print_span_mm"]
         brim = 4.0 if max(span_x, span_y) >= 150.0 else 0.0
         src = V2_PRINT_DIR / f"{design}_print.stl"
-        for i in range(1, int(entry["qty"]) + 1):
-            name = design if entry["qty"] == 1 else f"{design}_i{i}"
+        for i in range(1, qty + 1):
+            name = design if qty == 1 else f"{design}_i{i}"
             stl = f"{name}.stl"
             shutil.copyfile(src, STAGING / stl)
             parts[name] = {
@@ -163,7 +167,8 @@ def main() -> None:
         gb.roundtrip_with_bambu(patched, OUTPUT, temp_path)
         gb.write_plate_manifest(OUTPUT, manifest, layout)
         gb.validate_output(OUTPUT, manifest, layout)
-        gb.render_plate_contact_sheet(OUTPUT, layout, contact_sheet_path=CONTACT_SHEET)
+        gb.render_plate_contact_sheet(OUTPUT, layout, contact_sheet_path=CONTACT_SHEET,
+                                  title="Codex Robot Body v2 - P1S Plate Layout")
     finally:
         shutil.rmtree(temp_path, ignore_errors=True)
     print(
