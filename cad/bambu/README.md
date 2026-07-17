@@ -1,5 +1,29 @@
 # Bambu Studio P1S project
 
+## v2 prototype project
+
+[`codex_robot_body_v2_p1s.3mf`](codex_robot_body_v2_p1s.3mf) is the tracked
+printed-only v2 geometry-review project. It is a **prototype artifact, not a
+powered-motion release**. Its plate manifest keeps the physical release gates
+explicit, and the builder's book must use the same label until the complete
+head mechanism, harness schedule, software/firmware release, fuse selection,
+and commissioning evidence exist.
+
+Regenerate the v2 model, validator, print exports, and Bambu project with:
+
+```bash
+.venv-cad/bin/python cad/python/robot_body_v2.py
+.venv-cad/bin/python cad/python/validate_robot_body_v2.py --gate
+.venv-cad/bin/python cad/python/robot_body_v2_print.py
+.venv-cad/bin/python cad/bambu/generate_bambu_project_v2.py
+```
+
+The `--gate` validator is necessary but never substitutes for the named
+physical tests. Print coupons before large parts; keep the battery and motor
+branch disconnected while following prototype-only assembly pages.
+
+## v1 historical project
+
 The tracked [`codex_robot_body_v1_p1s.3mf`](codex_robot_body_v1_p1s.3mf)
 is the canonical Bambu Studio layout project for a Bambu Lab P1S with the
 standard 0.4 mm nozzle and a Textured PEI Plate.

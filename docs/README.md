@@ -36,11 +36,13 @@ Read these in order when getting oriented:
    Reproducible 101-part, 26-plate P1S 0.4 mm layout split into 14 material-profile/color groups, with an exact plate manifest and visual overview.
 
 12. [The Builder's Book — v2 Assembly Guide](../output/pdf/codex_robot_body_v2_assembly_guide.pdf)
-    The current 37-page retail-grade kit manual for the printed-only v2 body: computed
+    The current 37-page **prototype assembly preview — not for powered motion** for the printed-only v2 body: computed
     cover TOC, annotated meet-the-robot spread, shopping and printing chapters, piece
     inventory, twenty picture-first steps with progress bars and CHECK tests, wiring
-    maps, and first safety checks. Child-followable by design, with no "grown-up"
-    callouts (D029). Regenerate with `docs/generate_assembly_guide_v2.py`.
+    maps, and release-gap callouts. Child-followable by design, with no "grown-up"
+    callouts (D029), but not yet a standalone retail build manual: head mechanics,
+    harness details, software/firmware, fuse release, and commissioning remain open.
+    Regenerate with `docs/generate_assembly_guide_v2.py`.
     The 2026-07-17 review audit behind the current render/text conventions
     (insertion arrows, insert markers, insets, mirrored-direction fixes, the tire
     port, and the goalpost eye bar) is in
