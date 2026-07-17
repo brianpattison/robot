@@ -334,11 +334,13 @@ head shell parts already fit the bed.
 
 ### Print-plate simplification
 
-Part-count reduction alone should take the 26-plate project down to roughly
-10-14 plates. Consider printing the first article in a single PETG color
-plus TPU (two material groups) to cut plate count further and save the
-cream/teal/charcoal scheme for the second print; the plate manifest already
-supports material-group regeneration.
+The implemented D034 pipeline now produces 45 printed pieces (40 functional,
+four spare washers, one optional cosmetic skin) on 13 plates in seven exact
+material/color groups. It derives every group from registry fields rather than
+material-name special cases. Current shell/head gates are open, so those two
+parts automatically join white PETG; direct panels use charcoal PLA, the
+optional skin uses teal PLA, the diffusers use translucent-lime PLA, functional
+PETG is white/black/red, and the three TPU plate groups remain charcoal.
 
 ## What Stays Purchased (Unchanged Policy)
 
@@ -463,7 +465,7 @@ and then thrown that detailing away. Revised order:
    gained solid-ownership semantics (a solid may fill its own registered
    plate envelopes). Gate mode passes with zero warnings at ~2.92 kg,
    CG X=10. Update (fifth slice): the v2 coupon program is
-   live (`robot_body_v2_coupons.py`, 11 coupons: insert fit, the D026
+   live (`robot_body_v2_coupons.py`, originally 11 coupons: insert fit, the D026
    standard joint as a two-piece test, D-bore torque, axle/bushing
    wear, snap and bayonet pairs, the molded switch-pocket interface,
    tire fit, and the Pico capture-clamp pattern) and the print chain

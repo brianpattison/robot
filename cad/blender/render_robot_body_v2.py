@@ -12,6 +12,7 @@ Run from the repository root with Blender 5.x:
 from __future__ import annotations
 
 import math
+import json
 from pathlib import Path
 
 import bpy
@@ -21,27 +22,25 @@ ROOT = Path(__file__).resolve().parents[2]
 EXPORT_DIR = ROOT / "cad" / "exports" / "v2"
 IMAGE_DIR = ROOT / "docs" / "images"
 GROUND_Z = 23.0
+PRINT_MANIFEST = ROOT / "cad" / "exports" / "v2" / "print_ready" / "codex_robot_body_v2_print_manifest.json"
 
 COLORS = {
-    "cream": (0.94, 0.87, 0.76, 1.0),
-    "teal": (0.04, 0.43, 0.52, 1.0),
-    "charcoal": (0.025, 0.03, 0.035, 1.0),
-    "dark": (0.05, 0.055, 0.06, 1.0),
-    "lime": (0.75, 1.0, 0.15, 1.0),
-    "petg_natural": (0.82, 0.80, 0.74, 1.0),
+    "body_primary": (0.94, 0.87, 0.76, 1.0),
+    "top_accent": (0.04, 0.43, 0.52, 1.0),
+    "dark_panel": (0.05, 0.055, 0.06, 1.0),
+    "light_diffuser": (0.75, 1.0, 0.15, 1.0),
+    "structure_light": (0.88, 0.88, 0.84, 1.0),
+    "structure_wear": (0.025, 0.03, 0.035, 1.0),
+    "safety_service": (0.65, 0.025, 0.035, 1.0),
+    "flexible_dark": (0.025, 0.03, 0.035, 1.0),
     "floor": (0.34, 0.16, 0.055, 1.0),
 }
 
-MATERIAL_FOR = {
-    "shell_v2": "cream", "tray_v2": "petg_natural", "lid_v2": "teal",
-    "bumper_front_v2": "charcoal", "bumper_rear_v2": "charcoal",
-    "fascia_v2": "dark", "rear_panel_v2": "dark",
-    "head_shell_v2": "cream", "head_faceplate_v2": "dark",
-    "neck_v2": "cream", "bayonet_collar_v2": "cream",
-    "head_pan_plate_v2": "petg_natural",
-    "tire_v2": "charcoal", "rear_wheel_v2": "petg_natural", "front_wheel_v2": "petg_natural",
-    "eye_diffuser_bar_v2": "lime", "status_diffuser_bar_v2": "lime",
-}
+if PRINT_MANIFEST.exists():
+    _print_parts = json.loads(PRINT_MANIFEST.read_text(encoding="utf-8"))["parts"]
+    MATERIAL_FOR = {name: data["effective_color_slot"] for name, data in _print_parts.items()}
+else:
+    MATERIAL_FOR = {}
 # Parts imported once but present twice, mirrored across Y=0.
 MIRROR_Y = {"rear_wheel_v2", "front_wheel_v2", "motor_cap_v2", "speaker_clamp_v2",
             "tof_clamp_v2"}
@@ -55,7 +54,7 @@ HIDE_ALWAYS = {"printed_washer_v2", "tilt_bushing_v2", "battery_pad_frame_v2"}
 # The chassis view hides the shell, so also hide every clamp bar whose
 # purchased part is not in this printed-only scene — otherwise the bars
 # float in mid-air where the battery/Pico/speakers/ToF boards would be.
-CHASSIS_HIDE = {"shell_v2", "lid_v2", "head_shell_v2", "head_faceplate_v2", "neck_v2",
+CHASSIS_HIDE = {"shell_v2", "lid_v2", "lid_skin_v2", "head_shell_v2", "head_faceplate_v2", "neck_v2",
                 "bayonet_collar_v2", "yoke_v2", "head_pan_plate_v2", "eye_diffuser_bar_v2",
                 "status_diffuser_bar_v2", "mic_cradle_v2", "fascia_v2", "rear_panel_v2",
                 "speaker_clamp_v2", "tof_clamp_v2", "battery_clamp_v2", "pico_clamp_v2"}
@@ -97,7 +96,7 @@ def look_at(obj, target):
 def setup_scene():
     bpy.ops.object.select_all(action="SELECT")
     bpy.ops.object.delete(use_global=False)
-    mats = {k: material(k, v, emission=(1.4 if k == "lime" else 0.0))
+    mats = {k: material(k, v, emission=(1.4 if k == "light_diffuser" else 0.0))
             for k, v in COLORS.items()}
 
     objects = {}
@@ -106,7 +105,7 @@ def setup_scene():
         bpy.ops.wm.stl_import(filepath=str(stl))
         obj = bpy.context.selected_objects[0]
         obj.name = name
-        key = MATERIAL_FOR.get(name, "petg_natural")
+        key = MATERIAL_FOR.get(name, "structure_light")
         obj.data.materials.append(mats[key])
         objects[name] = obj
         if name in HIDE_ALWAYS:

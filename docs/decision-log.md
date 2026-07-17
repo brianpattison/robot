@@ -739,3 +739,37 @@ Rationale:
   an off-host record that complements D030's blackbox mirror.
 - ProxyCommand mode keeps SSH end-to-end encrypted; Cloudflare transports
   the stream but cannot read it.
+
+## D034: Visible PLA Is A Theme Layer Above Fixed PETG Safety Roles
+
+Status: accepted 2026-07-17 (Brian's direction)
+
+The v2 printed inventory separates `material_family`, `mechanical_role`, and
+`color_slot`. Directly replaceable visible parts — fascia, rear panel, head
+faceplate, eye diffuser, status diffuser, and the optional lid skin — target
+PLA. The main shell and head shell are PLA candidates, but each automatically
+falls back independently to white PETG until the exact manufacturer/product
+line passes its insert, impact, thermal, fit, and motion evidence gates.
+
+The tray, structural lid, deck, controller tower, clamps, neck/collar, wheels,
+pods, moving-head structure, and wear pieces remain PETG. Production PETG uses
+only white (`structure_light`), black (`structure_wear`), or red
+(`safety_service`). Tires, bumper halves, and the battery pad remain charcoal
+TPU 95A. Color slots may change without changing any material policy.
+
+The white PETG lid remains a complete standalone E-stop/head/microphone load
+path. Its teal PLA skin is optional, tool-free, cosmetic only, and excluded
+from D028's functional budget. Canonical inventory reporting is 40 installed
+functional pieces, four spare washers, and one optional cosmetic piece. All
+material changes remain prototype-only and indoor-only; no printed polymer is
+claimed as fire protection.
+
+Rationale:
+
+- The user's existing PLA collection can customize the large visible surfaces
+  without turning color preference into a chassis or safety decision.
+- Per-part fallback preserves honest physical qualification: one failed shell
+  spool does not roll back unrelated panels, and a favorite color does not get
+  to negotiate with the E-stop.
+- White/black/red PETG makes structure, wear, and service retainers visually
+  legible while keeping the palette configurable above that fixed layer.

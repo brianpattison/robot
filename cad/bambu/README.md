@@ -19,7 +19,12 @@ Regenerate the v2 model, validator, print exports, and Bambu project with:
 ```
 
 The `--gate` validator is necessary but never substitutes for the named
-physical tests. Print coupons before large parts; keep the battery and motor
+physical tests. The current project contains 45 pieces on 13 plates in seven
+inventory-derived material/color groups: white/black/red PETG, charcoal/teal/
+translucent-lime PLA, and charcoal TPU. Shell and head are white PETG because
+their candidate PLA evidence gates are still open; never hand-edit the 3MF to
+bypass that fallback. Generate and print all 18 coupons before large parts;
+keep the battery and motor
 branch disconnected while following prototype-only assembly pages.
 
 ## v1 historical project

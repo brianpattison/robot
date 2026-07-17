@@ -1,4 +1,4 @@
-"""Calibration coupons for the v2 printed-only body (plan: 17 -> ~8).
+"""Calibration coupons for the v2 printed-only hybrid-material body.
 
 Print and pass these BEFORE any large v2 part, per the repo's build
 order. Each coupon exercises one contract the v2 design leans on:
@@ -25,6 +25,14 @@ order. Each coupon exercises one contract the v2 design leans on:
 9. pcb_clamp        — pocket + pegs + clamp bar sized to the Pico 2 (the
                       cheapest real board) proving the capture-don't-
                       screw pattern before the Pi cradle prints.
+10. pla_insert      — production shell-style PLA boss and insert bore.
+11. pla_shell_wall  — representative shell wall, rollover/opening, and
+                      panel-interface edge.
+12. pla_head_pivot  — production tilt-pivot wall/boss stack in PLA.
+13. pla_snap        — visible-panel, diffuser, and lid-skin snap cycling.
+14. pla_optical     — three optical thickness windows; print once per
+                      candidate translucent PLA family/color.
+15. lid_boundary    — paired white-PETG socket and teal-PLA tab coupons.
 
 Run from the repo root:
     .venv-cad/bin/python cad/python/robot_body_v2_coupons.py
@@ -140,6 +148,60 @@ def pcb_clamp():
     return base + bar
 
 
+def pla_insert_shell():
+    wall = pad(34, 24, inv.WALL)
+    boss = Pos(0, 0, (inv.WALL + 10.0) / 2) * Cylinder(7.0, 10.0 - inv.WALL)
+    boss -= Pos(0, 0, 10.0 - 3.5) * Cylinder(F["insert_bore"] / 2, 7)
+    return wall + boss
+
+
+def pla_shell_wall():
+    # A 3.2 mm shell strip with a rounded opening edge, a 12 mm exterior
+    # rollover sample, and a 1.5 mm flush-panel seat at one end.
+    wall = pad(74, 44, inv.WALL)
+    wall -= Pos(-12, 0, inv.WALL / 2) * Cylinder(12, inv.WALL + 2)
+    rollover = Pos(18, 0, inv.WALL + 5) * Box(20, 30, 10)
+    rollover = fillet(rollover.edges().filter_by(Axis.Y), 4.5)
+    wall += rollover
+    wall -= Pos(33, 0, inv.WALL - 0.7) * Box(12, 28, 1.5)
+    return wall
+
+
+def pla_head_pivot():
+    wall = pad(42, 36, 5.0)
+    boss = Pos(0, 0, 10.0) * Cylinder(8.0, 15.0)
+    boss -= Pos(0, 0, 10.0) * Cylinder(F["insert_bore"] / 2, 17)
+    # Bushing-side shoulder wall representative of the passive pivot.
+    boss += Pos(0, 0, 17.0) * Cylinder(11.0, 3.0)
+    boss -= Pos(0, 0, 17.0) * Cylinder(4.1, 5.0)
+    return wall + boss
+
+
+def pla_optical():
+    # Three labeled-by-position windows: 1.2, 1.6, 2.0 mm. The adjacent
+    # camera aperture lets the builder inspect flare/hot spots, not just
+    # brightness on a workbench.
+    base = pad(84, 28, 2.0)
+    base -= Pos(0, 0, 1.0) * Cylinder(6.5, 4)
+    for x, h in ((-30, 1.2), (0, 1.6), (30, 2.0)):
+        base += Pos(x, 0, 2.0 + h / 2) * Box(14, 10, h)
+    return base
+
+
+def lid_boundary_petg():
+    c = pad(34, 22, 4.0)
+    c -= Pos(0, 0, 3.45) * Box(5.4, 1.55, 1.2)
+    c -= Pos(0, 0, 2.65) * Box(5.4, 2.05, 0.6)
+    return c
+
+
+def lid_boundary_pla():
+    tab = pad(34, 22, 1.2)
+    tab += Pos(0, 0, 0.6 + 0.6) * Box(5.0, 1.25, 1.2)
+    tab += Pos(0, 0, 1.95) * Box(5.0, 1.75, 0.3)
+    return tab
+
+
 COUPONS = {
     "coupon_insert_m3": (insert_m3, "PETG", "insert fit: drive one insert per bore, pick the station that seats flush without melt squeeze-out"),
     "coupon_joint_flange": (joint_standard_flange, "PETG", "with coupon_joint_boss: M3x8 through the counterbored flange; verify 3.2 clamp, full seat, no bottoming"),
@@ -152,6 +214,28 @@ COUPONS = {
     "coupon_switch_pocket": (switch_pocket, "PETG", "seat one D2HW switch; verify the 0.4 rest gap / 2.0 stroke / 2.4 stop interface before committing the tray print"),
     "coupon_tire_fit": (tire_fit, "TPU+PETG", "print the ring in TPU, the core in PETG; calibrate tire stretch and seat retention at 40% scale"),
     "coupon_pcb_clamp": (pcb_clamp, "PETG", "drop in the Pico 2, verify peg engagement without board stress, clamp bar seats at 3.2 stack"),
+    "coupon_pla_insert_shell": (pla_insert_shell, "PLA", "production shell-style boss: record insert temperature, whitening/cracks/sink/tilt, pull-through, and M3x8 engagement for this exact PLA family"),
+    "coupon_pla_shell_wall": (pla_shell_wall, "PLA", "representative 3.2 wall, rollover/opening, and panel seat: record dimensions, impact result, warm soak, and post-cool distortion"),
+    "coupon_pla_head_pivot": (pla_head_pivot, "PLA", "production-like tilt-pivot boss/wall: install insert and bushing, cycle under representative head load, inspect cracks and slop"),
+    "coupon_pla_snap_pair": (snap_pair, "PLA", "print in each candidate visible PLA family; 10 service cycles with full latch engagement and no whitening, fracture, or retention loss"),
+    "coupon_pla_optical": (pla_optical, "Translucent PLA", "print once per candidate family/color; record brightness, hot spots, camera flare, clip fit, and LED temperature at 1.2/1.6/2.0 mm"),
+    "coupon_lid_boundary_petg": (lid_boundary_petg, "White PETG", "mate with coupon_lid_boundary_pla; verify blind-socket fit, retention, removal, and no socket cracking"),
+    "coupon_lid_boundary_pla": (lid_boundary_pla, "Teal PLA", "mate with coupon_lid_boundary_petg; 10 remove/refit cycles, then warm soak and rattle check"),
+}
+
+PROCESS_RECORD = {
+    "manufacturer": None,
+    "product_line": None,
+    "material_subtype": None,
+    "color": None,
+    "nozzle_mm": 0.4,
+    "layer_height_mm": 0.2,
+    "wall_count": 4,
+    "insert_tool_temperature_c": None,
+    "measured_results": None,
+    "pass_fail": None,
+    "tested_by": None,
+    "test_date": None,
 }
 
 
@@ -167,6 +251,8 @@ def main():
             "span_mm": [round(bb.size.X, 1), round(bb.size.Y, 1), round(bb.size.Z, 1)],
             "supports": "none",
             "note": note,
+            "physical_evidence_status": "open",
+            "process_record": dict(PROCESS_RECORD),
         }
         print(f"{name}: {bb.size.X:.0f} x {bb.size.Y:.0f} x {bb.size.Z:.0f}  [{material}]")
     (EXPORT_DIR / "codex_robot_body_v2_coupons_manifest.json").write_text(

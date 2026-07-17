@@ -6,8 +6,10 @@ The design goal is pet-like presence without overcomplicating the first build. T
 
 ## Current Status
 
-The current direction is the **v2 printed-only body** (decision log D025-D029): a
-44-piece, 11-plate, zero-support prototype with one screw size and one insert size.
+The current direction is the **v2 printed-only hybrid-material body** (decision
+log D025-D034): 40 installed functional pieces, four spare washers, and one
+optional cosmetic lid skin on 13 zero-support plates, with one screw size and
+one insert size.
 
 > **Prototype assembly preview — do not use for powered motion.** The tracked v2
 > 3MF and builder's book are geometry and dry-assembly artifacts. The head/neck
@@ -17,6 +19,11 @@ The current direction is the **v2 printed-only body** (decision log D025-D029): 
 - **The Builder's Book (v2 prototype preview):** [`output/pdf/codex_robot_body_v2_assembly_guide.pdf`](output/pdf/codex_robot_body_v2_assembly_guide.pdf)
 - v2 Bambu Studio project: [`cad/bambu/codex_robot_body_v2_p1s.3mf`](cad/bambu/codex_robot_body_v2_p1s.3mf)
 - v2 book generator: [`docs/generate_assembly_guide_v2.py`](docs/generate_assembly_guide_v2.py)
+
+Visible replaceable panels and diffusers now use configurable PLA theme slots;
+functional PETG is restricted to white structure, black wear parts, and red
+service retainers. The shell and head remain white-PETG fallbacks until the
+exact candidate PLA family passes the recorded physical gates (D034).
 
 Everything below the book is the engineering paper trail and the current source
 of truth for open release gates. Start with the docs index:

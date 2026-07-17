@@ -36,7 +36,7 @@ Read these in order when getting oriented:
    Reproducible 101-part, 26-plate P1S 0.4 mm layout split into 14 material-profile/color groups, with an exact plate manifest and visual overview.
 
 12. [The Builder's Book — v2 Assembly Guide](../output/pdf/codex_robot_body_v2_assembly_guide.pdf)
-    The current 37-page **prototype assembly preview — not for powered motion** for the printed-only v2 body: computed
+    The generated **prototype assembly preview — not for powered motion** for the printed-only v2 body: computed
     cover TOC, annotated meet-the-robot spread, shopping and printing chapters, piece
     inventory, twenty picture-first steps with progress bars and CHECK tests, wiring
     maps, and release-gap callouts. Child-followable by design, with no "grown-up"
@@ -47,6 +47,12 @@ Read these in order when getting oriented:
     (insertion arrows, insert markers, insets, mirrored-direction fixes, the tire
     port, and the goalpost eye bar) is in
     [guide-v2-improvement-notes.md](guide-v2-improvement-notes.md).
+
+    Its current print inventory follows D034: 40 functional pieces, four spare
+    washers, and one optional PLA lid skin on 13 plates. Direct visible panels
+    and diffusers are PLA; fixed PETG stays white/black/red; the PLA shell and
+    head candidates automatically remain white PETG until physical evidence is
+    recorded for the exact filament family.
 
 13. [v1 Illustrated Assembly Guide (historical)](../output/pdf/codex_robot_body_v1_assembly_guide.pdf)
     Twenty-page visual build sequence synchronized with the D024 retail-only CAD, current renders, 101-part print manifest, and 26-plate P1S project.
