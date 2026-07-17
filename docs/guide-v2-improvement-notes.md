@@ -96,8 +96,11 @@ applied (or proposed). Items marked **[fixed]** were implemented in this pass.
 - **C1. No visual link between a floating part and its destination.** The
   LEGO-style "pop" offsets parts 32 mm, but nothing points at the landing spot —
   ambiguous for the motors (which cradle?), pods, Pico, relay, deck, shell, lid,
-  head. Every popped part now gets a **teal 3D arrow** along its insertion axis,
-  from the part to its seat. **[fixed]**
+  head. Every popped part now gets a **translucent magenta 3D arrow** along its
+  insertion axis, from the part to its seat — magenta because no printed part
+  or purchased proxy uses it, translucent and shadowless so it reads as an
+  annotation, not plastic (revised per Brian's feedback); wheel arrows float
+  above the tires so the pegs don't swallow them. **[fixed]**
 - **C2. Pops along the wrong axis.** Wheels/washers popped straight up (+Z) even
   though they slide sideways onto shafts; bumper halves popped up instead of
   wrapping front/back; the deck pop (+32) left the deck impaled on a tower;

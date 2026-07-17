@@ -177,9 +177,14 @@ POP_DIR = {
     "eye_diffuser_bar_v2": (-26, 0, 0), "status_diffuser_bar_v2": (-46, 0, 0),
 }
 OUT_Y_POP = 45.0
-# Parts whose arrow should anchor off-center (world X/Y) so it doesn't
-# plunge through interior geometry.
-ARROW_ANCHOR = {"shell_v2": (0, -80), "deck_v2": (60, -30)}
+# Parts whose arrow should anchor off its part center (None keeps that
+# axis): dodging interior geometry, or lifting axle-line arrows clear of
+# the pegs/shafts that would otherwise swallow them.
+ARROW_ANCHOR = {
+    "shell_v2": (0, -80, None), "deck_v2": (60, -30, None),
+    "rear_wheel_v2": (None, None, 112), "rear_wheel_v2_m": (None, None, 112),
+    "front_wheel_v2": (None, None, 112), "front_wheel_v2_m": (None, None, 112),
+}
 # Parts whose arrow direction differs from their pop (e.g. the camera pops
 # up WITH the popped head but slides in horizontally).
 ARROW_DIR = {"px_camera": (-40, 0, 0)}
@@ -275,15 +280,28 @@ def make_marker(loc, axis, mats_cache, name="marker"):
 
 
 def arrow_material(mats_cache):
-    key = "arrow_teal"
+    """Annotation arrows: translucent magenta — a color no printed part or
+    purchased proxy uses — so they read as instructions, not plastic."""
+    key = "arrow_annotation"
     if key not in mats_cache:
         mat = bpy.data.materials.new(key)
         mat.use_nodes = True
         bsdf = mat.node_tree.nodes["Principled BSDF"]
-        color = (0.005, 0.13, 0.19, 1)
+        color = (0.85, 0.04, 0.45, 1)
         bsdf.inputs["Base Color"].default_value = color
-        bsdf.inputs["Roughness"].default_value = 0.55
-        mat.diffuse_color = color
+        bsdf.inputs["Roughness"].default_value = 0.4
+        bsdf.inputs["Alpha"].default_value = 0.6
+        if "Emission Color" in bsdf.inputs:
+            bsdf.inputs["Emission Color"].default_value = color
+            bsdf.inputs["Emission Strength"].default_value = 0.25
+        # Transparency across EEVEE generations (attribute names differ).
+        if hasattr(mat, "surface_render_method"):
+            mat.surface_render_method = "BLENDED"
+        if hasattr(mat, "blend_method"):
+            mat.blend_method = "BLEND"
+        if hasattr(mat, "use_transparent_shadow"):
+            mat.use_transparent_shadow = True
+        mat.diffuse_color = (0.85, 0.04, 0.45, 0.6)
         mats_cache[key] = mat
     return mats_cache[key]
 
@@ -313,6 +331,9 @@ def make_arrow(tail: Vector, tip: Vector, mats_cache, shaft_r=2.4, head_r=5.5, h
     mat = arrow_material(mats_cache)
     for obj in made:
         obj.data.materials.append(mat)
+        # Annotation, not a part: cast no shadow onto the model.
+        if hasattr(obj, "visible_shadow"):
+            obj.visible_shadow = False
     return made
 
 
@@ -450,7 +471,9 @@ def add_step_arrows(new_objects, pops, mats_cache):
         center = sum(pts, Vector()) / 8
         anchor = ARROW_ANCHOR.get(obj.name)
         if anchor is not None:
-            center.x, center.y = anchor
+            for axis, value in zip(("x", "y", "z"), anchor):
+                if value is not None:
+                    setattr(center, axis, value)
         min_proj = min((p - center).dot(d_unit) for p in pts)
         tail = center + d_unit * (min_proj - 5)
         tip = tail - d_unit * max(d.length - 14, 18)
