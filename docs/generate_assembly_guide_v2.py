@@ -1,19 +1,31 @@
-"""Generate the v2 assembly guide: LEGO-style, picture-first, ages 10+.
+"""Generate the v2 assembly guide: print-first HTML -> PDF, ages 10+.
 
-Every step page is a big render (from cad/blender/render_assembly_steps_v2.py)
-with a parts strip of thumbnails and at most one short sentence — a child
-should be able to build the body from the pictures alone. Grown-up steps
-(heat-set inserts, wiring, the E-stop) carry a red badge. Fastener counts
-come from the live inventory so the guide cannot drift from the model.
+Authors the complete builder's book as fixed-size HTML pages (11 x 8.5 in
+landscape) styled like an advanced LEGO product manual, then prints it to
+PDF with headless Chrome. Content is generated from the live artifacts —
+the printed-part registry, joint/fastener registries, the Bambu plate
+manifest, and the coupon manifest — plus the authored step and wiring
+copy below, so the book cannot drift from the model.
+
+Chapters: cover, how-to-read, shopping (filament / fasteners /
+electronics / tools), printing with Bambu Studio (plates + coupons),
+grown-up inserts, twenty assembly steps with checks, the electronics
+orientation page, the grown-up wiring chapter with SVG power and signal
+maps, and the finish/test page.
 
 Run the v2 chain and both render passes first, then:
     .venv-cad/bin/python docs/generate_assembly_guide_v2.py
-Output: output/pdf/codex_robot_body_v2_assembly_guide.pdf
+Outputs:
+    output/guide/codex_robot_body_v2_guide.html
+    output/pdf/codex_robot_body_v2_assembly_guide.pdf
 Verify pages with pypdfium2 (poppler is not installed here).
 """
 
 from __future__ import annotations
 
+import html
+import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -21,265 +33,577 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "cad" / "python"))
 
 import robot_body_v2_inventory as inv  # noqa: E402
-from reportlab.lib.pagesizes import landscape, letter  # noqa: E402
-from reportlab.lib.units import inch  # noqa: E402
-from reportlab.pdfgen import canvas as pdfcanvas  # noqa: E402
 
-PAGE = landscape(letter)
-W, H = PAGE
 IMG = ROOT / "docs" / "images"
 GUIDE_IMG = IMG / "guide_v2"
-OUT = ROOT / "output" / "pdf" / "codex_robot_body_v2_assembly_guide.pdf"
+PLATES = json.loads((ROOT / "cad" / "bambu" / "codex_robot_body_v2_p1s_plates.json").read_text())
+COUPONS = json.loads((ROOT / "cad" / "exports" / "v2" / "coupons" /
+                      "codex_robot_body_v2_coupons_manifest.json").read_text())
+HTML_OUT = ROOT / "output" / "guide" / "codex_robot_body_v2_guide.html"
+PDF_OUT = ROOT / "output" / "pdf" / "codex_robot_body_v2_assembly_guide.pdf"
+CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
-CREAM = (0.97, 0.94, 0.88)
-TEAL = (0.04, 0.51, 0.57)
-DARK = (0.13, 0.13, 0.14)
-RED = (0.80, 0.10, 0.08)
-CHIP = (0.90, 0.86, 0.78)
+SCREWS = {j.name: len(j.positions) for j in inv.JOINTS}
+N_SCREWS, N_INSERTS = inv.fastener_tally()
 
-SCREW_COUNT = {j.name: len(j.positions) for j in inv.JOINTS}
+# ---------------------------------------------------------------------------
+# Authored content
+# ---------------------------------------------------------------------------
+SHOP_FILAMENT = [
+    ("Cream PETG", "1x 1 kg spool (uses ~600 g)", "The body, tray, head, and most parts."),
+    ("Teal PETG", "1x small spool or 250 g (uses ~80 g)", "The top lid."),
+    ("Charcoal / black PETG", "leftovers are fine (~15 g)", "Face panel, back panel."),
+    ("Translucent lime PETG", "a sample length (~5 g)", "The glowing eye and light bars."),
+    ("Charcoal TPU 95A", "1x 500 g spool (uses ~280 g)", "Soft tires, bumpers, battery pad."),
+]
+SHOP_FASTENERS = [
+    ("M3 x 8 mm socket head screws", "1x 100-pack", f"The ONLY screw in the robot ({N_SCREWS} used + spares)."),
+    ("M3 x 5.7 mm brass heat-set inserts (4.6 mm OD)", "1x 100-pack", f"The only insert ({N_INSERTS} used + spares)."),
+]
+SHOP_ELECTRONICS = [
+    ("Raspberry Pi 5 (8 GB)", "1", "The robot's computer."),
+    ("Raspberry Pi Camera Module 3 Wide + long FPC cable", "1", "The robot's eye."),
+    ("Raspberry Pi Pico 2 (no headers, no WiFi)", "1", "The safety helper: reflexes and watchdog."),
+    ("Cytron MDDS10 motor driver", "1", "The purple board that powers the wheels."),
+    ("Pololu #4867 gearmotor (99:1, 25D, 12 V, encoder)", "2", "The wheel motors."),
+    ("Hitec D85MG servo", "2", "The neck motors (look left/right, up/down)."),
+    ("Bioenno BLF-1203AB 12 V 3 Ah LiFePO4 battery", "1", "The robot's power pack."),
+    ("Bioenno BPC-1502DC charger", "1", "The matching charger. Only ever use this one."),
+    ("Switchcraft EN2P3M20 inlet + EN2C3F20G2 plug", "1 pair", "The keyed charging plug on the back."),
+    ("Pololu D24V90F5 regulator (5 V)", "1", "Makes clean 5 V for the Pi."),
+    ("Pololu D36V50F6 regulator (6 V)", "1", "Makes 6 V for the neck servos."),
+    ("Panasonic CB1A-R-M-12V relay", "1", "The motor power switch the red button controls."),
+    ("Blue Sea Systems 5045 fuse block + ATO fuses", "1", "Splits power safely into four fused branches."),
+    ("IDEC XW1E-BV402M-R emergency stop", "1", "THE BIG RED BUTTON."),
+    ("E-Switch PVB3F230SS311 mute switch", "1", "The microphone privacy switch (glows red when muted)."),
+    ("Omron D2HW-C202MR bumper switches", "6", "Feelers inside the bumpers."),
+    ("VL53L1X time-of-flight boards (Adafruit 3967)", "4", "Distance eyes: two in front, one each side."),
+    ("Adafruit 5975 NeoPixel breakouts + JST-SH cables", "4", "The glowing eyes and status lights."),
+    ("ReSpeaker USB mic array", "1", "The robot's ears."),
+    ("Enclosed 3 W 4 ohm speakers + 2x Adafruit MAX98357A amps", "1 set", "The robot's voice."),
+    ("Wires, JST/spade connectors, ferrules, zip ties, heat-shrink", "1 kit", "Grown-up wiring supplies."),
+]
+SHOP_TOOLS = [
+    ("2.5 mm hex key", "Turns every screw in this robot. Seriously, all of them."),
+    ("Soldering iron (grown-up)", "Melts the brass inserts into the plastic."),
+    ("Small flush cutters / scissors", "Trims zip ties and TPU strings."),
+    ("Painter's tape + marker", "Label wires as you go."),
+]
 
-# (image, title, sentence, [(thumb, count), ...], screws, grown_up)
+PRINT_TIPS = [
+    ("Open the project", "Open <b>codex_robot_body_v2_p1s.3mf</b> in Bambu Studio. All 13 plates are already laid out for the P1S with a 0.4 mm nozzle and Textured PEI plate."),
+    ("Load the right color", "Each plate's name says the filament to load (cream, teal, charcoal, lime, or TPU). Print plates one at a time and change filament between groups."),
+    ("No supports. Ever.", "Every part is designed to print with zero supports. If the slicer asks for supports, something is wrong - don't add them, re-check the plate."),
+    ("TPU is slow and squishy", "Print the tire and bumper plates slowly (the profile already does this). Dry TPU prints much better."),
+    ("Big flat parts stay put", "The tray, shell, and bumper plates fill the whole bed. Clean the plate with dish soap first so they stick."),
+]
+
 STEPS = [
-    ("step_01_tray", "Start with the floor", "Put the big tray flat on your table. This is the bottom of your robot.",
-     [("tray_v2", 1)], 0, False),
-    ("step_02_inserts", "Grown-up: melt in the brass inserts", "A grown-up uses a soldering iron to press a brass insert into every gold spot, flat and straight.",
-     [("px_insert", 24)], 0, True),
-    ("step_03_motors", "Drop in the motors", "Lay each motor in its cradle, put the little cap on top, and screw it down.",
-     [("px_motor_L", 2), ("motor_cap_v2", 2)], SCREW_COUNT["motor_caps"], False),
-    ("step_04_wheels_bench", "Make the wheels", "Stretch a rubber tire onto each of the four wheels.",
-     [("rear_wheel_v2", 2), ("front_wheel_v2", 2), ("tire_v2", 4)], 0, False),
-    ("step_05_front_pods", "Bolt on the front legs", "Screw both front pods to the tray. Their round pegs are the front axles.",
-     [("front_pod_left_v2", 2)], SCREW_COUNT["front_pods"], False),
-    ("step_06_wheels_on", "Put the wheels on", "Back wheels push onto the motor shafts, one clamp screw each. Front wheels spin on the pegs: washer first, then screw.",
+    ("step_01_tray", "Start with the floor", False, 0,
+     [("tray_v2", 1)],
+     ["Clear a big table. Put the tray down flat, wheels-cutouts toward you.",
+      "Find the two round motor cradles at the back and the tall round towers - that's the back of the robot."],
+     "The tray sits flat and doesn't rock."),
+    ("step_02_inserts", "Melt in the brass inserts", True, 0,
+     [("px_insert", 24)],
+     ["GROWN-UP: set the soldering iron to about 220 C.",
+      "Rest a brass insert in each gold-marked hole, then press it straight down with the hot iron tip until it sits flush.",
+      "Let each one cool. The shell, saddle tops, rails, and towers all get inserts too - the picture shows every spot on the tray."],
+     "Every insert is flush and straight, none tilted."),
+    ("step_03_motors", "Drop in the motors", False, SCREWS["motor_caps"],
+     [("px_motor_L", 2), ("motor_cap_v2", 2)],
+     ["Lay a motor in each cradle with the metal shaft poking OUT through the hole toward the wheel side.",
+      "Point the wires inward, toward the middle of the robot.",
+      "Set a printed cap over each motor and screw it down with 2 screws per cap - snug, not gorilla-tight."],
+     "Motors don't wiggle. Shafts spin freely when you twist them."),
+    ("step_04_wheels_bench", "Make the wheels", False, 0,
+     [("rear_wheel_v2", 2), ("front_wheel_v2", 2), ("tire_v2", 4)],
+     ["Stretch a rubber tire over each of the four wheels, like putting a rubber band on a yo-yo.",
+      "Work it around evenly until it sits flat in the groove all the way around."],
+     "No tire bulges. All four look the same."),
+    ("step_05_front_pods", "Bolt on the front legs", False, SCREWS["front_pods"],
+     [("front_pod_left_v2", 2)],
+     ["The two front pods have round pegs sticking out - those pegs are the front axles.",
+      "Screw each pod to the tray through its little foot tabs, 2 screws each, pegs pointing OUT."],
+     "Both pegs point straight out to the sides."),
+    ("step_06_wheels_on", "Put the wheels on", False,
+     SCREWS["rear_wheel_clamps"] + SCREWS["front_axle_retainers"],
      [("rear_wheel_v2", 2), ("front_wheel_v2", 2), ("printed_washer_v2", 2)],
-     SCREW_COUNT["rear_wheel_clamps"] + SCREW_COUNT["front_axle_retainers"], False),
-    ("step_07_tower", "Build the brain tower", "Screw the tower down, then set the purple motor board on its posts.",
-     [("controller_tower_v2", 1), ("px_mdds10", 1)], SCREW_COUNT["controller_tower_base"], False),
-    ("step_08_pi", "Add the computer", "The green Raspberry Pi sits on the tower's top shelf.",
-     [("px_pi", 1)], 0, False),
-    ("step_09_battery", "Strap in the battery", "Soft pad down first, battery on top, then the clamp bar holds it tight.",
-     [("battery_pad_frame_v2", 1), ("px_battery", 1), ("battery_clamp_v2", 1)], SCREW_COUNT["battery_clamp"], False),
-    ("step_10_pico", "Add the safety helper", "This tiny green board is the robot's reflexes. Clamp it gently.",
-     [("px_pico", 1), ("pico_clamp_v2", 1)], SCREW_COUNT["pico_clamp"], False),
-    ("step_11_relay", "Grown-up: the power relay", "A grown-up mounts the relay. Every wire in this robot is grown-up work.",
-     [("px_relay", 1)], 0, True),
-    ("step_12_deck", "Put on the power deck", "The deck is a shelf: fuse box on top, the two small green boards hang underneath.",
-     [("deck_v2", 1), ("px_fuse", 1), ("px_reg1", 2)], SCREW_COUNT["deck_towers"], False),
-    ("step_13_speakers", "Speakers and wall-sensing eyes", "Speakers rest on their shelves, little blue distance boards behind their windows. Clamp bars hold them.",
+     ["BACK wheels: the hole has a flat side, and so does the motor shaft. Line the flats up, push the wheel on, then tighten the one clamp screw on the wheel's rim.",
+      "FRONT wheels: slide onto the pegs - they should spin freely. Put a printed washer on, then a screw into the end of the peg to keep the wheel from sliding off.",
+      "Don't overtighten the front screws: the wheels must still spin."],
+     "Back wheels turn only when the motor turns. Front wheels spin freely."),
+    ("step_07_tower", "Build the brain tower", False, SCREWS["controller_tower_base"],
+     [("controller_tower_v2", 1), ("px_mdds10", 1)],
+     ["Set the tower over the front-left of the tray - its screw holes match the four inserts.",
+      "Drive 4 screws down through the base tabs.",
+      "Rest the purple motor board on the four little posts, its green terminal blocks facing the LEFT side of the robot."],
+     "The board sits level on all four posts, terminals facing left."),
+    ("step_08_pi", "Add the computer", False, 0,
+     [("px_pi", 1)],
+     ["The Raspberry Pi lies flat on the tower's top shelf frame.",
+      "Its USB ports face the BACK of the robot so the cables can reach.",
+      "Don't screw anything - the shelf pocket holds it, and the head's cable will come down to it later."],
+     "The Pi sits in its pocket, ports facing backward."),
+    ("step_09_battery", "Strap in the battery", False, SCREWS["battery_clamp"],
+     [("battery_pad_frame_v2", 1), ("px_battery", 1), ("battery_clamp_v2", 1)],
+     ["Lay the soft TPU pad frame onto the four pads behind the tower.",
+      "Set the battery on it, wires pointing at the BACK of the robot.",
+      "Bridge the clamp bar across the battery onto the two posts and screw it down with 2 screws - firm, so the battery cannot slide."],
+     "Grab the battery and try to wiggle it. It shouldn't move."),
+    ("step_10_pico", "Add the safety helper", False, SCREWS["pico_clamp"],
+     [("px_pico", 1), ("pico_clamp_v2", 1)],
+     ["The tiny green Pico sits on its little posts to the right of the tower, USB plug facing RIGHT.",
+      "Lay the small clamp bar across it and screw it down with 2 screws, gently - it's a small board."],
+     "The Pico is held snug and its USB port is reachable."),
+    ("step_11_relay", "Mount the power relay", True, 0,
+     [("px_relay", 1)],
+     ["GROWN-UP: the relay drops into its floor pocket on the left, behind the tower.",
+      "Its metal bracket slots into the printed pocket; the terminals face UP so you can wire them later.",
+      "No wires yet - all wiring happens in the wiring chapter at the back of this book."],
+     "The relay clicks into its pocket and doesn't rattle."),
+    ("step_12_deck", "Put on the power deck", False, SCREWS["deck_towers"],
+     [("deck_v2", 1), ("px_fuse", 1), ("px_reg1", 2)],
+     ["First hang the two small green regulator boards under the deck's east end (they clip under; wires come later).",
+      "Lower the deck onto the four towers - the notch at the back-right corner goes around the battery wires.",
+      "Drive 4 screws down into the tower tops.",
+      "Set the black fuse box into its raised outline on the deck's right half, wire end hanging over the edge."],
+     "The deck is level and the fuse box sits inside its printed fence."),
+    ("step_13_speakers", "Speakers and distance eyes", False,
+     SCREWS["speaker_clamps"] + SCREWS["tof_clamps"],
      [("px_speaker_L", 2), ("px_tof_L", 2), ("speaker_clamp_v2", 2), ("tof_clamp_v2", 2)],
-     SCREW_COUNT["speaker_clamps"] + SCREW_COUNT["tof_clamps"], False),
-    ("step_14_shell", "Lower the body shell", "Like a turtle shell! Four screws go up into it from underneath.",
-     [("shell_v2", 1)], SCREW_COUNT["shell_tray"], False),
-    ("step_15_bumpers", "Clip on the bumpers", "The soft black bumpers wrap the bottom, front and back.",
-     [("bumper_front_v2", 2)], 0, False),
-    ("step_16_panels", "Snap in the face and back panels", "The dark panels click into the front and the back.",
-     [("fascia_v2", 1), ("rear_panel_v2", 1)], 0, False),
-    ("step_17_lid", "Grown-up: the lid and the BIG RED BUTTON", "A grown-up wires the red emergency stop into the lid, adds the microphone, and screws the lid down.",
+     ["Rest a speaker on each side shelf inside the shell area, magnet side in, grille facing the wall.",
+      "Lay a clamp bar across each speaker's top and screw into the two posts (2 screws per side).",
+      "Slide a little blue distance board behind each side window, then its clamp bar and 1 screw."],
+     "Speakers can't rattle; the blue boards peek through their windows."),
+    ("step_14_shell", "Lower the body shell", False, SCREWS["shell_tray"],
+     [("shell_v2", 1)],
+     ["Two people make this easy: lower the big shell straight down over EVERYTHING.",
+      "The wheel arches go around the wheels; the lip settles onto the tray edge.",
+      "Flip-check the underside: drive 4 screws UP through the tray's corner holes into the shell's lugs."],
+     "No gaps between shell and tray. The robot is now a box with wheels."),
+    ("step_15_bumpers", "Clip on the bumpers", False, 0,
+     [("bumper_front_v2", 2)],
+     ["The two soft bumper halves wrap around the bottom, one from the front, one from the back.",
+      "They hug the body loosely on purpose - they need to squish in to press the hidden feeler switches."],
+     "Press any bumper edge gently: it moves in a tiny bit and springs back."),
+    ("step_16_panels", "Snap in the face and back panels", False, 0,
+     [("fascia_v2", 1), ("rear_panel_v2", 1)],
+     ["The dark FACE panel clicks into the front opening (the two sensor holes go low).",
+      "The dark BACK panel clicks into the back opening - its two round holes are for the charger plug and the mute switch, wired later."],
+     "Both panels sit flush with the body."),
+    ("step_17_lid", "The lid and the BIG RED BUTTON", True,
+     SCREWS["lid_shell"] + SCREWS["mic_cradle"],
      [("lid_v2", 1), ("px_estop_cap", 1), ("px_mic", 1), ("mic_cradle_v2", 1)],
-     SCREW_COUNT["lid_shell"] + SCREW_COUNT["mic_cradle"], True),
-    ("step_18_neck", "Grow the neck", "The neck slides through the lid and the collar twists on underneath to lock it.",
-     [("neck_v2", 1), ("bayonet_collar_v2", 1), ("px_servo", 1)], 0, False),
-    ("step_19_head", "Build the head", "The head shell goes over the yoke; the camera peeks out the front; the little plate closes the bottom.",
+     ["GROWN-UP: drop the red emergency-stop through the lid's round hole and spin its nut on underneath - the lid IS its mounting panel, and the printed ring under the lid makes it strong.",
+      "Set the round microphone under the lid's slotted area and screw its ring cradle to the two bosses (2 screws).",
+      "Wires come later. Lower the lid into its ledge and drive the 4 corner screws."],
+     "Slap test: the red button clicks down hard and twists to release."),
+    ("step_18_neck", "Grow the neck", False, 0,
+     [("neck_v2", 1), ("bayonet_collar_v2", 1), ("px_servo", 1)],
+     ["Feed the neck tube down through the lid's front hole.",
+      "From inside, twist the bayonet collar onto the neck's bottom - a quarter turn locks it, like a camera lens.",
+      "The neck servo sits in the collar's cradle underneath (its wire joins the wiring chapter)."],
+     "The neck turns smoothly by hand and cannot pull up and out."),
+    ("step_19_head", "Build the head", False, 1,
      [("head_shell_v2", 1), ("yoke_v2", 1), ("head_pan_plate_v2", 1), ("px_camera", 1), ("tilt_bushing_v2", 1)],
-     1, False),
-    ("step_20_face", "Give it a face", "The face panel presses into place, with the glowing eye bar behind it. Say hi!",
-     [("head_faceplate_v2", 1), ("eye_diffuser_bar_v2", 1), ("status_diffuser_bar_v2", 1)], 0, False),
+     ["Screw the yoke's ring onto the top of the neck.",
+      "Slide the camera into the pocket behind the face opening, lens forward; its flat ribbon cable runs down through the hollow neck to the Pi.",
+      "Lower the head shell over the yoke: one side takes the tilt servo, the other side gets the little bushing and 1 pivot screw.",
+      "Close the underside with the pan plate."],
+     "The head nods up-down and the neck turns left-right, smoothly."),
+    ("step_20_face", "Give it a face", False, 0,
+     [("head_faceplate_v2", 1), ("eye_diffuser_bar_v2", 1), ("status_diffuser_bar_v2", 1)],
+     ["Clip the lime eye bar behind the face panel's eye slots (glow boards ride behind it).",
+      "Press the face panel into its recess: camera hole over the lens.",
+      "The second lime bar clips behind the front body panel's light slots."],
+     "Rover Bean is looking at you. Say hi."),
 ]
 
-PRINTED_BOX = [
-    ("tray_v2", "floor tray", 1), ("shell_v2", "body shell", 1), ("lid_v2", "teal lid", 1),
-    ("bumper_front_v2", "bumpers", 2), ("fascia_v2", "face panel", 1), ("rear_panel_v2", "back panel", 1),
-    ("deck_v2", "power deck", 1), ("controller_tower_v2", "brain tower", 1),
-    ("rear_wheel_v2", "back wheels", 2), ("front_wheel_v2", "front wheels", 2), ("tire_v2", "tires", 4),
-    ("front_pod_left_v2", "front pods", 2), ("motor_cap_v2", "motor caps", 2),
-    ("battery_clamp_v2", "battery bar", 1), ("battery_pad_frame_v2", "battery pad", 1),
-    ("pico_clamp_v2", "little clamp", 1), ("speaker_clamp_v2", "speaker bars", 2),
-    ("tof_clamp_v2", "sensor bars", 2), ("mic_cradle_v2", "mic ring", 1),
-    ("head_shell_v2", "head", 1), ("head_faceplate_v2", "face", 1), ("neck_v2", "neck", 1),
-    ("bayonet_collar_v2", "neck lock", 1), ("yoke_v2", "head yoke", 1),
-    ("head_pan_plate_v2", "head base", 1), ("tilt_bushing_v2", "tilt bushing", 1),
-    ("eye_diffuser_bar_v2", "eye glow bar", 1), ("status_diffuser_bar_v2", "light bar", 1),
-    ("printed_washer_v2", "washers", 6),
+WIRE_RULES = [
+    "This whole chapter is grown-up work. The builder can watch and hand you zip ties.",
+    "The battery stays OUT of the robot until every wire is checked against these maps.",
+    "Use wire colors: RED = battery 12 V, YELLOW = switched motor 12 V, BLUE = 5 V, GREEN = 6 V, BLACK = ground, WHITE = signals.",
+    "Crimp or solder every joint; no bare twists. Label both ends of every wire with tape.",
+    "Fuses go in LAST, after a meter check - start with the smallest sizes that hold.",
+    "The robot must FAIL STOPPED: if any of this feels wrong, it stays off.",
 ]
-ELECTRONICS_BOX = [
-    ("px_pi", "Raspberry Pi 5"), ("px_mdds10", "motor board"), ("px_pico", "safety board"),
-    ("px_motor_L", "motors x2"), ("px_battery", "battery"), ("px_fuse", "fuse box"),
-    ("px_relay", "relay"), ("px_reg1", "power boards x2"), ("px_estop_cap", "BIG RED BUTTON"),
-    ("px_mic", "microphone"), ("px_speaker_L", "speakers x2"), ("px_tof_L", "distance eyes x4"),
-    ("px_servo", "neck motors x2"), ("px_camera", "camera"),
+POWER_MAP = [
+    ("Battery +12 V", "feeder fuse (near battery)", "Blue Sea fuse block IN"),
+    ("Fuse branch 1", "D24V90F5 regulator", "5 V to the Raspberry Pi"),
+    ("Fuse branch 2", "D36V50F6 regulator", "6 V to both neck servos"),
+    ("Fuse branch 3", "mute switch common", "mic USB power OR red mute ring"),
+    ("Fuse branch 4", "5 V accessories", "NeoPixel eyes + status lights"),
+    ("Battery +12 V", "motor fuse -> relay contacts", "MDDS10 motor board power"),
+    ("Relay coil 12 V", "through BOTH red-button NC contacts", "coil ground via Pico enable"),
+    ("Charger EN2 pins 1+2", "direct to battery charge lead", "pin 3 = charger-present to Pico"),
+]
+SIGNAL_MAP = [
+    ("Raspberry Pi", "MDDS10", "serial motor commands (through the Pico's watchful eye)"),
+    ("Raspberry Pi", "Pico 2", "USB: heartbeat + status; Pico can always stop motors"),
+    ("Motor encoders (6 wires each)", "Pico 2", "wheel speed feedback"),
+    ("Bumper switches x6", "Pico 2", "any press = stop, instantly, no software needed"),
+    ("ToF boards x4", "Raspberry Pi", "I2C daisy chain (STEMMA cables)"),
+    ("NeoPixels x4", "Raspberry Pi", "one data line, chained eye->eye->status->status"),
+    ("Camera", "Raspberry Pi", "flat FPC ribbon down the hollow neck"),
+    ("Servos x2", "Raspberry Pi", "PWM signal wires (power from the 6 V rail)"),
+    ("Mic array", "Raspberry Pi", "USB (its 5 V passes through the mute switch)"),
+    ("Speakers", "MAX98357A amps -> Pi I2S", "amps zip-tie beside each speaker for now"),
 ]
 
 
-def bg(c, color=CREAM):
-    c.setFillColorRGB(*color)
-    c.rect(0, 0, W, H, stroke=0, fill=1)
+# ---------------------------------------------------------------------------
+# HTML
+# ---------------------------------------------------------------------------
+def esc(s):
+    return html.escape(str(s), quote=False)
 
 
-def badge(c, x, y, w, text, fill=TEAL, size=12):
-    c.setFillColorRGB(*fill)
-    c.roundRect(x, y, w, 0.34 * inch, 0.17 * inch, stroke=0, fill=1)
-    c.setFillColorRGB(1, 1, 1)
-    c.setFont("Helvetica-Bold", size)
-    c.drawCentredString(x + w / 2, y + 0.1 * inch, text)
+def img_uri(path: Path) -> str:
+    return path.resolve().as_uri()
 
 
-def image(c, path, x, y, w, h):
-    if path.exists():
-        c.drawImage(str(path), x, y, width=w, height=h, preserveAspectRatio=True,
-                    anchor="c", mask="auto")
+CSS = """
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --cream:#F6F0E2; --paper:#FBF7EC; --teal:#0B6E84; --teal-dk:#07515f;
+  --dark:#1F2023; --red:#C4230F; --gold:#C79A3B; --chip:#EAE2CE; --lime:#B9E44A;
+}
+@page { size: 11in 8.5in; margin: 0; }
+body { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; color: var(--dark); }
+section.page { width: 11in; height: 8.5in; page-break-after: always; position: relative;
+  overflow: hidden; background: var(--paper); padding: .45in .55in; display: flex; flex-direction: column; }
+h1 { font-size: 58px; color: var(--teal); letter-spacing: -1px; line-height: .95; }
+h2 { font-size: 30px; color: var(--teal); margin-bottom: .18in; }
+h3 { font-size: 16px; color: var(--teal-dk); margin: .12in 0 .06in; }
+p, li, td, th { font-size: 12.5px; line-height: 1.45; }
+.badges { display: flex; gap: .12in; margin: .18in 0; }
+.badge { background: var(--teal); color: #fff; font-weight: 700; font-size: 12px;
+  padding: .06in .14in; border-radius: .17in; }
+.badge.red { background: var(--red); }
+.badge.gold { background: var(--gold); }
+.grownup { position: absolute; top: .42in; right: .55in; background: var(--red); color: #fff;
+  font-weight: 800; font-size: 13px; padding: .07in .16in; border-radius: .17in; }
+table { border-collapse: collapse; width: 100%; }
+th { text-align: left; color: #fff; background: var(--teal); padding: .05in .09in; font-size: 12px; }
+td { padding: .045in .09in; border-bottom: 1px solid #d8cfba; vertical-align: top; }
+tr:nth-child(even) td { background: #f2ecdc; }
+.stepnum { width: .62in; height: .62in; border-radius: 50%; background: var(--teal); color: #fff;
+  display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 800; }
+.stepnum.red { background: var(--red); }
+.stephead { display: flex; align-items: center; gap: .18in; }
+.stephead h2 { margin: 0; font-size: 26px; color: var(--dark); }
+.strip { background: var(--chip); border-radius: .12in; display: flex; align-items: center;
+  gap: .22in; padding: .08in .18in; margin: .12in 0; min-height: 1.05in; }
+.strip .cell { display: flex; align-items: center; gap: .05in; }
+.strip img { width: .9in; height: .9in; object-fit: contain; }
+.strip b { font-size: 15px; }
+.strip small { font-size: 9px; display:block; color:#555; }
+.stepbody { display: flex; gap: .3in; flex: 1; min-height: 0; }
+.stepbody img.main { width: 6.1in; height: 4.9in; object-fit: cover; border-radius: .14in; }
+.instr { flex: 1; display: flex; flex-direction: column; }
+.instr ol { margin-left: .22in; }
+.instr li { font-size: 13.5px; margin-bottom: .1in; }
+.check { margin-top: auto; background: var(--lime); border-radius: .1in; padding: .09in .14in;
+  font-weight: 700; font-size: 12.5px; }
+.check::before { content: "CHECK  "; color: var(--teal-dk); }
+.cols { display: flex; gap: .35in; }
+.cols > div { flex: 1; }
+.footer { position: absolute; bottom: .22in; left: .55in; right: .55in; display: flex;
+  justify-content: space-between; font-size: 9px; color: #7a7261; }
+.rule { border-left: 4px solid var(--red); padding: .04in .12in; margin-bottom: .09in; font-size: 12px; }
+.hero { position: absolute; right: 0; top: 0; width: 6.1in; height: 8.5in; object-fit: cover; }
+.gridwrap { display: grid; grid-template-columns: repeat(8, 1fr); gap: .08in; }
+.gcell { text-align: center; }
+.gcell img { width: 1.05in; height: .95in; object-fit: contain; }
+.gcell div { font-size: 9.5px; font-weight: 700; }
+svg text { font-family: Helvetica, Arial, sans-serif; }
+"""
 
 
-def parts_strip(c, items, screws, y):
-    c.setFillColorRGB(*CHIP)
-    c.roundRect(0.4 * inch, y, W - 0.8 * inch, 1.28 * inch, 0.12 * inch, stroke=0, fill=1)
-    x = 0.55 * inch
-    for thumb, count in items:
-        image(c, GUIDE_IMG / f"thumb_{thumb}.png", x, y + 0.24 * inch, 0.92 * inch, 0.92 * inch)
-        c.setFillColorRGB(*DARK)
-        c.setFont("Helvetica-Bold", 13)
-        c.drawString(x + 0.94 * inch, y + 0.56 * inch, f"x{count}")
-        x += 1.42 * inch
-    if screws:
-        image(c, GUIDE_IMG / "thumb_px_screw.png", x, y + 0.24 * inch, 0.8 * inch, 0.8 * inch)
-        c.setFillColorRGB(*DARK)
-        c.setFont("Helvetica-Bold", 13)
-        c.drawString(x + 0.84 * inch, y + 0.62 * inch, f"x{screws}")
-        c.setFont("Helvetica", 9)
-        c.drawString(x + 0.84 * inch, y + 0.44 * inch, "M3 screws")
+def page(body, footer_left="CODEX ROVER BEAN - Builder's Book", num=None, total=None, grownup=False):
+    gu = '<div class="grownup">GROWN-UP STEP</div>' if grownup else ""
+    ft = f'<div class="footer"><span>{footer_left}</span><span>{"" if num is None else f"page {num} / {total}"}</span></div>'
+    return f'<section class="page">{gu}{body}{ft}</section>'
+
+
+def build_pages():
+    pages = []
+
+    # Cover
+    pages.append(f"""
+      <img class="hero" src="{img_uri(IMG / 'codex_robot_body_v2_assembled.png')}">
+      <div style="width:4.4in; padding-top:.7in;">
+        <h1>CODEX<br>ROVER BEAN</h1>
+        <p style="font-size:19px; font-weight:700; margin-top:.15in;">The Robot Body Builder's Book</p>
+        <p style="font-size:13.5px; margin-top:.1in;">Print it. Screw it together. Meet your robot.<br>
+        Everything you need is in this book and one Bambu Studio file.</p>
+        <div class="badges" style="flex-wrap:wrap;">
+          <span class="badge">AGES 10+</span><span class="badge">39 PRINTED PARTS</span>
+          <span class="badge">13 PLATES</span><span class="badge">1 HEX KEY</span>
+          <span class="badge red">GROWN-UP FOR IRONS &amp; WIRES</span>
+        </div>
+        <p style="font-size:11px; margin-top:.28in; color:#6d6552;">Chapters: 1 Shop &nbsp;-&nbsp; 2 Print &nbsp;-&nbsp; 3 Build &nbsp;-&nbsp; 4 Wire (grown-up) &nbsp;-&nbsp; 5 Check &amp; play</p>
+      </div>""")
+
+    # How to read
+    pages.append(f"""
+      <h2>How this book works</h2>
+      <div class="cols">
+        <div>
+          <h3>The pictures do the talking</h3>
+          <p>Every build step shows the robot so far, with the NEW parts floating just above where they land.
+          Match the picture, then read the numbered lines if you want words too.</p>
+          <h3>The parts strip</h3>
+          <p>The tan strip at the top of each step shows exactly which parts and how many screws you need
+          <b>before you start</b>. Lay them out like a cooking show.</p>
+          <h3>The green CHECK bar</h3>
+          <p>Do the little test at the bottom of each step before moving on. If the check fails, fix it now -
+          later steps cover things up.</p>
+        </div>
+        <div>
+          <h3>Red circles mean grown-up</h3>
+          <p>Steps with a <span style="color:var(--red); font-weight:800;">red number</span> use the soldering
+          iron or touch wires. A grown-up does those; you can watch and help.</p>
+          <h3>One screw. One key.</h3>
+          <p>Every screw in this robot is the same M3 x 8 screw, and one 2.5 mm hex key turns them all.
+          "Snug" means: stop when it stops, then an eighth of a turn. Plastic hates gorillas.</p>
+          <h3>Front and back</h3>
+          <p>The FRONT is where the face panel and head look. The BACK has the charging plug, the mute switch,
+          and the motor wheels. Left and right are the robot's left and right, not yours.</p>
+        </div>
+      </div>""")
+
+    # Shopping 1: filament + fasteners + tools
+    fil = "".join(f"<tr><td><b>{esc(a)}</b></td><td>{esc(b)}</td><td>{esc(c)}</td></tr>" for a, b, c in SHOP_FILAMENT)
+    fas = "".join(f"<tr><td><b>{esc(a)}</b></td><td>{esc(b)}</td><td>{esc(c)}</td></tr>" for a, b, c in SHOP_FASTENERS)
+    tools = "".join(f"<tr><td><b>{esc(a)}</b></td><td>{esc(b)}</td></tr>" for a, b in SHOP_TOOLS)
+    pages.append(f"""
+      <h2>Chapter 1 - Go shopping: plastic, screws, tools</h2>
+      <div class="cols"><div>
+        <h3>Filament (for the printer)</h3>
+        <table><tr><th>Filament</th><th>How much</th><th>What it becomes</th></tr>{fil}</table>
+        <h3 style="margin-top:.18in;">The only two fastener packs</h3>
+        <table><tr><th>Fastener</th><th>Buy</th><th>Why</th></tr>{fas}</table>
+      </div><div>
+        <h3>Tools</h3>
+        <table><tr><th>Tool</th><th>Job</th></tr>{tools}</table>
+        <div style="margin-top:.2in; display:flex; gap:.3in; align-items:center;">
+          <img src="{img_uri(GUIDE_IMG / 'thumb_px_screw.png')}" style="width:1.3in;">
+          <img src="{img_uri(GUIDE_IMG / 'thumb_px_insert.png')}" style="width:1.3in;">
+          <p style="font-size:12px;">This screw and this brass insert are the only fasteners in the whole robot.
+          When a step says "2 screws," it always means these.</p>
+        </div>
+      </div></div>""")
+
+    # Shopping 2: electronics
+    elec = "".join(f"<tr><td><b>{esc(a)}</b></td><td style='text-align:center'>{esc(b)}</td><td>{esc(c)}</td></tr>"
+                   for a, b, c in SHOP_ELECTRONICS)
+    pages.append(f"""
+      <h2>Chapter 1 - Go shopping: the electronics box</h2>
+      <p style="margin-bottom:.1in;">Every item is a normal buy-one online part in the US. A grown-up orders these;
+      exact fuse sizes and wire get picked in the wiring chapter.</p>
+      <table style="font-size:11px;"><tr><th>Part</th><th>Qty</th><th>What it does</th></tr>{elec}</table>""")
+
+    # Print chapter: how to print
+    tips = "".join(f"<h3>{esc(t)}</h3><p>{d}</p>" for t, d in PRINT_TIPS)
+    pages.append(f"""
+      <h2>Chapter 2 - Print it with Bambu Studio</h2>
+      <div class="cols">
+        <div>{tips}</div>
+        <div>
+          <img src="{img_uri(IMG / 'codex_robot_body_v2_p1s_plates.png')}"
+               style="width:100%; border-radius:.12in;">
+          <p style="font-size:10.5px; margin-top:.06in;">All 13 plates, exactly as they open in Bambu Studio.</p>
+        </div>
+      </div>""")
+
+    # Plate table
+    rows = "".join(
+        f"<tr><td style='text-align:center'><b>{p['plate_number']}</b></td>"
+        f"<td><span style='display:inline-block;width:.14in;height:.14in;border-radius:50%;"
+        f"background:{p['color_hex']};border:1px solid #999;'></span> {esc(p['name'])}</td>"
+        f"<td style='text-align:center'>{p['part_count']}</td>"
+        f"<td>{esc(', '.join(pp['name'].replace('_v2', '').replace('_', ' ') for pp in p['parts'])[:95])}</td></tr>"
+        for p in PLATES["plates"])
+    pages.append(f"""
+      <h2>Chapter 2 - The 13 plates, in printing order</h2>
+      <table style="font-size:10.5px;"><tr><th>#</th><th>Plate (load this filament)</th><th>Parts</th><th>What's on it</th></tr>{rows}</table>
+      <p style="margin-top:.1in; font-size:11px;"><b>Tip:</b> print plates 1-5 (cream) back to back, then change color once per group. Keep every part in a labeled box - the next chapter uses them in order.</p>""")
+
+    # Coupons
+    crows = "".join(f"<tr><td><b>{esc(k.replace('coupon_', '').replace('_', ' '))}</b></td>"
+                    f"<td>{esc(v['material'])}</td><td>{esc(v['note'])}</td></tr>"
+                    for k, v in COUPONS.items())
+    pages.append(f"""
+      <h2>Chapter 2 - Print the little test parts FIRST</h2>
+      <p style="margin-bottom:.08in;">Before the big plates, print these small test parts (in
+      <b>cad/exports/v2/coupons</b>). They make sure your printer's holes, snaps, and fits are dialed in -
+      like tasting the batter before baking the whole cake. A grown-up checks each one.</p>
+      <table style="font-size:10.5px;"><tr><th>Test part</th><th>Filament</th><th>What it proves</th></tr>{crows}</table>""")
+
+    # Steps
+    for i, (img_name, title, grownup, screws, items, subs, check) in enumerate(STEPS, start=1):
+        cells = "".join(
+            f'<div class="cell"><img src="{img_uri(GUIDE_IMG / ("thumb_" + t + ".png"))}"><b>x{n}</b></div>'
+            for t, n in items)
+        if screws:
+            cells += (f'<div class="cell"><img src="{img_uri(GUIDE_IMG / "thumb_px_screw.png")}">'
+                      f'<b>x{screws}<small>M3 screws</small></b></div>')
+        lis = "".join(f"<li>{esc(s)}</li>" for s in subs)
+        pages.append(f"""
+          <div class="stephead"><div class="stepnum{' red' if grownup else ''}">{i}</div><h2>{esc(title)}</h2></div>
+          <div class="strip">{cells}</div>
+          <div class="stepbody">
+            <img class="main" src="{img_uri(GUIDE_IMG / (img_name + '.png'))}">
+            <div class="instr"><ol>{lis}</ol><div class="check">{esc(check)}</div></div>
+          </div>""")
+        if grownup:
+            pages[-1] = pages[-1]  # grown-up flag handled by page()
+
+    # Electronics orientation page
+    pages.append(f"""
+      <h2>Chapter 4 - Where every electronic part lives</h2>
+      <div class="cols">
+        <div><img src="{img_uri(IMG / 'codex_robot_body_v2_chassis.png')}" style="width:100%; border-radius:.12in;"></div>
+        <div>
+          <table style="font-size:11px;">
+            <tr><th>Part</th><th>Home</th><th>Faces</th></tr>
+            <tr><td><b>MDDS10 motor board</b></td><td>tower posts, front-left</td><td>terminals LEFT</td></tr>
+            <tr><td><b>Raspberry Pi 5</b></td><td>tower top shelf</td><td>USB ports BACK</td></tr>
+            <tr><td><b>Pico 2</b></td><td>floor, right of tower</td><td>USB RIGHT, pins UP</td></tr>
+            <tr><td><b>Battery</b></td><td>middle-back floor</td><td>wires BACK</td></tr>
+            <tr><td><b>Relay</b></td><td>floor pocket, left</td><td>terminals UP</td></tr>
+            <tr><td><b>Fuse block</b></td><td>deck, right half</td><td>wire exit RIGHT edge</td></tr>
+            <tr><td><b>Regulators (5 V + 6 V)</b></td><td>hang UNDER deck, back end</td><td>6 V wire exit LEFT</td></tr>
+            <tr><td><b>Big red button</b></td><td>through the lid</td><td>UP (slap it!)</td></tr>
+            <tr><td><b>Mic array</b></td><td>under the lid slots</td><td>UP</td></tr>
+            <tr><td><b>Speakers</b></td><td>side shelves</td><td>grilles OUT</td></tr>
+            <tr><td><b>ToF distance boards</b></td><td>2 behind face, 2 side windows</td><td>lenses OUT</td></tr>
+            <tr><td><b>Charger inlet + mute</b></td><td>back panel holes</td><td>BACK</td></tr>
+          </table>
+          <p style="font-size:10.5px; margin-top:.08in;">The two speaker amp boards (MAX98357A) zip-tie beside
+          their speakers for now - printed pockets for them are on the upgrade list.</p>
+        </div>
+      </div>""")
+
+    # Wiring rules + power map
+    rules = "".join(f'<div class="rule">{esc(r)}</div>' for r in WIRE_RULES)
+    prow = "".join(f"<tr><td>{esc(a)}</td><td>{esc(b)}</td><td>{esc(c)}</td></tr>" for a, b, c in POWER_MAP)
+    pages.append(f"""
+      <h2 style="color:var(--red);">Chapter 4 - Grown-up wiring rules</h2>
+      {rules}
+      <h3 style="margin-top:.14in;">The power map (every 12 V wire)</h3>
+      <table style="font-size:11px;"><tr><th>From</th><th>Through</th><th>To</th></tr>{prow}</table>""")
+
+    # SVG power diagram
+    pages.append(f"""
+      <h2 style="color:var(--red);">Chapter 4 - Power, as a picture</h2>
+      <svg viewBox="0 0 1000 560" style="width:100%; height:6.6in;">
+        <defs><marker id="a" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 z" fill="#555"/></marker></defs>
+        <rect x="20" y="230" width="150" height="90" rx="10" fill="#26438f"/>
+        <text x="95" y="270" fill="#fff" font-size="20" font-weight="bold" text-anchor="middle">BATTERY</text>
+        <text x="95" y="295" fill="#cfe" font-size="14" text-anchor="middle">12 V LiFePO4</text>
+        <rect x="240" y="150" width="120" height="60" rx="8" fill="#C79A3B"/>
+        <text x="300" y="186" font-size="15" font-weight="bold" text-anchor="middle" fill="#fff">FEEDER FUSE</text>
+        <rect x="430" y="130" width="170" height="100" rx="8" fill="#1F2023"/>
+        <text x="515" y="170" fill="#fff" font-size="16" font-weight="bold" text-anchor="middle">FUSE BLOCK</text>
+        <text x="515" y="192" fill="#ccc" font-size="12" text-anchor="middle">4 fused branches</text>
+        <rect x="700" y="40" width="180" height="52" rx="8" fill="#1b7a3d"/>
+        <text x="790" y="72" fill="#fff" font-size="14" font-weight="bold" text-anchor="middle">5 V reg -> RASPBERRY PI</text>
+        <rect x="700" y="110" width="180" height="52" rx="8" fill="#1b7a3d"/>
+        <text x="790" y="142" fill="#fff" font-size="14" font-weight="bold" text-anchor="middle">6 V reg -> NECK SERVOS</text>
+        <rect x="700" y="180" width="180" height="52" rx="8" fill="#444"/>
+        <text x="790" y="205" fill="#fff" font-size="13" font-weight="bold" text-anchor="middle">MUTE SWITCH -> MIC</text>
+        <text x="790" y="222" fill="#f88" font-size="11" text-anchor="middle">or red mute ring</text>
+        <rect x="700" y="250" width="180" height="52" rx="8" fill="#5c7a1b"/>
+        <text x="790" y="282" fill="#fff" font-size="14" font-weight="bold" text-anchor="middle">GLOW LIGHTS (5 V)</text>
+        <rect x="240" y="360" width="120" height="60" rx="8" fill="#C79A3B"/>
+        <text x="300" y="396" font-size="15" font-weight="bold" text-anchor="middle" fill="#fff">MOTOR FUSE</text>
+        <rect x="430" y="350" width="150" height="80" rx="8" fill="#333"/>
+        <text x="505" y="384" fill="#fff" font-size="16" font-weight="bold" text-anchor="middle">RELAY</text>
+        <text x="505" y="406" fill="#fbb" font-size="11" text-anchor="middle">coil runs through the</text>
+        <text x="505" y="420" fill="#fbb" font-size="11" text-anchor="middle">RED BUTTON + Pico OK</text>
+        <rect x="660" y="350" width="150" height="80" rx="8" fill="#5e2b7a"/>
+        <text x="735" y="384" fill="#fff" font-size="15" font-weight="bold" text-anchor="middle">MDDS10</text>
+        <text x="735" y="406" fill="#dcf" font-size="12" text-anchor="middle">motor board</text>
+        <rect x="860" y="340" width="110" height="44" rx="8" fill="#555"/>
+        <text x="915" y="367" fill="#fff" font-size="13" font-weight="bold" text-anchor="middle">MOTOR L</text>
+        <rect x="860" y="396" width="110" height="44" rx="8" fill="#555"/>
+        <text x="915" y="423" fill="#fff" font-size="13" font-weight="bold" text-anchor="middle">MOTOR R</text>
+        <rect x="20" y="440" width="220" height="70" rx="10" fill="#0B6E84"/>
+        <text x="130" y="470" fill="#fff" font-size="14" font-weight="bold" text-anchor="middle">CHARGER PLUG (EN2)</text>
+        <text x="130" y="492" fill="#cef" font-size="11" text-anchor="middle">pins 1+2 -> battery charge lead</text>
+        <path d="M170,260 C210,260 210,180 240,180" stroke="#c00" stroke-width="5" fill="none" marker-end="url(#a)"/>
+        <path d="M360,180 L430,180" stroke="#c00" stroke-width="5" fill="none" marker-end="url(#a)"/>
+        <path d="M600,155 C650,155 650,66 700,66" stroke="#26f" stroke-width="4" fill="none" marker-end="url(#a)"/>
+        <path d="M600,175 C650,175 650,136 700,136" stroke="#2a5" stroke-width="4" fill="none" marker-end="url(#a)"/>
+        <path d="M600,195 C650,195 650,206 700,206" stroke="#888" stroke-width="4" fill="none" marker-end="url(#a)"/>
+        <path d="M600,215 C650,215 650,276 700,276" stroke="#5c7a1b" stroke-width="4" fill="none" marker-end="url(#a)"/>
+        <path d="M170,300 C210,300 210,390 240,390" stroke="#c00" stroke-width="5" fill="none" marker-end="url(#a)"/>
+        <path d="M360,390 L430,390" stroke="#dd0" stroke-width="5" fill="none" marker-end="url(#a)"/>
+        <path d="M580,390 L660,390" stroke="#dd0" stroke-width="5" fill="none" marker-end="url(#a)"/>
+        <path d="M810,368 L860,362" stroke="#dd0" stroke-width="4" fill="none" marker-end="url(#a)"/>
+        <path d="M810,412 L860,418" stroke="#dd0" stroke-width="4" fill="none" marker-end="url(#a)"/>
+        <path d="M130,440 C130,380 95,360 95,320" stroke="#26438f" stroke-width="4" fill="none" marker-end="url(#a)"/>
+        <text x="300" y="140" font-size="12" fill="#555" text-anchor="middle">RED = always-hot 12 V</text>
+        <text x="470" y="345" font-size="12" fill="#555">YELLOW = motor 12 V, dead unless relay says so</text>
+      </svg>""")
+
+    # Signal map
+    srow = "".join(f"<tr><td>{esc(a)}</td><td>{esc(b)}</td><td>{esc(c)}</td></tr>" for a, b, c in SIGNAL_MAP)
+    pages.append(f"""
+      <h2 style="color:var(--red);">Chapter 4 - The signal map (thin wires)</h2>
+      <table style="font-size:11.5px;"><tr><th>From</th><th>To</th><th>What travels</th></tr>{srow}</table>
+      <h3 style="margin-top:.14in;">Cable neatness</h3>
+      <p style="font-size:12px;">Quiet wires (signals, audio, sensors) ride the LEFT channel under the deck.
+      Power wires ride the RIGHT channel. The camera ribbon goes up the little tunnel beside the neck servo,
+      through the hollow neck, into the head. Zip-tie at every printed tie point; no wire may touch a wheel or the fan.</p>
+      <h3>Before the battery goes in - the grown-up meter checklist</h3>
+      <p style="font-size:12px;">1) No shorts: beep-test + to - at the fuse block (no fuses in yet). &nbsp;
+      2) Red button held down = relay coil circuit OPEN. &nbsp; 3) Regulator outputs read 5.0-5.2 V and 6.0 V on the bench
+      before their loads connect. &nbsp; 4) Fuses in smallest-first, one branch at a time. &nbsp;
+      5) Charger plug in = motors will not run. Only then does the lid close.</p>""")
+
+    # Finish page
+    pages.append(f"""
+      <img class="hero" src="{img_uri(IMG / 'codex_robot_body_v2_rear.png')}">
+      <div style="width:4.4in; padding-top:.6in;">
+        <h2 style="font-size:38px;">You built a robot!</h2>
+        <p style="font-size:14px; margin-top:.1in;">High five, builder. Rover Bean's body is done.</p>
+        <h3 style="margin-top:.25in;">Chapter 5 - Before it ever moves (grown-ups)</h3>
+        <p style="font-size:12px;">Slap the red button while the wheels spin on blocks - everything must stop instantly.
+        Press each bumper - stop. Unplug the Pi's heartbeat - stop. Plug in the charger - it refuses to drive.
+        Only after every one of these passes does Rover Bean get floor time, supervised, at walking pace.</p>
+        <p style="font-size:12px; margin-top:.15in;">The robot's number one rule, forever:
+        <b>when anything is wrong, it stops.</b></p>
+        <p style="font-size:11px; margin-top:.3in; color:#6d6552;">Codex Rover Bean v2 - printed-only body -
+        one screw, one key, zero supports.</p>
+      </div>""")
+
+    return pages
 
 
 def main():
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    c = pdfcanvas.Canvas(str(OUT), pagesize=PAGE)
-    total = 4 + len(STEPS) + 1
-
-    # Cover.
-    bg(c)
-    image(c, IMG / "codex_robot_body_v2_assembled.png", W * 0.42, 0.35 * inch, W * 0.55, H - 0.9 * inch)
-    c.setFillColorRGB(*TEAL)
-    c.setFont("Helvetica-Bold", 44)
-    c.drawString(0.6 * inch, H - 1.5 * inch, "CODEX")
-    c.drawString(0.6 * inch, H - 2.15 * inch, "ROVER BEAN")
-    c.setFillColorRGB(*DARK)
-    c.setFont("Helvetica-Bold", 19)
-    c.drawString(0.62 * inch, H - 2.75 * inch, "Robot Body Builder's Guide")
-    c.setFont("Helvetica", 13)
-    c.drawString(0.62 * inch, H - 3.15 * inch, "You build it with pictures. One tool. No glue.")
-    x = 0.62 * inch
-    for label, wd in (("AGES 10+", 1.1), ("39 PRINTED PARTS", 1.9), ("1 HEX KEY", 1.25), ("GROWN-UP HELPS", 1.8)):
-        badge(c, x, H - 3.85 * inch, wd * inch, label,
-              fill=RED if label == "GROWN-UP HELPS" else TEAL)
-        x += (wd + 0.16) * inch
-    c.setFillColorRGB(*DARK)
-    c.setFont("Helvetica", 10)
-    c.drawString(0.62 * inch, 0.5 * inch,
-                 "v2 printed-only body - the grown-up pages and the release gates at the back are part of the kit.")
-    c.showPage()
-
-    # What you printed.
-    bg(c)
-    c.setFillColorRGB(*TEAL)
-    c.setFont("Helvetica-Bold", 26)
-    c.drawString(0.6 * inch, H - 0.75 * inch, "What you printed")
-    cols, cw, ch = 8, 1.28 * inch, 1.5 * inch
-    for i, (thumb, label, qty) in enumerate(PRINTED_BOX):
-        gx = 0.5 * inch + (i % cols) * cw
-        gy = H - 1.35 * inch - (i // cols + 1) * ch
-        image(c, GUIDE_IMG / f"thumb_{thumb}.png", gx, gy + 0.36 * inch, 1.1 * inch, 1.05 * inch)
-        c.setFillColorRGB(*DARK)
-        c.setFont("Helvetica-Bold", 9.5)
-        c.drawCentredString(gx + 0.58 * inch, gy + 0.22 * inch, f"{label}  x{qty}")
-    c.showPage()
-
-    # Electronics box.
-    bg(c)
-    c.setFillColorRGB(*TEAL)
-    c.setFont("Helvetica-Bold", 26)
-    c.drawString(0.6 * inch, H - 0.75 * inch, "The electronics box")
-    badge(c, W - 3.55 * inch, H - 0.82 * inch, 2.95 * inch, "A GROWN-UP HANDLES ALL WIRES", fill=RED, size=10)
-    cols, cw, ch = 7, 1.45 * inch, 1.85 * inch
-    for i, (thumb, label) in enumerate(ELECTRONICS_BOX):
-        gx = 0.55 * inch + (i % cols) * cw
-        gy = H - 1.4 * inch - (i // cols + 1) * ch
-        image(c, GUIDE_IMG / f"thumb_{thumb}.png", gx, gy + 0.4 * inch, 1.25 * inch, 1.25 * inch)
-        c.setFillColorRGB(*DARK)
-        c.setFont("Helvetica-Bold", 10)
-        c.drawCentredString(gx + 0.66 * inch, gy + 0.22 * inch, label)
-    c.showPage()
-
-    # Tools & hardware.
-    bg(c)
-    c.setFillColorRGB(*TEAL)
-    c.setFont("Helvetica-Bold", 26)
-    c.drawString(0.6 * inch, H - 0.75 * inch, "Tools and hardware")
-    screws, inserts = inv.fastener_tally()
-    rows = (
-        ("thumb_px_screw.png", f"M3 x 8 screws  x{screws}", "Every screw in the robot is this exact screw."),
-        ("thumb_px_insert.png", f"Brass inserts  x{inserts}", "A grown-up melts these in with a soldering iron."),
-    )
-    for i, (thumb, label, note) in enumerate(rows):
-        gy = H - 2.5 * inch - i * 1.9 * inch
-        image(c, GUIDE_IMG / thumb, 0.8 * inch, gy, 1.5 * inch, 1.5 * inch)
-        c.setFillColorRGB(*DARK)
-        c.setFont("Helvetica-Bold", 17)
-        c.drawString(2.6 * inch, gy + 0.9 * inch, label)
-        c.setFont("Helvetica", 13)
-        c.drawString(2.6 * inch, gy + 0.55 * inch, note)
-    c.setFillColorRGB(*TEAL)
-    c.roundRect(0.8 * inch, H - 6.7 * inch, 1.5 * inch, 0.55 * inch, 0.12 * inch, stroke=0, fill=1)
-    c.setFillColorRGB(1, 1, 1)
-    c.setFont("Helvetica-Bold", 16)
-    c.drawCentredString(1.55 * inch, H - 6.52 * inch, "2.5 mm")
-    c.setFillColorRGB(*DARK)
-    c.setFont("Helvetica-Bold", 17)
-    c.drawString(2.6 * inch, H - 6.35 * inch, "One 2.5 mm hex key")
-    c.setFont("Helvetica", 13)
-    c.drawString(2.6 * inch, H - 6.68 * inch, "It fits every screw. That's the whole toolbox.")
-    c.showPage()
-
-    # Steps.
-    for i, (img_name, title, sentence, items, screws, grown_up) in enumerate(STEPS, start=1):
-        bg(c)
-        c.setFillColorRGB(*(RED if grown_up else TEAL))
-        c.circle(0.95 * inch, H - 0.85 * inch, 0.42 * inch, stroke=0, fill=1)
-        c.setFillColorRGB(1, 1, 1)
-        c.setFont("Helvetica-Bold", 30)
-        c.drawCentredString(0.95 * inch, H - 0.99 * inch, str(i))
-        c.setFillColorRGB(*DARK)
-        c.setFont("Helvetica-Bold", 23)
-        c.drawString(1.6 * inch, H - 0.97 * inch, title)
-        if grown_up:
-            badge(c, W - 2.7 * inch, H - 1.02 * inch, 2.15 * inch, "GROWN-UP STEP", fill=RED)
-        parts_strip(c, items, screws, H - 2.65 * inch)
-        image(c, GUIDE_IMG / f"{img_name}.png", 0.9 * inch, 0.72 * inch, W - 1.8 * inch, H - 3.55 * inch)
-        c.setFillColorRGB(*DARK)
-        c.setFont("Helvetica", 13.5)
-        c.drawCentredString(W / 2, 0.42 * inch, sentence)
-        c.showPage()
-
-    # Finish page.
-    bg(c)
-    image(c, IMG / "codex_robot_body_v2_assembled.png", 0.6 * inch, 0.9 * inch, W * 0.5, H - 1.8 * inch)
-    c.setFillColorRGB(*TEAL)
-    c.setFont("Helvetica-Bold", 34)
-    c.drawString(W * 0.55, H - 1.4 * inch, "You built a robot!")
-    c.setFillColorRGB(*DARK)
-    c.setFont("Helvetica", 13)
-    for j, line in enumerate((
-        "High five. Rover Bean's body is done.",
-        "",
-        "For the grown-ups, before ANY power or motion:",
-        "- print and pass the 11 calibration coupons first,",
-        "- check every purchased part's fit on delivery,",
-        "- wire and test the E-stop, bumpers, and watchdog,",
-        "- and follow every release gate in the plan docs.",
-        "",
-        "The robot must always fail stopped.",
-    )):
-        c.drawString(W * 0.55, H - (1.9 + j * 0.32) * inch, line)
-    c.save()
-    print(f"wrote {OUT} ({total} pages)")
+    HTML_OUT.parent.mkdir(parents=True, exist_ok=True)
+    PDF_OUT.parent.mkdir(parents=True, exist_ok=True)
+    pages = build_pages()
+    total = len(pages)
+    grown_pages = {i for i, p in enumerate(pages, start=1) if 'stepnum red' in p or 'GROWN-UP' in p[:400]}
+    body = "".join(
+        page(p, num=i, total=total, grownup=(i in grown_pages))
+        for i, p in enumerate(pages, start=1))
+    HTML_OUT.write_text(f"<!doctype html><html><head><meta charset='utf-8'>"
+                        f"<style>{CSS}</style></head><body>{body}</body></html>", encoding="utf-8")
+    result = subprocess.run(
+        [CHROME, "--headless=new", "--disable-gpu", "--no-pdf-header-footer",
+         "--no-margins", f"--print-to-pdf={PDF_OUT}", HTML_OUT.resolve().as_uri()],
+        capture_output=True, text=True, timeout=300)
+    if not PDF_OUT.exists():
+        raise SystemExit(f"Chrome PDF failed:\n{result.stderr[-2000:]}")
+    print(f"wrote {HTML_OUT}")
+    print(f"wrote {PDF_OUT} ({total} pages)")
 
 
 if __name__ == "__main__":
