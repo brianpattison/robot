@@ -102,7 +102,7 @@
         "material": "PETG",
         "role": "structural chassis parts"
       },
-      "part_count": 22,
+      "part_count": 18,
       "parts": [
         {
           "name": "deck_v2",
@@ -287,10 +287,38 @@
           "release_status": "prototype: coupons + purchased-part fit gates apply"
         },
         {
+          "name": "printed_washer_v2_i1",
+          "center_mm": [
+            226.8,
+            201.0
+          ],
+          "rotated_z_degrees": 0,
+          "span_xy_mm": [
+            22.0,
+            22.0
+          ],
+          "brim_mm": 0.0,
+          "release_status": "prototype: coupons + purchased-part fit gates apply"
+        },
+        {
+          "name": "printed_washer_v2_i2",
+          "center_mm": [
+            226.8,
+            227.0
+          ],
+          "rotated_z_degrees": 0,
+          "span_xy_mm": [
+            22.0,
+            22.0
+          ],
+          "brim_mm": 0.0,
+          "release_status": "prototype: coupons + purchased-part fit gates apply"
+        },
+        {
           "name": "tof_clamp_v2_i1",
           "center_mm": [
-            112.0,
-            220.0
+            217.8,
+            181.0
           ],
           "rotated_z_degrees": 0,
           "span_xy_mm": [
@@ -304,7 +332,7 @@
           "name": "tof_clamp_v2_i2",
           "center_mm": [
             112.0,
-            232.0
+            220.0
           ],
           "rotated_z_degrees": 0,
           "span_xy_mm": [
@@ -317,97 +345,13 @@
         {
           "name": "tilt_bushing_v2",
           "center_mm": [
-            212.4,
-            181.6
+            106.6,
+            232.6
           ],
           "rotated_z_degrees": 0,
           "span_xy_mm": [
             9.2,
             9.2
-          ],
-          "brim_mm": 0.0,
-          "release_status": "prototype: coupons + purchased-part fit gates apply"
-        },
-        {
-          "name": "printed_washer_v2_i1",
-          "center_mm": [
-            225.0,
-            181.0
-          ],
-          "rotated_z_degrees": 0,
-          "span_xy_mm": [
-            8.0,
-            8.0
-          ],
-          "brim_mm": 0.0,
-          "release_status": "prototype: coupons + purchased-part fit gates apply"
-        },
-        {
-          "name": "printed_washer_v2_i2",
-          "center_mm": [
-            225.0,
-            193.0
-          ],
-          "rotated_z_degrees": 0,
-          "span_xy_mm": [
-            8.0,
-            8.0
-          ],
-          "brim_mm": 0.0,
-          "release_status": "prototype: coupons + purchased-part fit gates apply"
-        },
-        {
-          "name": "printed_washer_v2_i3",
-          "center_mm": [
-            237.0,
-            194.0
-          ],
-          "rotated_z_degrees": 0,
-          "span_xy_mm": [
-            8.0,
-            8.0
-          ],
-          "brim_mm": 0.0,
-          "release_status": "prototype: coupons + purchased-part fit gates apply"
-        },
-        {
-          "name": "printed_washer_v2_i4",
-          "center_mm": [
-            219.8,
-            205.0
-          ],
-          "rotated_z_degrees": 0,
-          "span_xy_mm": [
-            8.0,
-            8.0
-          ],
-          "brim_mm": 0.0,
-          "release_status": "prototype: coupons + purchased-part fit gates apply"
-        },
-        {
-          "name": "printed_washer_v2_i5",
-          "center_mm": [
-            231.8,
-            206.0
-          ],
-          "rotated_z_degrees": 0,
-          "span_xy_mm": [
-            8.0,
-            8.0
-          ],
-          "brim_mm": 0.0,
-          "release_status": "prototype: coupons + purchased-part fit gates apply"
-        },
-        {
-          "name": "printed_washer_v2_i6",
-          "center_mm": [
-            219.8,
-            217.0
-          ],
-          "rotated_z_degrees": 0,
-          "span_xy_mm": [
-            8.0,
-            8.0
           ],
           "brim_mm": 0.0,
           "release_status": "prototype: coupons + purchased-part fit gates apply"
@@ -425,7 +369,7 @@
         "material": "PETG",
         "role": "structural chassis parts"
       },
-      "part_count": 4,
+      "part_count": 8,
       "parts": [
         {
           "name": "front_wheel_v2_i1",
@@ -479,6 +423,62 @@
           "span_xy_mm": [
             42.0,
             42.0
+          ],
+          "brim_mm": 0.0,
+          "release_status": "prototype: coupons + purchased-part fit gates apply"
+        },
+        {
+          "name": "printed_washer_v2_i3",
+          "center_mm": [
+            205.0,
+            21.0
+          ],
+          "rotated_z_degrees": 0,
+          "span_xy_mm": [
+            22.0,
+            22.0
+          ],
+          "brim_mm": 0.0,
+          "release_status": "prototype: coupons + purchased-part fit gates apply"
+        },
+        {
+          "name": "printed_washer_v2_i4",
+          "center_mm": [
+            231.0,
+            21.0
+          ],
+          "rotated_z_degrees": 0,
+          "span_xy_mm": [
+            22.0,
+            22.0
+          ],
+          "brim_mm": 0.0,
+          "release_status": "prototype: coupons + purchased-part fit gates apply"
+        },
+        {
+          "name": "printed_washer_v2_i5",
+          "center_mm": [
+            205.0,
+            47.0
+          ],
+          "rotated_z_degrees": 0,
+          "span_xy_mm": [
+            22.0,
+            22.0
+          ],
+          "brim_mm": 0.0,
+          "release_status": "prototype: coupons + purchased-part fit gates apply"
+        },
+        {
+          "name": "printed_washer_v2_i6",
+          "center_mm": [
+            231.0,
+            47.0
+          ],
+          "rotated_z_degrees": 0,
+          "span_xy_mm": [
+            22.0,
+            22.0
           ],
           "brim_mm": 0.0,
           "release_status": "prototype: coupons + purchased-part fit gates apply"
