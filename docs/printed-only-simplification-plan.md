@@ -483,10 +483,18 @@ and then thrown that detailing away. Revised order:
    established concept lighting, and the 8-page v2 assembly guide
    generates from the live manifests (print inventory, joints, coupons,
    release gates) at output/pdf/codex_robot_body_v2_assembly_guide.pdf.
-   Remaining before declaring D027: delivered-part mass updates,
-   coupon prints, and the fresh external review round — the two
-   physical items and the review are the only steps left that need
-   Brian.
+   Update (eighth slice): the tracked v2 Bambu
+   Studio project exists (codex_robot_body_v2_p1s.3mf: 43 instances on
+   13 plates in 6 filament groups, round-tripped through Bambu Studio;
+   plate-filling parts take solo centered plates), and the assembly
+   guide became the 25-page picture-first ages-10+ edition built from
+   LEGO-style step renders with purchased-part proxies. Building the
+   3MF caught design error #13 — three parts were disconnected solids
+   (floating shell corner lugs under the arch openings, an unattached
+   yoke, a bridgeless mic cradle) — fixed, with a permanent
+   connectivity rule in the validator. Remaining before declaring
+   D027: delivered-part mass updates, coupon prints, and the fresh
+   external review round.
 3. **Fastener-system pass on v2.** Collapse `Params` to the single
    insert/screw spec; add the clamp-stack (3.0-3.4 mm) and
    engagement-limit validator checks; implement capture-or-M3 mounts for

@@ -273,7 +273,7 @@ PRINTED_PARTS = [
        "structural floor: motor saddles, switch pockets, battery cradle, pico bosses, deck towers"),
     PP("shell", 1, "PETG", "upright, open bottom down",
        "one-piece exterior; separate from tray for assembly access (arches, speaker pockets, ToF pockets, pod shrouds integrated)"),
-    PP("lid", 1, "PETG-dark", "top face down",
+    PP("lid", 1, "PETG-teal", "top face down",
        "roof service access; vent slots print directly; integrated E-stop backing collar "
        "AND the lid itself is the IDEC clamp panel (4 mm within the 0.8-6 range; "
        "mount-panel part merged away)"),
@@ -338,7 +338,7 @@ class Joint:
 
 J = Joint
 JOINTS = [
-    J("shell_tray", ((105, 96), (105, -96), (-105, 96), (-105, -96)), modeled=True),
+    J("shell_tray", ((110, 85), (110, -85), (-110, 85), (-110, -85)), modeled=True),
     J("lid_shell", ((100, 90), (100, -90), (-100, 90), (-100, -90)), modeled=True),
     J("deck_towers", ((30, -61), (86, -61), (95, 61), (107, 55)), modeled=True),
     J("motor_caps", ((63, 83), (85, 83), (63, -83), (85, -83)), modeled=True),

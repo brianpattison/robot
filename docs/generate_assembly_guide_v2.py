@@ -1,18 +1,19 @@
-"""Generate the v2 printed-only assembly guide PDF from live manifests.
+"""Generate the v2 assembly guide: LEGO-style, picture-first, ages 10+.
 
-Reads the print manifest, the coupon manifest, and the inventory's joint
-and fastener registries, so the guide cannot drift from the model. Run
-the v2 chain first (model -> validator -> print -> coupons), then:
+Every step page is a big render (from cad/blender/render_assembly_steps_v2.py)
+with a parts strip of thumbnails and at most one short sentence — a child
+should be able to build the body from the pictures alone. Grown-up steps
+(heat-set inserts, wiring, the E-stop) carry a red badge. Fastener counts
+come from the live inventory so the guide cannot drift from the model.
 
+Run the v2 chain and both render passes first, then:
     .venv-cad/bin/python docs/generate_assembly_guide_v2.py
-
-Output: output/pdf/codex_robot_body_v2_assembly_guide.pdf. Render pages
-with pdftoppm and inspect before delivery, per repo convention.
+Output: output/pdf/codex_robot_body_v2_assembly_guide.pdf
+Verify pages with pypdfium2 (poppler is not installed here).
 """
 
 from __future__ import annotations
 
-import json
 import sys
 from pathlib import Path
 
@@ -26,195 +27,257 @@ from reportlab.pdfgen import canvas as pdfcanvas  # noqa: E402
 
 PAGE = landscape(letter)
 W, H = PAGE
-IMAGES = ROOT / "docs" / "images"
-PRINT_MANIFEST = ROOT / "cad" / "exports" / "v2" / "print_ready" / "codex_robot_body_v2_print_manifest.json"
-COUPON_MANIFEST = ROOT / "cad" / "exports" / "v2" / "coupons" / "codex_robot_body_v2_coupons_manifest.json"
+IMG = ROOT / "docs" / "images"
+GUIDE_IMG = IMG / "guide_v2"
 OUT = ROOT / "output" / "pdf" / "codex_robot_body_v2_assembly_guide.pdf"
 
-CREAM, TEAL, DARK, RED = (0.97, 0.94, 0.88), (0.04, 0.43, 0.52), (0.13, 0.13, 0.14), (0.72, 0.08, 0.06)
+CREAM = (0.97, 0.94, 0.88)
+TEAL = (0.04, 0.51, 0.57)
+DARK = (0.13, 0.13, 0.14)
+RED = (0.80, 0.10, 0.08)
+CHIP = (0.90, 0.86, 0.78)
 
-ASSEMBLY_STEPS = [
-    ("Print and pass the coupons", "All 11 coupons print support-free. Do not print any large part until the insert, joint, D-bore, axle, snap, switch-pocket, and tire coupons pass.", "coupons"),
-    ("Heat-set the tray and shell inserts", "Drive the M3 inserts flush: tray (controller base, pods, battery posts, Pico bosses, saddle tops, deck towers) and shell (corner lugs, lid ledge, speaker columns, ToF bosses).", "shell_tray, deck_towers, motor_caps, battery_clamp, controller_tower_base, front_pods, speaker_clamps, tof_clamps, pico_clamp"),
-    ("Mount the rear motors and wheels", "Drop each #4867 into its saddle trough, fit the clamp cap (2 screws each), route the encoder leads into the motor-lead corridor. Press each wheel's D-bore onto the shaft and fit the radial clamp screw.", "motor_caps, rear_wheel_clamps"),
-    ("Fit the front pods and wheels", "Bolt each pod's base flange to the tray (2 screws), slide the front wheel onto the printed axle, retain with a printed washer + screw into the axle-end insert.", "front_pods, front_axle_retainers"),
-    ("Install the controller tower", "Bolt the plinth through its four counterbored tabs, seat the MDDS10 on its standoffs (terminals NORTH into the side corridor), stack the Pi on the shelf frame with the AI-HAT reserve above.", "controller_tower_base"),
-    ("Seat the battery and Pico", "TPU pad frame on the tray pads, pack on top (leads rearward through the corridor and riser), clamp bar onto the rail posts. Pico onto its bosses, clamp bar over it (USB east, SWD up).", "battery_clamp, pico_clamp"),
-    ("Hang the regulators and fit the deck", "Regulators hang under the deck (D36 wire corridor WEST), fuse block into its pocket lip on the deck's south half, wire exit over the edge. Deck onto the four towers.", "deck_towers"),
-    ("Fit speakers, ToF boards, and the shell", "Speakers onto the shell ledges with clamp bars; side ToF boards behind their windows with clamps. Lower the shell over the chassis and drive the four corner-lug screws up through the tray.", "speaker_clamps, tof_clamps, shell_tray"),
-    ("Close the lid with the E-stop", "The lid IS the IDEC clamp panel: mount the E-stop through the lid bore against the integrated collar, purchased nut clamps the 4 mm lid. Mic cradle onto its lid bosses. Four lid screws into the ledge.", "lid_shell, mic_cradle"),
-    ("Build the head", "Neck through the lid bore onto the pan interface, bayonet collar retains it. Yoke on the neck flange, tilt bushing + M3 pivot on the passive side, faceplate into its recess, pan plate closes the underside.", "head joints are Phase-4 detail"),
+SCREW_COUNT = {j.name: len(j.positions) for j in inv.JOINTS}
+
+# (image, title, sentence, [(thumb, count), ...], screws, grown_up)
+STEPS = [
+    ("step_01_tray", "Start with the floor", "Put the big tray flat on your table. This is the bottom of your robot.",
+     [("tray_v2", 1)], 0, False),
+    ("step_02_inserts", "Grown-up: melt in the brass inserts", "A grown-up uses a soldering iron to press a brass insert into every gold spot, flat and straight.",
+     [("px_insert", 24)], 0, True),
+    ("step_03_motors", "Drop in the motors", "Lay each motor in its cradle, put the little cap on top, and screw it down.",
+     [("px_motor_L", 2), ("motor_cap_v2", 2)], SCREW_COUNT["motor_caps"], False),
+    ("step_04_wheels_bench", "Make the wheels", "Stretch a rubber tire onto each of the four wheels.",
+     [("rear_wheel_v2", 2), ("front_wheel_v2", 2), ("tire_v2", 4)], 0, False),
+    ("step_05_front_pods", "Bolt on the front legs", "Screw both front pods to the tray. Their round pegs are the front axles.",
+     [("front_pod_left_v2", 2)], SCREW_COUNT["front_pods"], False),
+    ("step_06_wheels_on", "Put the wheels on", "Back wheels push onto the motor shafts, one clamp screw each. Front wheels spin on the pegs: washer first, then screw.",
+     [("rear_wheel_v2", 2), ("front_wheel_v2", 2), ("printed_washer_v2", 2)],
+     SCREW_COUNT["rear_wheel_clamps"] + SCREW_COUNT["front_axle_retainers"], False),
+    ("step_07_tower", "Build the brain tower", "Screw the tower down, then set the purple motor board on its posts.",
+     [("controller_tower_v2", 1), ("px_mdds10", 1)], SCREW_COUNT["controller_tower_base"], False),
+    ("step_08_pi", "Add the computer", "The green Raspberry Pi sits on the tower's top shelf.",
+     [("px_pi", 1)], 0, False),
+    ("step_09_battery", "Strap in the battery", "Soft pad down first, battery on top, then the clamp bar holds it tight.",
+     [("battery_pad_frame_v2", 1), ("px_battery", 1), ("battery_clamp_v2", 1)], SCREW_COUNT["battery_clamp"], False),
+    ("step_10_pico", "Add the safety helper", "This tiny green board is the robot's reflexes. Clamp it gently.",
+     [("px_pico", 1), ("pico_clamp_v2", 1)], SCREW_COUNT["pico_clamp"], False),
+    ("step_11_relay", "Grown-up: the power relay", "A grown-up mounts the relay. Every wire in this robot is grown-up work.",
+     [("px_relay", 1)], 0, True),
+    ("step_12_deck", "Put on the power deck", "The deck is a shelf: fuse box on top, the two small green boards hang underneath.",
+     [("deck_v2", 1), ("px_fuse", 1), ("px_reg1", 2)], SCREW_COUNT["deck_towers"], False),
+    ("step_13_speakers", "Speakers and wall-sensing eyes", "Speakers rest on their shelves, little blue distance boards behind their windows. Clamp bars hold them.",
+     [("px_speaker_L", 2), ("px_tof_L", 2), ("speaker_clamp_v2", 2), ("tof_clamp_v2", 2)],
+     SCREW_COUNT["speaker_clamps"] + SCREW_COUNT["tof_clamps"], False),
+    ("step_14_shell", "Lower the body shell", "Like a turtle shell! Four screws go up into it from underneath.",
+     [("shell_v2", 1)], SCREW_COUNT["shell_tray"], False),
+    ("step_15_bumpers", "Clip on the bumpers", "The soft black bumpers wrap the bottom, front and back.",
+     [("bumper_front_v2", 2)], 0, False),
+    ("step_16_panels", "Snap in the face and back panels", "The dark panels click into the front and the back.",
+     [("fascia_v2", 1), ("rear_panel_v2", 1)], 0, False),
+    ("step_17_lid", "Grown-up: the lid and the BIG RED BUTTON", "A grown-up wires the red emergency stop into the lid, adds the microphone, and screws the lid down.",
+     [("lid_v2", 1), ("px_estop_cap", 1), ("px_mic", 1), ("mic_cradle_v2", 1)],
+     SCREW_COUNT["lid_shell"] + SCREW_COUNT["mic_cradle"], True),
+    ("step_18_neck", "Grow the neck", "The neck slides through the lid and the collar twists on underneath to lock it.",
+     [("neck_v2", 1), ("bayonet_collar_v2", 1), ("px_servo", 1)], 0, False),
+    ("step_19_head", "Build the head", "The head shell goes over the yoke; the camera peeks out the front; the little plate closes the bottom.",
+     [("head_shell_v2", 1), ("yoke_v2", 1), ("head_pan_plate_v2", 1), ("px_camera", 1), ("tilt_bushing_v2", 1)],
+     1, False),
+    ("step_20_face", "Give it a face", "The face panel presses into place, with the glowing eye bar behind it. Say hi!",
+     [("head_faceplate_v2", 1), ("eye_diffuser_bar_v2", 1), ("status_diffuser_bar_v2", 1)], 0, False),
 ]
 
-RELEASE_GATES = [
-    "Every purchased part: delivered-revision fit check before its assembly step.",
-    "D-bore coupon holds 2x extrapolated stall (22 kg-cm) warm and cold before powered motion.",
-    "Axle/bushing wear test on target flooring before household release.",
-    "Battery clamp inverted-shake and tilt tests; pack current and runtime tests per the BOM.",
-    "E-stop dual-NC, deterministic motor-cut, and bumper six-zone tests before any powered motion.",
-    "Delivered-part weighing replaces every screen-grade mass in the inventory.",
-    "A fresh external design review round precedes the D027 gate declaration.",
+PRINTED_BOX = [
+    ("tray_v2", "floor tray", 1), ("shell_v2", "body shell", 1), ("lid_v2", "teal lid", 1),
+    ("bumper_front_v2", "bumpers", 2), ("fascia_v2", "face panel", 1), ("rear_panel_v2", "back panel", 1),
+    ("deck_v2", "power deck", 1), ("controller_tower_v2", "brain tower", 1),
+    ("rear_wheel_v2", "back wheels", 2), ("front_wheel_v2", "front wheels", 2), ("tire_v2", "tires", 4),
+    ("front_pod_left_v2", "front pods", 2), ("motor_cap_v2", "motor caps", 2),
+    ("battery_clamp_v2", "battery bar", 1), ("battery_pad_frame_v2", "battery pad", 1),
+    ("pico_clamp_v2", "little clamp", 1), ("speaker_clamp_v2", "speaker bars", 2),
+    ("tof_clamp_v2", "sensor bars", 2), ("mic_cradle_v2", "mic ring", 1),
+    ("head_shell_v2", "head", 1), ("head_faceplate_v2", "face", 1), ("neck_v2", "neck", 1),
+    ("bayonet_collar_v2", "neck lock", 1), ("yoke_v2", "head yoke", 1),
+    ("head_pan_plate_v2", "head base", 1), ("tilt_bushing_v2", "tilt bushing", 1),
+    ("eye_diffuser_bar_v2", "eye glow bar", 1), ("status_diffuser_bar_v2", "light bar", 1),
+    ("printed_washer_v2", "washers", 6),
+]
+ELECTRONICS_BOX = [
+    ("px_pi", "Raspberry Pi 5"), ("px_mdds10", "motor board"), ("px_pico", "safety board"),
+    ("px_motor_L", "motors x2"), ("px_battery", "battery"), ("px_fuse", "fuse box"),
+    ("px_relay", "relay"), ("px_reg1", "power boards x2"), ("px_estop_cap", "BIG RED BUTTON"),
+    ("px_mic", "microphone"), ("px_speaker_L", "speakers x2"), ("px_tof_L", "distance eyes x4"),
+    ("px_servo", "neck motors x2"), ("px_camera", "camera"),
 ]
 
 
-def page_header(c, title, num, total):
-    c.setFillColorRGB(*CREAM)
+def bg(c, color=CREAM):
+    c.setFillColorRGB(*color)
     c.rect(0, 0, W, H, stroke=0, fill=1)
-    c.setFillColorRGB(*TEAL)
-    c.rect(0, H - 0.62 * inch, W, 0.62 * inch, stroke=0, fill=1)
+
+
+def badge(c, x, y, w, text, fill=TEAL, size=12):
+    c.setFillColorRGB(*fill)
+    c.roundRect(x, y, w, 0.34 * inch, 0.17 * inch, stroke=0, fill=1)
     c.setFillColorRGB(1, 1, 1)
-    c.setFont("Helvetica-Bold", 17)
-    c.drawString(0.5 * inch, H - 0.44 * inch, title)
-    c.setFont("Helvetica", 10)
-    c.drawRightString(W - 0.5 * inch, H - 0.42 * inch, f"Codex robot body v2 — page {num}/{total}")
+    c.setFont("Helvetica-Bold", size)
+    c.drawCentredString(x + w / 2, y + 0.1 * inch, text)
 
 
-def wrapped(c, text, x, y, width, size=9.5, leading=12.5, bold=False):
-    c.setFont("Helvetica-Bold" if bold else "Helvetica", size)
-    words, line = text.split(), ""
-    for word in words:
-        trial = (line + " " + word).strip()
-        if c.stringWidth(trial, "Helvetica-Bold" if bold else "Helvetica", size) > width:
-            c.drawString(x, y, line)
-            y -= leading
-            line = word
-        else:
-            line = trial
-    if line:
-        c.drawString(x, y, line)
-        y -= leading
-    return y
+def image(c, path, x, y, w, h):
+    if path.exists():
+        c.drawImage(str(path), x, y, width=w, height=h, preserveAspectRatio=True,
+                    anchor="c", mask="auto")
+
+
+def parts_strip(c, items, screws, y):
+    c.setFillColorRGB(*CHIP)
+    c.roundRect(0.4 * inch, y, W - 0.8 * inch, 1.28 * inch, 0.12 * inch, stroke=0, fill=1)
+    x = 0.55 * inch
+    for thumb, count in items:
+        image(c, GUIDE_IMG / f"thumb_{thumb}.png", x, y + 0.24 * inch, 0.92 * inch, 0.92 * inch)
+        c.setFillColorRGB(*DARK)
+        c.setFont("Helvetica-Bold", 13)
+        c.drawString(x + 0.94 * inch, y + 0.56 * inch, f"x{count}")
+        x += 1.42 * inch
+    if screws:
+        image(c, GUIDE_IMG / "thumb_px_screw.png", x, y + 0.24 * inch, 0.8 * inch, 0.8 * inch)
+        c.setFillColorRGB(*DARK)
+        c.setFont("Helvetica-Bold", 13)
+        c.drawString(x + 0.84 * inch, y + 0.62 * inch, f"x{screws}")
+        c.setFont("Helvetica", 9)
+        c.drawString(x + 0.84 * inch, y + 0.44 * inch, "M3 screws")
 
 
 def main():
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    pm = json.loads(PRINT_MANIFEST.read_text())
-    cm = json.loads(COUPON_MANIFEST.read_text())
-    total = 8
     c = pdfcanvas.Canvas(str(OUT), pagesize=PAGE)
+    total = 4 + len(STEPS) + 1
 
-    # 1 — cover
-    page_header(c, "Codex Robot Body v2 — Printed-Only Assembly Guide", 1, total)
-    img = IMAGES / "codex_robot_body_v2_assembled.png"
-    if img.exists():
-        c.drawImage(str(img), 0.6 * inch, 0.7 * inch, width=6.4 * inch, height=4.8 * inch,
-                    preserveAspectRatio=True, anchor="sw")
+    # Cover.
+    bg(c)
+    image(c, IMG / "codex_robot_body_v2_assembled.png", W * 0.42, 0.35 * inch, W * 0.55, H - 0.9 * inch)
+    c.setFillColorRGB(*TEAL)
+    c.setFont("Helvetica-Bold", 44)
+    c.drawString(0.6 * inch, H - 1.5 * inch, "CODEX")
+    c.drawString(0.6 * inch, H - 2.15 * inch, "ROVER BEAN")
     c.setFillColorRGB(*DARK)
-    x = 7.4 * inch
-    y = H - 1.2 * inch
-    y = wrapped(c, "One-piece 238 x 220 x 133 body. No purchased metal structure.", x, y, 3.2 * inch, 12, 16, bold=True)
-    screws, inserts = inv.fastener_tally()
-    draft, after, budget = inv.budget_report()
-    for line in (
-        f"{draft} printed parts (budget {budget}).",
-        f"{screws} screws + {inserts} inserts — one SKU each: {inv.FASTENER['screw']}; {inv.FASTENER['insert']}.",
-        "One 2.5 mm hex key assembles the robot.",
-        "Zero-support print inventory (D028).",
-        "Decisions D025-D028; the D027 packing gate is OPEN pending the external review round.",
-    ):
-        y -= 6
-        y = wrapped(c, line, x, y, 3.2 * inch, 10.5, 14)
-    c.setFillColorRGB(*RED)
-    wrapped(c, "This guide describes the v2 design intent. Nothing here authorizes powered motion; the release gates on the final page hold.", x, 1.3 * inch, 3.2 * inch, 10, 13, bold=True)
+    c.setFont("Helvetica-Bold", 19)
+    c.drawString(0.62 * inch, H - 2.75 * inch, "Robot Body Builder's Guide")
+    c.setFont("Helvetica", 13)
+    c.drawString(0.62 * inch, H - 3.15 * inch, "You build it with pictures. One tool. No glue.")
+    x = 0.62 * inch
+    for label, wd in (("AGES 10+", 1.1), ("39 PRINTED PARTS", 1.9), ("1 HEX KEY", 1.25), ("GROWN-UP HELPS", 1.8)):
+        badge(c, x, H - 3.85 * inch, wd * inch, label,
+              fill=RED if label == "GROWN-UP HELPS" else TEAL)
+        x += (wd + 0.16) * inch
+    c.setFillColorRGB(*DARK)
+    c.setFont("Helvetica", 10)
+    c.drawString(0.62 * inch, 0.5 * inch,
+                 "v2 printed-only body - the grown-up pages and the release gates at the back are part of the kit.")
     c.showPage()
 
-    # 2 — safety
-    page_header(c, "Safety first: the robot must fail stopped", 2, total)
-    c.setFillColorRGB(*DARK)
-    y = H - 1.1 * inch
-    for line in (
-        "The physical E-stop cuts motor power independently of the Pi — its dual-NC contacts stay in the low-current relay-enable path.",
-        "Bumper switches and the Pico watchdog stop motion without consulting any software above them.",
-        "Printed structure carries torque and shear through geometry (D-bores, keys, troughs, pockets); screws only clamp (D025/D026).",
-        "Lift the unpowered robot with two hands under the tray. Never lift by the shell, lid, head, bumper, or wiring.",
-        "The E-stop clamps the removable 4 mm lid (inside the IDEC 0.8-6 mm range) against the integrated collar boss; its slap access sweep and the head's pan sweep are validated non-intersecting (finding #11).",
-        "Charge only through the keyed EN2 inlet with charger AC removed; insertion must inhibit motion deterministically.",
-    ):
-        y = wrapped(c, "•  " + line, 0.6 * inch, y, W - 1.2 * inch, 11, 16)
-        y -= 8
-    c.showPage()
-
-    # 3 — fastener system + joints
-    page_header(c, "The single-SKU fastener system (D026)", 3, total)
-    c.setFillColorRGB(*DARK)
-    y = H - 1.0 * inch
-    y = wrapped(c, f"Every joint: one {inv.FASTENER['screw']} through a 3.0-3.4 mm clamp stack into one {inv.FASTENER['insert']}. Counterbores keep the stack constant; thicker flanges are counterbored, thinner parts ARE the stack.", 0.6 * inch, y, W - 1.2 * inch, 10.5, 14)
-    y -= 10
-    c.setFont("Helvetica-Bold", 10)
-    c.drawString(0.6 * inch, y, "Joint family")
-    c.drawString(3.4 * inch, y, "Screws")
-    c.drawString(4.4 * inch, y, "Interface points (x, y)")
-    y -= 4
-    c.line(0.6 * inch, y, W - 0.6 * inch, y)
-    y -= 13
-    c.setFont("Helvetica", 9.5)
-    for j in inv.JOINTS:
-        pts = ", ".join(f"({p[0]:.0f},{p[1]:.0f})" for p in j.positions)
-        c.drawString(0.6 * inch, y, j.name)
-        c.drawString(3.4 * inch, y, str(len(j.positions)))
-        c.drawString(4.4 * inch, y, pts[:110])
-        y -= 13.5
-    c.showPage()
-
-    # 4 — coupons
-    page_header(c, "Coupons print first — calibration gates every large part", 4, total)
-    c.setFillColorRGB(*DARK)
-    y = H - 1.0 * inch
-    for name, entry in cm.items():
-        y = wrapped(c, f"{name}  [{entry['material']}]  —  {entry['note']}", 0.6 * inch, y, W - 1.2 * inch, 9.5, 12.5)
-        y -= 4
-    c.showPage()
-
-    # 5/6 — print inventory
-    parts = sorted(pm["parts"].items())
-    half = (len(parts) + 1) // 2
-    for pg, chunk in enumerate((parts[:half], parts[half:]), start=5):
-        page_header(c, f"Print inventory ({pg - 4}/2) — all parts support-free", pg, total)
+    # What you printed.
+    bg(c)
+    c.setFillColorRGB(*TEAL)
+    c.setFont("Helvetica-Bold", 26)
+    c.drawString(0.6 * inch, H - 0.75 * inch, "What you printed")
+    cols, cw, ch = 8, 1.28 * inch, 1.5 * inch
+    for i, (thumb, label, qty) in enumerate(PRINTED_BOX):
+        gx = 0.5 * inch + (i % cols) * cw
+        gy = H - 1.35 * inch - (i // cols + 1) * ch
+        image(c, GUIDE_IMG / f"thumb_{thumb}.png", gx, gy + 0.36 * inch, 1.1 * inch, 1.05 * inch)
         c.setFillColorRGB(*DARK)
-        y = H - 1.0 * inch
+        c.setFont("Helvetica-Bold", 9.5)
+        c.drawCentredString(gx + 0.58 * inch, gy + 0.22 * inch, f"{label}  x{qty}")
+    c.showPage()
+
+    # Electronics box.
+    bg(c)
+    c.setFillColorRGB(*TEAL)
+    c.setFont("Helvetica-Bold", 26)
+    c.drawString(0.6 * inch, H - 0.75 * inch, "The electronics box")
+    badge(c, W - 3.55 * inch, H - 0.82 * inch, 2.95 * inch, "A GROWN-UP HANDLES ALL WIRES", fill=RED, size=10)
+    cols, cw, ch = 7, 1.45 * inch, 1.85 * inch
+    for i, (thumb, label) in enumerate(ELECTRONICS_BOX):
+        gx = 0.55 * inch + (i % cols) * cw
+        gy = H - 1.4 * inch - (i // cols + 1) * ch
+        image(c, GUIDE_IMG / f"thumb_{thumb}.png", gx, gy + 0.4 * inch, 1.25 * inch, 1.25 * inch)
+        c.setFillColorRGB(*DARK)
         c.setFont("Helvetica-Bold", 10)
-        for label, xx in (("Design", 0.6), ("Qty", 3.6), ("Material", 4.2), ("Print span (mm)", 5.3), ("Orientation", 7.0)):
-            c.drawString(xx * inch, y, label)
-        y -= 4
-        c.line(0.6 * inch, y, W - 0.6 * inch, y)
-        y -= 14
-        c.setFont("Helvetica", 9.5)
-        for name, e in chunk:
-            span = " x ".join(str(v) for v in e["print_span_mm"])
-            c.drawString(0.6 * inch, y, name.replace("_v2", ""))
-            c.drawString(3.6 * inch, y, str(e["qty"]))
-            c.drawString(4.2 * inch, y, e["material"])
-            c.drawString(5.3 * inch, y, span)
-            c.drawString(7.0 * inch, y, e["orientation"][:42])
-            y -= 14
+        c.drawCentredString(gx + 0.66 * inch, gy + 0.22 * inch, label)
+    c.showPage()
+
+    # Tools & hardware.
+    bg(c)
+    c.setFillColorRGB(*TEAL)
+    c.setFont("Helvetica-Bold", 26)
+    c.drawString(0.6 * inch, H - 0.75 * inch, "Tools and hardware")
+    screws, inserts = inv.fastener_tally()
+    rows = (
+        ("thumb_px_screw.png", f"M3 x 8 screws  x{screws}", "Every screw in the robot is this exact screw."),
+        ("thumb_px_insert.png", f"Brass inserts  x{inserts}", "A grown-up melts these in with a soldering iron."),
+    )
+    for i, (thumb, label, note) in enumerate(rows):
+        gy = H - 2.5 * inch - i * 1.9 * inch
+        image(c, GUIDE_IMG / thumb, 0.8 * inch, gy, 1.5 * inch, 1.5 * inch)
+        c.setFillColorRGB(*DARK)
+        c.setFont("Helvetica-Bold", 17)
+        c.drawString(2.6 * inch, gy + 0.9 * inch, label)
+        c.setFont("Helvetica", 13)
+        c.drawString(2.6 * inch, gy + 0.55 * inch, note)
+    c.setFillColorRGB(*TEAL)
+    c.roundRect(0.8 * inch, H - 6.7 * inch, 1.5 * inch, 0.55 * inch, 0.12 * inch, stroke=0, fill=1)
+    c.setFillColorRGB(1, 1, 1)
+    c.setFont("Helvetica-Bold", 16)
+    c.drawCentredString(1.55 * inch, H - 6.52 * inch, "2.5 mm")
+    c.setFillColorRGB(*DARK)
+    c.setFont("Helvetica-Bold", 17)
+    c.drawString(2.6 * inch, H - 6.35 * inch, "One 2.5 mm hex key")
+    c.setFont("Helvetica", 13)
+    c.drawString(2.6 * inch, H - 6.68 * inch, "It fits every screw. That's the whole toolbox.")
+    c.showPage()
+
+    # Steps.
+    for i, (img_name, title, sentence, items, screws, grown_up) in enumerate(STEPS, start=1):
+        bg(c)
+        c.setFillColorRGB(*(RED if grown_up else TEAL))
+        c.circle(0.95 * inch, H - 0.85 * inch, 0.42 * inch, stroke=0, fill=1)
+        c.setFillColorRGB(1, 1, 1)
+        c.setFont("Helvetica-Bold", 30)
+        c.drawCentredString(0.95 * inch, H - 0.99 * inch, str(i))
+        c.setFillColorRGB(*DARK)
+        c.setFont("Helvetica-Bold", 23)
+        c.drawString(1.6 * inch, H - 0.97 * inch, title)
+        if grown_up:
+            badge(c, W - 2.7 * inch, H - 1.02 * inch, 2.15 * inch, "GROWN-UP STEP", fill=RED)
+        parts_strip(c, items, screws, H - 2.65 * inch)
+        image(c, GUIDE_IMG / f"{img_name}.png", 0.9 * inch, 0.72 * inch, W - 1.8 * inch, H - 3.55 * inch)
+        c.setFillColorRGB(*DARK)
+        c.setFont("Helvetica", 13.5)
+        c.drawCentredString(W / 2, 0.42 * inch, sentence)
         c.showPage()
 
-    # 7 — assembly order
-    page_header(c, "Assembly order (one hex key)", 7, total)
+    # Finish page.
+    bg(c)
+    image(c, IMG / "codex_robot_body_v2_assembled.png", 0.6 * inch, 0.9 * inch, W * 0.5, H - 1.8 * inch)
+    c.setFillColorRGB(*TEAL)
+    c.setFont("Helvetica-Bold", 34)
+    c.drawString(W * 0.55, H - 1.4 * inch, "You built a robot!")
     c.setFillColorRGB(*DARK)
-    y = H - 0.95 * inch
-    for i, (title, body, joints) in enumerate(ASSEMBLY_STEPS, start=1):
-        y = wrapped(c, f"{i}. {title} — {body}", 0.6 * inch, y, W - 1.2 * inch, 9.5, 12)
-        c.setFillColorRGB(*TEAL)
-        y = wrapped(c, f"    joints: {joints}", 0.6 * inch, y, W - 1.2 * inch, 8.5, 11)
-        c.setFillColorRGB(*DARK)
-        y -= 3
-    c.showPage()
-
-    # 8 — chassis render + release gates
-    page_header(c, "Service view and release gates", 8, total)
-    img = IMAGES / "codex_robot_body_v2_chassis.png"
-    if img.exists():
-        c.drawImage(str(img), 0.5 * inch, 0.6 * inch, width=5.4 * inch, height=4.05 * inch,
-                    preserveAspectRatio=True, anchor="sw")
-    c.setFillColorRGB(*RED)
-    x, y = 6.2 * inch, H - 1.05 * inch
-    y = wrapped(c, "Nothing in this guide is a powered-motion release.", x, y, 4.3 * inch, 11.5, 15, bold=True)
-    c.setFillColorRGB(*DARK)
-    y -= 4
-    for gate in RELEASE_GATES:
-        y = wrapped(c, "•  " + gate, x, y, 4.3 * inch, 9.5, 12.5)
-        y -= 4
+    c.setFont("Helvetica", 13)
+    for j, line in enumerate((
+        "High five. Rover Bean's body is done.",
+        "",
+        "For the grown-ups, before ANY power or motion:",
+        "- print and pass the 11 calibration coupons first,",
+        "- check every purchased part's fit on delivery,",
+        "- wire and test the E-stop, bumpers, and watchdog,",
+        "- and follow every release gate in the plan docs.",
+        "",
+        "The robot must always fail stopped.",
+    )):
+        c.drawString(W * 0.55, H - (1.9 + j * 0.32) * inch, line)
     c.save()
     print(f"wrote {OUT} ({total} pages)")
 

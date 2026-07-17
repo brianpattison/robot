@@ -87,6 +87,9 @@ def check_box_screen():
 
 def check_bed_fit(solids):
     for name, solid in solids.items():
+        pieces = len(solid.solids())
+        if pieces != 1:
+            FAILS.append(f"connectivity: {name} is {pieces} disconnected solids")
         bb = solid.bounding_box()
         if bb.size.X > BED_XY or bb.size.Y > BED_XY:
             FAILS.append(f"bed fit: {name} plan {bb.size.X:.1f} x {bb.size.Y:.1f} exceeds {BED_XY}")
