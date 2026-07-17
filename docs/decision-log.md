@@ -596,3 +596,31 @@ Rationale:
   pockets into the tray commits the coupon-calibrated 0.4/2.0/2.4 mm
   interface to the tray print; the recovery path if a printed tray still
   misses is a shim plate, not a tray reprint policy.
+
+## D029: The Builder's Book Is A Retail-Grade Manual With No Grown-Up Callouts
+
+Status: accepted 2026-07-16 (Brian's direction)
+
+The v2 assembly guide is written and designed as a professionally
+produced kit manual, and it must stay easy enough for a child to follow
+WITHOUT ever labeling steps as needing a grown-up. The previous
+"GROWN-UP STEP" banners, red step numbers, cover badge, and grown-up
+tool/chapter framing are removed and must not be reintroduced. Safety
+content stays; it is presented as plain instructions and checklists
+(soldering-iron temperatures, meter checks, fail-stopped rules), not as
+age gating.
+
+Rationale:
+
+- Brian's directive: the project should be polished until it could sell
+  as a super easy-to-assemble kit; the guide should read like a
+  professionally designed product, and the grown-up callouts are
+  unnecessary.
+- Child-followable stays a hard requirement: picture-first steps, one
+  screw size, GATHER strips, per-step CHECK tests, and playful copy are
+  the mechanism, in place of age labels.
+- The book's design system (Avenir Next type, chapter thumb tabs with
+  SHOP/PRINT/BUILD/WIRE/PLAY accents, step progress bars, computed cover
+  TOC, annotated meet-the-robot spread, piece-inventory chart, hairline
+  tables, back cover) is the retail-grade baseline; future edits should
+  extend it rather than regress to the earlier utilitarian layout.
