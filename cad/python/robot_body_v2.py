@@ -113,7 +113,7 @@ def build_tray():
             tray += Pos(bx, by, (inv.TRAY_TOP + 53.0) / 2) * Cylinder(3.5, 53.0 - inv.TRAY_TOP)
     # Shell-joint clearance holes: M3 up through the tray into the shell
     # corner lugs; the underside counterbore leaves a 3.2 mm clamp stack.
-    for jx, jy in ((105, 96), (105, -96), (-105, 96), (-105, -96)):
+    for jx, jy in ((110, 85), (110, -85), (-110, 85), (-110, -85)):
         tray -= Pos(jx, jy, inv.TRAY_TOP - 4) * Cylinder(1.7, 10)
         tray -= Pos(jx, jy, TRAY_Z0 + 2.4) * Cylinder(3.25, 4.8)
     # Pico clamp bosses north/south of the board seat.
@@ -162,10 +162,11 @@ def build_shell():
                 2 * ARCH_R, band_w, P.wheel_center_z - inv.TRAY_TOP + 10)
             shell -= arch
 
-    # Corner lugs for the tray joint: bosses fused into the interior corner
-    # arcs, blind insert bores opening downward (screws drive up from the
-    # tray underside, v1-style).
-    for jx, jy in ((105, 96), (105, -96), (-105, 96), (-105, -96)):
+    # Tray-joint lugs fused into the front/rear walls (the arch openings
+    # wrap through the true corners, so corner lugs would float — validator
+    # connectivity catch). Blind insert bores open downward; screws drive
+    # up from the tray underside, v1-style.
+    for jx, jy in ((110, 85), (110, -85), (-110, 85), (-110, -85)):
         shell += Pos(jx, jy, (inv.TRAY_TOP + 68.0) / 2) * Cylinder(7.0, 68.0 - inv.TRAY_TOP)
         shell -= Pos(jx, jy, inv.TRAY_TOP + 3.4) * Cylinder(2.3, 7)
     # Lid-joint insert bores in the seating ledge (screws drive down
@@ -185,7 +186,7 @@ def build_shell():
     # Speaker clamp columns flanking each speaker pocket, insert bores up.
     for sy in (1, -1):
         for jx in (-52.0, 26.0):
-            col_y = sy * (inv.BODY_W / 2 - WALL - 4)
+            col_y = sy * (inv.BODY_W / 2 - WALL - 3)   # 1 mm into the wall
             shell += Pos(jx, col_y, (110.0 + 148.0) / 2) * Cylinder(4.0, 38)
             shell -= Pos(jx, col_y, 148.0 - 3.5) * Cylinder(2.3, 7)
     # Side ToF windows at the v1 station (X=-20) with interior pocket
@@ -193,8 +194,8 @@ def build_shell():
     for sy in (1, -1):
         shell -= Pos(-20, sy * (inv.BODY_W / 2 - 1.5), 96.0) * Box(12, 8, 8)
         shell += Pos(-20, sy * (inv.BODY_W / 2 - WALL - 3), 89.5) * Box(24, 6, 5)
-        shell += Pos(-32, sy * (inv.BODY_W / 2 - WALL - 4), (87.0 + 100.0) / 2) * Cylinder(4.0, 13)
-        shell -= Pos(-32, sy * (inv.BODY_W / 2 - WALL - 4), 100.0 - 3.5) * Cylinder(2.3, 7)
+        shell += Pos(-32, sy * (inv.BODY_W / 2 - WALL - 3), (87.0 + 100.0) / 2) * Cylinder(4.0, 13)
+        shell -= Pos(-32, sy * (inv.BODY_W / 2 - WALL - 3), 100.0 - 3.5) * Cylinder(2.3, 7)
 
     # Fascia opening: two 27 mm sub-openings with a hidden 4 mm mullion
     # (every bridge span <= 30; the fascia panel covers the mullions).
@@ -467,25 +468,27 @@ def build_battery_clamp():
 
 
 def build_mic_cradle():
-    ring = Pos(60, -25, 173.6) * Cylinder(38.0, 3.2) - Pos(60, -25, 173.6) * Cylinder(33.0, 5)
+    # Annulus r26..r38: the mic rim rests on it, the r26 opening passes
+    # sound and cables, and the ear circles (at r30 from center) overlap it.
+    ring = Pos(60, -25, 173.6) * Cylinder(38.0, 3.2) - Pos(60, -25, 173.6) * Cylinder(26.0, 5)
     for jx, jy in ((30, -25), (90, -25)):
         ear = Pos(jx, jy, 173.6) * Cylinder(6.0, 3.2)
         ear -= Pos(jx, jy, 173.6) * Cylinder(1.7, 5)
         ring += ear
-        ring += Pos((jx + 60) / 2, jy, 173.6) * Box(18, 8, 3.2)
     return ring
 
 
 def build_speaker_clamp():
-    bar = Pos(-13, 100, 149.6) * Box(86, 8, 3.2)
+    bar_y = inv.BODY_W / 2 - WALL - 3
+    bar = Pos(-13, bar_y, 149.6) * Box(86, 8, 3.2)
     for jx in (-52.0, 26.0):
-        bar -= Pos(jx, 100, 149.6) * Cylinder(1.7, 5)
+        bar -= Pos(jx, bar_y, 149.6) * Cylinder(1.7, 5)
     return bar
 
 
 def build_tof_clamp():
-    bar = Pos(-26, inv.BODY_W / 2 - WALL - 4, 101.6) * Box(20, 8, 3.2)
-    bar -= Pos(-32, inv.BODY_W / 2 - WALL - 4, 101.6) * Cylinder(1.7, 5)
+    bar = Pos(-26, inv.BODY_W / 2 - WALL - 3, 101.6) * Box(20, 8, 3.2)
+    bar -= Pos(-32, inv.BODY_W / 2 - WALL - 3, 101.6) * Cylinder(1.7, 5)
     return bar
 
 
@@ -509,6 +512,8 @@ def build_yoke():
     for sy in (1, -1):
         arm = Pos(-10, sy * 38, (NECK_Z1 + 4 + 250.0) / 2) * Box(10, 6, 250.0 - NECK_Z1 - 4)
         arm += Pos(P.neck_x + 4, sy * 38, NECK_Z1 + 6.0) * Box(24, 6, 8)
+        # Foot runs inward across the base annulus so the yoke is one piece.
+        arm += Pos(P.neck_x + 4, sy * 19.0, NECK_Z1 + 6.0) * Box(6, 40, 8)
         arm -= Pos(-10, sy * 38, 245.0 + inv.DH) * Rot(90, 0, 0) * Cylinder(1.7, 10)
         yoke += arm
     return yoke
