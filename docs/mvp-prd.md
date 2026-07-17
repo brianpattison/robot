@@ -2,7 +2,7 @@
 
 ## 1. Summary
 
-Build a small indoor companion robot body that lets Codex perceive the home, listen and speak naturally, roam safely on one floor, and respond to simple social and navigation requests. The MVP should feel like a pet dog in behavior, not in mechanics: curious, responsive, able to follow, come when called, look up at you, and chat. It should use a wheeled base for reliability and safety, with a head-like camera module for expression and perception. Tiny robot dog energy, much less "weekend spent debugging knees."
+Build a small indoor companion robot body that lets the resident agent — Claude or Codex — perceive the home, listen and speak naturally, roam safely on one floor, and respond to simple social and navigation requests. The MVP should feel like a pet dog in behavior, not in mechanics: curious, responsive, able to follow, come when called, look up at you, and chat. It should use a wheeled base for reliability and safety, with a head-like camera module for expression and perception. Tiny robot dog energy, much less "weekend spent debugging knees."
 
 The MVP is supervised indoor operation only. It should never move faster than a cautious walking pace, should fail stopped, and should always expose a physical kill switch.
 
@@ -138,12 +138,9 @@ Dog-like behavior comes from motion language:
 
 ### Control Boundary
 
-Codex should issue high-level intents, not raw motor commands:
+The resident agent (Claude or Codex) has full authority over the robot computer (D030): live SSH, code and scripts written on the fly, software installs, and direct velocity/head setpoints through the `robotd` body daemon. The old intent vocabulary survives as the starter behavior library, not as a ceiling.
 
-- Allowed: "come to Brian," "turn toward speaker," "follow at 1.2 m," "go to home spot," "stop."
-- Not allowed: direct unbounded wheel velocity from language output.
-
-The safety controller and navigation layer must be able to reject or clamp any command.
+The hard boundary is physical and firmware-only (D032): velocity and acceleration clamps, watchdog, latched bumper/E-stop/charger stops, and the hardware mute are enforced by the safety MCU and physical controls the Pi cannot reflash or bypass. No-go zones, quiet hours, and supervision rules are audited policy, not physics. See `docs/agentic-control-plan.md`.
 
 ## 10. Core User Stories
 
@@ -268,7 +265,7 @@ The MVP is done when:
 ### M2: Senses And Speech
 
 - Person detection and user tracking working.
-- Voice commands route to safe high-level intents.
+- Voice commands route to the resident agent; urgent phrases keep their deterministic local path.
 - Robot can look toward speaker and talk while stationary.
 
 ### M3: One-Room Companion

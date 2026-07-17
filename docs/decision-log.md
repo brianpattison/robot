@@ -624,3 +624,118 @@ Rationale:
   TOC, annotated meet-the-robot spread, piece-inventory chart, hairline
   tables, back cover) is the retail-grade baseline; future edits should
   extend it rather than regress to the earlier utilitarian layout.
+
+## D030: The Resident Agent Has Full Authority Over The Robot Computer
+
+Status: accepted 2026-07-17 (Brian's direction)
+
+The resident agent (Claude or Codex, per D031) gets full control of the
+Raspberry Pi: live SSH access, code and scripts written on the fly, package
+and service installs, direct velocity and head setpoints through the
+`robotd` body daemon, and management of its own behaviors, schedules, and
+memory. The fixed high-level intent vocabulary is retired as the control
+boundary; the old intents survive only as the starter behavior library the
+agent inherits and rewrites. Every `robotd` command and agent shell session
+is captured in a blackbox streamed to an off-host mirror; a Pi-local copy
+alone is not trusted, since the agent has root on the Pi. The plan places
+no software gate between what the agent decides and what it may attempt —
+the floor exists for malfunction handling, hardware protection, and the
+humans' physical overrides, never to constrain the agent's choices. See
+`docs/agentic-control-plan.md`.
+
+Rationale:
+
+- Brian's directive: give Claude or Codex full control — live SSH, code on
+  the fly, software installs, whatever the robot needs to get around, talk,
+  and answer questions.
+- An agentic model's value is writing code against reality. Nine canned
+  intents cap the robot at its author's imagination and waste the model.
+- Full software authority is safe to grant because the deterministic floor
+  moved into hardware and firmware the Pi cannot alter (D032).
+- The blackbox and recorded sessions keep trust inspectable after the fact
+  instead of pretending to enforce it up front.
+
+## D031: The Agent Seat Is Pluggable: Claude Or Codex
+
+Status: accepted 2026-07-17 (Brian's direction)
+
+Revises D005. The robot has one agent seat, and either Claude (via Claude
+Code or the Claude Agent SDK) or Codex (via the Codex CLI) occupies it. One
+resident narrator at a time; wake word, STT, TTS, perception, and other
+subsystems remain tools, not alternate personalities. D005's coherence goal
+stands — only its exclusivity to Codex is revised.
+
+Rationale:
+
+- Brian consistently frames the operator as "Claude or Codex"; the
+  architecture should make the seat a choice, not a rebuild.
+- Everything below the seat (voice services, `robotd`, firmware) is
+  identity-agnostic, so pluggability costs one abstraction, not a redesign.
+- One-narrator-at-a-time preserves the coherent-companion experience D005
+  was protecting.
+
+## D032: The Safety Floor Is Physical And Firmware Only, And The Pi Cannot Reach It
+
+Status: accepted 2026-07-17 (Brian's direction)
+
+Refines D004, which stands. The deterministic floor is exactly: E-stop,
+normally-closed bumper loops with latched stops, watchdog, firmware
+motion-setpoint leases (a nonzero setpoint zeros unless refreshed; a
+heartbeat alone never sustains motion), firmware velocity/acceleration
+clamps, charger-present motion inhibit, low-battery cutoff, and the
+hardware microphone mute wired into the USB VBUS conductor with the
+backfeed release gate. It is enforced by the safety MCU
+firmware and physical controls. The Pi-to-MCU link carries only the framed
+command/heartbeat protocol with no flash, bootloader, or config-write path;
+the Pico's USB/SWD are service corridors never cabled to the Pi in
+operation, so reflashing requires opening the robot. Firmware clears a
+bumper latch on request once the loop reads released again and permits
+capped-speed escape motion away from a pressed zone, so the agent can
+bump, back off, and continue without a human; a loop that cannot read
+released holds a wiring fault. The E-stop latch always requires a
+physical reset.
+
+Software guardrails the firmware cannot sense — no-go zones, quiet hours,
+supervision expectations, upload rules — are reclassified as policy the
+agent is instructed to honor and the blackbox audits, not enforcement.
+
+Rationale:
+
+- Under D030 the agent has root on the Pi, so any Pi-side gate is a
+  convention. Drawing the line where it can actually hold is more honest
+  and therefore safer than layered software theater.
+- The Pico 2 safety shelf, relay coil path, NC loops, and service-corridor
+  wiring already position the hardware for exactly this boundary.
+- Policy violations become visible and auditable; physics violations stay
+  impossible from software. The worst honest failure is a capped-speed
+  bump that latches stopped.
+
+## D033: Remote Agent Ingress Is A Cloudflare Tunnel
+
+Status: accepted 2026-07-17 (Brian's direction)
+
+Remote access for agents and humans is a Cloudflare Tunnel: `cloudflared`
+runs as a systemd service on the Pi, dials out over HTTPS, and exposes no
+inbound port anywhere. SSH rides the tunnel end-to-end via
+`ProxyCommand cloudflared access ssh` — never the browser-rendered
+terminal — gated by Cloudflare Access with service tokens for agent
+clients and SSO for humans. sshd remains key-only and bound to
+loopback/LAN. The dashboard and off-host audit mirror may be published
+only behind the same Access gate. A personal WireGuard/Tailscale mesh
+remains an optional complement for Brian's own devices; the standard
+agent path is the tunnel.
+
+Rationale:
+
+- Outbound-only ingress: nothing listens on the WAN and the home firewall
+  stays closed, which strengthens rather than weakens the no-inbound-port
+  posture.
+- Agent-friendly by construction: any sandbox with outbound 443 and the
+  small `cloudflared` binary can connect — no VPN membership, TUN device,
+  or device enrollment, which is exactly the shape cloud agent
+  environments have.
+- Revocation and audit at the edge: Access service tokens can be killed
+  per-client without touching the Pi, and Access logs every connection —
+  an off-host record that complements D030's blackbox mirror.
+- ProxyCommand mode keeps SSH end-to-end encrypted; Cloudflare transports
+  the stream but cannot read it.
