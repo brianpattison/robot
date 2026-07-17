@@ -41,7 +41,7 @@ supervised, and fully in charge. Below it, nothing negotiates.
 | E-stop, bumpers, watchdog, speed caps | Deterministic, non-LLM | Unchanged — and explicitly unreachable from the Pi |
 | No-go zones, quiet hours, supervision | Described as hard limits | Reclassified honestly as policy the agent is instructed to honor |
 | Identity | Codex only (old D005) | Pluggable seat: Claude or Codex, one narrator at a time (D031) |
-| Audit | Logs | Append-only command blackbox plus recorded agent shell sessions |
+| Audit | Logs | Command blackbox plus recorded agent sessions, streamed to an off-host mirror |
 
 ## The Hard Floor
 
@@ -53,6 +53,7 @@ does in software, including `rm -rf /`:
 | E-stop cuts motor power | IDEC XW1E direct-opening NC contacts in the Panasonic CB1A-R-M-12V relay coil path, hardware reset latch | No — physical |
 | Bumper hit stops motion | Safety MCU firmware; six normally-closed Omron D2HW loops; any open loop is a latched stop | Latch clear only, rate-limited in firmware |
 | Watchdog timeout stops motion | Safety MCU firmware; stale heartbeat de-energizes motor enable | No |
+| Motion setpoints expire | Safety MCU firmware; every nonzero setpoint carries a short lease and zeros unless refreshed — a heartbeat alone never sustains motion | No |
 | Velocity and acceleration caps (0.35 m/s MVP) | Safety MCU firmware clamps every setpoint before the MDDS10 | No — new values require reflashing with physical access |
 | Charger inserted inhibits motion | `CHARGER_PRESENT` into the deterministic enable path; removal never auto-restarts | No |
 | Low-battery motor cutoff | Safety MCU firmware | No |
@@ -64,6 +65,13 @@ Pico 2) is wired, not because of software courtesy:
 - The Pi-to-Pico link is a framed UART protocol whose command set contains
   motion setpoints, latch-clear requests, heartbeat, and status queries —
   and no flash, bootloader, or config-write commands at all.
+- Nonzero motion setpoints expire in firmware (proposed 250 ms lease)
+  unless refreshed. The heartbeat proves the host is alive; only a fresh
+  setpoint stream keeps wheels turning. A behavior that crashes mid-drive
+  coasts to a leased stop even while the rest of the Pi stays healthy.
+- The firmware cannot tell who is talking. Any process that holds the
+  serial port and speaks the contract is "the Pi" to the MCU — the floor
+  binds all clients equally and vouches for none of them.
 - The Pico's USB and SWD interfaces are service corridors only. They are
   never cabled to the Pi in normal operation, so the Pi cannot reboot the
   Pico into its bootloader. Reflashing the firmware means opening the robot
@@ -133,15 +141,23 @@ to it.
   and the agent.
 
 `robotd` holds the serial port exclusively and emits the firmware heartbeat
-only while its own health checks pass. If the agent stops or breaks
-`robotd`, the heartbeat stops and the robot stops — motion requires a
-healthy body daemon by construction. The agent is free to take the serial
-port and speak the contract directly (full control means full control), but
-it then owns the heartbeat, loses the dashboard's eyes, and the blackbox
-records that it did so.
+only while its own health checks pass. It relays motion setpoints without
+refreshing them on behalf of a silent client, so a crashed behavior stops
+at the firmware lease even while the daemon stays healthy, and stopping
+`robotd` stops the robot in the ordinary case.
 
-Every command through `robotd` lands in an append-only blackbox log with
-timestamps and source, rotated and surfaced in the dashboard.
+That is a property of the default stack, not a guarantee against the agent
+itself: the firmware cannot distinguish `robotd`'s heartbeat from anyone
+else's, so an agent that takes the serial port and speaks the contract
+directly (full control means full control) can sustain motion on its own.
+Doing so is allowed, ends the dashboard's visibility, makes the agent the
+safety client of record, and is exactly the kind of move the off-host
+audit mirror exists to make visible. Anything `robotd` cannot vouch for,
+the firmware envelope still clamps.
+
+Every command through `robotd` lands in the blackbox log with timestamps
+and source, streamed live off-host as described under Observability. A
+Pi-local file alone is not the audit trail — the mirror is.
 
 ## Conversation Loop
 
@@ -193,10 +209,15 @@ so at a capped walking pace, bumps, stops, and gets audited.
 
 ## Observability
 
-- **Blackbox:** append-only log of every `robotd` command, latch event,
-  policy read, and firmware status change.
+- **Blackbox:** a log of every `robotd` command, latch event, policy read,
+  and firmware status change — streamed live to the dashboard client and
+  to an off-robot subscriber (a laptop, a NAS, anything not the Pi). The
+  Pi-local copy is convenience only: a sudo-capable agent can edit
+  anything stored on the Pi, so the trustworthy record is the off-host
+  mirror, and a gap or silence in that stream is itself a red flag.
 - **Session recording:** agent shell sessions recorded (auditd + tlog or
-  equivalent) and browsable from the dashboard.
+  equivalent) and browsable from the dashboard, shipped to the same
+  off-host mirror under the same rule.
 - **Dashboard agent panel:** live view of the resident session, recent
   actions, current behaviors, and a software stop button — supervision
   conveniences. The physical E-stop remains the only stop that is not a
@@ -209,8 +230,10 @@ so at a capped walking pace, bumps, stops, and gets audited.
   Keep a tested golden image from M0 onward.
 - Runaway behavior loop: firmware clamps speed, bumpers latch on contact,
   the latch-clear budget runs out, robot stays stopped.
-- Agent kills `robotd` deliberately: covered above — no heartbeat, no
-  motion, logged.
+- Agent kills `robotd` deliberately: no heartbeat, no motion — unless the
+  agent takes over the serial contract itself, which is allowed, visible
+  in the off-host mirror as a `robotd` outage, and makes the agent the
+  safety client of record. The firmware envelope binds it all the same.
 - Compromised or misbehaving seat: revoke its SSH key and the seat's API
   credentials, reflash the Pi. The blast radius of the agent account is the
   Pi, by design.
@@ -222,10 +245,15 @@ so at a capped walking pace, bumps, stops, and gets audited.
 - The agent's API credentials and any secrets it needs live in a store
   scoped to the `agent` user; the seat never needs Brian's accounts.
 - Privacy floor stays physical: the mute switch removes mic VBUS in
-  hardware and its red ring cannot be spoofed from software. Software
-  recording indicators are best-effort under full control; treat the
-  hardware ring as the trustworthy one, and consider hardwiring a
-  camera-power light as future hardening.
+  hardware and its red ring cannot be spoofed from software. For this to
+  be true with a USB mic array, the switch must be interposed in the USB
+  VBUS conductor between the Pi's port and the mic — an opened conductor
+  cannot be re-powered from software — and the existing backfeed release
+  gate applies in full: prove no data-line backfeed or residual capture
+  with VBUS removed before trusting the mute (mandatory at M0, per the
+  PRD and D019). Software recording indicators are best-effort under full
+  control; treat the hardware ring as the trustworthy one, and consider
+  hardwiring a camera-power light as future hardening.
 
 ## Milestone Deltas
 
@@ -235,26 +263,32 @@ so at a capped walking pace, bumps, stops, and gets audited.
   yet.
 - **M1 Rolling Chassis:** unchanged and still gates everything. The
   firmware envelope (clamps, watchdog kill test, all six NC bumper zones,
-  latch budget, E-stop, charger inhibit) passes bench tests before the
-  agent's first drive command. Agent is read-only telemetry until then.
+  latch budget, setpoint-lease expiry, E-stop, charger inhibit) passes
+  bench tests before the agent's first drive command. The agent is
+  read-only telemetry until then, enforced physically during
+  commissioning — motor branch isolated or wheels off the floor — not by
+  trusting software to abstain.
 - **M2 Senses And Speech:** the agent authors its first behaviors
   (`look_at_speaker`, `come_here`) in a prepared area, replacing "voice
   commands route to intents."
 - **M3/M4:** unchanged in intent; behaviors are agent-authored code.
 
 Additional acceptance checks: kill `robotd` under commanded motion and see
-the robot stop within the watchdog window; fill the latch-clear budget and
-confirm only physical reset recovers; verify the blackbox and session
-recording captured an entire agent-driven session; press the E-stop while
-the agent is driving.
+the robot stop within the watchdog window; kill a driving behavior while
+`robotd` stays healthy and see motion stop at the setpoint lease; fill the
+latch-clear budget and confirm only physical reset recovers; verify the
+off-host mirror captured an entire agent-driven session, blackbox and
+shell recording both; prove no mic capture with the hardware mute engaged
+and software running; press the E-stop while the agent is driving.
 
 ## Open Questions
 
 - Exact harness shape per seat (Claude Code headless vs Agent SDK service;
   Codex CLI equivalents), session cadence, and token budget for background
   turns.
-- Final heartbeat rate and watchdog timeout (proposed 20 Hz / 250 ms) and
-  the bumper latch-clear budget values.
+- Final heartbeat rate, watchdog timeout, and motion-setpoint lease
+  (proposed 20 Hz / 250 ms / 250 ms), and the bumper latch-clear budget
+  values.
 - Journal/memory privacy scoping and what syncs off-robot, now that the
   agent manages its own memory.
 - Whether the perception baseline (person tracking) ships preinstalled or

@@ -19,7 +19,7 @@ The agent seat is pluggable: Claude or Codex is the primary conversational and a
 
 ### Physical Control Layer
 
-- Safety microcontroller or dedicated motor controller.
+- Safety microcontroller: the Raspberry Pi Pico 2 baseline owns the watchdog, motion-setpoint leases, latched stops, and the motor-enable path (D032); the Cytron MDDS10 remains the motor driver, not the safety owner.
 - Motor enable relay or equivalent motor-power gate.
 - Encoder motor control for differential drive.
 - Bumper switches and optional cliff/drop sensors.
@@ -104,7 +104,7 @@ Motion commands pass through this chain:
 Agent command (robotd call, or code the agent wrote)
   -> robotd body daemon: blackbox logging, telemetry, heartbeat
   -> serial contract to the safety MCU
-  -> firmware envelope: clamps, watchdog, latched stops
+  -> firmware envelope: clamps, setpoint leases, watchdog, latched stops
   -> motor controller
   -> motors
 ```
@@ -310,7 +310,6 @@ shorted into an implausible state, stale, or untested after controller reset.
 
 ## Open Questions
 
-- Which motor controller and safety microcontroller should own the watchdog and motor enable line?
 - Should MVP use ROS 2 immediately, or start with simpler Python services and leave a ROS 2 migration path?
 - Which mic array gives the best wake word accuracy while the motors are running?
 - Do we want 2D LiDAR in the first rolling chassis, or only reserve the mount and power budget?

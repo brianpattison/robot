@@ -636,7 +636,8 @@ and service installs, direct velocity and head setpoints through the
 memory. The fixed high-level intent vocabulary is retired as the control
 boundary; the old intents survive only as the starter behavior library the
 agent inherits and rewrites. Every `robotd` command and agent shell session
-is captured in an append-only blackbox. See
+is captured in a blackbox streamed to an off-host mirror; a Pi-local copy
+alone is not trusted, since the agent has root on the Pi. See
 `docs/agentic-control-plan.md`.
 
 Rationale:
@@ -676,8 +677,11 @@ Status: accepted 2026-07-17 (Brian's direction)
 
 Refines D004, which stands. The deterministic floor is exactly: E-stop,
 normally-closed bumper loops with latched stops, watchdog, firmware
-velocity/acceleration clamps, charger-present motion inhibit, low-battery
-cutoff, and the hardware microphone mute. It is enforced by the safety MCU
+motion-setpoint leases (a nonzero setpoint zeros unless refreshed; a
+heartbeat alone never sustains motion), firmware velocity/acceleration
+clamps, charger-present motion inhibit, low-battery cutoff, and the
+hardware microphone mute wired into the USB VBUS conductor with the
+backfeed release gate. It is enforced by the safety MCU
 firmware and physical controls. The Pi-to-MCU link carries only the framed
 command/heartbeat protocol with no flash, bootloader, or config-write path;
 the Pico's USB/SWD are service corridors never cabled to the Pi in
