@@ -19,7 +19,10 @@ Current model scope:
   concept, replacing the earlier oversized peaked cuts), and mullioned
   fascia/rear openings — every sub-span <= 30 mm bridges cleanly and the
   mullions hide behind the fascia and rear panels.
-- Lid: seats in the recess; E-stop bore, mic slot field, vent slots.
+- Lid: complete white-PETG structural panel with the E-stop bore, mic slot
+  field, vent slots, and four blind pockets for an optional cosmetic skin.
+- Optional lid skin: thin PLA accent with copied airflow/acoustic openings,
+  generous E-stop/neck/screw clearance, and four captive shallow snap tabs.
 - Bumper C-halves (TPU): open-bottom U cross-section (D028 rule 8, no
   bridged cavities), wheel cutouts with concealed low inboard bridges
   keeping each half one piece; printed upside-down.
@@ -27,8 +30,9 @@ Current model scope:
   printed INBOARD-face-down so the axle rises axis-vertical (the
   audit caught the outboard-face-down idea standing on the axle tip).
 
-Still owed: insert bosses and the fastener system (Phase 3), speaker and
-ToF pockets, head parts, rear/fascia panels, controller tower, wheels.
+The current inventory includes every registered production solid plus the
+optional D034 lid skin. The validator remains the authority for connectivity,
+registered keepouts, family-aware mass/CG, bed fit, and zero-support geometry.
 
 Run from the repo root:
     .venv-cad/bin/python cad/python/robot_body_v2.py
@@ -44,8 +48,8 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 import robot_body_v2_inventory as inv  # noqa: E402
 from build123d import (  # noqa: E402
-    Axis, Box, Cylinder, Pos, Rot,
-    fillet, offset, Kind,
+    Align, Axis, Box, Cylinder, Pos, Rot, Text,
+    extrude, fillet, offset, Kind,
     export_step, export_stl,
 )
 
@@ -71,6 +75,11 @@ def rounded_slab(length, width, height, radius, z0):
     b = Box(length, width, height)
     b = fillet(b.edges().filter_by(Axis.Z), radius)
     return Pos(0, 0, z0 + height / 2) * b
+
+
+def material_mark(label: str, size: float = 4.0, depth: float = 0.35):
+    """Small hidden-face family mark for fixed-material parts."""
+    return extrude(Text(label, font_size=size, align=(Align.CENTER, Align.CENTER)), amount=depth)
 
 
 def build_tray():
@@ -220,6 +229,14 @@ def build_lid():
         lid -= Pos(inv.MIC[0], inv.MIC[1] - 30 + i * 7.5, inv.Z_TOP - LID_RECESS / 2) * Box(36, 3, LID_RECESS + 2)
     for i in range(5):
         lid -= Pos(60, -92 + i * 6.0, inv.Z_TOP - LID_RECESS / 2) * Box(50, 3, LID_RECESS + 2)
+    # Four blind, top-opening snap sockets for the optional cosmetic skin.
+    # The sockets do not penetrate the 4 mm lid, do not share any E-stop or
+    # lid screw load, and cannot shed a separate fastener into the bay.
+    for sx in (1, -1):
+        for sy in (1, -1):
+            x, y = sx * 90.0, sy * 82.0
+            lid -= Pos(x, y, inv.Z_TOP - 0.55) * Box(5.4, 1.55, 1.2)
+            lid -= Pos(x, y, inv.Z_TOP - 1.35) * Box(5.4, 2.05, 0.6)
     # Lid-joint clearance holes with top counterbores (3.2 mm clamp stack).
     for jx, jy in ((100, 90), (100, -90), (-100, 90), (-100, -90)):
         lid -= Pos(jx, jy, inv.Z_TOP - LID_RECESS / 2) * Cylinder(1.7, LID_RECESS + 2)
@@ -233,7 +250,41 @@ def build_lid():
     for jx, jy in ((30, -25), (90, -25)):
         lid += Pos(jx, jy, inv.Z_TOP - LID_RECESS - 3.0) * Cylinder(4.5, 6)
         lid -= Pos(jx, jy, inv.Z_TOP - LID_RECESS - 6.0 + 3.5) * Cylinder(2.3, 7)
+    lid += Pos(-70, -65, inv.Z_TOP - LID_RECESS + 0.05) * Rot(180, 0, 0) * material_mark("PETG")
     return lid
+
+
+def build_lid_skin():
+    """Optional cosmetic-only PLA accent over the complete PETG lid.
+
+    It has no path into the E-stop clamp, neck, microphone cradle, or lid
+    screws. Four integral shallow snap tabs enter blind PETG sockets; there
+    are no loose clips or adhesives inside the electronics bay.
+    """
+    skin_h = 1.2
+    skin = rounded_slab(210.0, 190.0, skin_h, 16.0, inv.Z_TOP)
+    # Purchased controls, neck sweep, and lid fasteners remain exposed.
+    skin -= Pos(inv.ESTOP[0], inv.ESTOP[1], inv.Z_TOP + skin_h / 2) * Cylinder(35.0, skin_h + 2)
+    skin -= Pos(P.neck_x, 0, inv.Z_TOP + skin_h / 2) * Cylinder(32.0, skin_h + 2)
+    for jx, jy in ((100, 90), (100, -90), (-100, 90), (-100, -90)):
+        skin -= Pos(jx, jy, inv.Z_TOP + skin_h / 2) * Cylinder(5.5, skin_h + 2)
+    # Copy every microphone and vent opening so the skin cannot silently
+    # become a teal acoustic blanket or a tiny heat-retention experiment.
+    for i in range(9):
+        skin -= Pos(inv.MIC[0], inv.MIC[1] - 30 + i * 7.5, inv.Z_TOP + skin_h / 2) * Box(36, 3, skin_h + 2)
+    for i in range(5):
+        skin -= Pos(60, -92 + i * 6.0, inv.Z_TOP + skin_h / 2) * Box(50, 3, skin_h + 2)
+    # Cantilever-like shallow friction snaps with a 0.25 mm retention bead.
+    # They point up in the declared top-face-down print pose.
+    for sx in (1, -1):
+        for sy in (1, -1):
+            x, y = sx * 90.0, sy * 82.0
+            skin += Pos(x, y, inv.Z_TOP + 0.05) * Box(6.0, 3.0, 0.4)
+            skin += Pos(x, y, inv.Z_TOP - 0.5) * Box(5.0, 1.25, 1.2)
+            skin += Pos(x, y, inv.Z_TOP - 1.0) * Box(5.0, 1.75, 0.3)
+    # Recessed underside mark: visible only when the optional skin is off.
+    skin -= Pos(-60, 68, inv.Z_TOP - 0.05) * material_mark("PLA")
+    return skin
 
 
 def _bumper_ring():
@@ -290,6 +341,7 @@ def build_fascia():
     # Status diffuser slots (lime bars mount behind).
     for sy in (1, -1):
         plate -= Pos(-(inv.BODY_L / 2 - 0.75), sy * 30.0, 116.0) * Box(3, 10, 5)
+    plate += Pos(-(inv.BODY_L / 2 - 1.45), 0, 96.0) * Rot(0, 90, 0) * material_mark("PLA")
     return plate
 
 
@@ -299,6 +351,7 @@ def build_rear_panel():
         P.charge_jack_cutout_diameter / 2, 4, rotation=(0, 90, 0))
     plate -= Pos(inv.BODY_L / 2 - 0.75, -35.0, 130.0) * Cylinder(
         P.mute_switch_cutout_diameter / 2, 4, rotation=(0, 90, 0))
+    plate += Pos(inv.BODY_L / 2 - 1.45, 0, 111.0) * Rot(0, -90, 0) * material_mark("PLA")
     return plate
 
 
@@ -578,6 +631,7 @@ def primary_solids():
         "tray_v2": build_tray(),
         "shell_v2": build_shell(),
         "lid_v2": build_lid(),
+        "lid_skin_v2": build_lid_skin(),
         "bumper_front_v2": build_bumper_half(front=True),
         "bumper_rear_v2": build_bumper_half(front=False),
         "front_pod_left_v2": build_front_pod(left=True),
@@ -615,6 +669,7 @@ PRINT_UP = {
     "tray_v2": (0, 0, 1),            # flat, bottom down
     "shell_v2": (0, 0, 1),           # upright, open bottom down
     "lid_v2": (0, 0, -1),            # top face down
+    "lid_skin_v2": (0, 0, -1),       # top face down; snap tabs build upward
     "bumper_front_v2": (0, 0, -1),   # upside down: U opens up on the bed
     "bumper_rear_v2": (0, 0, -1),
     "front_pod_left_v2": (0, -1, 0),   # inboard face down, axle rises vertically

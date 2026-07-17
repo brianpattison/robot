@@ -62,6 +62,46 @@ def check_registry():
     for p in inv.PRINTED_PARTS:
         if not p.orientation or not p.justification:
             FAILS.append(f"registry: printed part '{p.name}' missing orientation/justification")
+        if p.material_family not in inv.MATERIAL_FAMILIES:
+            FAILS.append(f"D034 material: '{p.name}' has invalid family {p.material_family}")
+        if p.mechanical_role not in inv.MECHANICAL_ROLES:
+            FAILS.append(f"D034 material: '{p.name}' has invalid role {p.mechanical_role}")
+        if p.color_slot not in inv.DEFAULT_THEME:
+            FAILS.append(f"D034 material: '{p.name}' has unknown color slot {p.color_slot}")
+        if p.qualification not in inv.QUALIFICATION_POLICIES:
+            FAILS.append(f"D034 material: '{p.name}' has invalid qualification {p.qualification}")
+        if p.qualification_status not in inv.QUALIFICATION_STATUSES:
+            FAILS.append(f"D034 material: '{p.name}' has invalid qualification status {p.qualification_status}")
+        if p.qualification == "fixed-PETG" and p.material_family != "PETG":
+            FAILS.append(f"D034 material: fixed-PETG part '{p.name}' requests {p.material_family}")
+        if p.effective_material_family == "PETG" and p.effective_color_slot not in inv.PETG_COLOR_SLOTS:
+            FAILS.append(f"D034 material: PETG part '{p.name}' uses non-white/black/red slot {p.effective_color_slot}")
+        if p.material_family == "TPU" and not (p.mechanical_role == "flexible" and p.color_slot == "flexible_dark"):
+            FAILS.append(f"D034 material: TPU part '{p.name}' changed role/color policy")
+        if p.material_family == "PLA" and p.qualification_status == "not-required":
+            FAILS.append(f"D034 evidence: PLA part '{p.name}' must expose an open or passed exact-family gate")
+        if p.qualification == "physical-gate-required":
+            if not p.fallback_material_family or not p.fallback_color_slot:
+                FAILS.append(f"D034 material: gated part '{p.name}' lacks automatic fallback")
+            if p.qualification_status != "passed" and p.effective_material_family != "PETG":
+                FAILS.append(f"D034 material: unqualified '{p.name}' did not fall back to PETG")
+    for required in ("shell", "head_shell"):
+        p = inv.PART_BY_NAME[required]
+        if p.qualification_status == "passed":
+            WARNS.append(f"D034 evidence: {required} marked passed; verify the recorded exact-filament evidence")
+        elif p.effective_color_slot != "structure_light":
+            FAILS.append(f"D034 material: open-gate {required} must fall back to white PETG")
+    expected_tpu = {"bumper_half", "tire", "battery_pad_frame"}
+    actual_tpu = {p.name for p in inv.PRINTED_PARTS if p.material_family == "TPU"}
+    if actual_tpu != expected_tpu:
+        FAILS.append(f"D034 material: TPU inventory changed ({sorted(actual_tpu)})")
+    skin = inv.PART_BY_NAME.get("lid_skin")
+    if not skin or not skin.optional or skin.functional_installed_qty:
+        FAILS.append("D034 inventory: lid_skin must remain optional and outside the functional budget")
+    if any("lid_skin" in j.name for j in inv.JOINTS):
+        FAILS.append("D034 E-stop: optional lid skin must not own a structural joint")
+    if inv.SUPPORT_EXCEPTIONS:
+        FAILS.append(f"D028 supports: exception list must stay empty ({sorted(inv.SUPPORT_EXCEPTIONS)})")
     draft, after, budget = inv.budget_report()
     if after > budget:
         FAILS.append(f"D028 budget: {after} parts after owed merges > budget {budget}")
@@ -180,7 +220,8 @@ def check_overhangs(solids):
 def check_mass_cg(solids):
     total, mx, my, mz = 0.0, 0.0, 0.0, 0.0
     for name, solid in solids.items():
-        rho = inv.TPU_EFF_DENSITY if name in inv.TPU_SOLIDS else inv.PETG_EFF_DENSITY
+        family = inv.part_for_solid(name).effective_material_family
+        rho = inv.EFFECTIVE_DENSITY[family]
         n = inv.SOLID_INSTANCES.get(name, 1)
         m = solid.volume * rho * n
         c = solid.center()

@@ -50,6 +50,7 @@ PROFILE_ROOT = DEFAULT_PROFILE_ROOT
 MACHINE_PROFILE = PROFILE_ROOT / "machine" / "Bambu Lab P1S 0.4 nozzle.json"
 PROCESS_PROFILE = PROFILE_ROOT / "process" / "0.20mm Standard @BBL X1C.json"
 PETG_PROFILE = PROFILE_ROOT / "filament" / "Generic PETG HF @BBL P1S 0.4 nozzle.json"
+PLA_PROFILE = PROFILE_ROOT / "filament" / "Bambu PLA Basic @BBL P1S 0.4 nozzle.json"
 TPU_PROFILE = PROFILE_ROOT / "filament" / "Bambu TPU 95A HF @BBL P1S.json"
 
 BED_SIZE = 256.0
@@ -108,13 +109,14 @@ def fail(message: str) -> None:
 def configure_bambu_paths(cli: Path, profile_root: Path) -> None:
     """Configure an installed official Bambu Studio CLI and its BBL profiles."""
     global BAMBU_CLI, PROFILE_ROOT
-    global MACHINE_PROFILE, PROCESS_PROFILE, PETG_PROFILE, TPU_PROFILE
+    global MACHINE_PROFILE, PROCESS_PROFILE, PETG_PROFILE, PLA_PROFILE, TPU_PROFILE
 
     BAMBU_CLI = cli.expanduser()
     PROFILE_ROOT = profile_root.expanduser()
     MACHINE_PROFILE = PROFILE_ROOT / "machine" / "Bambu Lab P1S 0.4 nozzle.json"
     PROCESS_PROFILE = PROFILE_ROOT / "process" / "0.20mm Standard @BBL X1C.json"
     PETG_PROFILE = PROFILE_ROOT / "filament" / "Generic PETG HF @BBL P1S 0.4 nozzle.json"
+    PLA_PROFILE = PROFILE_ROOT / "filament" / "Bambu PLA Basic @BBL P1S 0.4 nozzle.json"
     TPU_PROFILE = PROFILE_ROOT / "filament" / "Bambu TPU 95A HF @BBL P1S.json"
 
 
@@ -124,6 +126,7 @@ def validate_environment() -> None:
         MACHINE_PROFILE,
         PROCESS_PROFILE,
         PETG_PROFILE,
+        PLA_PROFILE,
         TPU_PROFILE,
         MANIFEST_PATH,
     ]
@@ -280,15 +283,21 @@ def build_layout(manifest: dict) -> list[dict]:
     for group in sorted(groups, key=group_key):
         group_plates = pack_group(group, groups[group], parts)
         material_profile, color_profile = group.split(":", 1)
-        material = "TPU 95A" if material_profile == "tpu_95a" else "PETG"
+        material = manifest["material_profiles"][material_profile]["material"]
         color_label = color_profile.replace("_", " ").title()
         role_label = {
             "petg_structural": "Structural",
             "petg_shell": "Shell",
             "petg_detail": "Detail",
             "translucent_petg": "Diffuser",
+            "pla_visible": "Visible",
+            "pla_qualified_enclosure": "Qualified Enclosure",
+            "pla_optical": "Optical",
+            "petg_structure": "Structure",
+            "petg_wear": "Wear",
+            "petg_service": "Service",
             "tpu_95a": "Flexible",
-        }[material_profile]
+        }.get(material_profile, material_profile.replace("_", " ").title())
         for index, placements in enumerate(group_plates, start=1):
             suffix = f" {index} of {len(group_plates)}" if len(group_plates) > 1 else ""
             layout.append(
@@ -364,8 +373,9 @@ def flatten_filament_profile(source: Path, output: Path, filament: dict) -> None
             "instantiation": "true",
             "compatible_printers": ["Bambu Lab P1S 0.4 nozzle"],
             "filament_colour": [filament["color_hex"], filament["color_hex"]],
-            "filament_type": ["TPU" if material.startswith("TPU") else "PETG"] * 2,
-            "filament_vendor": ["Bambu Lab" if material.startswith("TPU") else "Generic"] * 2,
+            "filament_type": ["TPU" if material.startswith("TPU") else
+                              "PLA" if "PLA" in material else "PETG"] * 2,
+            "filament_vendor": ["Bambu Lab" if material.startswith("TPU") or "PLA" in material else "Generic"] * 2,
         }
     )
     output.write_text(json.dumps(resolved, indent=2) + "\n", encoding="utf-8")
@@ -377,7 +387,9 @@ def run_bambu_import(manifest: dict, layout: list[dict], temp_dir: Path) -> Path
     flattened = []
     for index, filament in enumerate(filaments, start=1):
         output = temp_dir / f"filament_{index:02d}.json"
-        source = TPU_PROFILE if filament["material"].startswith("TPU") else PETG_PROFILE
+        material = filament["material"]
+        source = (TPU_PROFILE if material.startswith("TPU") else
+                  PLA_PROFILE if "PLA" in material else PETG_PROFILE)
         flatten_filament_profile(source, output, filament)
         flattened.append(output)
 
@@ -635,6 +647,8 @@ def write_plate_manifest(output: Path, manifest: dict, layout: list[dict]) -> No
         "color_profiles": manifest["color_profiles"],
         "plates": [],
     }
+    if "inventory_counts" in manifest:
+        payload["inventory_counts"] = manifest["inventory_counts"]
     for plate in layout:
         profile = manifest["material_profiles"][plate["material_profile"]]
         payload["plates"].append(
@@ -655,6 +669,14 @@ def write_plate_manifest(output: Path, manifest: dict, layout: list[dict]) -> No
                         "span_xy_mm": [round(p.span_x, 3), round(p.span_y, 3)],
                         "brim_mm": p.brim_mm,
                         "release_status": manifest["parts"][p.name]["release_status"],
+                        **{
+                            key: manifest["parts"][p.name][key]
+                            for key in (
+                                "registry_part", "mechanical_role", "requested_material_family",
+                                "effective_material_family", "qualification", "qualification_status", "optional",
+                            )
+                            if key in manifest["parts"][p.name]
+                        },
                     }
                     for p in plate["placements"]
                 ],

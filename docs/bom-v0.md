@@ -122,11 +122,14 @@ See [`retail-sourcing-policy.md`](retail-sourcing-policy.md) for the live audit.
 
 | Item | Qty | Status | Est. subtotal | Notes |
 | --- | ---: | --- | ---: | --- |
-| PETG filament | 1-2 kg | Consumable | $25-$60 | Main chassis, trays, mounts, service panels. |
-| PLA filament | 1 kg | Consumable | $15-$30 | Fast fit-check prints before PETG. |
-| TPU filament or foam/rubber bumper material | 1 | Consumable | $20-$50 | Soft bumper carrier and impact padding. |
-| M3 x 5.7 x 4.6 OD heat-set inserts, 100-pack | 1 | Buy now (v2 baseline, D026) | $12-$20 | The ONLY insert SKU in the v2 printed-only body (~30 used + spares). Supersedes the old M2.5/M3/M4 kit. |
-| M3 x 8 socket head cap screws (ISO 4762), 100-pack | 1 | Buy now (v2 baseline, D026) | $8-$15 | The ONLY separately purchased screw SKU (~30 used + spares); one 2.5 mm hex key drives the robot. Supersedes the old multi-size assortment and all metal standoffs/spacers. |
+| White PETG filament | 1 kg | v2 prototype baseline (D034) | $20-$35 | Tray, structural lid, deck/tower/clamps, neck/collar, plus automatic shell/head fallback while their exact PLA gates remain open. Confirm the slicer estimate before buying. |
+| Black PETG filament | 0.5 kg | v2 prototype baseline (D034) | $15-$30 | Wheels, pods, washers, pan plate, yoke, and tilt bushing: every motion/wear part. |
+| Red PETG filament | Small spool | v2 prototype baseline (D034) | $15-$30 | Battery, Pico, and motor retainers. Red is a service convention, not a safety label substitute. |
+| Visible PLA / PLA+ | Existing collection or small spools | Prototype; exact-family coupons required | $0-$30 | Dark fascia/rear/head panels and optional teal lid skin. Standard or credible PLA+ may enter the shell/head qualification path; effect PLAs stay cosmetic-only by default. |
+| Translucent PLA | Smallest available spool | Prototype optical gate open | $15-$30 | Eye and status diffusers after brightness, hot-spot, camera-flare, clip, and LED-temperature checks. |
+| Charcoal TPU 95A | 0.5 kg | v2 prototype baseline | $20-$50 | Tires, front/rear bumper halves, and battery pad frame. |
+| M3 x 5.7 x 4.6 OD heat-set inserts, 100-pack | 1 | Buy now (v2 baseline, D026) | $12-$20 | The ONLY insert SKU in the v2 printed-only body (41 used + spares). Supersedes the old M2.5/M3/M4 kit. |
+| M3 x 8 socket head cap screws (ISO 4762), 100-pack | 1 | Buy now (v2 baseline, D026) | $8-$15 | The ONLY separately purchased screw SKU (41 used + spares); one 2.5 mm hex key drives the robot. Supersedes the old multi-size assortment and all metal standoffs/spacers. |
 | Cable glands, zip ties, ferrules, heat-shrink | 1 set | Buy now | $15-$50 | Cable management is robot hygiene. |
 | Rubber feet/pads and anti-vibration tape | 1 set | Buy now | $5-$25 | Useful for audio and electronics isolation. |
 

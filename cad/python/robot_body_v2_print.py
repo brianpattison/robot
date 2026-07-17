@@ -3,7 +3,8 @@
 Rotates every primary solid into its DECLARED print pose (the same
 `PRINT_UP` vectors the D028 overhang audit runs against), grounds it on
 the bed at Z=0, re-verifies bed fit in-pose, and writes oriented STLs
-plus `codex_robot_body_v2_print_manifest.json` — quantity, material, and
+plus `codex_robot_body_v2_print_manifest.json` — quantity, requested and
+effective material, mechanical role, color slot, qualification status, and
 orientation notes from the printed-part registry, with supports "none"
 across the entire inventory (any exception would need a named entry in
 the D028 exception list, which is empty).
@@ -30,26 +31,6 @@ from build123d import Axis, Pos, export_stl  # noqa: E402
 
 EXPORT_DIR = Path(__file__).resolve().parents[2] / "cad" / "exports" / "v2" / "print_ready"
 BED_XY = 240.0
-
-# Solid name -> printed-part registry name.
-REGISTRY_MAP = {
-    "tray_v2": "tray", "shell_v2": "shell", "lid_v2": "lid",
-    "bumper_front_v2": "bumper_half", "bumper_rear_v2": "bumper_half",
-    "front_pod_left_v2": "front_pod", "front_pod_right_v2": "front_pod",
-    "fascia_v2": "fascia", "rear_panel_v2": "rear_panel",
-    "controller_tower_v2": "controller_tower", "rear_wheel_v2": "wheel_core_rear",
-    "front_wheel_v2": "wheel_front", "tire_v2": "tire",
-    "head_shell_v2": "head_shell", "head_faceplate_v2": "head_faceplate",
-    "neck_v2": "neck", "bayonet_collar_v2": "bayonet_collar",
-    "head_pan_plate_v2": "head_pan_plate", "motor_cap_v2": "motor_clamp_cap",
-    "battery_clamp_v2": "battery_clamp_bar", "deck_v2": "deck",
-    "mic_cradle_v2": "mic_cradle", "speaker_clamp_v2": "speaker_clamp_bar",
-    "tof_clamp_v2": "tof_side_clamp", "pico_clamp_v2": "pico_clamp_bar",
-    "battery_pad_frame_v2": "battery_pad_frame", "yoke_v2": "yoke",
-    "tilt_bushing_v2": "tilt_bushing", "eye_diffuser_bar_v2": "eye_diffuser_bar",
-    "status_diffuser_bar_v2": "status_diffuser_bar", "printed_washer_v2": "printed_washer_set",
-}
-
 
 def to_print_pose(solid, up):
     """Rotate so the declared UP vector becomes +Z, then ground at Z=0."""
@@ -85,12 +66,21 @@ def main():
             print(f"BED FAIL: {name} {bb.size.X:.1f} x {bb.size.Y:.1f} in print pose")
             problems += 1
         export_stl(posed, str(EXPORT_DIR / f"{name}_print.stl"))
-        reg = registry.get(REGISTRY_MAP.get(name, ""))
-        covered.add(REGISTRY_MAP.get(name, ""))
+        registry_name = inv.SOLID_TO_REGISTRY.get(name)
+        reg = registry.get(registry_name or "")
+        covered.add(registry_name or "")
         manifest["parts"][name] = {
-            "registry_part": REGISTRY_MAP.get(name),
+            "registry_part": registry_name,
             "qty": reg.qty if reg else 1,
-            "material": reg.material if reg else "PETG",
+            "functional_installed_qty": reg.functional_installed_qty if reg else 1,
+            "optional": reg.optional if reg else False,
+            "requested_material_family": reg.material_family if reg else "PETG",
+            "effective_material_family": reg.effective_material_family if reg else "PETG",
+            "mechanical_role": reg.mechanical_role if reg else "structure",
+            "requested_color_slot": reg.color_slot if reg else "structure_light",
+            "effective_color_slot": reg.effective_color_slot if reg else "structure_light",
+            "qualification": reg.qualification if reg else "fixed-PETG",
+            "qualification_status": reg.qualification_status if reg else "not-required",
             "orientation": reg.orientation if reg else "as exported",
             "supports": "none",
             "print_span_mm": [round(bb.size.X, 1), round(bb.size.Y, 1), round(bb.size.Z, 1)],
@@ -99,7 +89,20 @@ def main():
     for p in inv.PRINTED_PARTS:
         if p.name not in covered:
             manifest["pending"].append({"registry_part": p.name, "qty": p.qty,
-                                        "material": p.material, "orientation": p.orientation})
+                                        "requested_material_family": p.material_family,
+                                        "effective_material_family": p.effective_material_family,
+                                        "mechanical_role": p.mechanical_role,
+                                        "effective_color_slot": p.effective_color_slot,
+                                        "optional": p.optional,
+                                        "orientation": p.orientation})
+    functional, spares, optional, total = inv.inventory_report()
+    manifest["inventory_counts"] = {
+        "functional_installed": functional,
+        "spares": spares,
+        "optional_cosmetics": optional,
+        "total_printed": total,
+    }
+    manifest["theme"] = inv.DEFAULT_THEME
     screws, inserts = inv.fastener_tally()
     manifest["fasteners"] = {"screws": f"{screws} x {inv.FASTENER['screw']}",
                              "inserts": f"{inserts} x {inv.FASTENER['insert']}"}

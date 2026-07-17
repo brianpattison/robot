@@ -4,7 +4,7 @@ This module is the single source of truth for the v2 layout's envelopes
 and the printed-part registry. It is consumed by:
 
 - `packing_study_printed_only.py` — the box-level screen (today);
-- `robot_body_v2.py` — the v2 BREP packing model (forthcoming);
+- `robot_body_v2.py` — the v2 BREP production/prototype geometry;
 - `validate_robot_body_v2.py` — the inventory-driven validator
   (forthcoming), whose contract is that an envelope absent from THIS
   registry is itself a failure.
@@ -253,64 +253,154 @@ def boxes():
 
 
 # ---------------------------------------------------------------------------
-# Printed-part registry (D028): draft v2 inventory with owed merges.
+# Printed-part registry (D028/D034): production inventory, material policy,
+# and optional cosmetics. Material family, mechanical role, and visible color
+# are deliberately separate; "teal PETG" is no longer a material science
+# category invented by a cheerful little rover.
 # ---------------------------------------------------------------------------
 PART_BUDGET = 40
+
+MATERIAL_FAMILIES = {"PLA", "PETG", "TPU"}
+MECHANICAL_ROLES = {
+    "visible_cosmetic", "qualified_enclosure", "structure",
+    "wear_motion", "safety_service", "flexible", "optical",
+}
+QUALIFICATION_POLICIES = {"direct", "physical-gate-required", "fixed-PETG"}
+QUALIFICATION_STATUSES = {"not-required", "open", "passed"}
+
+# Theme slots control appearance only. They never authorize a material-family
+# change. Production PETG is intentionally restricted to white/black/red.
+DEFAULT_THEME = {
+    "body_primary": {"name": "Cream", "hex": "#F0DEC2", "role": "visible body and qualified head"},
+    "top_accent": {"name": "Teal", "hex": "#0B8392", "role": "optional cosmetic lid skin"},
+    "dark_panel": {"name": "Charcoal", "hex": "#15171B", "role": "visible panels and faceplate"},
+    "light_diffuser": {"name": "Translucent lime", "hex": "#D7FF52", "role": "eye and status diffusers"},
+    "structure_light": {"name": "White", "hex": "#F2F2EE", "role": "general PETG structure"},
+    "structure_wear": {"name": "Black", "hex": "#15171B", "role": "PETG motion and wear structure"},
+    "safety_service": {"name": "Red", "hex": "#C51E2A", "role": "PETG service retainers"},
+    "flexible_dark": {"name": "Charcoal", "hex": "#15171B", "role": "TPU impact and traction"},
+}
+PETG_COLOR_SLOTS = {"structure_light", "structure_wear", "safety_service"}
+SUPPORT_EXCEPTIONS: dict[str, str] = {}
 
 @dataclass(frozen=True)
 class PrintedPart:
     name: str
     qty: int
-    material: str        # "PETG" | "TPU" | "PETG-lime" | "PETG-dark"
+    material_family: str  # requested family: PLA | PETG | TPU
+    mechanical_role: str
+    color_slot: str
+    qualification: str    # direct | physical-gate-required | fixed-PETG
     orientation: str     # declared print orientation (D028 audits run in it)
     justification: str   # why this exists as a separate part
+    qualification_status: str = "not-required"
+    fallback_material_family: str = ""
+    fallback_color_slot: str = ""
+    installed_qty: int | None = None
+    optional: bool = False
     merge_candidate: str = ""  # non-empty: owed merge target to reach the budget
+
+    @property
+    def effective_material_family(self) -> str:
+        if self.qualification == "physical-gate-required" and self.qualification_status != "passed":
+            return self.fallback_material_family
+        return self.material_family
+
+    @property
+    def effective_color_slot(self) -> str:
+        if self.qualification == "physical-gate-required" and self.qualification_status != "passed":
+            return self.fallback_color_slot
+        return self.color_slot
+
+    @property
+    def functional_installed_qty(self) -> int:
+        if self.optional:
+            return 0
+        return self.qty if self.installed_qty is None else self.installed_qty
+
+    @property
+    def spare_qty(self) -> int:
+        if self.optional:
+            return 0
+        return self.qty - self.functional_installed_qty
 
 
 PP = PrintedPart
 PRINTED_PARTS = [
-    PP("tray", 1, "PETG", "flat, bottom down",
+    PP("tray", 1, "PETG", "structure", "structure_light", "fixed-PETG", "flat, bottom down",
        "structural floor: motor saddles, switch pockets, battery cradle, pico bosses, deck towers"),
-    PP("shell", 1, "PETG", "upright, open bottom down",
-       "one-piece exterior; separate from tray for assembly access (arches, speaker pockets, ToF pockets, pod shrouds integrated)"),
-    PP("lid", 1, "PETG-teal", "top face down",
+    PP("shell", 1, "PLA", "qualified_enclosure", "body_primary", "physical-gate-required", "upright, open bottom down",
+       "one-piece exterior; separate from tray for assembly access (arches, speaker pockets, ToF pockets, pod shrouds integrated)",
+       qualification_status="open", fallback_material_family="PETG", fallback_color_slot="structure_light"),
+    PP("lid", 1, "PETG", "structure", "structure_light", "fixed-PETG", "top face down",
        "roof service access; vent slots print directly; integrated E-stop backing collar "
        "AND the lid itself is the IDEC clamp panel (4 mm within the 0.8-6 range; "
        "mount-panel part merged away)"),
-    PP("bumper_half", 2, "TPU", "flat, open-bottom U", "compliance + material change + bed length"),
-    PP("rear_panel", 1, "PETG-dark", "flat", "connector service and independent reprintability"),
-    PP("fascia", 1, "PETG-dark", "flat",
-       "sensor service + color break; front ToF and status NeoPixel pockets integrated (merge executed)"),
-    PP("deck", 1, "PETG", "flat, ribs up", "removable power/service deck; harness ribs + fuse saddles integrated"),
-    PP("controller_tower", 1, "PETG", "flat", "MDDS10 plate + Pi shelf towers as one service module"),
-    PP("pico_clamp_bar", 1, "PETG", "flat", "safety-MCU capture on tray bosses"),
-    PP("battery_clamp_bar", 1, "PETG", "flat", "battery service (replaces straps, D025)"),
-    PP("battery_pad_frame", 1, "TPU", "flat", "material change: compliant pack interface"),
-    PP("wheel_core_rear", 2, "PETG", "axis vertical", "wear part; D-bore calibration interface"),
-    PP("tire", 4, "TPU", "flat ring", "material change; shared profile front/rear"),
-    PP("wheel_front", 2, "PETG", "axis vertical",
+    PP("lid_skin", 1, "PLA", "visible_cosmetic", "top_accent", "direct", "top face down",
+       "optional tool-free cosmetic skin; the complete PETG lid remains the sole E-stop/head/mic load path",
+       qualification_status="open", installed_qty=0, optional=True),
+    PP("bumper_half", 2, "TPU", "flexible", "flexible_dark", "direct", "flat, open-bottom U", "compliance + material change + bed length"),
+    PP("rear_panel", 1, "PLA", "visible_cosmetic", "dark_panel", "direct", "flat", "connector service and independent reprintability", qualification_status="open"),
+    PP("fascia", 1, "PLA", "visible_cosmetic", "dark_panel", "direct", "flat",
+       "sensor service + color break; front ToF and status NeoPixel pockets integrated (merge executed)", qualification_status="open"),
+    PP("deck", 1, "PETG", "structure", "structure_light", "fixed-PETG", "flat, ribs up", "removable power/service deck; harness ribs + fuse saddles integrated"),
+    PP("controller_tower", 1, "PETG", "structure", "structure_light", "fixed-PETG", "flat", "MDDS10 plate + Pi shelf towers as one service module"),
+    PP("pico_clamp_bar", 1, "PETG", "safety_service", "safety_service", "fixed-PETG", "flat", "safety-MCU capture on tray bosses"),
+    PP("battery_clamp_bar", 1, "PETG", "safety_service", "safety_service", "fixed-PETG", "flat", "battery service (replaces straps, D025)"),
+    PP("battery_pad_frame", 1, "TPU", "flexible", "flexible_dark", "direct", "flat", "material change: compliant pack interface"),
+    PP("wheel_core_rear", 2, "PETG", "wear_motion", "structure_wear", "fixed-PETG", "axis vertical", "wear part; D-bore calibration interface"),
+    PP("tire", 4, "TPU", "flexible", "flexible_dark", "direct", "flat ring", "material change; shared profile front/rear"),
+    PP("wheel_front", 2, "PETG", "wear_motion", "structure_wear", "fixed-PETG", "axis vertical",
        "wear part; bore is the bearing surface (bushing merged into the wheel; worn wheel = reprint)"),
-    PP("front_pod", 2, "PETG", "inboard face down (axle rises vertical)",
+    PP("front_pod", 2, "PETG", "wear_motion", "structure_wear", "fixed-PETG", "inboard face down (axle rises vertical)",
        "orientation conflict with the flat-printed tray: the stub axle must print axis-vertical"),
-    PP("printed_washer_set", 6, "PETG", "flat",
-       "plan rule 4: printed washers under screw heads on TPU/soft parts and the axle-end retainers"),
-    PP("motor_clamp_cap", 2, "PETG", "flat", "motor service without tray removal"),
-    PP("speaker_clamp_bar", 2, "PETG", "flat", "speaker capture in shell side pockets"),
-    PP("mic_cradle", 1, "PETG", "flat", "mic array service under the lid slots"),
-    PP("tof_side_clamp", 2, "PETG", "flat", "side ToF capture in shell pockets"),
-    PP("head_shell", 1, "PETG", "open face down", "one-piece head enclosure (v1 front/rear covers merged)"),
-    PP("head_pan_plate", 1, "PETG", "flat", "underside service plate; pan servo mounts here"),
-    PP("head_faceplate", 1, "PETG-dark", "flat, face down",
-       "color break + fused camera annulus + camera pocket and eye NeoPixel pockets (merges executed)"),
-    PP("neck", 1, "PETG", "flange down", "rotating pan structure with cable corridor"),
-    PP("bayonet_collar", 1, "PETG", "flat",
+    PP("printed_washer_set", 6, "PETG", "wear_motion", "structure_wear", "fixed-PETG", "flat",
+       "plan rule 4: printed washers under screw heads on TPU/soft parts and the axle-end retainers",
+       installed_qty=2),
+    PP("motor_clamp_cap", 2, "PETG", "safety_service", "safety_service", "fixed-PETG", "flat", "motor service without tray removal"),
+    PP("speaker_clamp_bar", 2, "PETG", "structure", "structure_light", "fixed-PETG", "flat", "speaker capture in shell side pockets"),
+    PP("mic_cradle", 1, "PETG", "structure", "structure_light", "fixed-PETG", "flat", "mic array service under the lid slots"),
+    PP("tof_side_clamp", 2, "PETG", "structure", "structure_light", "fixed-PETG", "flat", "side ToF capture in shell pockets"),
+    PP("head_shell", 1, "PLA", "qualified_enclosure", "body_primary", "physical-gate-required", "open face down", "one-piece head enclosure (v1 front/rear covers merged)",
+       qualification_status="open", fallback_material_family="PETG", fallback_color_slot="structure_light"),
+    PP("head_pan_plate", 1, "PETG", "wear_motion", "structure_wear", "fixed-PETG", "flat", "underside service plate; pan servo mounts here"),
+    PP("head_faceplate", 1, "PLA", "visible_cosmetic", "dark_panel", "direct", "flat, face down",
+       "color break + fused camera annulus + camera pocket and eye NeoPixel pockets (merges executed)", qualification_status="open"),
+    PP("neck", 1, "PETG", "structure", "structure_light", "fixed-PETG", "flange down", "rotating pan structure with cable corridor"),
+    PP("bayonet_collar", 1, "PETG", "structure", "structure_light", "fixed-PETG", "flat",
        "pan retention; tool-free head removal; integrated pan-servo mount base (merge executed)"),
-    PP("yoke", 1, "PETG", "TBD (BREP)",
+    PP("yoke", 1, "PETG", "wear_motion", "structure_wear", "fixed-PETG", "TBD (BREP)",
        "tilt structure spanning the neck flange; integrated servo-horn adapter (merge executed)"),
-    PP("tilt_bushing", 1, "PETG", "axis vertical", "designated tilt wear part"),
-    PP("eye_diffuser_bar", 1, "PETG-lime", "flat", "color/optics: both eye diffusers as one bar"),
-    PP("status_diffuser_bar", 1, "PETG-lime", "flat", "color/optics: both status diffusers as one bar"),
+    PP("tilt_bushing", 1, "PETG", "wear_motion", "structure_wear", "fixed-PETG", "axis vertical", "designated tilt wear part"),
+    PP("eye_diffuser_bar", 1, "PLA", "optical", "light_diffuser", "direct", "flat", "color/optics: both eye diffusers as one bar", qualification_status="open"),
+    PP("status_diffuser_bar", 1, "PLA", "optical", "light_diffuser", "direct", "flat", "color/optics: both status diffusers as one bar", qualification_status="open"),
 ]
+
+PART_BY_NAME = {p.name: p for p in PRINTED_PARTS}
+
+# Solid name -> registry name. Shared by validation, print export, Bambu
+# grouping, render material assignment, and mass/CG calculations.
+SOLID_TO_REGISTRY = {
+    "tray_v2": "tray", "shell_v2": "shell", "lid_v2": "lid", "lid_skin_v2": "lid_skin",
+    "bumper_front_v2": "bumper_half", "bumper_rear_v2": "bumper_half",
+    "front_pod_left_v2": "front_pod", "front_pod_right_v2": "front_pod",
+    "fascia_v2": "fascia", "rear_panel_v2": "rear_panel",
+    "controller_tower_v2": "controller_tower", "rear_wheel_v2": "wheel_core_rear",
+    "front_wheel_v2": "wheel_front", "tire_v2": "tire",
+    "head_shell_v2": "head_shell", "head_faceplate_v2": "head_faceplate",
+    "neck_v2": "neck", "bayonet_collar_v2": "bayonet_collar",
+    "head_pan_plate_v2": "head_pan_plate", "motor_cap_v2": "motor_clamp_cap",
+    "battery_clamp_v2": "battery_clamp_bar", "deck_v2": "deck",
+    "mic_cradle_v2": "mic_cradle", "speaker_clamp_v2": "speaker_clamp_bar",
+    "tof_clamp_v2": "tof_side_clamp", "pico_clamp_v2": "pico_clamp_bar",
+    "battery_pad_frame_v2": "battery_pad_frame", "yoke_v2": "yoke",
+    "tilt_bushing_v2": "tilt_bushing", "eye_diffuser_bar_v2": "eye_diffuser_bar",
+    "status_diffuser_bar_v2": "status_diffuser_bar", "printed_washer_v2": "printed_washer_set",
+}
+
+
+def part_for_solid(solid_name: str) -> PrintedPart:
+    return PART_BY_NAME[SOLID_TO_REGISTRY[solid_name]]
 
 
 # ---------------------------------------------------------------------------
@@ -374,9 +464,11 @@ PURCHASED_MASSES = [
 # design) and mass allowances for registered parts still lacking solids.
 SOLID_INSTANCES = {"rear_wheel_v2": 2, "front_wheel_v2": 2, "tire_v2": 4, "motor_cap_v2": 2}
 PRINTED_MASS_EXTRAS = []  # every registered part now has a solid
-PETG_EFF_DENSITY = 0.60e-3   # g/mm^3: walls + infill, screen-grade
-TPU_EFF_DENSITY = 0.75e-3
-TPU_SOLIDS = {"bumper_front_v2", "bumper_rear_v2", "tire_v2"}
+EFFECTIVE_DENSITY = {  # g/mm^3: walls + infill, screen-grade estimates
+    "PLA": 0.58e-3,
+    "PETG": 0.60e-3,
+    "TPU": 0.75e-3,
+}
 CG_X_LIMITS = (-64.0, 64.0)  # 10 mm inside each axle
 CG_Y_LIMIT = 30.0
 
@@ -386,15 +478,18 @@ def fastener_tally():
     return screws, screws  # one insert per screw in this system
 
 
-# Fastener accessories print in multiples but count once against the D028
-# assembly-part budget, exactly like the screws and inserts they serve.
-FASTENER_ACCESSORY_PARTS = {"printed_washer_set"}
-
-
 def budget_report():
-    draft = sum(1 if p.name in FASTENER_ACCESSORY_PARTS else p.qty for p in PRINTED_PARTS)
-    owed = sum(p.qty for p in PRINTED_PARTS if p.merge_candidate)
-    return draft, draft - owed, PART_BUDGET
+    installed = sum(p.functional_installed_qty for p in PRINTED_PARTS)
+    owed = sum(p.functional_installed_qty for p in PRINTED_PARTS if p.merge_candidate)
+    return installed, installed - owed, PART_BUDGET
+
+
+def inventory_report():
+    """Installed functional pieces, printed spares, optional cosmetics, total."""
+    functional = sum(p.functional_installed_qty for p in PRINTED_PARTS)
+    spares = sum(p.spare_qty for p in PRINTED_PARTS)
+    optional = sum(p.qty for p in PRINTED_PARTS if p.optional)
+    return functional, spares, optional, functional + spares + optional
 
 
 if __name__ == "__main__":
@@ -404,6 +499,8 @@ if __name__ == "__main__":
     print(f"ESTIMATE-basis envelopes needing BREP replacement ({len(est)}): {', '.join(est)}")
     print(f"printed parts: draft {draft}, after owed merges {after}, budget {budget}"
           f" -> {'OK' if after <= budget else 'OVER BUDGET'}")
+    functional, spares, optional, total = inventory_report()
+    print(f"pieces: {functional} functional + {spares} spares + {optional} optional = {total} printed")
     screws, inserts = fastener_tally()
     unmod = [j.name for j in JOINTS if not j.modeled]
     print(f"fasteners: {screws} x {FASTENER['screw']} + {inserts} x {FASTENER['insert']}"

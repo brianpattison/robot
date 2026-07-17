@@ -38,31 +38,54 @@ PLATES_JSON = ROOT / "cad" / "bambu" / "codex_robot_body_v2_p1s_plates.json"
 CONTACT_SHEET = ROOT / "docs" / "images" / "codex_robot_body_v2_p1s_plates.png"
 
 COLOR_PROFILES = {
-    "cream": {"hex": "#F0DEC2", "role": "visible molded shell and structural surfaces"},
-    "teal": {"hex": "#0B8392", "role": "top lid"},
-    "charcoal": {"hex": "#15171B", "role": "fascia, rear panel, faceplate, tires, bumper"},
-    "translucent_lime": {"hex": "#D7FF52", "role": "illuminated diffusers"},
+    slot: {"name": data["name"], "hex": data["hex"], "role": data["role"]}
+    for slot, data in inv.DEFAULT_THEME.items()
 }
 MATERIAL_PROFILES = {
-    "petg_structural": {"material": "PETG", "role": "structural chassis parts"},
-    "petg_shell": {"material": "PETG", "role": "visible shell and head surfaces"},
-    "petg_detail": {"material": "PETG", "role": "dark cosmetic panels"},
-    "translucent_petg": {"material": "PETG", "role": "light diffusers"},
+    "pla_visible": {"material": "PLA", "role": "direct visible cosmetic parts; physical fit/temperature gates open"},
+    "pla_qualified_enclosure": {"material": "PLA", "role": "shell/head only after exact-filament physical qualification"},
+    "pla_optical": {"material": "Translucent PLA", "role": "light diffusers; optical/thermal gates open"},
+    "petg_structure": {"material": "PETG", "role": "white general and enclosure-fallback structure"},
+    "petg_wear": {"material": "PETG", "role": "black motion and wear structure"},
+    "petg_service": {"material": "PETG", "role": "red battery, safety-board, and motor retainers"},
     "tpu_95a": {"material": "TPU 95A", "role": "tires, bumper halves, battery pads"},
 }
-# Registry material -> filament group; visible cream parts upgrade to the
-# shell group by name.
-GROUP_BY_MATERIAL = {
-    "PETG": "petg_structural:cream",
-    "PETG-teal": "petg_shell:teal",
-    "PETG-dark": "petg_detail:charcoal",
-    "PETG-lime": "translucent_petg:translucent_lime",
-    "TPU": "tpu_95a:charcoal",
-}
-SHELL_GROUP_DESIGNS = {"shell_v2", "head_shell_v2", "neck_v2", "bayonet_collar_v2"}
+gb.MATERIAL_ORDER.update({
+    "petg_structure": 0,
+    "petg_wear": 1,
+    "petg_service": 2,
+    "pla_qualified_enclosure": 3,
+    "pla_visible": 4,
+    "pla_optical": 5,
+    "tpu_95a": 6,
+})
+gb.COLOR_ORDER.update({slot: i for i, slot in enumerate((
+    "structure_light", "structure_wear", "safety_service", "body_primary",
+    "dark_panel", "light_diffuser", "top_accent", "flexible_dark",
+))})
 # Designs whose left/right twin is a separate solid: each prints once, not
 # at the registry quantity (which already counts both sides).
 PER_SIDE_DESIGNS = {"front_pod_left_v2", "front_pod_right_v2", "bumper_front_v2", "bumper_rear_v2"}
+
+
+def filament_group(entry: dict) -> str:
+    """Derive one material/color group from canonical inventory fields."""
+    family = entry["effective_material_family"]
+    role = entry["mechanical_role"]
+    slot = entry["effective_color_slot"]
+    if family == "PLA":
+        profile = ("pla_optical" if role == "optical" else
+                   "pla_qualified_enclosure" if role == "qualified_enclosure" else
+                   "pla_visible")
+    elif family == "PETG":
+        profile = ("petg_service" if slot == "safety_service" else
+                   "petg_wear" if slot == "structure_wear" else
+                   "petg_structure")
+    elif family == "TPU":
+        profile = "tpu_95a"
+    else:
+        raise SystemExit(f"unsupported effective material family {family}")
+    return f"{profile}:{slot}"
 
 
 def build_instance_manifest() -> dict:
@@ -74,8 +97,7 @@ def build_instance_manifest() -> dict:
         old.unlink()
     parts = {}
     for design, entry in sorted(v2["parts"].items()):
-        group = ("petg_shell:cream" if design in SHELL_GROUP_DESIGNS
-                 else GROUP_BY_MATERIAL[entry["material"]])
+        group = filament_group(entry)
         qty = 1 if design in PER_SIDE_DESIGNS else int(entry["qty"])
         span_x, span_y, _ = entry["print_span_mm"]
         brim = 4.0 if max(span_x, span_y) >= 150.0 else 0.0
@@ -89,7 +111,14 @@ def build_instance_manifest() -> dict:
                 "span_mm": {"x": span_x, "y": span_y},
                 "support_guidance": {"supports": "none", "brim_mm": brim},
                 "filament_group": group,
-                "release_status": "prototype: coupons + purchased-part fit gates apply",
+                "registry_part": entry["registry_part"],
+                "mechanical_role": entry["mechanical_role"],
+                "requested_material_family": entry["requested_material_family"],
+                "effective_material_family": entry["effective_material_family"],
+                "qualification": entry["qualification"],
+                "qualification_status": entry["qualification_status"],
+                "optional": entry["optional"],
+                "release_status": "prototype: material coupons + purchased-part fit gates apply",
             }
     return {
         "printer_target": {
@@ -100,12 +129,13 @@ def build_instance_manifest() -> dict:
             "plate_type": gb.PLATE_TYPE,
         },
         "release_warning": (
-            "Prototype v2 plates. Print and pass the 11 calibration coupons "
+            "Prototype v2 plates. Generate, print, and record the material-specific coupons "
             "before any large part; the D027 gate and all physical release "
             "gates remain open. Nothing here authorizes powered motion."
         ),
         "color_profiles": COLOR_PROFILES,
         "material_profiles": MATERIAL_PROFILES,
+        "inventory_counts": v2["inventory_counts"],
         "fasteners": {
             "screws": f"{inv.fastener_tally()[0]} x {inv.FASTENER['screw']}",
             "inserts": f"{inv.fastener_tally()[1]} x {inv.FASTENER['insert']}",

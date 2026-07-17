@@ -43,6 +43,10 @@ GUIDE_IMG = IMG / "guide_v2"
 PLATES = json.loads((ROOT / "cad" / "bambu" / "codex_robot_body_v2_p1s_plates.json").read_text())
 N_PLATES = len(PLATES["plates"])
 N_PIECES = sum(pl["part_count"] for pl in PLATES["plates"])
+INVENTORY_COUNTS = PLATES.get("inventory_counts", {})
+N_FUNCTIONAL = INVENTORY_COUNTS.get("functional_installed", 40)
+N_SPARES = INVENTORY_COUNTS.get("spares", 4)
+N_OPTIONAL = INVENTORY_COUNTS.get("optional_cosmetics", max(0, N_PIECES - N_FUNCTIONAL - N_SPARES))
 COUPONS = json.loads((ROOT / "cad" / "exports" / "v2" / "coupons" /
                       "codex_robot_body_v2_coupons_manifest.json").read_text())
 COUPON_NOTES = {
@@ -57,6 +61,13 @@ COUPON_NOTES = {
     "coupon_switch_pocket": "Seat one bumper switch in the pocket: it must click when pressed and spring back, never jammed.",
     "coupon_tire_fit": "Stretch the mini tire onto the mini wheel. Snug and even = your big tires will fit too.",
     "coupon_pcb_clamp": "Rest the little green safety board on the pegs and screw the bar over it. Held gently, nothing bending.",
+    "coupon_pla_insert_shell": "Use your exact body PLA and record the insert temperature. No white stress marks, cracks, sink, tilt, or pull-through.",
+    "coupon_pla_shell_wall": "Check the wall, rounded edge, opening, and panel seat after a bump test, warm soak, and full cool-down.",
+    "coupon_pla_head_pivot": "Fit the insert and bushing, load it like the finished head, then check for cracks and growing wobble.",
+    "coupon_pla_snap_pair": "Print this in every candidate visible PLA. Click it ten times; it must still latch fully with no whitening or crack.",
+    "coupon_pla_optical": "Print once per translucent PLA family/color. Compare the three thicknesses for brightness, hot spots, heat, and camera flare.",
+    "coupon_lid_boundary_petg": "Print with the white PETG lid profile and mate it to the teal PLA tab. The blind socket must not crack.",
+    "coupon_lid_boundary_pla": "Snap into the white PETG coupon ten times, warm it, and check that it still holds without rattling.",
 }
 COUPON_TITLES = {
     "coupon_insert_m3": "Insert fit",
@@ -70,6 +81,13 @@ COUPON_TITLES = {
     "coupon_switch_pocket": "Switch pocket",
     "coupon_tire_fit": "Tire stretch",
     "coupon_pcb_clamp": "Board clamp",
+    "coupon_pla_insert_shell": "PLA insert boss",
+    "coupon_pla_shell_wall": "PLA shell wall",
+    "coupon_pla_head_pivot": "PLA head pivot",
+    "coupon_pla_snap_pair": "PLA snap",
+    "coupon_pla_optical": "PLA light test",
+    "coupon_lid_boundary_petg": "PETG lid socket",
+    "coupon_lid_boundary_pla": "PLA skin tab",
 }
 HTML_OUT = ROOT / "output" / "guide" / "codex_robot_body_v2_guide.html"
 PDF_OUT = ROOT / "output" / "pdf" / "codex_robot_body_v2_assembly_guide.pdf"
@@ -105,6 +123,7 @@ PART_NAMES = {
     "rear_wheel_v2": "back wheel", "shell_v2": "body shell",
     "head_shell_v2": "head shell", "bayonet_collar_v2": "neck collar",
     "neck_v2": "neck", "lid_v2": "lid", "head_faceplate_v2": "head face",
+    "lid_skin_v2": "optional lid skin",
     "rear_panel_v2": "back panel", "fascia_v2": "face panel",
     "status_diffuser_bar_v2": "status light bar",
     "eye_diffuser_bar_v2": "eye light bar",
@@ -138,13 +157,23 @@ CHAPTERS = [
 # ---------------------------------------------------------------------------
 # Authored content
 # ---------------------------------------------------------------------------
-SHOP_FILAMENT = [
-    ("Cream PETG", "one 1 kg spool (uses ~600 g)", "The body, tray, head, and most parts."),
-    ("Teal PETG", "one small spool, 250 g is plenty (uses ~80 g)", "The top lid."),
-    ("Charcoal / black PETG", "leftovers are fine (~20 g)", "Face panel, back panel, head face."),
-    ("Translucent lime PETG", "smallest spool available (uses ~5 g)", "The glowing eye and light bars."),
-    ("Charcoal TPU 95A", "one 500 g spool (uses ~280 g)", "Soft tires, bumpers, battery pad."),
-]
+_groups: dict[str, dict] = {}
+for _plate in PLATES["plates"]:
+    _groups.setdefault(_plate["filament_group"], {"plate": _plate, "count": 0})["count"] += 1
+SHOP_FILAMENT = []
+for _group in _groups.values():
+    _plate, _count = _group["plate"], _group["count"]
+    _theme = inv.DEFAULT_THEME[_plate["color_profile"]]
+    _amount = ("one 1 kg spool; confirm the slicer estimate" if _count >= 4 else
+               "one 500 g spool" if _plate["material"].startswith("TPU") else
+               "a small spool or known-good leftovers")
+    _label = (f"{_theme['name']} PLA" if _theme["name"].startswith("Translucent") and "PLA" in _plate["material"]
+              else f"{_theme['name']} {_plate['material']}")
+    SHOP_FILAMENT.append((
+        _label,
+        _amount,
+        f"{_plate['recommended_process']['role']} ({_count} plate{'s' if _count != 1 else ''}).",
+    ))
 SHOP_FASTENERS = [
     ("M3 × 8 mm socket head screws", "one 100-pack", f"The ONLY screw in the robot ({N_SCREWS} used + spares)."),
     ("M3 × 5.7 mm brass heat-set inserts (4.6 mm OD)", "one 100-pack", f"The only insert ({N_INSERTS} used + spares)."),
@@ -184,10 +213,10 @@ SHOP_TOOLS = [
 
 PRINT_TIPS = [
     ("Open the prototype project", f"Open <b>codex_robot_body_v2_p1s.3mf</b> in Bambu Studio. Its {N_PLATES} plates are laid out for geometry review on a P1S with a 0.4 mm nozzle and Textured PEI plate; physical release gates remain open."),
-    ("Load the right color", "Each plate’s name says the filament to load (cream, teal, charcoal, lime, or TPU). Print plates one at a time and change filament between groups."),
+    ("Load the exact family + color", "Each plate names one material and one theme color. Never substitute PLA for a white/black/red PETG plate just to preserve the palette."),
     ("No supports", "Every part targets zero supports. If the slicer asks for supports, stop and re-check the source, plate, and declared orientation."),
     ("TPU is slow and squishy", "Print the tire and bumper plates slowly (the profile already does this). Dry TPU prints much better."),
-    ("Big flat parts stay put", "The tray, shell, and bumper plates fill the whole bed. Clean the plate with dish soap first so they stick."),
+    ("Big flat parts stay put", "The tray, shell, lid, skin, and bumper plates use lots of bed. Clean the plate with dish soap first so they stick."),
 ]
 
 # Step tuple: (render name, title, screws, strip items, moves, check).
@@ -297,11 +326,12 @@ STEPS = [
      "Speakers can’t rattle; the blue boards peek through their side windows."),
     ("step_17_lid", "The lid and the BIG RED BUTTON",
      SCREWS["mic_cradle"],
-     [("lid_v2", 1), ("px_estop_cap", 1), ("px_mic", 1), ("mic_cradle_v2", 1), ("px_insert", 2)],
+     [("lid_v2", 1), ("lid_skin_v2", 1), ("px_estop_cap", 1), ("px_mic", 1), ("mic_cradle_v2", 1), ("px_insert", 2)],
      ["Melt the lid’s 2 mic-boss inserts, then drop the red emergency-stop through the lid’s round hole and spin its nut on underneath — the lid IS its mounting panel, and the printed ring under the lid makes it strong.",
       "Set the round microphone under the lid’s slotted area and screw its ring cradle to the two bosses (2 screws).",
+      "OPTIONAL: after the E-stop is clamped, press the teal skin’s four integral tabs into the lid’s blind pockets. It stays above the lid and never goes under the E-stop nut, neck, microphone, or corner screws.",
       "Rest the lid in its ledge — DON’T screw it yet. The neck, the head, and all the wiring still need the inside. Its 4 corner screws are the very last thing in this book."],
-     "With the lid supported and the nut tight, a centered firm press latches the red button; twist to release."),
+     "The optional skin sits flat with every slot open; with the PETG lid supported and nut tight, a centered firm press latches the red button; twist to release."),
     ("step_18_neck", "Neck mechanism — prototype hold", 0,
      [("neck_v2", 1), ("bayonet_collar_v2", 1), ("px_servo", 1)],
      ["STOP: the current collar and pan plate do not yet contain the complete servo capture and retention geometry shown by this concept render.",
@@ -358,7 +388,7 @@ SIGNAL_MAP = [
 # on the uncropped 4:3 render.
 MEET_FRONT = [
     (38.5, 13, "The head — camera in the middle, glowing eyes beside it. It nods and turns to look at you."),
-    (55, 44, "The teal lid. It lifts off for service, and it screws down dead last."),
+    (55, 44, "The white PETG lid carries the red button and head. The teal PLA skin above it is optional decoration."),
     (27, 66, "Face panel — two distance eyes low, glowing status bars above."),
     (23, 83, "Soft bumper — a squishy ring that feels walls and tells the robot to stop."),
     (83, 72, "Four wheels with grippy printed tires. The back pair are the motor wheels."),
@@ -552,7 +582,7 @@ def build_body_pages():
     stats = "".join(
         f'<div style="flex:1; text-align:center;"><div style="font-size:26px; font-weight:800; color:var(--teal);">{v}</div>'
         f'<div style="font-size:9px; font-weight:700; letter-spacing:.12em; color:var(--ink2); text-transform:uppercase;">{k}</div></div>'
-        for v, k in [(N_PIECES, "printed pieces"), (N_SCREWS, "screws, one size"),
+        for v, k in [(N_PIECES, "printed incl. spare + optional"), (N_SCREWS, "screws, one size"),
                      (N_PLATES, "printer plates"), ("0", "supports needed")])
     add(f"""
       {eyebrow(text="Meet your robot")}
@@ -677,22 +707,21 @@ def build_body_pages():
         f' font-size:14px; font-weight:800; display:flex; align-items:center; justify-content:center;">{k}</div>'
         f'<div><h3 style="margin:0 0 .02in;">{esc(t)}</h3><p style="font-size:11.5px;">{d}</p></div></div>'
         for k, (t, d) in enumerate(PRINT_TIPS, start=1))
+    order_data = [("#fff", "TEST PARTS", f"{len(COUPONS)} coupons first")]
+    for group in _groups.values():
+        plate, count = group["plate"], group["count"]
+        theme = inv.DEFAULT_THEME[plate["color_profile"]]
+        label = (f"{theme['name']} PLA" if theme["name"].startswith("Translucent") and "PLA" in plate["material"]
+                 else f"{theme['name']} {plate['material']}")
+        order_data.append((plate["color_hex"], label,
+                           f"{count} plate{'s' if count != 1 else ''}"))
     order_chips = "".join(
-        f'<div style="flex:1; display:flex; align-items:center; gap:.1in;">'
-        f'<div style="flex:1; text-align:center;"><div style="background:#fff; border:1px solid var(--line);'
-        f' border-radius:.09in; padding:.05in .02in; font-size:10px; font-weight:800; letter-spacing:.06em;">'
+        f'<div style="text-align:center; background:#fff; border:1px solid var(--line); border-radius:.09in; padding:.05in .04in;">'
+        f'<div style="font-size:9px; font-weight:800; letter-spacing:.04em;">'
         f'<span style="display:inline-block; width:.11in; height:.11in; border-radius:50%; background:{c};'
-        f' border:1px solid rgba(0,0,0,.2); vertical-align:-1.5px; margin-right:.045in;"></span>{t}</div>'
-        f'<div style="font-size:8.5px; color:var(--ink2); margin-top:.03in; font-weight:600;">{d}</div></div>'
-        + ('<div style="font-size:14px; color:#B4A785;">&#8594;</div>' if k < 5 else "") + "</div>"
-        for k, (c, t, d) in enumerate([
-            ("#fff", "TEST PARTS", "the coupons pass first"),
-            ("#F0DEC2", "CREAM &times;5", "tray, body, head"),
-            ("#0B8392", "TEAL &times;1", "the lid"),
-            ("#15171B", "CHARCOAL &times;1", "panels + face"),
-            ("#D7FF52", "LIME &times;1", "light bars"),
-            ("#15171B", "TPU &times;3", "tires + bumpers"),
-        ]))
+        f' border:1px solid rgba(0,0,0,.2); vertical-align:-1.5px; margin-right:.045in;"></span>{esc(t)}</div>'
+        f'<div style="font-size:8px; color:var(--ink2); margin-top:.02in; font-weight:600;">{esc(d)}</div></div>'
+        for c, t, d in order_data)
     add(f"""
       {eyebrow(1)}
       <div style="display:inline-block; margin-bottom:.1in; background:var(--red); color:#fff; padding:.07in .12in; font-size:11px; font-weight:800; letter-spacing:.08em;">PROTOTYPE PLATES — PHYSICAL RELEASE GATES OPEN</div>
@@ -705,10 +734,9 @@ def build_body_pages():
           <p style="font-size:10px; margin-top:.06in; color:var(--ink2);">All {N_PLATES} prototype plates, exactly as they open in Bambu Studio. Layout is not powered-motion release.</p>
         </div>
       </div>
-      <div style="display:flex; align-items:center; gap:.12in; border-top:1px solid var(--line);
-           padding-top:.16in; margin-top:auto;">
-        <div style="font-size:9px; font-weight:700; letter-spacing:.14em; color:var(--ink2); width:.9in;">PRINTING ORDER</div>
-        {order_chips}
+      <div style="border-top:1px solid var(--line); padding-top:.12in; margin-top:auto;">
+        <div style="font-size:9px; font-weight:700; letter-spacing:.14em; color:var(--ink2); margin-bottom:.06in;">PRINTING ORDER</div>
+        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:.06in;">{order_chips}</div>
       </div>""",
         chapter=1, mark="ch1")
 
@@ -736,23 +764,36 @@ def build_body_pages():
       {eyebrow(1)}
       <h2>The {N_PLATES} prototype plates, in printing order</h2>
       <table class="roomy" style="font-size:10.5px;"><tr><th style="width:.35in;">#</th><th style="width:2.4in;">Plate (load this filament)</th><th style="width:.5in;">Parts</th><th>What’s on it</th></tr>{rows}</table>
-      <p style="margin-top:.12in; font-size:11px;"><b>Tip:</b> print plates 1–5 (cream) back to back, then change color once
-      per group. Keep every part in a labeled box — the next chapter uses them in order.</p>""",
+      <p style="margin-top:.12in; font-size:11px;"><b>Tip:</b> the plates are already grouped by exact material and color.
+      Print each group back to back, then label its box before changing filament.</p>""",
         chapter=1)
 
-    # Coupons
-    crows = "".join(f"<tr><td><b>{esc(COUPON_TITLES.get(k, k))}</b><br>"
-                    f"<span class='mono'>{esc(k)}.stl</span></td>"
-                    f"<td>{esc(v['material'])}</td><td>{esc(COUPON_NOTES.get(k, v['note']))}</td></tr>"
-                    for k, v in COUPONS.items())
-    add(f"""
-      {eyebrow(1)}
-      <h2>Print the little test parts first</h2>
-      <p style="margin-bottom:.1in;">Before the big plates, print the little TEST PARTS that come with the project
-      (generated with <b>cad/python/robot_body_v2_coupons.py</b>). They make sure your printer’s holes, snaps, and fits are
-      dialed in — like tasting the batter before baking the whole cake. Each one has a simple pass test:</p>
-      <table class="roomy" style="font-size:11px;"><tr><th>Test part</th><th>Filament</th><th>What it proves</th></tr>{crows}</table>""",
-        chapter=1)
+    # Coupons: keep the original mechanical checks and the new material
+    # qualification evidence on separate pages so the recording fields remain
+    # readable instead of becoming microscopic ant paperwork.
+    standard_coupons = [(k, v) for k, v in COUPONS.items()
+                        if "_pla_" not in k and "lid_boundary" not in k]
+    material_coupons = [(k, v) for k, v in COUPONS.items()
+                        if "_pla_" in k or "lid_boundary" in k]
+    for coupon_page, coupon_items in enumerate((standard_coupons, material_coupons), start=1):
+        crows = "".join(f"<tr><td><b>{esc(COUPON_TITLES.get(k, k))}</b><br>"
+                        f"<span class='mono'>{esc(k)}.stl</span></td>"
+                        f"<td>{esc(v['material'])}</td><td>{esc(COUPON_NOTES.get(k, v['note']))}</td></tr>"
+                        for k, v in coupon_items)
+        intro = ("These checks prove the shared screw, wheel, switch, board, and motion interfaces."
+                 if coupon_page == 1 else
+                 "These checks are specific to the exact PLA/PETG product lines you load. A pass never transfers to another brand, subtype, or effect filament.")
+        record = "" if coupon_page == 1 else """
+          <div style="margin-top:.12in; border:2px solid var(--red); border-radius:.1in; padding:.08in .12in; font-size:10px;">
+            <b>RECORD BEFORE PASS:</b> manufacturer · product line · subtype · color · nozzle · layer height · wall count ·
+            insert-tool temperature (when used) · measurements · pass/fail · tester · date. Blank evidence means the gate is open.
+          </div>"""
+        add(f"""
+          {eyebrow(1)}
+          <h2>Print the little test parts first ({coupon_page} of 2)</h2>
+          <p style="margin-bottom:.1in;">Generate them with <b>cad/python/robot_body_v2_coupons.py</b>. {intro}</p>
+          <table class="roomy" style="font-size:10.5px;"><tr><th>Test part</th><th>Filament</th><th>What it proves</th></tr>{crows}</table>
+          {record}""", chapter=1)
 
     # Piece inventory
     counts: dict[str, int] = {}
@@ -772,8 +813,8 @@ def build_body_pages():
     add(f"""
       {eyebrow(1)}
       <h2>When the printer stops: count your pieces</h2>
-      <p style="margin-bottom:.12in;">All {N_PIECES} printed pieces, in one place. Line yours up against this chart
-      before Chapter 3 — building is way more fun when nothing is missing. The dot shows each piece’s color.</p>
+      <p style="margin-bottom:.12in;">All {N_PIECES} printed pieces: {N_FUNCTIONAL} installed functional parts,
+      {N_SPARES} spare washers, and {N_OPTIONAL} optional cosmetic skin. Line yours up before Chapter 3; the dot shows each piece’s current effective color.</p>
       <div class="invgrid">{cells}</div>""",
         chapter=1)
 
@@ -997,7 +1038,7 @@ def build_body_pages():
              f"Every one of the {N_SCREWS} screws is the same M3 × 8, and one 2.5 mm hex key turns them all."),
             ('<svg width="18" height="18" viewBox="0 0 18 18"><path d="M2.5 13.5 H15.5 M2.5 10 H15.5 M2.5 6.5 H15.5" stroke="#B9E44A" stroke-width="1.8" stroke-linecap="round"/><path d="M9 4.5 V1.5 M7.2 3 L9 1.2 L10.8 3" stroke="#B9E44A" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>',
              "ZERO SUPPORTS",
-             f"All {N_PIECES} pieces target clean prints on {N_PLATES} prototype plates. Physical gates remain open."),
+             f"{N_FUNCTIONAL} functional + {N_SPARES} spare + {N_OPTIONAL} optional pieces target {N_PLATES} prototype plates. Physical gates remain open."),
             ('<svg width="18" height="18" viewBox="0 0 18 18"><path d="M5.6 2.2 H12.4 L15.8 5.6 V12.4 L12.4 15.8 H5.6 L2.2 12.4 V5.6 Z" fill="none" stroke="#B9E44A" stroke-width="1.8" stroke-linejoin="round"/></svg>',
              "FAILS STOPPED",
              "The E-stop is physical; bumper latches and the watchdog live in independent safety firmware, with no Pi software required."),
@@ -1037,7 +1078,8 @@ def build_cover(chapter_pages):
                      f'<span class="t">{name}</span><span class="d">{desc}</span>'
                      f'<span class="lead"></span><span class="pg">{chapter_pages[idx]}</span></div>')
     chips = "".join(f'<span class="statchip">{c}</span>' for c in
-                    ("AGES 10+", f"{N_PIECES} PRINTED PIECES", f"{N_PLATES} PLATES", "ONE HEX KEY"))
+                    ("AGES 10+", f"{N_FUNCTIONAL} FUNCTIONAL + {N_SPARES} SPARE + {N_OPTIONAL} OPTIONAL",
+                     f"{N_PLATES} PLATES", "ONE HEX KEY"))
     return f"""
       <img class="hero" src="{img_uri(IMG / 'codex_robot_body_v2_assembled.png')}">
       <div style="width:4.4in; padding-top:.55in;">
@@ -1081,9 +1123,11 @@ def main():
     body = "".join(
         page(p["html"], chapter=p["chapter"], footer=p["footer"], num=i, total=total)
         for i, p in enumerate(pages, start=1))
-    HTML_OUT.write_text("<!doctype html><html><head><meta charset='utf-8'>"
-                        "<title>Codex Rover Bean — Builder’s Book</title>"
-                        f"<style>{CSS}</style></head><body>{body}</body></html>", encoding="utf-8")
+    html_doc = ("<!doctype html><html><head><meta charset='utf-8'>"
+                "<title>Codex Rover Bean — Builder’s Book</title>"
+                f"<style>{CSS}</style></head><body>{body}</body></html>")
+    html_doc = "\n".join(line.rstrip() for line in html_doc.splitlines()) + "\n"
+    HTML_OUT.write_text(html_doc, encoding="utf-8")
     result = subprocess.run(
         [CHROME, "--headless=new", "--disable-gpu", "--no-pdf-header-footer",
          "--no-margins", f"--print-to-pdf={PDF_OUT}", HTML_OUT.resolve().as_uri()],

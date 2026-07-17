@@ -1,5 +1,29 @@
 # CAD Mechanical Plan
 
+## Current v2 material and print policy
+
+The v2 authority is `robot_body_v2_inventory.py` -> `robot_body_v2.py` ->
+`validate_robot_body_v2.py --gate` -> the print/Bambu manifests. D034 separates
+material family, mechanical role, and theme color for every registered part.
+The fascia, rear panel, head faceplate, two diffuser bars, and optional lid
+skin are direct PLA roles. The shell and head are PLA candidates with
+independent automatic white-PETG fallback until exact-filament evidence passes.
+All sustained structure, motion/wear, battery retention, safety-MCU retention,
+and the E-stop lid remain PETG in white, black, or red; the three flexible part
+families remain charcoal TPU 95A.
+
+The optional 1.2 mm teal PLA lid skin uses four integral tabs in blind pockets
+and duplicates the vent/microphone openings. It carries no E-stop, neck,
+microphone, corner-screw, or shell load; the complete 4 mm white PETG lid works
+without it. Inventory is 40 installed functional pieces + four spare washers +
+one optional skin, 45 printed pieces total. The support-exception list is empty.
+
+Eighteen material/mechanical coupons now cover the legacy interfaces plus PLA
+insert, shell-wall/opening, head-pivot, snap, optical, and PETG/PLA lid-boundary
+evidence. The generated manifest requires manufacturer, product line, subtype,
+color, nozzle, layer height, walls, insert temperature where applicable,
+measurements, pass/fail, tester, and date. A blank record means the gate is open.
+
 ## Current v1 implementation
 
 The current source-of-truth model is [`cad/python/robot_body.py`](../cad/python/robot_body.py), using build123d. It is organized as serviceable modules rather than one fused decorative mesh:
