@@ -478,9 +478,15 @@ and then thrown that detailing away. Revised order:
    bringing the registry to 39 of the 40-part budget. Four clamp joint
    families were added (mic cradle, speaker clamps, ToF clamps, Pico
    clamp), taking the fastener totals to 40 screws + 40 inserts, still
-   single 100-pack SKUs. Remaining before declaring D027:
-   delivered-part mass updates, assembly-guide regeneration, and a
-   fresh external review round.
+   single 100-pack SKUs. Update (seventh slice): the v2 render
+   pipeline produces the assembled/rear/chassis review images with the
+   established concept lighting, and the 8-page v2 assembly guide
+   generates from the live manifests (print inventory, joints, coupons,
+   release gates) at output/pdf/codex_robot_body_v2_assembly_guide.pdf.
+   Remaining before declaring D027: delivered-part mass updates,
+   coupon prints, and the fresh external review round — the two
+   physical items and the review are the only steps left that need
+   Brian.
 3. **Fastener-system pass on v2.** Collapse `Params` to the single
    insert/screw spec; add the clamp-stack (3.0-3.4 mm) and
    engagement-limit validator checks; implement capture-or-M3 mounts for
