@@ -637,7 +637,10 @@ memory. The fixed high-level intent vocabulary is retired as the control
 boundary; the old intents survive only as the starter behavior library the
 agent inherits and rewrites. Every `robotd` command and agent shell session
 is captured in a blackbox streamed to an off-host mirror; a Pi-local copy
-alone is not trusted, since the agent has root on the Pi. See
+alone is not trusted, since the agent has root on the Pi. The plan places
+no software gate between what the agent decides and what it may attempt —
+the floor exists for malfunction handling, hardware protection, and the
+humans' physical overrides, never to constrain the agent's choices. See
 `docs/agentic-control-plan.md`.
 
 Rationale:
@@ -685,9 +688,12 @@ backfeed release gate. It is enforced by the safety MCU
 firmware and physical controls. The Pi-to-MCU link carries only the framed
 command/heartbeat protocol with no flash, bootloader, or config-write path;
 the Pico's USB/SWD are service corridors never cabled to the Pi in
-operation, so reflashing requires opening the robot. Firmware accepts a
-rate-limited budget of remote bumper latch clears; past it, and always for
-E-stop, recovery requires a physical reset input.
+operation, so reflashing requires opening the robot. Firmware clears a
+bumper latch on request once the loop reads released again and permits
+capped-speed escape motion away from a pressed zone, so the agent can
+bump, back off, and continue without a human; a loop that cannot read
+released holds a wiring fault. The E-stop latch always requires a
+physical reset.
 
 Software guardrails the firmware cannot sense — no-go zones, quiet hours,
 supervision expectations, upload rules — are reclassified as policy the

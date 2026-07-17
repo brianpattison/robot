@@ -159,9 +159,12 @@ If STT, network, or the agent seat fails, the robot still handles local `stop`, 
 
 The six bumper inputs should use normally-closed circuits. Any open circuit,
 including a pressed switch, disconnected plug, or broken wire, is a latched
-stop/fault until the safety controller observes a valid released loop and the
-operator explicitly re-enables motion. Do not infer bumper safety from Linux
-process health or the LLM.
+stop/fault until the safety controller observes a valid released loop and
+receives an explicit clear — from the agent, the dashboard, or a physical
+input. Firmware permits capped-speed escape motion away from a pressed zone
+so the robot can free itself; a loop that cannot read released holds a
+fault until repaired. Do not infer bumper safety from Linux process health
+or the LLM.
 
 The motor branch's mechanical cutoff baseline is a Panasonic CB1A-R-M-12V
 sealed SPST-NO automotive relay with an integral bracket, one 5.4 mm mounting

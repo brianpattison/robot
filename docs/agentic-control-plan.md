@@ -51,7 +51,7 @@ does in software, including `rm -rf /`:
 | Invariant | Enforced by | Agent-changeable? |
 | --- | --- | --- |
 | E-stop cuts motor power | IDEC XW1E direct-opening NC contacts in the Panasonic CB1A-R-M-12V relay coil path, hardware reset latch | No — physical |
-| Bumper hit stops motion | Safety MCU firmware; six normally-closed Omron D2HW loops; any open loop is a latched stop | Latch clear only, rate-limited in firmware |
+| Bumper hit stops motion | Safety MCU firmware; six normally-closed Omron D2HW loops; any open loop is a latched stop | Clears freely once the loop reads released; capped-speed escape from a pressed zone |
 | Watchdog timeout stops motion | Safety MCU firmware; stale heartbeat de-energizes motor enable | No |
 | Motion setpoints expire | Safety MCU firmware; every nonzero setpoint carries a short lease and zeros unless refreshed — a heartbeat alone never sustains motion | No |
 | Velocity and acceleration caps (0.35 m/s MVP) | Safety MCU firmware clamps every setpoint before the MDDS10 | No — new values require reflashing with physical access |
@@ -76,11 +76,25 @@ Pico 2) is wired, not because of software courtesy:
   never cabled to the Pi in normal operation, so the Pi cannot reboot the
   Pico into its bootloader. Reflashing the firmware means opening the robot
   and physically connecting to the service corridor (BOOTSEL in hand).
-- Bumper and E-stop stops are latched. Firmware accepts a limited budget of
-  remote bumper latch clears (proposed: three per rolling ten minutes);
-  beyond that, only a physical reset input clears the latch. The E-stop
-  latch always requires physical reset. The E-stop does not care who is
-  holding the shell.
+- Bumper and E-stop stops are latched. The agent may clear a bumper latch
+  as soon as the loop reads released again — no budget, no human in the
+  loop — and firmware permits capped-speed escape motion away from a
+  pressed zone so the robot can free itself. Bump, back off, clear,
+  continue is normal exploration, not a fault. A loop that cannot read
+  released (broken wire, unplugged connector) holds a fault until
+  repaired: that is wiring protection, not agent restriction. The E-stop
+  latch always requires physical reset — it is the humans' button, and it
+  does not care who is holding the shell.
+
+What the floor is for — and not for: it catches malfunctions (code that
+died mid-drive), protects hardware (stalled motors, deep-discharged packs,
+shorted branches), and preserves the humans' two physical controls (E-stop
+and mute). It places no gate between what the agent decides and what it
+may attempt. The agent can drive anywhere in the house, at any hour, for
+any reason it finds sufficient; the floor only shapes how gently that
+meets walls and furniture. The hardware "can't do anything actually
+unsafe" precisely because these caps and cutoffs are part of the hardware
+— they are what make unbounded software freedom a low-stakes grant.
 
 ## Topology
 
@@ -263,7 +277,8 @@ so at a capped walking pace, bumps, stops, and gets audited.
   yet.
 - **M1 Rolling Chassis:** unchanged and still gates everything. The
   firmware envelope (clamps, watchdog kill test, all six NC bumper zones,
-  latch budget, setpoint-lease expiry, E-stop, charger inhibit) passes
+  latch clear and escape motion, setpoint-lease expiry, E-stop, charger
+  inhibit) passes
   bench tests before the agent's first drive command. The agent is
   read-only telemetry until then, enforced physically during
   commissioning — motor branch isolated or wheels off the floor — not by
@@ -275,9 +290,10 @@ so at a capped walking pace, bumps, stops, and gets audited.
 
 Additional acceptance checks: kill `robotd` under commanded motion and see
 the robot stop within the watchdog window; kill a driving behavior while
-`robotd` stays healthy and see motion stop at the setpoint lease; fill the
-latch-clear budget and confirm only physical reset recovers; verify the
-off-host mirror captured an entire agent-driven session, blackbox and
+`robotd` stays healthy and see motion stop at the setpoint lease; bump,
+back away, clear, and continue with no human in the loop; confirm a
+simulated broken bumper wire holds a fault no protocol command clears;
+verify the off-host mirror captured an entire agent-driven session, blackbox and
 shell recording both; prove no mic capture with the hardware mute engaged
 and software running; press the E-stop while the agent is driving.
 
@@ -287,11 +303,10 @@ and software running; press the E-stop while the agent is driving.
   Codex CLI equivalents), session cadence, and token budget for background
   turns.
 - Final heartbeat rate, watchdog timeout, and motion-setpoint lease
-  (proposed 20 Hz / 250 ms / 250 ms), and the bumper latch-clear budget
-  values.
+  (proposed 20 Hz / 250 ms / 250 ms).
 - Journal/memory privacy scoping and what syncs off-robot, now that the
   agent manages its own memory.
 - Whether the perception baseline (person tracking) ships preinstalled or
   is the agent's first install job.
-- Whether the physical latch-reset input is the E-stop twist cycle or a
-  dedicated service button on the safety shelf.
+- Whether the E-stop's latched reset input is the twist-release cycle
+  plus a confirm, or a dedicated service button on the safety shelf.

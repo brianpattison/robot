@@ -57,6 +57,7 @@ The docs intentionally separate product requirements, decisions, architecture, B
 - The resident agent (Claude or Codex) has full authority over the Pi (D030): shell, sudo, installs, code on the fly, and direct velocity/head setpoints through `robotd`, all blackbox-logged.
 - The agent cannot exceed firmware velocity/accel clamps, clear an E-stop latch, bypass the watchdog or NC bumper loops, restart motion past the charger inhibit, or un-mute the hardware microphone switch (D032). Never give the safety MCU a remote flash or config-write path, and never cable its USB/SWD to the Pi in normal operation.
 - No-go zones, quiet hours, and supervision rules are policy the agent is instructed to honor and the blackbox audits — do not describe them as hard enforcement.
+- Do not add software permission gates between the agent and its actions (Brian's direction, 2026-07-17). The floor exists for malfunction handling (setpoint leases, watchdog), hardware protection (clamps, fusing, low-battery cutoff, wiring-fault latches), and the humans' physical overrides (E-stop, mute) — never to constrain what the agent chooses to do. Bumper latches clear freely on a valid released loop, with capped-speed escape motion allowed from a pressed zone.
 - Local `stop`, `wait`, `mute`, and basic `status` should work even if network/cloud AI is unavailable.
 
 If you touch any motion, power, battery, or safety-control design, update the relevant docs and make the safety implications explicit.
