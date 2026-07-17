@@ -42,6 +42,23 @@ applied (or proposed). Items marked **[fixed]** were implemented in this pass.
   drive the clamp screw through the port in step 6. All four tires share the
   design; the front pair's port is simply unused. Steps 4/6 text updated.
   **[fixed]**
+- **A6. Neither wheel retention actually worked (Brian's catch, 2026-07-17).**
+  Looking at the step-4 render, Brian asked how the tire insert could possibly
+  work — and checking the numbers showed the whole retention stack was fiction:
+  - *Rear:* the clamp-screw insert bore opened at the rim surface, so an
+    M3 × 8 threaded into it ended ~12 mm short of the motor shaft. The screw
+    would spin in free air. The bore is now a stepped well — a 7.4 mm
+    head/tool channel from the rim, the 4.6 mm insert seat deep in the wheel,
+    and tip clearance ending 0.3 mm past the shaft flat, so the single-SKU
+    M3 × 8's tip presses the flat snug. The insert drops down the well and is
+    pressed home with the iron tip (still with the tire off, as step 4 orders).
+  - *Front:* the printed washer was 8 mm OD — smaller than the front wheel's
+    18.5 mm bore, so it retained nothing; the wheel could slide straight off
+    past it. It is now a 22 mm OD × 3.2 mm cap washer that overlaps the bore
+    lip, and its 3.2 mm face makes the front-axle joint honest against the
+    D026 clamp-stack rule (the old 1.6 mm washer violated it).
+  Steps 4/6 rewritten to match; step 2 now explains that the gold pegs in the
+  pictures are pointers, not parts. **[fixed]**
 - **A4. Piece names differ between the plate table (p8) and the piece chart
   (p10).** "deck / controller tower / pico clamp / tof clamp / head pan plate"
   vs "power deck / brain tower / safety-board clamp / sensor clamp / head bottom

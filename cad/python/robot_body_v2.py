@@ -340,8 +340,16 @@ def build_rear_wheel():
     bore = Pos(inv.REAR_AXLE_X, 118, P.wheel_center_z) * Rot(90, 0, 0) * Cylinder(2.05, 26)
     bore -= Pos(inv.REAR_AXLE_X, 118, P.wheel_center_z + 3.5) * Box(6, 28, 4)
     wheel -= bore
-    # Radial clamp-screw bore into an insert boss (axial retention only).
-    wheel -= Pos(inv.REAR_AXLE_X, 118, P.wheel_center_z + 12) * Cylinder(2.3, 20)
+    # Stepped radial clamp well. A rim-surface insert would leave the M3 x 8
+    # tip 12 mm short of the shaft, so the insert seats DEEP: a head/tool
+    # channel from the rim down to the insert seat, then the 4.6 insert bore,
+    # then tip clearance ending 0.3 mm past the shaft flat (z center+1.5)
+    # so the screw presses the flat snug. All three holes stay under the
+    # 8 mm horizontal-hole print rule in the axis-vertical print pose.
+    z = P.wheel_center_z
+    wheel -= Pos(inv.REAR_AXLE_X, 118, (z + 9.2 + z + 22.5) / 2) * Cylinder(3.7, 13.3)
+    wheel -= Pos(inv.REAR_AXLE_X, 118, (z + 3.5 + z + 9.2) / 2) * Cylinder(2.3, 5.7)
+    wheel -= Pos(inv.REAR_AXLE_X, 118, (z + 1.0 + z + 3.5) / 2) * Cylinder(1.7, 2.5)
     return wheel
 
 
@@ -558,7 +566,11 @@ def build_status_diffuser_bar():
 
 
 def build_printed_washer():
-    return Pos(0, 0, 0.8) * Cylinder(4.0, 1.6) - Pos(0, 0, 0.8) * Cylinder(1.75, 3)
+    # Front-axle retaining cap. It must overlap the front wheel's 18.5 mm
+    # bore lip to retain anything (the old 8 mm washer fit entirely inside
+    # the bore), and its 3.2 mm face is the D026 clamp stack for the M3 x 8
+    # into the peg-end insert.
+    return Pos(0, 0, 1.6) * Cylinder(11.0, 3.2) - Pos(0, 0, 1.6) * Cylinder(1.75, 5)
 
 
 def primary_solids():
