@@ -6,8 +6,9 @@ inventory), then renders:
 - one thumbnail per printed design and per purchased proxy (for the
   parts-needed strips and the what's-in-the-box pages),
 - one render per assembly step, with everything assembled so far shown in
-  place, the step's new parts "popped" along their true insertion axis,
-  and a teal arrow pointing from each popped part to its seat, and
+  place and the step's new parts "popped" along their true insertion axis,
+- a normalized annotation map that lets the guide draw crisp numbered 2D
+  arrows after rendering, without shadows, occlusion, or perspective scaling,
 - two inset renders (the shell's 14 insert spots; the flipped lid's 2).
 
 Gold pegs mark every heat-set insert bore in the step where that batch
@@ -27,6 +28,7 @@ import sys
 from pathlib import Path
 
 import bpy
+from bpy_extras.object_utils import world_to_camera_view
 from mathutils import Matrix, Vector
 
 HERE = Path(__file__).resolve().parent
@@ -211,7 +213,7 @@ OUT_Y_POP = 45.0
 # axis): dodging interior geometry, or lifting axle-line arrows clear of
 # the pegs/shafts that would otherwise swallow them.
 ARROW_ANCHOR = {
-    "shell_v2": (0, -80, None), "deck_v2": (60, -30, None),
+    "shell_v2": (0, -80, None), "deck_v2": (0, -30, None),
     "rear_wheel_v2": (None, None, 112), "rear_wheel_v2_m": (None, None, 112),
     "front_wheel_v2": (None, None, 112), "front_wheel_v2_m": (None, None, 112),
 }
@@ -219,8 +221,18 @@ ARROW_ANCHOR = {
 # up WITH the popped head but slides in horizontally).
 ARROW_DIR = {"px_camera": (-40, 0, 0)}
 # Tires ride their wheels in the wheels-on step: one arrow per pair.
-NO_ARROW = ({"px_insert", "px_screw", "tire_v2", "tire_v2_1", "tire_v2_2", "tire_v2_3"}
-            | set(ACCESSORIES))
+NO_ARROW = ({
+    "px_insert", "px_screw", "tire_v2", "tire_v2_1", "tire_v2_2", "tire_v2_3",
+    # Dedicated close panels already teach these purchased-part placements.
+    # Keeping their arrows as well made several interior landings unreadable.
+    "px_reg1", "px_reg2", "px_fuse",
+    "px_switch", "px_switch_2", "px_switch_3", "px_switch_4", "px_switch_5", "px_switch_6",
+    "px_tof_F", "px_tof_F2", "px_speaker_L", "px_speaker_R", "px_tof_L", "px_tof_R",
+    "px_estop_base", "px_estop_stem", "px_estop_cap", "px_estop_nut", "px_estop_body",
+    "px_estop_nc1", "px_estop_nc2", "px_mic", "px_servo",
+    "speaker_clamp_v2_m", "tof_clamp_v2_m",
+    "lid_skin_v2", "mic_cradle_v2", "head_faceplate_v2",
+} | set(ACCESSORIES))
 
 CAMS = {
     "body": ((-430, -380, 330), (0, 0, 110), 55),
@@ -309,64 +321,6 @@ def make_marker(loc, axis, mats_cache, name="marker"):
     return obj
 
 
-def arrow_material(mats_cache):
-    """Annotation arrows: translucent magenta — a color no printed part or
-    purchased proxy uses — so they read as instructions, not plastic."""
-    key = "arrow_annotation"
-    if key not in mats_cache:
-        mat = bpy.data.materials.new(key)
-        mat.use_nodes = True
-        bsdf = mat.node_tree.nodes["Principled BSDF"]
-        color = (0.85, 0.04, 0.45, 1)
-        bsdf.inputs["Base Color"].default_value = color
-        bsdf.inputs["Roughness"].default_value = 0.4
-        bsdf.inputs["Alpha"].default_value = 0.6
-        if "Emission Color" in bsdf.inputs:
-            bsdf.inputs["Emission Color"].default_value = color
-            bsdf.inputs["Emission Strength"].default_value = 0.25
-        # Transparency across EEVEE generations (attribute names differ).
-        if hasattr(mat, "surface_render_method"):
-            mat.surface_render_method = "BLENDED"
-        if hasattr(mat, "blend_method"):
-            mat.blend_method = "BLEND"
-        if hasattr(mat, "use_transparent_shadow"):
-            mat.use_transparent_shadow = True
-        mat.diffuse_color = (0.85, 0.04, 0.45, 0.6)
-        mats_cache[key] = mat
-    return mats_cache[key]
-
-
-def make_arrow(tail: Vector, tip: Vector, mats_cache, shaft_r=2.4, head_r=5.5, head_len=10.0):
-    """A solid arrow from tail to tip (cone at the tip)."""
-    made = []
-    vec = tip - tail
-    length = vec.length
-    if length < 12:
-        return made
-    direction = vec.normalized()
-    quat = direction.to_track_quat("Z", "Y")
-    shaft_len = max(length - head_len, 4)
-    bpy.ops.mesh.primitive_cylinder_add(radius=shaft_r, depth=shaft_len)
-    shaft = bpy.context.object
-    shaft.rotation_mode = "QUATERNION"
-    shaft.rotation_quaternion = quat
-    shaft.location = tail + direction * (shaft_len / 2)
-    made.append(shaft)
-    bpy.ops.mesh.primitive_cone_add(radius1=head_r, radius2=0, depth=head_len)
-    head = bpy.context.object
-    head.rotation_mode = "QUATERNION"
-    head.rotation_quaternion = quat
-    head.location = tail + direction * (shaft_len + head_len / 2)
-    made.append(head)
-    mat = arrow_material(mats_cache)
-    for obj in made:
-        obj.data.materials.append(mat)
-        # Annotation, not a part: cast no shadow onto the model.
-        if hasattr(obj, "visible_shadow"):
-            obj.visible_shadow = False
-    return made
-
-
 def resolve_pop(obj) -> Vector:
     """The pop vector for one object: POP_DIR by base name, Y mirrored for
     *_m twins, and OUT_Y resolved to the object's own side of the robot."""
@@ -399,6 +353,11 @@ def camera_to(loc, target, lens=55):
     cam.data.clip_end = 5000
     base.look_at(cam, target)
     bpy.context.scene.camera = cam
+    # world_to_camera_view reads the evaluated camera matrix immediately on
+    # the next line in the step pass. Force the dependency graph to catch up;
+    # the renderer would do this later, but our exported 2D annotation map
+    # must use the same camera pose before rendering starts.
+    bpy.context.view_layer.update()
 
 
 def render(path, res=(1100, 850)):
@@ -453,13 +412,15 @@ def thumbs(objects):
 
 
 def bench_layout(objects):
-    """Lay the four wheel+tire assemblies flat on the floor in a 2x2 grid;
-    returns marker positions for the two rear-hub insert bores. Mirrored
+    """Lay the four wheel+tire assemblies flat on the floor in a 2x2 grid.
+
+    The old hovering gold pegs were removed because they looked like installed
+    hardware protruding through the tread. The guide's precise section diagram
+    now teaches the deep insert seat and tool path. Mirrored
     *_m wheels share the +Y wheel's mesh with a -Y scale, so their bench
     matrix bakes the mirror in around the +Y mesh station."""
     lay_flat = Matrix.Rotation(math.radians(90), 4, "X")
     mirror_y = Matrix.Diagonal((1, -1, 1, 1))
-    markers = []
     for wheel_name, tire_name, target in BENCH_TARGETS:
         target = Vector(target)
         wheel, tire = objects[wheel_name], objects[tire_name]
@@ -470,11 +431,7 @@ def bench_layout(objects):
             mat = mat @ mirror_y
         wheel.matrix_world = mat @ Matrix.Translation(-mesh_station)
         tire.matrix_world = Matrix.Translation(target) @ lay_flat
-        if wheel_name.startswith("rear_wheel"):
-            # The rim screw bore (and the tire's access port) face the
-            # camera after lay-flat; the gold peg hovers just outside.
-            markers.append((target.x, target.y - 49, target.z, "Y"))
-    return markers
+    return []
 
 
 def reset_bench(objects):
@@ -487,14 +444,21 @@ def reset_bench(objects):
                                       .index(tire_name)]))
 
 
-def front_floor_arrow(mats_cache):
-    """A hovering arrow pointing at the tray's front edge for step 1."""
-    return make_arrow(Vector((-182, -42, 60)), Vector((-128, -18, 54)), mats_cache,
-                      shaft_r=3.2, head_r=7.5, head_len=13)
+def front_floor_annotation():
+    """The tray's front-direction annotation for step 1, in world space."""
+    return [{"name": "front_edge",
+             "tail": Vector((-182, -42, 60)),
+             "tip": Vector((-128, -18, 54))}]
 
 
-def add_step_arrows(new_objects, pops, mats_cache):
-    arrows = []
+def step_annotation_specs(new_objects, pops):
+    """Return world-space tail/tip pairs for the guide's 2D overlay.
+
+    The popped part and landing point come from the actual scene geometry. The
+    Blender render stays completely annotation-free; the HTML/PDF layer draws
+    consistent numbered arrows and matching destination dots afterward.
+    """
+    specs = []
     for obj in new_objects:
         if obj.name in NO_ARROW or obj.name.startswith(("px_insert", "px_screw")):
             continue
@@ -514,12 +478,35 @@ def add_step_arrows(new_objects, pops, mats_cache):
         min_proj = min((p - center).dot(d_unit) for p in pts)
         tail = center + d_unit * (min_proj - 5)
         tip = tail - d_unit * max(d.length - 14, 18)
-        arrows += make_arrow(tail, tip, mats_cache)
-    return arrows
+        specs.append({"name": obj.name, "tail": tail, "tip": tip})
+    return specs
+
+
+def project_annotations(specs):
+    """Project world-space annotations to normalized image coordinates."""
+    scene = bpy.context.scene
+    camera = scene.camera
+    projected = []
+    for i, spec in enumerate(specs, start=1):
+        tail = world_to_camera_view(scene, camera, spec["tail"])
+        tip = world_to_camera_view(scene, camera, spec["tip"])
+        # Blender uses a bottom-left origin; HTML/SVG uses top-left.
+        points = ((tail.x, 1.0 - tail.y), (tip.x, 1.0 - tip.y))
+        if any(not (-0.08 <= x <= 1.08 and -0.08 <= y <= 1.08)
+               for x, y in points):
+            continue
+        projected.append({
+            "n": i,
+            "part": spec["name"],
+            "tail": [round(points[0][0] * 100, 3), round(points[0][1] * 100, 3)],
+            "tip": [round(points[1][0] * 100, 3), round(points[1][1] * 100, 3)],
+        })
+    return projected
 
 
 def steps(objects, mats_cache):
     placed = []
+    annotation_map = {}
     for idx, (key, parts, proxies, cam) in enumerate(STEPS, start=1):
         new = [objects[n] for n in parts + proxies if n in objects]
         bench = key == "wheels_bench"
@@ -548,12 +535,12 @@ def steps(objects, mats_cache):
             marker_specs += [(x, y, z + 8, "Z") for x, y, z in marker_data]
         for mi, (x, y, z, axis) in enumerate(marker_specs):
             temp.append(make_marker((x, y, z), axis, mats_cache, name=f"mk_{mi}"))
-        if key == "tray":
-            temp += front_floor_arrow(mats_cache)
+        annotation_specs = front_floor_annotation() if key == "tray" else []
         if not bench:
-            temp += add_step_arrows(new, pops, mats_cache)
+            annotation_specs += step_annotation_specs(new, pops)
         loc, target, lens = CAMS[cam]
         camera_to(loc, target, lens=lens)
+        annotation_map[f"step_{idx:02d}_{key}"] = project_annotations(annotation_specs)
         render(OUT / f"step_{idx:02d}_{key}.png")
         for obj in new:
             d = pops.get(obj.name)
@@ -570,6 +557,9 @@ def steps(objects, mats_cache):
         else:
             placed.extend(obj for obj in new
                           if not obj.name.startswith(("px_insert", "px_screw")))
+    (OUT / "step_annotations.json").write_text(
+        json.dumps(annotation_map, indent=2) + "\n", encoding="utf-8")
+    print("wrote step_annotations.json")
 
 
 def insets(objects, mats_cache):

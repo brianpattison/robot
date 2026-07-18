@@ -40,7 +40,10 @@ import robot_body_v2_inventory as inv  # noqa: E402
 
 IMG = ROOT / "docs" / "images"
 GUIDE_IMG = IMG / "guide_v2"
+STEP_ANNOTATIONS = json.loads((GUIDE_IMG / "step_annotations.json").read_text())
 PLATES = json.loads((ROOT / "cad" / "bambu" / "codex_robot_body_v2_p1s_plates.json").read_text())
+COUPON_PLATES = json.loads(
+    (ROOT / "cad" / "bambu" / "codex_robot_body_v2_coupons_p1s_plates.json").read_text())
 N_PLATES = len(PLATES["plates"])
 N_PIECES = sum(pl["part_count"] for pl in PLATES["plates"])
 INVENTORY_COUNTS = PLATES.get("inventory_counts", {})
@@ -102,22 +105,187 @@ FRONT_LABEL = {
     "step_15_panels": "&#8601; FRONT",
     "step_04_wheels_bench": None,   # bench shot, no robot orientation
 }
+
+
+def annotation_svg(step_key):
+    """Crisp numbered assembly arrows projected from the actual Blender scene."""
+    arrows = STEP_ANNOTATIONS.get(step_key, [])
+    if not arrows:
+        return ""
+    marker = f"arrow_{step_key}"
+    bits = [
+        '<svg class="step-annotations" viewBox="0 0 1100 850" '
+        'preserveAspectRatio="none" aria-hidden="true">',
+        f'<defs><marker id="{marker}" markerWidth="9" markerHeight="9" refX="7" refY="3.5" '
+        'orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,7 L8,3.5 z" fill="#D41468"/>'
+        '</marker></defs>',
+    ]
+    for arrow in arrows:
+        tx, ty = arrow["tail"][0] * 11, arrow["tail"][1] * 8.5
+        dx, dy = arrow["tip"][0] * 11, arrow["tip"][1] * 8.5
+        vx, vy = dx - tx, dy - ty
+        length = max((vx * vx + vy * vy) ** 0.5, 1.0)
+        # Keep the line clear of both numbered dots.
+        sx, sy = tx + vx * 13 / length, ty + vy * 13 / length
+        ex, ey = dx - vx * 18 / length, dy - vy * 18 / length
+        n = arrow["n"]
+        bits.append(
+            f'<line x1="{sx:.1f}" y1="{sy:.1f}" x2="{ex:.1f}" y2="{ey:.1f}" '
+            f'stroke="#D41468" stroke-width="5" stroke-linecap="round" marker-end="url(#{marker})"/>'
+            f'<circle cx="{tx:.1f}" cy="{ty:.1f}" r="13" fill="#D41468" stroke="#FFF9EE" stroke-width="3"/>'
+            f'<text x="{tx:.1f}" y="{ty + 5:.1f}" text-anchor="middle" fill="#FFF9EE" '
+            f'font-size="16" font-weight="800">{n}</text>'
+            f'<circle cx="{dx:.1f}" cy="{dy:.1f}" r="13" fill="#FFF9EE" fill-opacity=".82" '
+            f'stroke="#D41468" stroke-width="4"/>'
+            f'<text x="{dx:.1f}" y="{dy + 5:.1f}" text-anchor="middle" fill="#A20E4A" '
+            f'font-size="16" font-weight="800">{n}</text>'
+        )
+    bits.append("</svg>")
+    return "".join(bits)
+
+
+def robot_axis_badge():
+    return ('<div class="axisbadge"><span>L</span><b>&larr;</b><i>FRONT</i>'
+            '<b>&rarr;</b><span>R</span></div>')
+
+
+def technical_diagram(kind):
+    """Small dimensioned sections for operations a perspective render hides."""
+    common = ('<svg viewBox="0 0 520 310" style="width:100%;height:100%;display:block" '
+              'aria-hidden="true"><rect width="520" height="310" fill="#F5EEE2"/>')
+    end = "</svg>"
+    if kind == "rear_well":
+        return common + '''
+          <rect x="70" y="42" width="300" height="226" rx="24" fill="#272724"/>
+          <rect x="104" y="62" width="232" height="186" rx="18" fill="#4D4B46"/>
+          <rect x="250" y="44" width="46" height="85" rx="18" fill="#E9DED0"/>
+          <rect x="257" y="126" width="32" height="58" rx="7" fill="#C89B32"/>
+          <rect x="264" y="176" width="18" height="76" rx="7" fill="#82817D"/>
+          <rect x="252" y="238" width="42" height="18" rx="6" fill="#A9A8A3"/>
+          <path d="M292 88 H368 M292 153 H368 M282 224 H368" stroke="#087A8C" stroke-width="3"/>
+          <text x="376" y="92" font-size="13" font-weight="700" fill="#1F2828">7.2 mm tire port</text>
+          <text x="376" y="157" font-size="13" font-weight="700" fill="#1F2828">deep insert seat</text>
+          <text x="376" y="228" font-size="13" font-weight="700" fill="#1F2828">M3 tip on shaft flat</text>
+          <text x="72" y="294" font-size="17" font-weight="700" fill="#087A8C">Nothing protrudes after assembly</text>
+        ''' + end
+    if kind == "rear_clamp":
+        return common + '''
+          <circle cx="170" cy="154" r="112" fill="#272724"/><circle cx="170" cy="154" r="78" fill="#4D4B46"/>
+          <rect x="156" y="12" width="28" height="100" rx="12" fill="#E9DED0"/>
+          <rect x="161" y="104" width="18" height="94" rx="7" fill="#8A8984"/>
+          <path d="M170 198 V258 H310" stroke="#8A8984" stroke-width="26" fill="none"/>
+          <path d="M170 237 H285" stroke="#F5EEE2" stroke-width="8"/>
+          <text x="290" y="56" font-size="14" font-weight="700" fill="#1F2828">tool enters through tread</text>
+          <path d="M278 62 H190" stroke="#087A8C" stroke-width="3"/>
+          <text x="290" y="151" font-size="14" font-weight="700" fill="#1F2828">screw presses D-flat</text>
+          <path d="M278 157 H190" stroke="#087A8C" stroke-width="3"/>
+          <text x="290" y="246" font-size="14" font-weight="700" fill="#1F2828">motor shaft</text>
+        ''' + end
+    if kind == "front_washer":
+        return common + '''
+          <circle cx="208" cy="155" r="118" fill="#32312E"/>
+          <circle cx="208" cy="155" r="57" fill="#F5EEE2"/>
+          <circle cx="208" cy="155" r="68" fill="none" stroke="#D41468" stroke-width="22"/>
+          <circle cx="208" cy="155" r="13" fill="#8A8984"/>
+          <path d="M93 42 H323 M93 34 V50 M323 34 V50" stroke="#087A8C" stroke-width="3"/>
+          <text x="145" y="28" font-size="17" font-weight="700" fill="#087A8C">22 mm cap washer</text>
+          <path d="M151 155 H265" stroke="#FFF9EE" stroke-width="3"/>
+          <text x="312" y="121" font-size="14" font-weight="700" fill="#1F2828">washer overlaps</text>
+          <text x="312" y="143" font-size="14" font-weight="700" fill="#1F2828">18.5 mm wheel bore</text>
+          <path d="M302 137 H274" stroke="#087A8C" stroke-width="3"/>
+          <text x="312" y="230" font-size="14" font-weight="700" fill="#1F2828">wheel remains free</text>
+        ''' + end
+    if kind == "bumper_section":
+        return common + '''
+          <rect x="42" y="44" width="260" height="168" rx="22" fill="#DED9CF"/>
+          <rect x="172" y="170" width="94" height="46" rx="7" fill="#4B4A46"/>
+          <rect x="122" y="184" width="54" height="18" rx="5" fill="#8B8983"/>
+          <rect x="70" y="172" width="52" height="42" rx="8" fill="#F0C34A"/>
+          <path d="M34 158 Q18 191 34 231 L89 255 H326 Q356 255 356 225 V204" fill="none" stroke="#242421" stroke-width="25"/>
+          <path d="M96 203 H119" stroke="#D41468" stroke-width="4" marker-end="url(#tiny)"/>
+          <defs><marker id="tiny" markerWidth="8" markerHeight="8" refX="7" refY="3.5" orient="auto"><path d="M0 0V7L8 3.5Z" fill="#D41468"/></marker></defs>
+          <text x="330" y="74" font-size="14" font-weight="700" fill="#1F2828">0.4 mm rest gap</text>
+          <text x="330" y="116" font-size="14" font-weight="700" fill="#1F2828">2.0 mm switch click</text>
+          <text x="330" y="158" font-size="14" font-weight="700" fill="#1F2828">2.4 mm hard stop</text>
+          <text x="330" y="216" font-size="14" font-weight="700" fill="#087A8C">button faces OUT</text>
+          <text x="330" y="244" font-size="14" font-weight="700" fill="#087A8C">lead exits IN</text>
+        ''' + end
+    if kind == "fascia_back":
+        return common + '''
+          <rect x="54" y="52" width="412" height="206" rx="18" fill="#292824"/>
+          <rect x="95" y="94" width="78" height="82" rx="8" fill="#5F83D0"/>
+          <rect x="347" y="94" width="78" height="82" rx="8" fill="#5F83D0"/>
+          <circle cx="134" cy="135" r="12" fill="#141516" stroke="#DCE9F5" stroke-width="5"/>
+          <circle cx="386" cy="135" r="12" fill="#141516" stroke="#DCE9F5" stroke-width="5"/>
+          <rect x="188" y="194" width="54" height="30" rx="7" fill="#4C9B59"/>
+          <rect x="278" y="194" width="54" height="30" rx="7" fill="#4C9B59"/>
+          <path d="M134 85 V42 M386 85 V42 M215 229 V276 M305 229 V276" stroke="#087A8C" stroke-width="3"/>
+          <text x="100" y="30" font-size="14" font-weight="700" fill="#1F2828">LEFT ToF</text>
+          <text x="350" y="30" font-size="14" font-weight="700" fill="#1F2828">RIGHT ToF</text>
+          <text x="182" y="52" font-size="13" font-weight="700" fill="#1F2828">lenses through low holes</text>
+          <text x="115" y="300" font-size="14" font-weight="700" fill="#087A8C">status lights: arrows OUT, plugs IN</text>
+        ''' + end
+    if kind == "audio_section":
+        return common + '''
+          <rect x="42" y="46" width="430" height="220" rx="20" fill="#DED9CF"/>
+          <rect x="78" y="78" width="210" height="88" rx="10" fill="#4B4944"/>
+          <rect x="78" y="78" width="26" height="88" fill="#171817"/>
+          <path d="M104 92 H52 M288 122 H360" stroke="#087A8C" stroke-width="3"/>
+          <text x="8" y="88" font-size="14" font-weight="700" fill="#1F2828">grille OUT</text>
+          <text x="364" y="118" font-size="14" font-weight="700" fill="#1F2828">magnet IN</text>
+          <rect x="150" y="188" width="96" height="42" rx="7" fill="#397948"/>
+          <rect x="250" y="191" width="58" height="36" rx="6" fill="#5F83D0"/>
+          <path d="M198 232 V286 M279 230 V286" stroke="#087A8C" stroke-width="3"/>
+          <text x="88" y="298" font-size="13" font-weight="700" fill="#1F2828">amp pocket + service loop</text>
+          <text x="330" y="298" font-size="13" font-weight="700" fill="#1F2828">ToF lens OUT</text>
+        ''' + end
+    if kind == "estop_section":
+        return common + '''
+          <rect x="45" y="118" width="284" height="28" rx="8" fill="#D7D4CC"/>
+          <rect x="45" y="94" width="284" height="20" rx="5" fill="#56C4C2"/>
+          <rect x="155" y="38" width="72" height="70" rx="12" fill="#D52B20"/>
+          <rect x="174" y="106" width="34" height="148" rx="9" fill="#30312F"/>
+          <rect x="142" y="147" width="98" height="17" rx="6" fill="#9A9994"/>
+          <rect x="137" y="171" width="108" height="32" rx="8" fill="none" stroke="#F0C34A" stroke-width="8"/>
+          <rect x="138" y="232" width="52" height="47" rx="5" fill="#20211F"/>
+          <rect x="194" y="232" width="52" height="47" rx="5" fill="#20211F"/>
+          <path d="M255 257 H350" stroke="#087A8C" stroke-width="3"/>
+          <text x="280" y="80" font-size="13" font-weight="700" fill="#1F2828">teal skin: cosmetic only</text>
+          <text x="280" y="128" font-size="13" font-weight="700" fill="#1F2828">4 mm PETG lid clamps switch</text>
+          <text x="280" y="178" font-size="13" font-weight="700" fill="#1F2828">nut + printed reinforcement</text>
+          <text x="280" y="230" font-size="13" font-weight="700" fill="#1F2828">2 NC blocks</text>
+          <text x="280" y="260" font-size="13" font-weight="700" fill="#087A8C">terminal corridor</text>
+        ''' + end
+    if kind == "status_bar":
+        return common + '''
+          <rect x="38" y="48" width="444" height="214" rx="24" fill="#E4E0D6"/>
+          <rect x="76" y="102" width="368" height="76" rx="12" fill="#292824"/>
+          <rect x="137" y="126" width="72" height="28" rx="7" fill="#DDFD73"/>
+          <rect x="311" y="126" width="72" height="28" rx="7" fill="#DDFD73"/>
+          <rect x="145" y="192" width="56" height="32" rx="7" fill="#438851"/>
+          <rect x="319" y="192" width="56" height="32" rx="7" fill="#438851"/>
+          <path d="M173 190 V160 M347 190 V160" stroke="#D41468" stroke-width="5"/>
+          <text x="80" y="82" font-size="14" font-weight="700" fill="#1F2828">clip diffuser first</text>
+          <text x="258" y="82" font-size="13" font-weight="700" fill="#1F2828">seat both glow boards from behind</text>
+          <text x="124" y="286" font-size="14" font-weight="700" fill="#087A8C">LED arrows OUT, JST plugs IN</text>
+        ''' + end
+    raise KeyError(kind)
 # Inset panels overlaid on a step's big picture: render name + caption.
 INSETS = {
     "step_13_shell": ("step_13b_shell_inserts", "All 14 insert spots"),
 }
 EXTRA_PANELS = {
-    "step_10_pico": [("step_10b_pico_close", "USB end, SWD end, and clamp landing")],
+    "step_10_pico": [("step_10b_pico_close", "USB toward BACK; SWD toward FRONT; clamp touches blank PCB edges only")],
     "step_12_deck": [
-        ("step_12b_regulators", "Underside: distinct 5 V and 6 V regulators"),
-        ("step_12c_fuse", "Topside: covered fuse block and wire edge"),
+        ("step_12b_regulators", "Detail A - underside: distinct 5 V and 6 V regulators"),
+        ("step_12c_fuse", "Detail B - topside: covered fuse block and LEFT wire edge"),
     ],
-    "step_14_bumpers": [("step_14b_switch_underside", "Underside: all 6 NC feeler positions")],
-    "step_15_panels": [("step_15b_rear_panel", "Separate rear view: charge, blank, mute")],
-    "step_16_speakers": [("step_16b_audio_close", "One side enlarged: speaker, clamp, ToF")],
+    "step_14_bumpers": [("step_14b_switch_underside", "Detail A - 6 switches: buttons OUT, leads IN")],
+    "step_15_panels": [("step_15b_rear_panel", "Detail B - rear: charge LEFT, blank center, mute RIGHT")],
+    "step_16_speakers": [("step_16b_audio_close", "Detail A - speaker: grille OUT, magnet IN; clamp + ToF")],
     "step_17_lid": [
-        ("step_17b_lid_inserts", "Lid flipped: the 2 mic bosses"),
-        ("step_17c_estop_stack", "Full E-stop body, nut, and 2 NC blocks"),
+        ("step_17b_lid_inserts", "Detail A - lid flipped: the 2 mic bosses"),
+        ("step_17c_estop_stack", "Detail B - full E-stop body, nut, and 2 NC blocks"),
     ],
     "step_18_neck": [
         ("step_18b_neck_cutaway", "Lid hidden: collar, cradle, servo, plate, horn"),
@@ -126,6 +294,18 @@ EXTRA_PANELS = {
         ("step_19b_tilt_stack", "Tilt servo, horn, hard stops, passive bushing"),
         ("step_19c_camera", "Camera board, lens, and ribbon entrance"),
     ],
+}
+VECTOR_PANELS = {
+    "step_04_wheels_bench": [("Rear wheel cutaway: port, deep insert, screw, shaft", "rear_well")],
+    "step_06_wheels_on": [
+        ("Detail A - rear wheel clamp path", "rear_clamp"),
+        ("Detail B - front cap washer overlap", "front_washer"),
+    ],
+    "step_14_bumpers": [("Detail B - side section: rest, click, hard stop", "bumper_section")],
+    "step_15_panels": [("Detail A - back of fascia: sensors and status lights", "fascia_back")],
+    "step_16_speakers": [("Detail B - one-side orientation and wire exit", "audio_section")],
+    "step_17_lid": [("Detail C - E-stop lid load path and terminal corridor", "estop_section")],
+    "step_20_face": [("Detail - body status bar: diffuser, boards, plug direction", "status_bar")],
 }
 N_SCREWS, N_INSERTS = inv.fastener_tally()
 
@@ -500,8 +680,16 @@ td b { font-weight: 600; }
 .stepbody .imgwrap { width: 6.15in; height: 4.85in; border-radius: .14in; overflow: hidden;
   position: relative; flex: none; border: 1px solid var(--line-soft); }
 .stepbody .imgwrap img.main { width: 107%; height: 107%; object-fit: cover; object-position: 50% 55%; margin: -2.5% 0 0 -3.5%; }
+.step-annotations { position: absolute; left: -3.5%; top: -2.5%; width: 107%; height: 107%;
+  pointer-events: none; overflow: visible; }
 .frontchip { position: absolute; left: .12in; bottom: .12in; background: rgba(34,35,31,.85); color: #fff;
   font-weight: 700; font-size: 10.5px; letter-spacing: .04em; padding: .04in .1in; border-radius: .1in; }
+.axisbadge { position: absolute; left: .12in; top: .12in; display: flex; align-items: center; gap: .045in;
+  background: rgba(255,249,238,.92); color: var(--ink); border: 1px solid rgba(34,35,31,.25);
+  border-radius: .13in; padding: .045in .09in; font-size: 8px; font-weight: 800;
+  letter-spacing: .06em; box-shadow: 0 1px 5px rgba(0,0,0,.12); }
+.axisbadge b { color: var(--teal); font-size: 12px; line-height: 1; }
+.axisbadge i { font-style: normal; color: var(--teal-dk); font-size: 7px; letter-spacing: .1em; }
 .instr { flex: 1; display: flex; flex-direction: column; }
 .instr ol { margin-left: .22in; }
 .instr li { font-size: 13.5px; margin-bottom: .1in; line-height: 1.42; }
@@ -515,7 +703,7 @@ td b { font-weight: 600; }
 .footer { position: absolute; bottom: .24in; left: .6in; right: .6in; display: flex;
   justify-content: space-between; font-size: 7.5px; font-weight: 600; letter-spacing: .14em;
   color: #A2967C; text-transform: uppercase; }
-.rule { background: #fff; border: 1px solid var(--line-soft); border-left: 4px solid var(--red);
+.rule { background: #FFF8F1; border: 1.5px solid #E8B8A9;
   border-radius: .07in; padding: .07in .13in; margin-bottom: .08in; font-size: 12.5px; }
 .hero { position: absolute; right: 0; top: 0; width: 6in; height: 8.5in; object-fit: cover; object-position: 62% 22%; }
 .invgrid { display: grid; grid-template-columns: repeat(8, 1fr); gap: .08in; }
@@ -795,6 +983,34 @@ def build_body_pages():
       Print each group back to back, then label its box before changing filament.</p>""",
         chapter=1)
 
+    # Coupons are a real tracked P1S project, not an STL treasure hunt.
+    add(f"""
+      {eyebrow(1)}
+      <div style="display:inline-block; margin-bottom:.1in; background:var(--lime); color:var(--ink); padding:.07in .12in; font-size:11px; font-weight:850; letter-spacing:.08em;">FIRST PRINT: QUALIFICATION COUPONS</div>
+      <h2>Open one file. Print the evidence first.</h2>
+      <div class="cols">
+        <div>
+          <img src="{img_uri(IMG / 'codex_robot_body_v2_coupons_p1s_plates.png')}"
+               style="width:100%; border-radius:.12in; border:1px solid var(--line-soft);">
+          <p style="font-size:10px; margin-top:.06in; color:var(--ink2);">
+            {len(COUPONS)} logical tests, {sum(p['part_count'] for p in COUPON_PLATES['plates'])} printable objects,
+            {len(COUPON_PLATES['plates'])} material-separated P1S plates. The tire ring and core are separate objects.
+          </p>
+        </div>
+        <div>
+          <h3 style="margin-top:0;">codex_robot_body_v2_coupons_p1s.3mf</h3>
+          <ol style="font-size:12px; margin-left:.24in;">
+            <li>Open the tracked coupon 3MF in Bambu Studio.</li>
+            <li>Load the exact filament product and color you intend to use.</li>
+            <li>Print one material plate at a time; do not substitute a pass from another spool family.</li>
+            <li>Run the matching fit, load, wear, heat, or optical check on the next two pages.</li>
+            <li>Record the machine, filament, settings, measured result, tester, and date. Blank means OPEN.</li>
+          </ol>
+          <div class="check" style="margin-top:.2in;"><span class="box"></span><div><b>CHECK</b>
+            Every coupon object is present, each plate contains one material/color, and no support is enabled.</div></div>
+        </div>
+      </div>""", chapter=1)
+
     # Coupons: keep the original mechanical checks and the new material
     # qualification evidence on separate pages so the recording fields remain
     # readable instead of becoming microscopic ant paperwork.
@@ -804,7 +1020,7 @@ def build_body_pages():
                         if "_pla_" in k or "lid_boundary" in k]
     for coupon_page, coupon_items in enumerate((standard_coupons, material_coupons), start=1):
         crows = "".join(f"<tr><td><b>{esc(COUPON_TITLES.get(k, k))}</b><br>"
-                        f"<span class='mono'>{esc(k)}.stl</span></td>"
+                        f"<span class='mono'>{esc(' + '.join(o['stl'] for o in v['objects']))}</span></td>"
                         f"<td>{esc(v['material'])}</td><td>{esc(COUPON_NOTES.get(k, v['note']))}</td></tr>"
                         for k, v in coupon_items)
         intro = ("These checks prove the shared screw, wheel, switch, board, and motion interfaces."
@@ -818,7 +1034,7 @@ def build_body_pages():
         add(f"""
           {eyebrow(1)}
           <h2>Print the little test parts first ({coupon_page} of 2)</h2>
-          <p style="margin-bottom:.1in;">Generate them with <b>cad/python/robot_body_v2_coupons.py</b>. {intro}</p>
+          <p style="margin-bottom:.1in;">Print them from <b>codex_robot_body_v2_coupons_p1s.3mf</b>. {intro}</p>
           <table class="roomy" style="font-size:10.5px;"><tr><th>Test part</th><th>Filament</th><th>What it proves</th></tr>{crows}</table>
           {record}""", chapter=1)
 
@@ -873,6 +1089,11 @@ def build_body_pages():
     for i, (img_name, title, screws, items, subs, check) in enumerate(STEPS, start=1):
         label = FRONT_LABEL.get(img_name, "&#8601; FRONT")
         front_chip = f'<div class="frontchip">{label}</div>' if label else ""
+        direction_text = " ".join((title, *subs, check)).upper()
+        axis = (robot_axis_badge()
+                if label is not None and any(word in direction_text for word in ("LEFT", "RIGHT"))
+                else "")
+        arrows = annotation_svg(img_name)
         inset = ""
         if img_name in INSETS:
             inset_img, inset_caption = INSETS[img_name]
@@ -883,18 +1104,33 @@ def build_body_pages():
                 f'<img src="{img_uri(GUIDE_IMG / (inset_img + ".png"))}" style="width:100%; display:block;">'
                 f'<div style="font-size:8.5px; font-weight:700; letter-spacing:.06em; padding:.035in .06in;'
                 f' color:var(--teal-dk); text-transform:uppercase;">{inset_caption}</div></div>')
-        if img_name in EXTRA_PANELS:
-            panel_count = len(EXTRA_PANELS[img_name])
-            panel_h = 2.15 if panel_count > 1 else 2.55
+        panel_specs = [
+            ("image", panel_img, panel_caption)
+            for panel_img, panel_caption in EXTRA_PANELS.get(img_name, [])
+        ] + [
+            ("vector", kind, panel_caption)
+            for panel_caption, kind in VECTOR_PANELS.get(img_name, [])
+        ]
+        if panel_specs:
+            panel_count = len(panel_specs)
+            panel_h = {1: 2.55, 2: 2.15}.get(panel_count, 1.44)
             chunks = []
-            for panel_i, (panel_img, panel_caption) in enumerate(EXTRA_PANELS[img_name]):
+            for panel_i, (panel_kind, panel_source, panel_caption) in enumerate(panel_specs):
                 top = 0.10 + panel_i * (panel_h + 0.12)
+                media_h = panel_h - .38
+                if panel_kind == "image":
+                    media = (
+                        f'<img src="{img_uri(GUIDE_IMG / (panel_source + ".png"))}" '
+                        f'style="width:100%; height:{media_h:.2f}in; object-fit:cover; display:block;">')
+                else:
+                    media = (
+                        f'<div style="width:100%; height:{media_h:.2f}in; display:block;">'
+                        f'{technical_diagram(panel_source)}</div>')
                 chunks.append(
                     f'<div style="position:absolute; top:{top:.2f}in; right:.1in; width:2.25in; background:#fff;'
                     f' border:1px solid var(--line); border-radius:.1in; overflow:hidden;'
                     f' box-shadow:0 1px 6px rgba(0,0,0,.2);">'
-                    f'<img src="{img_uri(GUIDE_IMG / (panel_img + ".png"))}" '
-                    f'style="width:100%; height:{panel_h - .38:.2f}in; object-fit:cover; display:block;">'
+                    f'{media}'
                     f'<div style="font-size:8px; font-weight:700; line-height:1.15; padding:.045in .06in;'
                     f' color:var(--teal-dk); text-transform:uppercase;">{panel_caption}</div></div>')
             inset = "".join(chunks)
@@ -904,9 +1140,9 @@ def build_body_pages():
         add(f"""
           <div class="stephead"><div class="stepnum">{i}</div><h2>{esc(title)}</h2>{progress(i)}</div>
           <div class="{strip_cls}"><span class="gather">GATHER</span>{cells}</div>
-          <div class="stepbody">
+            <div class="stepbody">
             <div class="imgwrap"><img class="main" src="{img_uri(GUIDE_IMG / (img_name + '.png'))}">
-              {front_chip}{inset}</div>
+              {arrows}{front_chip}{axis}{inset}</div>
             <div class="instr"><ol>{lis}</ol>
               <div class="check"><span class="box"></span><div><b>CHECK</b>{esc(check)}</div></div></div>
           </div>""",
@@ -1170,14 +1406,24 @@ def main():
                 f"<style>{CSS}</style></head><body>{body}</body></html>")
     html_doc = "\n".join(line.rstrip() for line in html_doc.splitlines()) + "\n"
     HTML_OUT.write_text(html_doc, encoding="utf-8")
+    # Chrome will not reliably replace an existing --print-to-pdf target. A
+    # mere existence check therefore accepts a stale book while claiming the
+    # new page count. Remove only this exact generated artifact, then prove the
+    # replacement has the authored number of fixed pages.
+    PDF_OUT.unlink(missing_ok=True)
     result = subprocess.run(
         [CHROME, "--headless=new", "--disable-gpu", "--no-pdf-header-footer",
          "--no-margins", f"--print-to-pdf={PDF_OUT}", HTML_OUT.resolve().as_uri()],
         capture_output=True, text=True, timeout=300)
-    if not PDF_OUT.exists():
+    if result.returncode != 0 or not PDF_OUT.exists():
         raise SystemExit(f"Chrome PDF failed:\n{result.stderr[-2000:]}")
+    import pypdfium2 as pdfium
+    emitted_pages = len(pdfium.PdfDocument(PDF_OUT))
+    if emitted_pages != total:
+        raise SystemExit(
+            f"Chrome PDF page mismatch: authored {total}, emitted {emitted_pages}. ")
     print(f"wrote {HTML_OUT}")
-    print(f"wrote {PDF_OUT} ({total} pages)")
+    print(f"wrote {PDF_OUT} ({emitted_pages} pages, verified)")
 
 
 if __name__ == "__main__":
