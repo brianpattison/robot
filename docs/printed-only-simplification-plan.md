@@ -497,6 +497,21 @@ and then thrown that detailing away. Revised order:
    connectivity rule in the validator. Remaining before declaring
    D027: delivered-part mass updates, coupon prints, and the fresh
    external review round.
+   Update (2026-07-17 closeout): D034 added the hybrid material registry
+   without changing the 40-part functional budget: 40 installed pieces,
+   four spare washers, and one optional PLA lid skin produce 45 print
+   instances on 13 plates in seven material/color groups. The material
+   evidence program now has 18 coupons. D035 replaced the head skeleton's
+   prose-only load paths with the production solids: bayonet collar,
+   printed pan journal/thrust face, captured D85MG, horn-driven neck,
+   four-M3 yoke, active tilt drive, passive printed shoulder bushing, and
+   physical stops. The model exports 32 connected designs, uses 47 standard
+   M3 joints, and passes the inventory-driven gate with zero warnings at
+   approximately 2.83 kg. The 38-page builder's book and all tracked review
+   renders were regenerated from those manifests. The packing/CAD gate is
+   therefore closed; delivered-part fit, coupons, harness/fuse details, and
+   loaded motion evidence remain physical release gates rather than reasons
+   to reopen the box layout.
 3. **Fastener-system pass on v2.** Collapse `Params` to the single
    insert/screw spec; add the clamp-stack (3.0-3.4 mm) and
    engagement-limit validator checks; implement capture-or-M3 mounts for
@@ -527,9 +542,9 @@ coupons → Bambu project) per repo convention.
 | Screw lengths | many (kit) | 1 (8 mm) |
 | Tools for body assembly | hex keys, nut drivers, wrenches | one 2.5 mm hex key + soldering iron (inserts) |
 | Printed parts | 101 | <= 40 (hard budget, D028) |
-| Print plates | 26 | ~8-12 |
+| Print plates | 26 | 13 current v2 plates (seven material/color groups) |
 | Parts needing supports | shell quadrants + head shells (build-plate supports) | 0 (validator-audited; empty exception list) |
-| Calibration coupons | 17 | ~8 |
+| Calibration coupons | 17 | 18 evidence coupons across PETG, PLA, and TPU roles |
 | Hardware cost removed | — | roughly $120-280 (brackets, hubs, bolts, bearings, spacers, kits) |
 
 ## Resolved Decisions (2026-07-16)

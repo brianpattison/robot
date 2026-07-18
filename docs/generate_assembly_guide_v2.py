@@ -105,7 +105,27 @@ FRONT_LABEL = {
 # Inset panels overlaid on a step's big picture: render name + caption.
 INSETS = {
     "step_13_shell": ("step_13b_shell_inserts", "All 14 insert spots"),
-    "step_17_lid": ("step_17b_lid_inserts", "Lid flipped: the 2 mic bosses"),
+}
+EXTRA_PANELS = {
+    "step_10_pico": [("step_10b_pico_close", "USB end, SWD end, and clamp landing")],
+    "step_12_deck": [
+        ("step_12b_regulators", "Underside: distinct 5 V and 6 V regulators"),
+        ("step_12c_fuse", "Topside: covered fuse block and wire edge"),
+    ],
+    "step_14_bumpers": [("step_14b_switch_underside", "Underside: all 6 NC feeler positions")],
+    "step_15_panels": [("step_15b_rear_panel", "Separate rear view: charge, blank, mute")],
+    "step_16_speakers": [("step_16b_audio_close", "One side enlarged: speaker, clamp, ToF")],
+    "step_17_lid": [
+        ("step_17b_lid_inserts", "Lid flipped: the 2 mic bosses"),
+        ("step_17c_estop_stack", "Full E-stop body, nut, and 2 NC blocks"),
+    ],
+    "step_18_neck": [
+        ("step_18b_neck_cutaway", "Lid hidden: collar, cradle, servo, plate, horn"),
+    ],
+    "step_19_head": [
+        ("step_19b_tilt_stack", "Tilt servo, horn, hard stops, passive bushing"),
+        ("step_19c_camera", "Camera board, lens, and ribbon entrance"),
+    ],
 }
 N_SCREWS, N_INSERTS = inv.fastener_tally()
 
@@ -115,7 +135,7 @@ PART_NAMES = {
     "tray_v2": "floor tray", "deck_v2": "power deck",
     "controller_tower_v2": "brain tower", "battery_clamp_v2": "battery clamp",
     "speaker_clamp_v2": "speaker clamp", "yoke_v2": "head yoke",
-    "mic_cradle_v2": "mic cradle", "head_pan_plate_v2": "head bottom plate",
+    "mic_cradle_v2": "mic cradle", "head_pan_plate_v2": "pan-servo plate",
     "pico_clamp_v2": "safety-board clamp", "front_pod_left_v2": "front pod (L)",
     "front_pod_right_v2": "front pod (R)", "motor_cap_v2": "motor cap",
     "tof_clamp_v2": "sensor clamp", "tilt_bushing_v2": "tilt bushing",
@@ -135,7 +155,7 @@ PART_NAMES = {
     "px_fuse": "fuse block", "px_reg1": "regulators",
     "px_switch": "feeler switches", "px_tof_L": "distance boards",
     "px_speaker_L": "speakers", "px_estop_cap": "red button",
-    "px_mic": "mic array", "px_servo": "servo", "px_camera": "camera",
+    "px_mic": "mic array", "px_servo": "D85MG + R-ML24", "px_camera": "camera",
     "px_pico": "Pico 2",
 }
 STRIP_NAME_OVERRIDES = {
@@ -186,6 +206,8 @@ SHOP_ELECTRONICS = [
     ("Cytron MDDS10 motor driver", "1", "The purple board that powers the wheels."),
     ("Pololu #4867 gearmotor (99:1, 25D, 12 V, encoder)", "2", "The wheel motors."),
     ("Hitec D85MG servo", "2", "The neck motors (look left/right, up/down)."),
+    ("Hitec R-ML24 aluminum horn (H24T)", "2", "One per servo; 22 mm single arm with M2 × 0.4 stations at 13 and 16 mm."),
+    ("Verified D85MG/R-ML24 component hardware pack", "1 set", "2 spline-center screws, 4 M2 horn-link screws, and both servos’ mounting grommets, eyelets, screws, and nuts. Confirm the delivered pack against the head coupons before use."),
     ("Bioenno BLF-1203AB 12 V 3 Ah LiFePO4 battery", "1", "The robot’s power pack."),
     ("Bioenno BPC-1502DC charger", "1", "The matching charger. Only ever use this one."),
     ("Switchcraft EN2P3M20 inlet + EN2C3F20G2 plug", "1 pair", "The keyed charging plug on the back."),
@@ -205,6 +227,7 @@ SHOP_ELECTRONICS = [
 ]
 SHOP_TOOLS = [
     ("2.5 mm hex key", "Turns every screw in this robot. Seriously, all of them."),
+    ("6 V current-limited servo tester", "Centers both D85MG servos at 1500 µs before either horn goes on."),
     ("Soldering iron", "Melts the brass inserts into the plastic. Hot — treat it with respect."),
     ("Small flush cutters / scissors", "Trims zip ties and TPU strings."),
     ("Painter’s tape + marker", "Label wires as you go."),
@@ -332,18 +355,22 @@ STEPS = [
       "OPTIONAL: after the E-stop is clamped, press the teal skin’s four integral tabs into the lid’s blind pockets. It stays above the lid and never goes under the E-stop nut, neck, microphone, or corner screws.",
       "Rest the lid in its ledge — DON’T screw it yet. The neck, the head, and all the wiring still need the inside. Its 4 corner screws are the very last thing in this book."],
      "The optional skin sits flat with every slot open; with the PETG lid supported and nut tight, a centered firm press latches the red button; twist to release."),
-    ("step_18_neck", "Neck mechanism — prototype hold", 0,
-     [("neck_v2", 1), ("bayonet_collar_v2", 1), ("px_servo", 1)],
-     ["STOP: the current collar and pan plate do not yet contain the complete servo capture and retention geometry shown by this concept render.",
-      "Do not fit the servo or rely on this page as a load-bearing assembly instruction.",
-      "Keep the neck, collar, servo, and lid loose until a regenerated book shows the validated mechanism and bundled servo hardware."],
-     "No head mechanism has been assembled from unfinished geometry."),
-    ("step_19_head", "Head mechanism — prototype hold", 1,
-     [("head_shell_v2", 1), ("yoke_v2", 1), ("head_pan_plate_v2", 1), ("px_camera", 1), ("px_servo", 1), ("tilt_bushing_v2", 1), ("px_insert", 1)],
-     ["STOP: the complete pan/tilt load paths, servo capture, horn engagement, hard stops, cable corridor, and service access are not yet modeled.",
-      "Do not install the camera, yoke, servo, bushing, or pivot from this preview.",
-      "Store the head parts together. A later regenerated book will show the real geometry and every piece of bundled Hitec hardware."],
-     "The unfinished head mechanism remains unassembled."),
+    ("step_18_neck", "Build the pan journal and neck", SCREWS["pan_servo_plate"],
+     [("neck_v2", 1), ("bayonet_collar_v2", 1), ("head_pan_plate_v2", 1), ("px_servo", 1), ("px_insert", 6)],
+     ["Melt 2 inserts into the collar’s pan-plate towers and 4 into the neck’s top flange. Keep heat away from the smooth journal and thrust faces.",
+      "From above the loose lid, align the collar’s 3 lugs with the keyways, press through, and twist about 20° until all 3 detents sit in the blind underside race.",
+      "Flip the supported lid. Set the pan D85MG into the cradle with its shaft UP; the black pan plate captures its flange from below with 2 M3 screws. The case must not be pinched.",
+      "Using a current-limited 6 V servo tester, center the servo at 1500 µs. Fit one R-ML24 arm toward FRONT with its verified spline screw; never force the gears by hand.",
+      "Feed the camera ribbon through the open +X crescent, lower the neck journal into the collar, and fasten the neck drive pad to both R-ML24 M2 stations with the verified component screws."],
+     "The shoulder sits flat on the greased thrust face; the neck turns by hand through ±60°, meets both hard stops beyond that range, has no lift, and never rubs the ribbon."),
+    ("step_19_head", "Build the tilt head and camera", SCREWS["yoke_neck"] + SCREWS["head_tilt_pivot"],
+     [("head_shell_v2", 1), ("yoke_v2", 1), ("px_camera", 1), ("px_servo", 1), ("tilt_bushing_v2", 1), ("px_insert", 1)],
+     ["Melt 1 insert into the yoke’s passive-pivot boss from the OUTSIDE end. Seat the yoke on the neck and install its 4 M3 screws without trapping the center ribbon.",
+      "Mount the second D85MG sideways in the active frame with its verified Hitec grommets, eyelets, screws, and nuts. Center it at 1500 µs on the current-limited 6 V tester; fit the R-ML24 arm toward FRONT.",
+      "Slide the head shell over the yoke. Through the two +Y service holes, fasten the shell’s drive boss to the horn’s 13 and 16 mm M2 stations. The servo supplies torque; the printed pivots carry the head.",
+      "From the -Y outside face, slide the black shoulder bushing through the shell and install 1 M3 screw into the yoke insert. Tighten against the bushing’s 3.2 mm sleeve — never pinch the moving shell.",
+      "Dry-seat the Camera Module 3 behind the face opening and feed its FPC down the hollow neck. Permanent camera-board retention and the exact harness remain prototype release gates."],
+     "The bushing flange is flush; the shell has no axial pinch, hand-tilts freely through ±20°, and contacts both printed hard stops only beyond the commanded range."),
     ("step_20_face", "Give it a face", 0,
      [("head_faceplate_v2", 1), ("eye_diffuser_bar_v2", 1), ("status_diffuser_bar_v2", 1)],
      ["Clip the lime eye bar behind the face panel’s eye slots (glow boards ride behind it).",
@@ -856,6 +883,21 @@ def build_body_pages():
                 f'<img src="{img_uri(GUIDE_IMG / (inset_img + ".png"))}" style="width:100%; display:block;">'
                 f'<div style="font-size:8.5px; font-weight:700; letter-spacing:.06em; padding:.035in .06in;'
                 f' color:var(--teal-dk); text-transform:uppercase;">{inset_caption}</div></div>')
+        if img_name in EXTRA_PANELS:
+            panel_count = len(EXTRA_PANELS[img_name])
+            panel_h = 2.15 if panel_count > 1 else 2.55
+            chunks = []
+            for panel_i, (panel_img, panel_caption) in enumerate(EXTRA_PANELS[img_name]):
+                top = 0.10 + panel_i * (panel_h + 0.12)
+                chunks.append(
+                    f'<div style="position:absolute; top:{top:.2f}in; right:.1in; width:2.25in; background:#fff;'
+                    f' border:1px solid var(--line); border-radius:.1in; overflow:hidden;'
+                    f' box-shadow:0 1px 6px rgba(0,0,0,.2);">'
+                    f'<img src="{img_uri(GUIDE_IMG / (panel_img + ".png"))}" '
+                    f'style="width:100%; height:{panel_h - .38:.2f}in; object-fit:cover; display:block;">'
+                    f'<div style="font-size:8px; font-weight:700; line-height:1.15; padding:.045in .06in;'
+                    f' color:var(--teal-dk); text-transform:uppercase;">{panel_caption}</div></div>')
+            inset = "".join(chunks)
         cells = strip_cells(img_name, items, screws)
         strip_cls = "strip dense" if len(items) + (1 if screws else 0) >= 6 else "strip"
         lis = "".join(f"<li>{esc(s)}</li>" for s in subs)
@@ -875,7 +917,7 @@ def build_body_pages():
       {eyebrow(3)}
       <h2>Where every electronic part lives</h2>
       <div class="cols">
-        <div><img src="{img_uri(IMG / 'codex_robot_body_v2_chassis.png')}"
+        <div><img src="{img_uri(IMG / 'codex_robot_body_v2_populated_cutaway.png')}"
              style="width:100%; border-radius:.12in; border:1px solid var(--line-soft);"></div>
         <div>
           <table style="font-size:10.5px;">
@@ -897,8 +939,8 @@ def build_body_pages():
             <tr><td><b>Pan + tilt servos</b></td><td>pan inside the neck, tilt in the head’s side</td><td>pan shaft UP, tilt shaft SIDEWAYS</td></tr>
             <tr><td><b>Glow boards ×4</b></td><td>pockets behind the eye + status bars</td><td>lights OUT</td></tr>
           </table>
-          <p style="font-size:10px; margin-top:.08in; color:var(--red);"><b>PROTOTYPE HOLD:</b> The populated routing
-          render, MAX98357A mounts, NeoPixel installation, and exact harness schedule are not released yet.</p>
+          <p style="font-size:10px; margin-top:.08in; color:var(--red);"><b>PROTOTYPE HOLD:</b> This populated cutaway
+          proves placement only. MAX98357A mounts, NeoPixel installation, and the exact harness schedule are not released yet.</p>
         </div>
       </div>""",
         chapter=3, mark="ch3")
@@ -1055,7 +1097,7 @@ def build_body_pages():
           </div>
           <div style="flex:1;">
             <div style="border-radius:.16in; overflow:hidden; border:1px solid rgba(255,255,255,.18);">
-              <img src="{img_uri(IMG / 'codex_robot_body_v2_chassis.png')}" style="width:100%; display:block;"></div>
+              <img src="{img_uri(IMG / 'codex_robot_body_v2_populated_cutaway.png')}" style="width:100%; display:block;"></div>
             <p style="font-size:10px; color:#7FB6C4; margin-top:.08in; text-align:center; letter-spacing:.08em;">
               INSIDE: RASPBERRY PI 5 BRAIN &middot; SAFETY CO-PILOT &middot; FAIL-STOPPED POWER</p>
           </div>
@@ -1088,7 +1130,7 @@ def build_cover(chapter_pages):
         <h1 style="font-size:55px;">CODEX<br>ROVER BEAN</h1>
         <p style="font-size:19px; font-weight:600; margin-top:.16in;">The Robot Body Builder’s Book</p>
         <p style="font-size:13px; margin-top:.08in; color:var(--ink2);">Review the geometry, print coupons, and dry-build the released chassis steps.<br>
-        Software, firmware, the production harness, head mechanics, and commissioning remain open.</p>
+        Software, firmware, the production harness, head physical qualification, and commissioning remain open.</p>
         <div style="display:flex; gap:.09in; margin-top:.22in; flex-wrap:wrap;">{chips}</div>
         <div class="toc">{toc_rows}</div>
         <p style="font-size:9.5px; font-weight:600; letter-spacing:.14em; color:#A2967C; margin-top:.28in;">

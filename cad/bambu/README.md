@@ -5,9 +5,10 @@
 [`codex_robot_body_v2_p1s.3mf`](codex_robot_body_v2_p1s.3mf) is the tracked
 printed-only v2 geometry-review project. It is a **prototype artifact, not a
 powered-motion release**. Its plate manifest keeps the physical release gates
-explicit, and the builder's book must use the same label until the complete
-head mechanism, harness schedule, software/firmware release, fuse selection,
-and commissioning evidence exist.
+explicit, and the builder's book must use the same label. The D035 head
+mechanism is modeled and kinematically validated; exact-part fit, journal wear,
+loaded servo current, harness schedule, software/firmware release, fuse
+selection, and commissioning evidence remain open.
 
 Regenerate the v2 model, validator, print exports, and Bambu project with:
 
@@ -67,11 +68,12 @@ editing source:
 
 This is an editable layout project, not pre-sliced G-code and not a hardware
 release waiver. Review every plate in the current Bambu Studio slicer before
-printing. Honor the release status in the plate manifest, print the calibration
-coupons first. The rear drivetrain is drawing-backed to selected Pololu motors,
-metal brackets, and aluminum hubs; the head targets two Hitec D85MG servos,
-R-ML24 horns, a 6807 pan bearing, and an MF84ZZ passive-tilt bearing. Both still
-require delivered-part inspection and loaded testing. The IDEC XW1E E-stop and
+printing. Honor the release status in the plate manifest and print the calibration
+coupons first. The rear drivetrain uses drawing-backed Pololu motors in printed
+saddles/caps with direct D-shaft wheel clamps; the v2 head targets two Hitec D85MG servos
+and R-ML24 horns around a greased printed pan journal and printed passive tilt
+bushing — no 6807/MF84ZZ/shoulder-screw stack. Both still require delivered-part
+inspection and loaded testing. The IDEC XW1E E-stop and
 Omron D2HW bumper interfaces are also drawing-backed but remain gated on exact
 coupons and deterministic cutoff tests. D024 replaces the Albright/custom-
 carrier and custom-distribution interfaces with the Panasonic CB1A-R-M-12V

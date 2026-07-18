@@ -7,14 +7,15 @@ The design goal is pet-like presence without overcomplicating the first build. T
 ## Current Status
 
 The current direction is the **v2 printed-only hybrid-material body** (decision
-log D025-D034): 40 installed functional pieces, four spare washers, and one
+log D025-D035): 40 installed functional pieces, four spare washers, and one
 optional cosmetic lid skin on 13 zero-support plates, with one screw size and
 one insert size.
 
 > **Prototype assembly preview — do not use for powered motion.** The tracked v2
 > 3MF and builder's book are geometry and dry-assembly artifacts. The head/neck
-> load paths, executable harness schedule, released fuse values, Pi/Pico software,
-> and commissioning evidence are still open.
+> load paths are now fully modeled and kinematically validated, but exact-part
+> fit, loaded wear/current testing, the executable harness schedule, released
+> fuse values, Pi/Pico software, and commissioning evidence are still open.
 
 - **The Builder's Book (v2 prototype preview):** [`output/pdf/codex_robot_body_v2_assembly_guide.pdf`](output/pdf/codex_robot_body_v2_assembly_guide.pdf)
 - v2 Bambu Studio project: [`cad/bambu/codex_robot_body_v2_p1s.3mf`](cad/bambu/codex_robot_body_v2_p1s.3mf)
@@ -143,7 +144,7 @@ python -m pip install -r cad/python/requirements.txt
 
 1. Print and measure the P1S calibration coupons before committing to large body parts.
 2. Buy the bench-brain and safety-prototype batch from [`docs/bom-v0.md`](docs/bom-v0.md).
-3. Print and measure the applicable calibration suite, including the 6807 pan-bearing seat/journal block, exact three-piece split-pilot, three-piece tray/PETG/TPU bumper-interface, two-piece flush-fairing recess test, and the production-derived Blue Sea 5045 fit gauge before any large chassis part.
-4. Purchase and bench-check one Pololu #4867 motor plus one BLF-1203AB/BPC-1502DC/EN2 charge set, then the selected Hitec head hardware, IDEC XW1E E-stop, two Omron D2HW bumper switches, both Pololu regulators, the Panasonic CB1A-R-M-12V relay, Blue Sea Systems 5045 fuse block, WDS 615-M6-8-65 shoulder-bolt hardware, and E-Switch PVB3F230SS311 physical-mute switch. Qualify delivered fit, current, runtime, charger inhibit, relay dropout, branch fusing/selective faults/thermal behavior, axle retention, and safety/privacy interfaces before buying the remaining mobility/safety set or powering both motors.
+3. Print and measure all 18 v2 coupons, especially the PETG pan journal/bayonet, passive tilt bushing, exact-family shell/head, TPU interfaces, and PLA/PETG lid boundary, before any large chassis part.
+4. Purchase and bench-check one Pololu #4867 motor plus one BLF-1203AB/BPC-1502DC/EN2 charge set, the two D85MG/R-ML24 head stacks and verified component hardware, IDEC XW1E E-stop, two Omron D2HW bumper switches, both Pololu regulators, the Panasonic relay, Blue Sea 5045 fuse block, and E-Switch physical-mute switch. Qualify delivered fit, current, runtime, journal wear, cable drag, charger inhibit, relay dropout, branch fusing/selective faults/thermal behavior, axle retention, and safety/privacy interfaces before buying the remaining set or powering either motor.
 5. Print representative harness, seam, motor-pod, idler, camera, vent, and acoustic parts before a full shell.
 6. Build the stationary bench brain and deterministic safety loop before powering drive motors.

@@ -24,6 +24,35 @@ evidence. The generated manifest requires manufacturer, product line, subtype,
 color, nozzle, layer height, walls, insert temperature where applicable,
 measurements, pass/fail, tester, and date. A blank record means the gate is open.
 
+## Current v2 printed-only head mechanism (D035)
+
+The v2 pan load path is now production geometry, not a prose placeholder. A
+three-lug PETG collar bayonets into a blind underside race in the complete
+structural lid. Its 40.3 mm printed bore supports the neck's 39.6 mm journal at
+0.35 mm radial clearance; a 48 mm neck shoulder rides the collar's flat thrust
+face. The collar integrates a downward D85MG cradle, while a removable 3.2 mm
+black-PETG plate captures the servo flange with two standard M3 x 8 joints. The
+R-ML24 horn drives the neck from below at its 13/16 mm M2 stations, leaving the
++X crescent and 20 mm center bore open for the camera ribbon. Commanded pan is
++/-60 degrees; printed collar/neck tabs engage beyond that range.
+
+The black-PETG yoke attaches to four inserts in the neck flange with standard
+M3 x 8 joints. Its active side carries the drawing-backed sideways D85MG frame
+and R-ML24 horn; the head shell's integrated drive boss is reachable through
+two exterior M2 service paths. The passive side uses a replaceable 3.2 mm PETG
+shoulder bushing clamped by one M3 x 8 into a blind yoke insert, so the shell
+rotates on the bushing instead of being pinched by the screw. Commanded tilt is
++/-20 degrees, with printed hard stops beginning beyond the command range. The
+head shell's internal relief is generated from the actual yoke swept through
+the hard-stop range rather than from a hand-maintained box.
+
+`validate_robot_body_v2.py --gate` now checks both servo-case clearances, the
+pan journal clearance, the 20 mm cable corridor, sampled collision-free command
+ranges, and engagement of all four physical stops. CAD completion is not a
+powered-motion release: exact-part fit, the bayonet/journal/bushing coupons,
+PETG-safe grease selection, head mass, regulated current, cable drag, axial
+play, backlash, temperature, and loaded wear cycling remain physical gates.
+
 ## Current v1 implementation
 
 The current source-of-truth model is [`cad/python/robot_body.py`](../cad/python/robot_body.py), using build123d. It is organized as serviceable modules rather than one fused decorative mesh:
