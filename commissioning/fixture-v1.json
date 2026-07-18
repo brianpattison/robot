@@ -1,0 +1,304 @@
+{
+  "schema_version": 1,
+  "fixture_id": "RB-FIXTURE-V1",
+  "revision": "v1.0.0-design",
+  "status": "design and hardware-free validation only; no physical result is bundled",
+  "purpose": "unpowered logic fixture and current-limited negative-control witness for the deliberately fail-stopped Pico target",
+  "forbidden": [
+    "battery",
+    "motor",
+    "MDDS10",
+    "production Pico",
+    "powered-motion authorization"
+  ],
+  "printer": {
+    "process": "Bambu Lab P1S, 0.4 mm nozzle, Textured PEI Plate",
+    "material": "PETG",
+    "bed_mm": [256, 256],
+    "edge_reserve_mm": 8,
+    "plate_mm": [232, 210, 4],
+    "feet_below_plate_mm": 75,
+    "print_orientation": "component face on the build plate; integrated hollow feet upward; flip after printing",
+    "supports": false
+  },
+  "firmware_contract": {
+    "source": "firmware/pico2-safety/src/pico_main.c",
+    "pins": {
+      "uart_tx": 0,
+      "uart_rx": 1,
+      "bumper_1": 2,
+      "bumper_2": 3,
+      "bumper_3": 4,
+      "bumper_4": 5,
+      "bumper_5": 6,
+      "bumper_6": 7,
+      "estop_sense": 8,
+      "reset": 9,
+      "charger_sense": 10,
+      "relay_enable": 11
+    },
+    "current_target_behavior": "GP11 remains low in every state; relay coil and witness lamp must remain off",
+    "reset_rule": "Remove 12 V before flashing, resetting, unplugging, or reconnecting the Pico; apply USB logic first and 12 V last only after GP11 is observed low. The driver input reset-state pull-down has not been accepted as a safety control."
+  },
+  "power_domains": [
+    {
+      "id": "USB_LOGIC",
+      "nominal_v": 5,
+      "source": "separate USB connections to the Pico 2 and Debug Probe",
+      "limit": "USB logic only"
+    },
+    {
+      "id": "PICO_LOGIC",
+      "nominal_v": 3.3,
+      "source": "Pico GPIO",
+      "limit": "never connect to 12 V"
+    },
+    {
+      "id": "BENCH_12V",
+      "nominal_v": 12,
+      "source": "current-limited bench supply",
+      "current_limit_a": 0.2,
+      "limit": "negative-control stage only; no battery"
+    }
+  ],
+  "components": [
+    {
+      "id": "PICO",
+      "type": "Raspberry Pi Pico 2 with headers",
+      "part": "SC1632",
+      "qty": 1,
+      "source": "https://pip.raspberrypi.com/categories/1005-raspberry-pi-pico-2",
+      "distributor_part": "DigiKey 2648-SC1632-ND",
+      "note": "dedicated fixture board; never the production robot Pico"
+    },
+    {
+      "id": "DEBUG_PROBE",
+      "type": "Raspberry Pi Debug Probe",
+      "part": "SC0889",
+      "qty": 1,
+      "source": "https://www.raspberrypi.com/documentation/microcontrollers/debug-probe.html",
+      "distributor_part": "DigiKey 2648-SC0889-ND",
+      "note": "use only the three-wire UART U cable; no SWD connection during observations"
+    },
+    {
+      "id": "BREADBOARD",
+      "type": "830-point solderless breadboard",
+      "part": "BusBoard BB830 or Adafruit 239",
+      "qty": 1,
+      "source": "https://www.adafruit.com/product/239",
+      "note": "attach with the supplied adhesive backing"
+    },
+    {
+      "id": "BUMP_1",
+      "type": "Omron SPST-NC bumper switch",
+      "part": "D2HW-C202MR",
+      "qty": 1,
+      "source": "https://omronfs.omron.com/en_US/ecb/products/pdf/en-d2hw.pdf",
+      "reused": true
+    },
+    {
+      "id": "BUMP_2",
+      "type": "Omron SPST-NC bumper switch",
+      "part": "D2HW-C202MR",
+      "qty": 1,
+      "source": "https://omronfs.omron.com/en_US/ecb/products/pdf/en-d2hw.pdf",
+      "reused": true
+    },
+    {
+      "id": "BUMP_3",
+      "type": "Omron SPST-NC bumper switch",
+      "part": "D2HW-C202MR",
+      "qty": 1,
+      "source": "https://omronfs.omron.com/en_US/ecb/products/pdf/en-d2hw.pdf",
+      "reused": true
+    },
+    {
+      "id": "BUMP_4",
+      "type": "Omron SPST-NC bumper switch",
+      "part": "D2HW-C202MR",
+      "qty": 1,
+      "source": "https://omronfs.omron.com/en_US/ecb/products/pdf/en-d2hw.pdf",
+      "reused": true
+    },
+    {
+      "id": "BUMP_5",
+      "type": "Omron SPST-NC bumper switch",
+      "part": "D2HW-C202MR",
+      "qty": 1,
+      "source": "https://omronfs.omron.com/en_US/ecb/products/pdf/en-d2hw.pdf",
+      "reused": true
+    },
+    {
+      "id": "BUMP_6",
+      "type": "Omron SPST-NC bumper switch",
+      "part": "D2HW-C202MR",
+      "qty": 1,
+      "source": "https://omronfs.omron.com/en_US/ecb/products/pdf/en-d2hw.pdf",
+      "reused": true
+    },
+    {
+      "id": "ESTOP_SENSE_SIM",
+      "type": "breadboard SPST logic control",
+      "part": "fixture-only switch or jumper",
+      "qty": 1,
+      "note": "separate logic simulation; not an E-stop contact"
+    },
+    {
+      "id": "RESET_BUTTON",
+      "type": "breadboard momentary SPST logic control",
+      "part": "fixture-only switch or jumper",
+      "qty": 1
+    },
+    {
+      "id": "CHARGER_SIM",
+      "type": "breadboard SPST logic control",
+      "part": "fixture-only switch or jumper",
+      "qty": 1,
+      "note": "closed is charger absent; open is charger present because GP10 uses the firmware pull-up"
+    },
+    {
+      "id": "ESTOP",
+      "type": "IDEC dual-NC emergency stop",
+      "part": "XW1E-BV402M-R",
+      "qty": 1,
+      "source": "https://us.idec.com/idec-us/en/USD/medias/IDEC-XA-XW-EMO-Datasheet.pdf",
+      "reused": true,
+      "note": "both NC channels are physically in series; test each channel power-off before 12 V"
+    },
+    {
+      "id": "DRIVER",
+      "type": "Adafruit MOSFET Driver",
+      "part": "5648",
+      "qty": 1,
+      "source": "https://learn.adafruit.com/adafruit-mosfet-driver/pinouts",
+      "distributor_part": "Adafruit 5648",
+      "note": "non-isolated low-side switch; integral flyback diode; output + is V+ and output - is switched ground"
+    },
+    {
+      "id": "RELAY",
+      "type": "Panasonic sealed SPST-NO relay",
+      "part": "CB1A-R-M-12V",
+      "qty": 1,
+      "reused": true,
+      "note": "12 V, 134 mA coil; fixture uses the real robot relay"
+    },
+    {
+      "id": "LAMP",
+      "type": "Bulgin green 12 V LED indicator",
+      "part": "DX06WG012B",
+      "qty": 1,
+      "source": "https://www.bulgin.com/pdf/pdf.php?sku=DX06WG012B",
+      "distributor_part": "Mouser 167-DX06WG012B",
+      "note": "witness load on relay NO only"
+    },
+    {
+      "id": "BENCH_12V",
+      "type": "current-limited bench supply",
+      "part": "user bench supply",
+      "qty": 1,
+      "note": "set 12.0 V and 0.20 A before connecting; no battery"
+    },
+    {
+      "id": "WAGO",
+      "type": "two-conductor lever connector",
+      "part": "221-412/K007-0000",
+      "qty": 10,
+      "source": "https://www.wago.com/us/wire-splicing-connectors/compact-splicing-connector/p/221-412",
+      "distributor_part": "DigiKey 2946-221-412/K007-0000-ND"
+    },
+    {
+      "id": "WIRE",
+      "type": "22 AWG solid-core breadboard wire set",
+      "part": "Adafruit 1311",
+      "qty": 1,
+      "source": "https://www.adafruit.com/product/1311",
+      "note": "fixture-only low-current wiring; do not infer a production harness release"
+    },
+    {
+      "id": "UART_CABLE",
+      "type": "three-pin JST-SH socket cable",
+      "part": "Adafruit 3893",
+      "qty": 1,
+      "source": "https://www.adafruit.com/product/3893",
+      "note": "optional spare/adapter; Debug Probe U cable remains the UART baseline"
+    },
+    {
+      "id": "PLATE",
+      "type": "printed fixture plate",
+      "part": "cad/openscad/commissioning_fixture_v1.scad",
+      "qty": 1,
+      "note": "PETG; 232 x 210 x 79 mm overall; no supports"
+    },
+    {
+      "id": "FIXTURE_FASTENERS",
+      "type": "fixture-only fasteners",
+      "part": "M3 x 12 SHCS plus M3 nyloc nuts",
+      "qty": 12,
+      "note": "temporary fixture hardware, deliberately distinct from the robot's M3 x 8 single-SKU system"
+    }
+  ],
+  "nets": [
+    {"id": "GND_COMMON", "domain": "ground", "members": ["PICO.GND", "DEBUG_PROBE.GND", "DRIVER.GND", "BENCH_12V.NEG", "BUMP_1.COM", "BUMP_2.COM", "BUMP_3.COM", "BUMP_4.COM", "BUMP_5.COM", "BUMP_6.COM", "ESTOP_SENSE_SIM.COM", "RESET_BUTTON.COM", "CHARGER_SIM.COM", "LAMP.NEG"]},
+    {"id": "UART_TX", "domain": "PICO_LOGIC", "members": ["PICO.GP0", "DEBUG_PROBE.RX"]},
+    {"id": "UART_RX", "domain": "PICO_LOGIC", "members": ["PICO.GP1", "DEBUG_PROBE.TX"]},
+    {"id": "BUMP_1_NC", "domain": "PICO_LOGIC", "members": ["PICO.GP2", "BUMP_1.NC"]},
+    {"id": "BUMP_2_NC", "domain": "PICO_LOGIC", "members": ["PICO.GP3", "BUMP_2.NC"]},
+    {"id": "BUMP_3_NC", "domain": "PICO_LOGIC", "members": ["PICO.GP4", "BUMP_3.NC"]},
+    {"id": "BUMP_4_NC", "domain": "PICO_LOGIC", "members": ["PICO.GP5", "BUMP_4.NC"]},
+    {"id": "BUMP_5_NC", "domain": "PICO_LOGIC", "members": ["PICO.GP6", "BUMP_5.NC"]},
+    {"id": "BUMP_6_NC", "domain": "PICO_LOGIC", "members": ["PICO.GP7", "BUMP_6.NC"]},
+    {"id": "ESTOP_SENSE_SIM", "domain": "PICO_LOGIC", "members": ["PICO.GP8", "ESTOP_SENSE_SIM.SW"]},
+    {"id": "RESET_SIM", "domain": "PICO_LOGIC", "members": ["PICO.GP9", "RESET_BUTTON.SW"]},
+    {"id": "CHARGER_SIM", "domain": "PICO_LOGIC", "members": ["PICO.GP10", "CHARGER_SIM.SW"]},
+    {"id": "RELAY_LOGIC", "domain": "PICO_LOGIC", "members": ["PICO.GP11", "DRIVER.IN"]},
+    {"id": "12V_POS", "domain": "BENCH_12V", "members": ["BENCH_12V.POS", "ESTOP.NC1_IN", "RELAY.COM"]},
+    {"id": "ESTOP_SERIES", "domain": "BENCH_12V", "members": ["ESTOP.NC1_OUT", "ESTOP.NC2_IN"]},
+    {"id": "DRIVER_VPLUS", "domain": "BENCH_12V", "members": ["ESTOP.NC2_OUT", "DRIVER.VPLUS", "RELAY.COIL_HIGH"]},
+    {"id": "DRIVER_OUT", "domain": "BENCH_12V_SWITCHED", "members": ["DRIVER.OUT", "RELAY.COIL_LOW"]},
+    {"id": "RELAY_NO_LAMP", "domain": "BENCH_12V_SWITCHED", "members": ["RELAY.NO", "LAMP.POS"]}
+  ],
+  "layout": {
+    "origin": "plate center; millimetres",
+    "breadboard": {"center": [-28, 48], "size": [165, 55]},
+    "estop": {"center": [82, 55], "panel_hole_diameter": 22.3, "body_plus_terminal_depth": 68.7},
+    "lamp": {"center": [82, 13], "panel_hole_diameter": 6.2},
+    "bumper_centers": [[-80, -69], [-48, -69], [-16, -69], [16, -69], [48, -69], [80, -69]],
+    "bumper_hole_spacing": 13,
+    "driver_tie_center": [18, -16],
+    "relay_tie_center": [65, -18]
+  },
+  "stages": [
+    {
+      "id": "F1",
+      "name": "mechanical assembly",
+      "power": "none",
+      "result_boundary": "fit and labeling only"
+    },
+    {
+      "id": "F2",
+      "name": "continuity",
+      "power": "none",
+      "result_boundary": "prove both E-stop NC channels, six bumper loops, polarity, and absence of shorts"
+    },
+    {
+      "id": "F3",
+      "name": "USB logic",
+      "power": "Pico and Debug Probe USB only",
+      "result_boundary": "observe UART state changes; GP11 must stay low"
+    },
+    {
+      "id": "F4",
+      "name": "12 V negative control",
+      "power": "12.0 V bench supply limited to 0.20 A; USB logic already stable",
+      "result_boundary": "driver may show only its small idle indicator load; relay and lamp must remain off"
+    }
+  ],
+  "observations": [
+    "The six real NC switches report their identities over UART when opened one at a time.",
+    "The separate GP8, GP9, and GP10 breadboard controls exercise firmware sense/reset/charger inputs only.",
+    "Power-off continuity proves each physical E-stop NC contact opens; the two channels are in series and therefore do not provide independent powered witness results on this fixture.",
+    "The current target never drives GP11 high, so no coil actuation, powered E-stop de-energization, or positive witness-lamp result may be recorded.",
+    "A sustained current near the 134 mA coil load or a lit lamp is a fault: remove 12 V immediately.",
+    "Low-current relay contact closure on an LED witness does not qualify production contact wetting, motor current, or the motor branch."
+  ]
+}

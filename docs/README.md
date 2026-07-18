@@ -65,7 +65,10 @@ Read these in order when getting oriented:
 14. [Bench Control And Evidence Artifacts](body-protocol-v1.md)
     The v1 UART contract plus the executable [`robotd`](../software/robotd/),
     [Pico 2 safety core](../firmware/pico2-safety/), [harness traveler](../harness/),
-    and [commissioning package](../commissioning/). Run
+    [commissioning package](../commissioning/), and
+    [RB-FIXTURE-V1 build guide](commissioning-fixture-v1.md). The fixture is one
+    support-free PETG plate for unpowered continuity, USB logic, and a 0.20 A
+    negative-control witness; it contains no battery, motors, or MDDS10. Run
     `python3 commissioning/run_host_tests.py` without robot hardware.
 
 15. [Hardware-free CI Gates](ci-safety-gates.md)

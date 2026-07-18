@@ -40,6 +40,7 @@ def main() -> None:
             env=test_env)
         run([str(python), "-m", "unittest", "discover", "-s", "harness/tests", "-v"],
             env=test_env)
+        run([str(python), "commissioning/fixture.py", "--check"])
         run([str(python), "harness/generate_harness_docs.py", "--output", str(temp_path / "harness")])
         cmake = os.environ.get("ROVER_BEAN_CMAKE") or shutil.which("cmake")
         ctest = shutil.which("ctest")

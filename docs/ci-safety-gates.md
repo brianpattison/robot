@@ -12,6 +12,8 @@ A green run proves only that:
 
 - the `robotd` protocol, simulator, socket, and blackbox tests pass;
 - commissioning evidence rejects incomplete or contradictory records;
+- RB-FIXTURE-V1 matches its generated guide/labels/CAD data, its circuit matches
+  the Pico pin contract, and closed-world mutation tests reject unsafe drift;
 - the checked-in harness passes its engineering checks while its physical
   release gate still rejects blank first-article evidence;
 - the portable C11 protocol and safety core compile and pass their host tests;
@@ -24,6 +26,7 @@ C11 compiler fallback.
 
 Green CI does **not** build or flash Pico firmware, validate a physical circuit,
 release the harness, replace any of the 27 commissioning steps, or authorize
-powered motion. The shipped Pico integration remains fail-stopped and has no
-production motor outputs. A green robot emoji would be adorable, but it would
-still not be a fuse value.
+powered motion. It also does not prove the fixture was printed, wired, or tested.
+The shipped Pico integration remains fail-stopped and has no production motor
+outputs. A green robot emoji would be adorable, but it would still not be a fuse
+value.
