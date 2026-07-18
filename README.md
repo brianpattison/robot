@@ -159,6 +159,8 @@ python -m pip install -r cad/python/requirements.txt
 5. Print representative harness, seam, motor-pod, idler, camera, vent, and acoustic parts before a full shell.
 6. Build the stationary bench brain and deterministic safety loop before powering drive motors.
 7. Run `python3 commissioning/run_host_tests.py`, then work through the
-   27-step commissioning plan in order. The repository release gates are
-   intentionally red until the exact physical first article supplies every
-   required measurement.
+   27-step commissioning plan in order using the
+   [first-article evidence workflow](docs/first-article-evidence.md). The
+   repository release gates are intentionally red until the exact physical
+   first article supplies every required measurement and an independently
+   trusted signer seals the complete bundle.

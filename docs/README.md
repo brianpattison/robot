@@ -79,7 +79,13 @@ Read these in order when getting oriented:
     Reproducible Bookworm install, key-only Cloudflare Access SSH, separate Pi 5
     debug/GPIO UARTs, tlog capture, backup limitations, and live attestations.
 
-17. [v1 Illustrated Assembly Guide (historical)](../output/pdf/codex_robot_body_v1_assembly_guide.pdf)
+17. [First-article Evidence Capture](first-article-evidence.md)
+    Per-robot content-addressed evidence bundles, append-only event history,
+    release-tag provenance, OpenSSH sealing, out-of-band signer verification,
+    privacy handling, crash recovery, and superseding corrections. No physical
+    pass is bundled and a valid signature never authorizes powered motion.
+
+18. [v1 Illustrated Assembly Guide (historical)](../output/pdf/codex_robot_body_v1_assembly_guide.pdf)
     Twenty-page visual build sequence synchronized with the D024 retail-only CAD, current renders, 101-part print manifest, and 26-plate P1S project.
 
 > **D024 retail-only baseline:** CAD, validation, split and print manifests,

@@ -83,5 +83,6 @@ pnpm-debug.log*
 captures/
 recordings/
 rosbags/
+output/commissioning/
 *.bag
 *.mcap
