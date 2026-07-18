@@ -1,0 +1,83 @@
+# Body protocol v1
+
+This is the deliberately small Pi-to-Pico contract for Rover Bean. It carries
+live body setpoints and safety status over a 3.3 V UART. It contains **no**
+flash, bootloader, firmware-update, pin-mode, threshold, or configuration-write
+command. Changing the safety envelope requires opening the robot and flashing
+the Pico through its service-only USB/SWD corridor.
+
+Status: executable bench baseline. The protocol implementation and host tests
+ship in this repository; pinout, noise, disconnect, latency, and fault-injection
+results remain commissioning evidence, not assumptions.
+
+## Link
+
+- 3.3 V UART, 115200 baud, 8 data bits, no parity, 1 stop bit.
+- Pi TX -> Pico RX, Pi RX <- Pico TX, and one signal ground.
+- Pico USB and SWD are never connected to the Pi in normal operation.
+- `robotd` normally owns the serial device, but the firmware safety envelope
+  applies equally to any process that speaks this contract.
+
+## Frame
+
+All multi-byte integers are little-endian.
+
+| Bytes | Field |
+| --- | --- |
+| `A5 5A` | start marker |
+| `01` | protocol version |
+| 1 byte | message type |
+| 2 bytes | sequence number |
+| 2 bytes | payload length, 0..64 |
+| 0..64 bytes | payload |
+| 2 bytes | CRC-16/CCITT-FALSE over version through payload |
+
+The receiver discards bytes until the start marker, rejects a wrong version,
+oversize payload, or bad CRC, and never lets a malformed frame refresh a timer.
+
+## Pi -> Pico commands
+
+| Type | Name | Payload | Effect |
+| --- | --- | --- | --- |
+| `0x01` | HEARTBEAT | none | Refreshes the fixed 250 ms host watchdog only. It never sustains motion. |
+| `0x02` | DRIVE | `i16 linear_mm_s`, `i16 angular_mrad_s` | Sets a new motion target and refreshes the independent fixed 250 ms motion lease. Firmware clamps velocity and acceleration. |
+| `0x03` | STOP | none | Immediately zeros the target and applied motion. |
+| `0x04` | CLEAR_BUMPER | `u8 zone_mask` | Clears only requested bumper latches whose normally-closed loops currently read released. Cannot clear E-stop, charger, low-battery, watchdog, or wiring faults. |
+| `0x05` | STATUS_REQUEST | none | Requests a STATUS frame. Does not refresh heartbeat or motion. |
+| `0x06` | HEAD | `i16 pan_cdeg`, `i16 tilt_cdeg` | Sets head targets, clamped to +/-60.00 and +/-20.00 degrees. |
+
+Unknown commands are rejected and reported. There is intentionally no generic
+register read/write escape hatch. Boring is beautiful when the wheels have
+opinions.
+
+## Pico -> Pi messages
+
+| Type | Name | Payload |
+| --- | --- | --- |
+| `0x80` | ACK | `u8 command_type`, `u8 result` |
+| `0x81` | STATUS | `u32 uptime_ms`, `u16 flags`, `u8 released_mask`, `u8 latched_mask`, `u16 battery_mv`, `i16 linear_mm_s`, `i16 angular_mrad_s`, `i16 pan_cdeg`, `i16 tilt_cdeg` |
+| `0x82` | EVENT | `u8 event`, `u8 zone_mask`, `u32 uptime_ms` |
+
+Safety flags are: E-stop latched, charger present, low battery, heartbeat stale,
+motion lease stale, bumper latched, wiring fault, and motor-enable output. The
+bench-safe Pico target always reports motor enable false; a future reviewed
+production integration may report it true only when the deterministic
+conditions permit and the actual output is enabled. The physical E-stop NC
+contacts still cut the relay coil independently.
+
+## Fixed safety constants in the bench baseline
+
+- Heartbeat/watchdog: 250 ms.
+- Nonzero motion lease: 250 ms.
+- Linear velocity cap: 350 mm/s.
+- Angular velocity cap: 1500 mrad/s.
+- Linear acceleration cap: 500 mm/s^2.
+- Angular acceleration cap: 2000 mrad/s^2.
+- Bumper escape cap: 100 mm/s and 500 mrad/s for at most 1500 ms after a loop
+  that was previously seen released opens. A loop that stays open becomes a
+  wiring fault and cannot be cleared by protocol.
+- Head command range: pan +/-60 degrees; tilt +/-20 degrees.
+
+The low-battery threshold and GPIO assignment are compile-time board constants,
+not protocol configuration. Their production values remain blocked on the
+delivered BLF-1203AB voltage-sag/runtime tests and the released wiring review.

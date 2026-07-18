@@ -37,9 +37,11 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "cad" / "python"))
 
 import robot_body_v2_inventory as inv  # noqa: E402
+from builder_release_v2 import RELEASE_ID, RELEASE_URL  # noqa: E402
 
 IMG = ROOT / "docs" / "images"
 GUIDE_IMG = IMG / "guide_v2"
+RELEASE_QR = GUIDE_IMG / "builder_release_v2_qr.png"
 STEP_ANNOTATIONS = json.loads((GUIDE_IMG / "step_annotations.json").read_text())
 PLATES = json.loads((ROOT / "cad" / "bambu" / "codex_robot_body_v2_p1s_plates.json").read_text())
 COUPON_PLATES = json.loads(
@@ -403,7 +405,7 @@ SHOP_ELECTRONICS = [
     ("Adafruit 5975 NeoPixel breakouts + JST-SH cables", "4", "The glowing eyes and status lights."),
     ("ReSpeaker USB mic array", "1", "The robot’s ears."),
     ("Enclosed 3 W 4 ohm speakers + 2× Adafruit MAX98357A amps", "1 set", "The robot’s voice."),
-    ("Prototype wire, terminal, and connector kit", "not released", "The exact harness schedule and crimp tooling are still open; do not improvise a powered harness from this preview."),
+    ("Prototype wire, terminal, and connector kit", "not released", "The production terminal schedule, measured lengths, and crimp tooling are still open; do not improvise a powered harness from this preview."),
 ]
 SHOP_TOOLS = [
     ("2.5 mm hex key", "Turns every screw in this robot. Seriously, all of them."),
@@ -412,6 +414,25 @@ SHOP_TOOLS = [
     ("Small flush cutters / scissors", "Trims zip ties and TPU strings."),
     ("Painter’s tape + marker", "Label wires as you go."),
     ("Multimeter", "Checks every circuit before the battery ever goes in."),
+]
+
+SHOP_VISUALS = [
+    ("thumb_px_pi.png", "Raspberry Pi 5"),
+    ("thumb_px_pico.png", "Pico 2"),
+    ("thumb_px_mdds10.png", "MDDS10"),
+    ("thumb_px_motor_L.png", "25D motor ×2"),
+    ("thumb_px_battery.png", "Bioenno battery"),
+    ("thumb_px_relay.png", "Panasonic relay"),
+    ("thumb_px_fuse.png", "Blue Sea fuse block"),
+    ("thumb_px_reg1.png", "5 V regulator"),
+    ("thumb_px_reg2.png", "6 V regulator"),
+    ("thumb_px_switch.png", "Bumper switch ×6"),
+    ("thumb_px_servo.png", "D85MG servo ×2"),
+    ("thumb_px_speaker_L.png", "Speaker + amp ×2"),
+    ("thumb_px_tof_L.png", "ToF board ×4"),
+    ("thumb_px_camera.png", "Camera 3 Wide"),
+    ("thumb_px_mic.png", "ReSpeaker mic"),
+    ("thumb_px_estop_cap.png", "IDEC E-stop"),
 ]
 
 PRINT_TIPS = [
@@ -617,6 +638,21 @@ def esc(s):
 
 def img_uri(path: Path) -> str:
     return path.resolve().as_uri()
+
+
+def ensure_release_qr() -> None:
+    try:
+        import qrcode
+        from qrcode.constants import ERROR_CORRECT_M
+    except ImportError as exc:
+        raise SystemExit(
+            "qrcode is required for the versioned Builder Release link; "
+            "install cad/python/requirements.txt") from exc
+    RELEASE_QR.parent.mkdir(parents=True, exist_ok=True)
+    qr = qrcode.QRCode(version=None, error_correction=ERROR_CORRECT_M, box_size=12, border=3)
+    qr.add_data(RELEASE_URL)
+    qr.make(fit=True)
+    qr.make_image(fill_color="#075365", back_color="#FFFFFF").save(RELEASE_QR)
 
 
 def friendly(base: str) -> str:
@@ -905,8 +941,8 @@ def build_body_pages():
     for part_i, chunk in enumerate((SHOP_ELECTRONICS[:half], SHOP_ELECTRONICS[half:]), start=1):
         elec = "".join(f"<tr><td><b>{esc(a)}</b></td><td style='text-align:center'>{esc(b)}</td><td>{esc(c)}</td></tr>"
                        for a, b, c in chunk)
-        intro = ("Every named production component must be a normal buy-one-online part in the US. This prototype "
-                 "preview does not yet release the harness terminals, wire schedule, crimp tooling, or fuse values."
+        intro = ("Every named production component must be a normal buy-one-online part in the US. The nominal "
+                 "harness traveler ships with this version; exact terminals, measured lengths, crimp tooling, and fuse values remain open."
                  if part_i == 1 else "The rest of the electronics box:")
         add(f"""
           {eyebrow(0)}
@@ -914,6 +950,24 @@ def build_body_pages():
           <p style="margin-bottom:.12in;">{intro}</p>
           <table class="roomy" style="font-size:12px;"><tr><th>Part</th><th>Qty</th><th>What it does</th></tr>{elec}</table>""",
             chapter=0)
+
+    visual_cells = "".join(
+        f'<div style="height:1.02in; border:1px solid var(--line-soft); border-radius:.1in; background:#fff; '
+        f'padding:.05in; display:flex; align-items:center; gap:.07in;">'
+        f'<img src="{img_uri(GUIDE_IMG / image)}" style="width:.72in; height:.72in; object-fit:contain;">'
+        f'<div style="font-size:10.5px; font-weight:750; line-height:1.15;">{esc(label)}</div></div>'
+        for image, label in SHOP_VISUALS)
+    add(f"""
+      {eyebrow(0)}
+      <h2>Match the electronics before they enter the robot</h2>
+      <p style="margin-bottom:.12in;">Use these silhouettes to sort the purchased parts. They show identity and connector direction,
+      not exact scale; the delivered-part fit record still decides whether a component passes.</p>
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:.08in;">{visual_cells}</div>
+      <div style="margin-top:auto; display:flex; align-items:center; gap:.14in; border-top:1px solid var(--line); padding-top:.1in;">
+        <img src="{img_uri(RELEASE_QR)}" style="width:.72in; height:.72in; image-rendering:pixelated;">
+        <p style="font-size:10.5px;"><b>One source, one version:</b> scan for the permanent Builder Release
+        <span class="mono">{RELEASE_ID}</span>. It contains the exact BOM, software paths, bench commands, and every open physical gate.</p>
+      </div>""", chapter=0)
 
     # --- Chapter 2: print ----------------------------------------------------
     tips = "".join(
@@ -983,6 +1037,25 @@ def build_body_pages():
       Print each group back to back, then label its box before changing filament.</p>""",
         chapter=1)
 
+    bin_labels = "".join(
+        f'<div style="height:.92in; border:1.5px dashed #8D897E; border-radius:.08in; padding:.07in .09in; '
+        f'display:grid; grid-template-columns:.32in 1fr; column-gap:.08in; align-items:center; background:#fff;">'
+        f'<div style="width:.28in; height:.28in; border-radius:50%; background:{p["color_hex"]}; '
+        f'border:1px solid rgba(0,0,0,.25);"></div>'
+        f'<div><div style="font-size:8px; font-weight:800; letter-spacing:.12em; color:var(--ink2);">PLATE {p["plate_number"]}</div>'
+        f'<div style="font-size:10.5px; font-weight:800; line-height:1.1;">{esc(p["name"])}</div>'
+        f'<div style="font-size:8.5px; margin-top:.02in;">{p["part_count"]} printed piece{"s" if p["part_count"] != 1 else ""}</div></div></div>'
+        for p in PLATES["plates"])
+    add(f"""
+      {eyebrow(1)}
+      <h2>Cut-apart labels for the parts boxes</h2>
+      <p style="margin-bottom:.12in;">Cut on the dotted lines and tape each label to its box as a plate finishes.
+      Keep failed/reprinted pieces outside the counted box so the Chapter 3 gather strips stay honest.</p>
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:.09in;">{bin_labels}</div>
+      <div class="check" style="margin-top:auto;"><span class="box"></span><div><b>CHECK</b>
+      All {N_PLATES} boxes are labeled, and their piece totals match the plate manifest before assembly starts.</div></div>""",
+        chapter=1)
+
     # Coupons are a real tracked P1S project, not an STL treasure hunt.
     add(f"""
       {eyebrow(1)}
@@ -1037,6 +1110,27 @@ def build_body_pages():
           <p style="margin-bottom:.1in;">Print them from <b>codex_robot_body_v2_coupons_p1s.3mf</b>. {intro}</p>
           <table class="roomy" style="font-size:10.5px;"><tr><th>Test part</th><th>Filament</th><th>What it proves</th></tr>{crows}</table>
           {record}""", chapter=1)
+
+    coupon_record_rows = "".join(
+        f'<tr><td><b>{esc(COUPON_TITLES.get(key, key))}</b></td><td>{esc(value["material"])}</td>'
+        '<td>&nbsp;</td><td>&nbsp;</td><td>&#9633; P&nbsp; &#9633; F</td><td>&nbsp;</td><td>&nbsp;</td></tr>'
+        for key, value in COUPONS.items())
+    add(f"""
+      {eyebrow(1)}
+      <h2>Coupon qualification record — blank means OPEN</h2>
+      <div style="display:grid; grid-template-columns:1.3fr 1fr 1fr; gap:.1in; margin-bottom:.1in; font-size:10px;">
+        <div><b>Printer / serial:</b> ____________________</div>
+        <div><b>Nozzle:</b> ______</div><div><b>Date started:</b> __________</div>
+      </div>
+      <table style="font-size:8.2px; table-layout:fixed;">
+        <tr><th style="width:1.45in;">Test</th><th style="width:1.1in;">Required family</th>
+        <th style="width:1.55in;">Exact product + color</th><th style="width:1.7in;">Settings + measurements</th>
+        <th style="width:.72in;">Result</th><th style="width:.72in;">Tester</th><th style="width:.72in;">Date</th></tr>
+        {coupon_record_rows}
+      </table>
+      <p style="font-size:9px; margin-top:.08in;"><b>Attach detail sheets</b> for loads, cycles, temperatures, photos, and failure notes.
+      Every row must identify the exact machine, spool product/color, settings, measured result, tester, and date; another spool family’s pass does not transfer.</p>""",
+        chapter=1)
 
     # Piece inventory
     counts: dict[str, int] = {}
@@ -1291,14 +1385,15 @@ def build_body_pages():
         {eyebrow(4)}
         <div style="display:inline-block; background:var(--red); color:white; padding:.06in .12in; font-size:11px; font-weight:800; letter-spacing:.08em;">PROTOTYPE PREVIEW — NO POWERED MOTION</div>
         <h2 style="font-size:36px; letter-spacing:-.8px; margin-top:.12in;">The body preview is assembled</h2>
-        <p style="font-size:13px; margin-top:.08in; width:3.9in;">The Pi installer, Pico firmware release, executable harness schedule,
-        head mechanism, and signed commissioning procedure are not shipped yet. Do not energize the motor branch from this book.</p>
+        <p style="font-size:13px; margin-top:.08in; width:3.9in;">This version ships a bench Pi installer, local <span class="mono">robotd</span>,
+        framed UART contract, tested portable Pico safety core, fail-stopped Pico target, nominal harness traveler, and executable commissioning gate.
+        Production motor outputs, exact terminals/lengths/fuses, and signed physical results are not released. Do not energize the motor branch from this book.</p>
         <h3 style="margin-top:.2in;">Commissioning gate</h3>
         <p style="font-size:11.5px; width:3.9in;">A released checklist must cover both E-stop NC channels and physical reset;
         all six NC bumper zones plus a broken wire; watchdog and setpoint-lease expiry; velocity/acceleration clamps;
         charger inhibit; low-battery cutoff; hardware mic mute with no backfeed; regulator polarity and voltage;
         branch-by-branch power-up; stop latency; motor direction; and a wheels-off-ground run before any floor test.</p>
-        <p style="font-size:11.5px; margin-top:.1in; width:3.9in;">Until those artifacts and physical results exist,
+        <p style="font-size:11.5px; margin-top:.1in; width:3.9in;">Until those physical results and production integrations exist,
         Rover Bean’s number one rule is wonderfully easy: <b>admire, measure, and keep the battery out.</b></p>
       </div>""",
         chapter=4, footer=False, mark="ch4")
@@ -1319,7 +1414,7 @@ def build_body_pages():
              f"{N_FUNCTIONAL} functional + {N_SPARES} spare + {N_OPTIONAL} optional pieces target {N_PLATES} prototype plates. Physical gates remain open."),
             ('<svg width="18" height="18" viewBox="0 0 18 18"><path d="M5.6 2.2 H12.4 L15.8 5.6 V12.4 L12.4 15.8 H5.6 L2.2 12.4 V5.6 Z" fill="none" stroke="#B9E44A" stroke-width="1.8" stroke-linejoin="round"/></svg>',
              "FAILS STOPPED",
-             "The E-stop is physical; bumper latches and the watchdog live in independent safety firmware, with no Pi software required."),
+             "The E-stop is physically independent. The tested bench safety core defines bumper, lease, and watchdog stops; physical commissioning remains open."),
         ])
     add(f"""
       <div style="position:absolute; inset:0; background:var(--teal-dk); padding:.65in .75in; display:flex; flex-direction:column;">
@@ -1336,6 +1431,11 @@ def build_body_pages():
               <img src="{img_uri(IMG / 'codex_robot_body_v2_populated_cutaway.png')}" style="width:100%; display:block;"></div>
             <p style="font-size:10px; color:#7FB6C4; margin-top:.08in; text-align:center; letter-spacing:.08em;">
               INSIDE: RASPBERRY PI 5 BRAIN &middot; SAFETY CO-PILOT &middot; FAIL-STOPPED POWER</p>
+            <div style="display:flex; align-items:center; gap:.12in; margin-top:.14in; padding:.1in; border:1px solid rgba(255,255,255,.2); border-radius:.1in;">
+              <img src="{img_uri(RELEASE_QR)}" style="width:.72in; height:.72in; background:#fff; image-rendering:pixelated;">
+              <div><div style="font-size:10px; font-weight:800; color:#fff; letter-spacing:.08em;">PERMANENT BUILD SOURCE</div>
+              <div style="font-size:9px; color:#B7D6DE; margin-top:.03in;">{RELEASE_ID}<br>Exact BOM · software · open gates</div></div>
+            </div>
           </div>
         </div>
         <div style="display:flex; justify-content:space-between; font-size:9.5px; font-weight:600;
@@ -1366,7 +1466,7 @@ def build_cover(chapter_pages):
         <h1 style="font-size:55px;">CODEX<br>ROVER BEAN</h1>
         <p style="font-size:19px; font-weight:600; margin-top:.16in;">The Robot Body Builder’s Book</p>
         <p style="font-size:13px; margin-top:.08in; color:var(--ink2);">Review the geometry, print coupons, and dry-build the released chassis steps.<br>
-        Software, firmware, the production harness, head physical qualification, and commissioning remain open.</p>
+        Bench software/firmware and evidence runners ship; production wiring, powered outputs, head physical qualification, and signed commissioning remain open.</p>
         <div style="display:flex; gap:.09in; margin-top:.22in; flex-wrap:wrap;">{chips}</div>
         <div class="toc">{toc_rows}</div>
         <p style="font-size:9.5px; font-weight:600; letter-spacing:.14em; color:#A2967C; margin-top:.28in;">
@@ -1388,6 +1488,7 @@ def check_images(pages_html):
 def main():
     HTML_OUT.parent.mkdir(parents=True, exist_ok=True)
     PDF_OUT.parent.mkdir(parents=True, exist_ok=True)
+    ensure_release_qr()
     body_pages = build_body_pages()
     total = len(body_pages) + 1
     # Chapter start page numbers (cover is page 1; body pages start at 2).

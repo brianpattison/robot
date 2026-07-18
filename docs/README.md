@@ -14,35 +14,42 @@ Read these in order when getting oriented:
 4. [Agentic Control Plan](agentic-control-plan.md)
    Full agent authority on the robot computer — live SSH, code on the fly, installs, direct motion setpoints — above the physical/firmware safety floor (D030-D032).
 
-5. [BOM v0](bom-v0.md)
+5. [v2 Builder Release Index](builder-release-v2.md)
+   The single versioned entry point for the prototype BOM, tracked print files,
+   bench software/firmware, harness traveler, commissioning commands, and every
+   physical release hold.
+
+6. [BOM v0](bom-v0.md)
    First-pass parts list, rough cost ranges, already-owned parts, buy-now batch, and deferrals.
 
-6. [Retail Sourcing Policy And Audit](retail-sourcing-policy.md)
+7. [Retail Sourcing Policy And Audit](retail-sourcing-policy.md)
    Quantity-one US checkout rule, known sourcing violations, and replacement directions.
 
-7. [CAD Mechanical Plan](cad-mechanical-plan.md)
+8. [CAD Mechanical Plan](cad-mechanical-plan.md)
    Printable modules, CAD parameter strategy, rough dimensions, fit-check tests, and export workflow.
 
-8. [CAD v1 Body Preview](cad-v1-body.md)
+9. [CAD v1 Body Preview](cad-v1-body.md)
    Generated assembled, head-detail, exploded, electronics-fit, Pico 2 safety-shelf, Cytron MDDS10 controller-stack, dual MAX98357A speaker-plate, retail-only upper power-deck, BLF-1203AB battery cradle, under-deck harness, EN2 charge/blank-center/physical-mute cartridges, tray-fixed bumper switch, retail front-idler stack, printer-split joinery, and canonical print-orientation previews for the current build123d body source.
 
-9. [CAD Component Coverage](cad-component-coverage.md)
+10. [CAD Component Coverage](cad-component-coverage.md)
    BOM-to-CAD matrix showing modeled interfaces, reserved service bays, and measured-hardware gates that still block release printing.
 
-10. [CAD Calibration Coupons](cad-coupons.md)
+11. [CAD Calibration Coupons](cad-coupons.md)
    Seventeen parametric insert, clearance, bearing-seat, wall, production lid-lap, exact split-pilot, clipped tray/PETG/TPU bumper-interface, flush-fairing recess, and Blue Sea 5045 fit coupons with a measured-use protocol.
 
-11. [Bambu Studio P1S Project](../cad/bambu/README.md)
+12. [Bambu Studio P1S Project](../cad/bambu/README.md)
    Reproducible 101-part, 26-plate P1S 0.4 mm layout split into 14 material-profile/color groups, with an exact plate manifest and visual overview.
 
-12. [The Builder's Book — v2 Assembly Guide](../output/pdf/codex_robot_body_v2_assembly_guide.pdf)
+13. [The Builder's Book — v2 Assembly Guide](../output/pdf/codex_robot_body_v2_assembly_guide.pdf)
     The generated **prototype assembly preview — not for powered motion** for the printed-only v2 body: computed
     cover TOC, annotated meet-the-robot spread, shopping and printing chapters, piece
     inventory, twenty picture-first steps with progress bars and CHECK tests, wiring
     maps, and release-gap callouts. Child-followable by design, with no "grown-up"
     callouts (D029), but not yet a standalone retail build manual: the D035 head
-    mechanism is CAD-complete while exact-part fit, loaded wear/current tests,
-    harness details, software/firmware, fuse release, and commissioning remain open.
+    mechanism is CAD-complete. Bench software/firmware, a nominal harness
+    traveler, and the commissioning runner ship, while exact-part fit, loaded
+    wear/current tests, production motor outputs, exact terminals/lengths,
+    fuse release, and signed physical commissioning remain open.
     Regenerate with `docs/generate_assembly_guide_v2.py`.
     The 2026-07-17 review audit behind the current render/text conventions
     (insertion arrows, insert markers, insets, mirrored-direction fixes, the tire
@@ -55,7 +62,13 @@ Read these in order when getting oriented:
     head candidates automatically remain white PETG until physical evidence is
     recorded for the exact filament family.
 
-13. [v1 Illustrated Assembly Guide (historical)](../output/pdf/codex_robot_body_v1_assembly_guide.pdf)
+14. [Bench Control And Evidence Artifacts](body-protocol-v1.md)
+    The v1 UART contract plus the executable [`robotd`](../software/robotd/),
+    [Pico 2 safety core](../firmware/pico2-safety/), [harness traveler](../harness/),
+    and [commissioning package](../commissioning/). Run
+    `python3 commissioning/run_host_tests.py` without robot hardware.
+
+15. [v1 Illustrated Assembly Guide (historical)](../output/pdf/codex_robot_body_v1_assembly_guide.pdf)
     Twenty-page visual build sequence synchronized with the D024 retail-only CAD, current renders, 101-part print manifest, and 26-plate P1S project.
 
 > **D024 retail-only baseline:** CAD, validation, split and print manifests,

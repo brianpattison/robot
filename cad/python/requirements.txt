@@ -5,3 +5,4 @@ reportlab
 # CadQuery's cadquery-ocp backend requires VTK; keep it explicit for reproducible setup.
 vtk
 pypdfium2
+qrcode
