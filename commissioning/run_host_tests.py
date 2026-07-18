@@ -28,9 +28,18 @@ def main() -> None:
         venv = temp_path / "venv"
         run([base_python, "-m", "venv", str(venv)])
         python = venv / "bin" / "python"
-        run([str(python), "-m", "pip", "install", "--quiet", "--no-deps", "-e", "software/robotd"])
-        run([str(python), "-m", "unittest", "discover", "-s", "software/robotd/tests", "-v"])
-        run([str(python), "-m", "unittest", "discover", "-s", "commissioning/tests", "-v"])
+        test_env = os.environ.copy()
+        robotd_source = str(ROOT / "software" / "robotd" / "src")
+        existing_path = test_env.get("PYTHONPATH")
+        test_env["PYTHONPATH"] = (
+            robotd_source + os.pathsep + existing_path if existing_path else robotd_source
+        )
+        run([str(python), "-m", "unittest", "discover", "-s", "software/robotd/tests", "-v"],
+            env=test_env)
+        run([str(python), "-m", "unittest", "discover", "-s", "commissioning/tests", "-v"],
+            env=test_env)
+        run([str(python), "-m", "unittest", "discover", "-s", "harness/tests", "-v"],
+            env=test_env)
         run([str(python), "harness/generate_harness_docs.py", "--output", str(temp_path / "harness")])
         cmake = os.environ.get("ROVER_BEAN_CMAKE") or shutil.which("cmake")
         ctest = shutil.which("ctest")
