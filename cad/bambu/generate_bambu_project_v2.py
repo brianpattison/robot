@@ -130,8 +130,9 @@ def build_instance_manifest() -> dict:
         },
         "release_warning": (
             "Prototype v2 plates. Generate, print, and record the material-specific coupons "
-            "before any large part; the D027 gate and all physical release "
-            "gates remain open. Nothing here authorizes powered motion."
+            "before any large part. The D027 CAD packing gate is closed; all "
+            "named physical, electrical, firmware, and commissioning gates remain "
+            "open. Nothing here authorizes powered motion."
         ),
         "color_profiles": COLOR_PROFILES,
         "material_profiles": MATERIAL_PROFILES,
@@ -196,6 +197,9 @@ def main() -> None:
         gb.patch_project(imported, patched, manifest, layout)
         gb.roundtrip_with_bambu(patched, OUTPUT, temp_path)
         gb.write_plate_manifest(OUTPUT, manifest, layout)
+        plate_manifest = json.loads(PLATES_JSON.read_text(encoding="utf-8"))
+        plate_manifest["generated_by"] = "cad/bambu/generate_bambu_project_v2.py"
+        PLATES_JSON.write_text(json.dumps(plate_manifest, indent=2) + "\n", encoding="utf-8")
         gb.validate_output(OUTPUT, manifest, layout)
         gb.render_plate_contact_sheet(OUTPUT, layout, contact_sheet_path=CONTACT_SHEET,
                                   title="Codex Robot Body v2 - P1S Plate Layout")

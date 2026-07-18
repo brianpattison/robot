@@ -206,7 +206,7 @@ applied (or proposed). Items marked **[fixed]** were implemented in this pass.
 - **F6. Executable artifacts fixed; physical evidence still open by design.**
   The repo now ships the framed v1 UART contract, local `robotd`/installer,
   host-tested portable Pico safety core, deliberately fail-stopped Pico target,
-  27-conductor nominal harness traveler with a red release gate, and executable
+  28-route nominal harness traveler with a red release gate, and executable
   27-step commissioning package. Exact harness terminals and measured lengths,
   MAX98357A mounting, NeoPixel installation, production motor/encoder outputs,
   released fuse values, physical photos, and signed commissioning results still
@@ -215,7 +215,7 @@ applied (or proposed). Items marked **[fixed]** were implemented in this pass.
 - **F7. Builder usability follow-up. [fixed]** The 42-page book now adds a
   purchased-electronics visual matching page, 13 cut-apart plate/bin labels,
   an 18-row printable coupon qualification record, and QR links to the
-  immutable `v2.0.0-prototype.1` Builder Release Index. That index generates
+  immutable `v2.0.0-prototype.2` Builder Release Index. That index generates
   the exact prototype BOM, artifact paths, bench commands, and open-gate list
   from the same authored shopping data as the book. The commissioning gate now
   checks fixed acceptance predicates as well as field presence, so a record

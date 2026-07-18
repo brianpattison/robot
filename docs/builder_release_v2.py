@@ -10,7 +10,7 @@ from builder_release_catalog_v2 import SHOP_ELECTRONICS, SHOP_FASTENERS, SHOP_FI
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "docs" / "builder-release-v2.md"
-RELEASE_ID = "v2.0.0-prototype.1"
+RELEASE_ID = "v2.0.0-prototype.2"
 RELEASE_URL = f"https://github.com/brianpattison/robot/tree/{RELEASE_ID}"
 
 
@@ -44,7 +44,7 @@ physical first article.
 | Pi body daemon | `software/robotd/` | Executable local Unix-socket/UART baseline with blackbox logging. |
 | Pi 5 appliance | `software/appliance/` + `software/install.sh` | Closed-world Bookworm provisioning baseline; real Pi, Tunnel, dual-UART, and append-only collector attestations remain open. |
 | Pico safety firmware | `firmware/pico2-safety/` | Tested portable safety core plus a deliberately fail-stopped Pico integration. Production motor outputs are absent. |
-| Harness traveler | `harness/harness-v2.json` | 27-conductor engineering schedule; exact terminals, measured lengths, fuses, and physical evidence remain red. |
+| Harness traveler | `harness/harness-v2.json` | 28-route engineering schedule; exact terminals, measured lengths, fuses, and physical evidence remain red. |
 | Commissioning evidence | `commissioning/plan-v2.json` + `docs/first-article-evidence.md` | Executable 27-step gate plus content-addressed, externally signed per-robot bundles; no physical pass is bundled. |
 | Unpowered commissioning fixture | `commissioning/fixture-v1.json` + `docs/commissioning-fixture-v1.md` | Closed-world circuit, one support-free PETG plate, and USB-logic/0.20 A negative-control guide; no physical pass is bundled. |
 
@@ -89,6 +89,8 @@ OpenSSH `allowed_signers` / revocation policy.
 
 ## Powered-motion release remains blocked on
 
+- A protected mobile Pi 5 input, normal US R-ML24 source, available/qualified
+  servo regulator, production relay driver, and Pico-local physical reset.
 - Exact delivered-part fit and the completed 18-coupon record.
 - Exact connector housings/contacts, measured harness lengths, continuity and
   pull tests, released fuse values, selective-fault tests, and thermal soak.

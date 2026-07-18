@@ -1,0 +1,37 @@
+name: CAD release
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  v2-cad-gate:
+    runs-on: macos-15
+    timeout-minutes: 25
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install pinned CAD toolchain
+        run: python -m pip install -r cad/python/requirements.txt
+
+      - name: Generate and validate v2 geometry
+        run: |
+          python cad/python/robot_body_v2.py
+          python cad/python/validate_robot_body_v2.py --gate
+          python scripts/check_cad_release.py
+
+  # Bambu Studio round trips, Blender renders, Chrome PDF printing, page-by-page
+  # visual review, printer coupons, and physical evidence remain explicit local
+  # release steps. A hosted runner does not own those native apps or tiny parts.

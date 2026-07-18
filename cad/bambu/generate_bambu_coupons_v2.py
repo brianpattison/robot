@@ -28,6 +28,7 @@ import generate_bambu_project as gb  # noqa: E402
 COUPON_DIR = ROOT / "cad" / "exports" / "v2" / "coupons"
 COUPON_MANIFEST = COUPON_DIR / "codex_robot_body_v2_coupons_manifest.json"
 OUTPUT = ROOT / "cad" / "bambu" / "codex_robot_body_v2_coupons_p1s.3mf"
+PLATES_JSON = ROOT / "cad" / "bambu" / "codex_robot_body_v2_coupons_p1s_plates.json"
 CONTACT_SHEET = ROOT / "docs" / "images" / "codex_robot_body_v2_coupons_p1s_plates.png"
 
 COLOR_PROFILES = {
@@ -133,6 +134,9 @@ def main() -> None:
         gb.patch_project(imported, patched, manifest, layout)
         gb.roundtrip_with_bambu(patched, OUTPUT, temp_path)
         gb.write_plate_manifest(OUTPUT, manifest, layout)
+        plate_manifest = json.loads(PLATES_JSON.read_text(encoding="utf-8"))
+        plate_manifest["generated_by"] = "cad/bambu/generate_bambu_coupons_v2.py"
+        PLATES_JSON.write_text(json.dumps(plate_manifest, indent=2) + "\n", encoding="utf-8")
         gb.validate_output(OUTPUT, manifest, layout)
         gb.render_plate_contact_sheet(
             OUTPUT,

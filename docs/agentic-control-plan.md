@@ -51,7 +51,7 @@ does in software, including `rm -rf /`:
 | Invariant | Enforced by | Agent-changeable? |
 | --- | --- | --- |
 | E-stop cuts motor power | IDEC XW1E direct-opening NC contacts in the Panasonic CB1A-R-M-12V relay coil path, hardware reset latch | No — physical |
-| Bumper hit stops motion | Safety MCU firmware; six normally-closed Omron D2HW loops; any open loop is a latched stop | Clears freely once the loop reads released; capped-speed escape from a pressed zone |
+| Bumper hit stops motion | Safety MCU firmware; six normally-closed Omron D2HW loops; any open loop is a latched stop | Clears freely once the requested loop reads released; no motion while open |
 | Watchdog timeout stops motion | Safety MCU firmware; stale heartbeat de-energizes motor enable | No |
 | Motion setpoints expire | Safety MCU firmware; every nonzero setpoint carries a short lease and zeros unless refreshed — a heartbeat alone never sustains motion | No |
 | Velocity and acceleration caps (0.35 m/s MVP) | Safety MCU firmware clamps every setpoint before the MDDS10 | No — new values require reflashing with physical access |
@@ -76,15 +76,12 @@ Pico 2) is wired, not because of software courtesy:
   never cabled to the Pi in normal operation, so the Pi cannot reboot the
   Pico into its bootloader. Reflashing the firmware means opening the robot
   and physically connecting to the service corridor (BOOTSEL in hand).
-- Bumper and E-stop stops are latched. The agent may clear a bumper latch
-  as soon as the loop reads released again — no budget, no human in the
-  loop — and firmware permits capped-speed escape motion away from a
-  pressed zone so the robot can free itself. Bump, back off, clear,
-  continue is normal exploration, not a fault. A loop that cannot read
-  released (broken wire, unplugged connector) holds a fault until
-  repaired: that is wiring protection, not agent restriction. The E-stop
-  latch always requires physical reset — it is the humans' button, and it
-  does not care who is holding the shell.
+- Bumper and E-stop stops are latched. The agent may clear a bumper latch as
+  soon as the requested loop reads released again — no budget and no human in
+  the loop. While a loop is open, applied motion is zero in every direction:
+  one SPST-NC input cannot tell a pressed bumper from a broken or unplugged
+  wire. The E-stop latch always requires physical reset — it is the humans'
+  button, and it does not care who is holding the shell.
 
 What the floor is for — and not for: it catches malfunctions (code that
 died mid-drive), protects hardware (stalled motors, deep-discharged packs,
@@ -236,7 +233,7 @@ installed that afternoon. Fast control loops run as normal processes the
 agent deploys and hot-swaps; the agent does not need to be in the loop at
 20 Hz, it needs to write the loop. Norm: new motion behaviors get a bench
 or blocked-wheels dry run before they drive the floor, and the firmware
-envelope makes the worst honest mistake a capped-speed bump.
+envelope makes an open bumper loop an immediate latched stop.
 
 ## Policy, Not Physics
 
@@ -324,7 +321,7 @@ so at a capped walking pace, bumps, stops, and gets audited.
   yet.
 - **M1 Rolling Chassis:** unchanged and still gates everything. The
   firmware envelope (clamps, watchdog kill test, all six NC bumper zones,
-  latch clear and escape motion, setpoint-lease expiry, E-stop, charger
+  zero motion while open and released-loop latch clear, setpoint-lease expiry, E-stop, charger
   inhibit) passes
   bench tests before the agent's first drive command. The agent is
   read-only telemetry until then, enforced physically during
@@ -337,9 +334,9 @@ so at a capped walking pace, bumps, stops, and gets audited.
 
 Additional acceptance checks: kill `robotd` under commanded motion and see
 the robot stop within the watchdog window; kill a driving behavior while
-`robotd` stays healthy and see motion stop at the setpoint lease; bump,
-back away, clear, and continue with no human in the loop; confirm a
-simulated broken bumper wire holds a fault no protocol command clears;
+`robotd` stays healthy and see motion stop at the setpoint lease; open each
+bumper loop and prove forward, reverse, and turn outputs all stay zero; confirm
+a simulated broken bumper wire holds a fault no protocol command clears;
 verify the off-host mirror captured an entire agent-driven session, blackbox and
 shell recording both; prove no mic capture with the hardware mute engaged
 and software running; press the E-stop while the agent is driving.

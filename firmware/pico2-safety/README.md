@@ -38,5 +38,5 @@ the assembled robot: USB/SWD remain service-only.
 
 The core already tests fixed velocity/acceleration clamps, independent
 heartbeat and motion leases, physical reset latches, six NC bumper zones,
-limited direction-aware escape, persistent-open wiring faults, charger inhibit,
-low-battery latch behavior, head clamps, CRC, and fragmented frames.
+zero motion while any bumper loop is open, broken-wire clear rejection, charger
+inhibit, low-battery latch behavior, head clamps, CRC, and fragmented frames.

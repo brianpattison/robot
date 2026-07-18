@@ -93,9 +93,9 @@ python3 commissioning/commission.py \
   --source-ref refs/tags/REPLACE_WITH_RELEASE_TAG
 ```
 
-Replace the placeholder with the immutable release tag that contains evidence
-schema v2. The historical `v2.0.0-prototype.1` tag predates this workflow and
-must not be moved or reused.
+Replace the placeholder with `v2.0.0-prototype.2` or a later immutable release
+tag that contains evidence schema v2. The historical `v2.0.0-prototype.1` tag
+predates this workflow and must not be moved or reused.
 
 `init` records the bundle/robot identity, exact commit, origin, resolved release
 tag, plan blob hash, and hashes derived from committed bytes for:

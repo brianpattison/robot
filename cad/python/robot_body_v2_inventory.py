@@ -3,16 +3,15 @@
 This module is the single source of truth for the v2 layout's envelopes
 and the printed-part registry. It is consumed by:
 
-- `packing_study_printed_only.py` — the box-level screen (today);
+- `packing_study_printed_only.py` — the box-level screen;
 - `robot_body_v2.py` — the v2 BREP production/prototype geometry;
-- `validate_robot_body_v2.py` — the inventory-driven validator
-  (forthcoming), whose contract is that an envelope absent from THIS
+- `validate_robot_body_v2.py` — the inventory-driven validator,
+  whose contract is that an envelope absent from THIS
   registry is itself a failure.
 
-Every envelope entry records its `basis`: which `Params` fields or
-verified helpers it derives from, or that it is still an ESTIMATE. The
-estimates are exactly the envelopes the BREP phase must replace with
-drawing-backed geometry before the D027 gate can close.
+Every envelope entry records its `basis`: which `Params` fields or verified
+helpers it derives from. Estimate tags are forbidden by the validator gate;
+the current registry has none and the D027 production CAD gate is closed.
 
 The printed-part registry implements D028: each part declares quantity,
 material, print orientation, and a justification for existing as a

@@ -1,6 +1,6 @@
-# Rover Bean Builder Release — v2.0.0-prototype.1
+# Rover Bean Builder Release — v2.0.0-prototype.2
 
-Permanent source: [https://github.com/brianpattison/robot/tree/v2.0.0-prototype.1](https://github.com/brianpattison/robot/tree/v2.0.0-prototype.1)
+Permanent source: [https://github.com/brianpattison/robot/tree/v2.0.0-prototype.2](https://github.com/brianpattison/robot/tree/v2.0.0-prototype.2)
 
 ## Verdict
 
@@ -21,7 +21,7 @@ physical first article.
 | Pi body daemon | `software/robotd/` | Executable local Unix-socket/UART baseline with blackbox logging. |
 | Pi 5 appliance | `software/appliance/` + `software/install.sh` | Closed-world Bookworm provisioning baseline; real Pi, Tunnel, dual-UART, and append-only collector attestations remain open. |
 | Pico safety firmware | `firmware/pico2-safety/` | Tested portable safety core plus a deliberately fail-stopped Pico integration. Production motor outputs are absent. |
-| Harness traveler | `harness/harness-v2.json` | 27-conductor engineering schedule; exact terminals, measured lengths, fuses, and physical evidence remain red. |
+| Harness traveler | `harness/harness-v2.json` | 28-route engineering schedule; exact terminals, measured lengths, fuses, and physical evidence remain red. |
 | Commissioning evidence | `commissioning/plan-v2.json` + `docs/first-article-evidence.md` | Executable 27-step gate plus content-addressed, externally signed per-robot bundles; no physical pass is bundled. |
 | Unpowered commissioning fixture | `commissioning/fixture-v1.json` + `docs/commissioning-fixture-v1.md` | Closed-world circuit, one support-free PETG plate, and USB-logic/0.20 A negative-control guide; no physical pass is bundled. |
 
@@ -58,22 +58,24 @@ Any row whose fit, termination, load, or test evidence is open stays open.
 | Cytron MDDS10 motor driver | 1 | The purple board that powers the wheels. |
 | Pololu #4867 gearmotor (99:1, 25D, 12 V, encoder) | 2 | The wheel motors. |
 | Hitec D85MG servo | 2 | The neck motors (look left/right, up/down). |
-| Hitec R-ML24 aluminum horn (H24T) | 2 | One per servo; 22 mm single arm with M2 × 0.4 stations at 13 and 16 mm. |
+| Hitec R-ML24 aluminum horn (H24T) | 2 | BLOCKED: no normal US quantity-one source is confirmed; do not substitute an unmodeled horn. |
 | Verified D85MG/R-ML24 component hardware pack | 1 set | 2 spline-center screws, 4 M2 horn-link screws, and both servos’ mounting grommets, eyelets, screws, and nuts. Confirm the delivered pack against the head coupons before use. |
 | Bioenno BLF-1203AB 12 V 3 Ah LiFePO4 battery | 1 | The robot’s power pack. |
 | Bioenno BPC-1502DC charger | 1 | The matching charger. Only ever use this one. |
 | Switchcraft EN2P3M20 inlet + EN2C3F20G2 plug | 1 pair | The keyed charging plug on the back. |
-| Pololu D24V90F5 regulator (5 V) | 1 | Makes clean 5 V for the Pi. |
-| Pololu D36V50F6 regulator (6 V) | 1 | Makes 6 V for the neck servos. |
+| Pololu D24V90F5 regulator (5 V) | 1 | CAD envelope only. The novice-safe locking Pi input, backfeed protection, downstream fusing, boot/load margin, and thermal proof are BLOCKED; never feed the GPIO header from this preview. |
+| Pololu D36V50F6 regulator (6 V) | 1 | BLOCKED on normal availability and measured two-servo transient, capacitance, connector, and thermal evidence. |
 | Panasonic CB1A-R-M-12V relay | 1 | The motor power switch the red button controls. |
+| Production relay driver | not released | BLOCKED: RB-FIXTURE-V1's Adafruit 5648 is negative-control evidence only; production default-off conditioning, fit, and EE review remain open. |
+| Pico-local physical reset | not released | BLOCKED: exact momentary control, protected input, label, and CAD/service location are not selected. |
 | Blue Sea Systems 5045 fuse block | 1 | Splits power safely into four fused branches. |
-| ATO fuse assortment (values not released) | 1 kit | Prototype starting values require measured load, conductor, inrush, selective-clearing, and thermal tests before use. |
+| ATO/ATC fuses | 0 for now | Every value is unset. Select and buy only after measured load, conductor, inrush, time-current, selective-clearing, and thermal evidence is reviewed. |
 | IDEC XW1E-BV402M-R emergency stop | 1 | THE BIG RED BUTTON. |
 | E-Switch PVB3F230SS311 mute switch | 1 | The microphone privacy switch (glows red when muted). |
 | Omron D2HW-C202MR bumper switches | 6 | Feelers inside the bumpers. |
 | VL53L1X time-of-flight boards (Adafruit 3967) | 4 | Distance eyes: two in front, one each side. |
 | Adafruit 5975 NeoPixel breakouts + JST-SH cables | 4 | The glowing eyes and status lights. |
-| ReSpeaker USB mic array | 1 | The robot’s ears. |
+| ReSpeaker USB mic array | 1 | Selected envelope; exact revision plus a true VBUS-cut/no-backfeed mute interface remain BLOCKED. |
 | Enclosed 3 W 4 ohm speakers + 2× Adafruit MAX98357A amps | 1 set | The robot’s voice. |
 | Prototype wire, terminal, and connector kit | not released | The production terminal schedule, measured lengths, and crimp tooling are still open; do not improvise a powered harness from this preview. |
 
@@ -97,6 +99,8 @@ OpenSSH `allowed_signers` / revocation policy.
 
 ## Powered-motion release remains blocked on
 
+- A protected mobile Pi 5 input, normal US R-ML24 source, available/qualified
+  servo regulator, production relay driver, and Pico-local physical reset.
 - Exact delivered-part fit and the completed 18-coupon record.
 - Exact connector housings/contacts, measured harness lengths, continuity and
   pull tests, released fuse values, selective-fault tests, and thermal soak.

@@ -1,8 +1,6 @@
-build123d
-cadquery
-Pillow
-reportlab
-# CadQuery's cadquery-ocp backend requires VTK; keep it explicit for reproducible setup.
-vtk
-pypdfium2
-qrcode
+# Validated CAD/guide toolchain (Python 3.12). Update these pins only in a
+# dedicated dependency change followed by the full v2 release check.
+build123d==0.11.1
+Pillow==12.3.0
+pypdfium2==5.12.1
+qrcode==8.2

@@ -44,7 +44,8 @@ of truth for open release gates. Start with the docs index:
 - Decision log: [`docs/decision-log.md`](docs/decision-log.md)
 - MVP architecture: [`docs/mvp-architecture.md`](docs/mvp-architecture.md)
 - Agentic control plan: [`docs/agentic-control-plan.md`](docs/agentic-control-plan.md)
-- BOM v0: [`docs/bom-v0.md`](docs/bom-v0.md)
+- Current v2 purchase authority: [`docs/builder-release-v2.md`](docs/builder-release-v2.md)
+- BOM v0 (historical v1 planning): [`docs/bom-v0.md`](docs/bom-v0.md)
 - Retail sourcing policy: [`docs/retail-sourcing-policy.md`](docs/retail-sourcing-policy.md)
 - CAD mechanical plan: [`docs/cad-mechanical-plan.md`](docs/cad-mechanical-plan.md)
 - CAD v1 body and renders: [`docs/cad-v1-body.md`](docs/cad-v1-body.md)
@@ -65,7 +66,7 @@ of truth for open release gates. Start with the docs index:
 - Physical E-stop, bumper switches, watchdog, velocity limits, and conservative movement defaults.
 - The resident agent (Claude or Codex) owns the robot's computer: live SSH, code on the fly, package installs, and direct motion setpoints above a firmware safety floor it cannot alter (D030-D032).
 - Local dashboard for health, logs, camera preview, manual drive, emergency stop, and the agent panel.
-- Quantity-one US retail hardware throughout the production design: Panasonic CB1A-R-M-12V motor-cut relay, Blue Sea Systems 5045 covered fuse block, WDS 615-M6-8-65 front shoulder bolts with stock hardware, no carry handles, and a blank center rear cartridge.
+- Quantity-one US retail hardware for every purchased v2 item; printed front axles, wheels, and motor retention; no custom PCB, machined structure, or carry handles. Unresolved retail/power parts stay visibly blocked.
 
 ## Safety First
 
@@ -116,49 +117,49 @@ python -m pip install -r cad/python/requirements.txt
 
 ```text
 .
+|-- .github/workflows/bench-safety.yml
 |-- cad/
 |   |-- bambu/
 |   |   |-- README.md
-|   |   |-- generate_bambu_project.py
-|   |   |-- codex_robot_body_v1_p1s.3mf
-|   |   `-- codex_robot_body_v1_p1s_plates.json
+|   |   |-- generate_bambu_project_v2.py
+|   |   |-- codex_robot_body_v2_p1s.3mf
+|   |   `-- codex_robot_body_v2_coupons_p1s.3mf
 |   |-- blender/
-|   |   |-- render_robot_body.py
-|   |   |-- render_print_ready.py
-|   |   |-- render_coupons.py
-|   |   `-- render_alignment_pilot.py
+|   |   |-- render_robot_body_v2.py
+|   |   `-- render_assembly_steps_v2.py
 |   `-- python/
 |       |-- README.md
 |       |-- requirements.txt
-|       |-- robot_body.py
-|       |-- robot_body_split.py
-|       |-- robot_body_print.py
-|       |-- robot_body_coupons.py
-|       `-- validate_robot_body.py
+|       |-- robot_body_v2_inventory.py
+|       |-- robot_body_v2.py
+|       |-- robot_body_v2_coupons.py
+|       `-- validate_robot_body_v2.py
+|-- commissioning/
 |-- docs/
-|   |-- README.md
-|   |-- bom-v0.md
-|   |-- cad-v1-body.md
-|   |-- cad-component-coverage.md
-|   |-- cad-coupons.md
-|   |-- images/
-|   |-- cad-mechanical-plan.md
-|   |-- decision-log.md
-|   |-- mvp-architecture.md
-|   `-- mvp-prd.md
-|-- .gitignore
+|   |-- builder-release-v2.md
+|   |-- body-protocol-v1.md
+|   |-- first-article-evidence.md
+|   `-- README.md
+|-- firmware/pico2-safety/
+|-- harness/
+|-- software/robotd/
+|-- software/appliance/
 `-- README.md
 ```
 
 ## Next Steps
 
-1. Print and measure the P1S calibration coupons before committing to large body parts.
-2. Buy the bench-brain and safety-prototype batch from [`docs/bom-v0.md`](docs/bom-v0.md).
-3. Print and measure all 18 v2 coupons, especially the PETG pan journal/bayonet, passive tilt bushing, exact-family shell/head, TPU interfaces, and PLA/PETG lid boundary, before any large chassis part.
-4. Purchase and bench-check one Pololu #4867 motor plus one BLF-1203AB/BPC-1502DC/EN2 charge set, the two D85MG/R-ML24 head stacks and verified component hardware, IDEC XW1E E-stop, two Omron D2HW bumper switches, both Pololu regulators, the Panasonic relay, Blue Sea 5045 fuse block, and E-Switch physical-mute switch. Qualify delivered fit, current, runtime, journal wear, cable drag, charger inhibit, relay dropout, branch fusing/selective faults/thermal behavior, axle retention, and safety/privacy interfaces before buying the remaining set or powering either motor.
-5. Print representative harness, seam, motor-pod, idler, camera, vent, and acoustic parts before a full shell.
-6. Build the stationary bench brain and deterministic safety loop before powering drive motors.
-7. Run `python3 commissioning/run_host_tests.py`, then work through the
+1. Run `python3 commissioning/run_host_tests.py`; green proves only the
+   hardware-free contracts.
+2. Use [`docs/builder-release-v2.md`](docs/builder-release-v2.md), never the
+   historical v1 BOM, for the current selection list and explicit blockers.
+3. Print and record all 18 v2 coupons before committing to large body parts.
+4. Close the protected mobile-Pi input, R-ML24 sourcing, servo-regulator,
+   production relay-driver, Pico-reset, USB-mute/backfeed, and exact harness
+   decisions before treating the electronics table as a complete shopping list.
+5. Keep every fuse value unset until measured current, conductor, inrush,
+   time-current, selective-clearing, and thermal evidence supports it.
+6. Work through the
    27-step commissioning plan in order using the
    [first-article evidence workflow](docs/first-article-evidence.md). The
    repository release gates are intentionally red until the exact physical

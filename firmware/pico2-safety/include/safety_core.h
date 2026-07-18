@@ -7,11 +7,8 @@
 #define RB_BUMPER_MASK 0x3Fu
 #define RB_WATCHDOG_MS 250u
 #define RB_MOTION_LEASE_MS 250u
-#define RB_ESCAPE_WINDOW_MS 1500u
 #define RB_LINEAR_LIMIT_MM_S 350
 #define RB_ANGULAR_LIMIT_MRAD_S 1500
-#define RB_ESCAPE_LINEAR_LIMIT_MM_S 100
-#define RB_ESCAPE_ANGULAR_LIMIT_MRAD_S 500
 #define RB_LINEAR_ACCEL_MM_S2 500
 #define RB_ANGULAR_ACCEL_MRAD_S2 2000
 #define RB_HEAD_PAN_LIMIT_CDEG 6000
@@ -42,9 +39,7 @@ typedef struct {
     uint32_t previous_tick_ms;
     uint32_t last_heartbeat_ms;
     uint32_t last_motion_ms;
-    uint32_t open_since_ms[6];
     uint8_t released_mask;
-    uint8_t seen_released_mask;
     uint8_t bumper_latched_mask;
     uint8_t wiring_fault_mask;
     bool estop_released;
