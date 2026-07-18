@@ -11,11 +11,16 @@ python3 docs/builder_release_v2.py --check
 A green run proves only that:
 
 - the `robotd` protocol, simulator, socket, and blackbox tests pass;
-- commissioning evidence rejects incomplete or contradictory records;
+- commissioning evidence rejects incomplete/contradictory records, unsafe
+  artifacts, changed source provenance, damaged event chains, transplanted
+  signatures, bundled trust roots, and signer/robot mismatches;
 - RB-FIXTURE-V1 matches its generated guide/labels/CAD data, its circuit matches
   the Pico pin contract, and closed-world mutation tests reject unsafe drift;
-- the checked-in harness passes its engineering checks while its physical
-  release gate still rejects blank first-article evidence;
+- the checked-in harness passes its engineering checks while its separate
+  physical release gate still rejects blank conductor/first-article evidence;
+- synthetic commissioning bundles can be signed and independently verified,
+  while the repository's missing real bundle and separate harness release gate
+  both remain red;
 - the portable C11 protocol and safety core compile and pass their host tests;
 - the Pi appliance manifest/templates are closed-world and fresh, staging is
   idempotent, secret formats and modes are enforced, tlog failure behavior and
