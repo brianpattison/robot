@@ -96,11 +96,12 @@ applied (or proposed). Items marked **[fixed]** were implemented in this pass.
 - **C1. No visual link between a floating part and its destination.** The
   LEGO-style "pop" offsets parts 32 mm, but nothing points at the landing spot —
   ambiguous for the motors (which cradle?), pods, Pico, relay, deck, shell, lid,
-  head. Every popped part now gets a **translucent magenta 3D arrow** along its
-  insertion axis, from the part to its seat — magenta because no printed part
-  or purchased proxy uses it, translucent and shadowless so it reads as an
-  annotation, not plastic (revised per Brian's feedback); wheel arrows float
-  above the tires so the pegs don't swallow them. **[fixed]**
+  head. The final renderer exports normalized part/destination coordinates
+  from the evaluated camera, and the guide draws crisp numbered magenta 2D
+  arrows with matching numbered landing dots. This removes shadow, occlusion,
+  and perspective-scale ambiguity while keeping every pointer registered to
+  the actual CAD scene. Dedicated detail panels replace dense arrows where a
+  hidden interface needs a section. **[fixed]**
 - **C2. Pops along the wrong axis.** Wheels/washers popped straight up (+Z) even
   though they slide sideways onto shafts; bumper halves popped up instead of
   wrapping front/back; the deck pop (+32) left the deck impaled on a tower;
@@ -193,7 +194,15 @@ applied (or proposed). Items marked **[fixed]** were implemented in this pass.
   camera lens; white PETG gets a temporary cool-grey instructional tint and
   stronger rim; page 32/back use a populated cutaway. Close panels now cover
   Pico orientation, regulator/fuse sides, all six bumper switches, rear panel,
-  audio, the full E-stop stack, pan, tilt, and camera.
+  audio, the full E-stop stack, pan, tilt, and camera. Dimensioned vector
+  sections now expose the rear-wheel well and shaft clamp, front cap washer,
+  bumper stroke/stop, fascia back, audio orientation, E-stop load path, and
+  status-light order. Numbered arrows are exported from the real camera scene.
+- **F5a. Coupon project and records. [fixed as an artifact; evidence open.]**
+  The 18 logical qualification tests now ship as a tracked five-plate Bambu
+  project with 19 material-correct objects; the PETG tire core and TPU ring are
+  separate. The book shows the project before the test tables and requires
+  machine/filament/settings/result/tester/date records.
 - **F6. Still open by design.** Exact harness/terminal lengths, MAX98357A
   mounting, NeoPixel installation, released fuse values, Pi/Pico artifacts,
   physical photos, and commissioning evidence require delivered hardware and

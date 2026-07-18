@@ -127,10 +127,13 @@ def switch_pocket():
     return slab
 
 
-def tire_fit():
-    core = Pos(0, 0, 5) * Cylinder(21.0 * 0.4 + 8, 10)
-    ring = Pos(60, 0, 5) * (Cylinder(P.wheel_radius * 0.4, 10) - Cylinder(20.8 * 0.4 + 8 - 8, 12))
-    return core + ring
+def tire_fit_core():
+    return Pos(0, 0, 5) * Cylinder(21.0 * 0.4 + 8, 10)
+
+
+def tire_fit_ring():
+    return Pos(0, 0, 5) * (
+        Cylinder(P.wheel_radius * 0.4, 10) - Cylinder(20.8 * 0.4, 12))
 
 
 def pcb_clamp():
@@ -212,7 +215,7 @@ COUPONS = {
     "coupon_snap_pair": (snap_pair, "PETG", "10 insert/release cycles; hook must survive and retention must stay positive"),
     "coupon_bayonet_pair": (bayonet_pair, "PETG", "head-retention interface: engage/disengage feel, no ratcheting under axial pull"),
     "coupon_switch_pocket": (switch_pocket, "PETG", "seat one D2HW switch; verify the 0.4 rest gap / 2.0 stroke / 2.4 stop interface before committing the tray print"),
-    "coupon_tire_fit": (tire_fit, "TPU+PETG", "print the ring in TPU, the core in PETG; calibrate tire stretch and seat retention at 40% scale"),
+    "coupon_tire_fit": (None, "TPU+PETG", "print the ring in TPU, the core in PETG; calibrate tire stretch and seat retention at 40% scale"),
     "coupon_pcb_clamp": (pcb_clamp, "PETG", "drop in the Pico 2, verify peg engagement without board stress, clamp bar seats at 3.2 stack"),
     "coupon_pla_insert_shell": (pla_insert_shell, "PLA", "production shell-style boss: record insert temperature, whitening/cracks/sink/tilt, pull-through, and M3x8 engagement for this exact PLA family"),
     "coupon_pla_shell_wall": (pla_shell_wall, "PLA", "representative 3.2 wall, rollover/opening, and panel seat: record dimensions, impact result, warm soak, and post-cool distortion"),
@@ -238,23 +241,44 @@ PROCESS_RECORD = {
     "test_date": None,
 }
 
+MULTI_OBJECT_COUPONS = {
+    "coupon_tire_fit": (
+        ("coupon_tire_fit_core", tire_fit_core, "PETG"),
+        ("coupon_tire_fit_ring", tire_fit_ring, "TPU 95A"),
+    ),
+}
+
 
 def main():
     EXPORT_DIR.mkdir(parents=True, exist_ok=True)
+    for stale in EXPORT_DIR.glob("coupon_*.stl"):
+        stale.unlink()
     manifest = {}
     for name, (fn, material, note) in COUPONS.items():
-        solid = fn()
-        bb = solid.bounding_box()
-        export_stl(solid, str(EXPORT_DIR / f"{name}.stl"))
+        objects = []
+        object_specs = MULTI_OBJECT_COUPONS.get(name, ((name, fn, material),))
+        for object_name, object_fn, object_material in object_specs:
+            solid = object_fn()
+            bb = solid.bounding_box()
+            stl_name = f"{object_name}.stl"
+            export_stl(solid, str(EXPORT_DIR / stl_name))
+            objects.append({
+                "name": object_name,
+                "stl": stl_name,
+                "material": object_material,
+                "span_mm": [round(bb.size.X, 1), round(bb.size.Y, 1), round(bb.size.Z, 1)],
+            })
+            print(
+                f"{object_name}: {bb.size.X:.0f} x {bb.size.Y:.0f} x {bb.size.Z:.0f}  "
+                f"[{object_material}]")
         manifest[name] = {
             "material": material,
-            "span_mm": [round(bb.size.X, 1), round(bb.size.Y, 1), round(bb.size.Z, 1)],
+            "objects": objects,
             "supports": "none",
             "note": note,
             "physical_evidence_status": "open",
             "process_record": dict(PROCESS_RECORD),
         }
-        print(f"{name}: {bb.size.X:.0f} x {bb.size.Y:.0f} x {bb.size.Z:.0f}  [{material}]")
     (EXPORT_DIR / "codex_robot_body_v2_coupons_manifest.json").write_text(
         json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     print(f"{len(COUPONS)} coupons exported to {EXPORT_DIR}")

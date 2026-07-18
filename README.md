@@ -19,6 +19,7 @@ one insert size.
 
 - **The Builder's Book (v2 prototype preview):** [`output/pdf/codex_robot_body_v2_assembly_guide.pdf`](output/pdf/codex_robot_body_v2_assembly_guide.pdf)
 - v2 Bambu Studio project: [`cad/bambu/codex_robot_body_v2_p1s.3mf`](cad/bambu/codex_robot_body_v2_p1s.3mf)
+- v2 qualification-coupon project: [`cad/bambu/codex_robot_body_v2_coupons_p1s.3mf`](cad/bambu/codex_robot_body_v2_coupons_p1s.3mf)
 - v2 book generator: [`docs/generate_assembly_guide_v2.py`](docs/generate_assembly_guide_v2.py)
 
 Visible replaceable panels and diffusers now use configurable PLA theme slots;

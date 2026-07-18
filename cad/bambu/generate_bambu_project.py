@@ -901,9 +901,14 @@ def validate_output(output: Path, manifest: dict, layout: list[dict]) -> None:
             flags=re.MULTILINE,
         )
     )
-    if info.returncode != 0 or reported_part_count != expected_part_count:
+    # Bambu reports disconnected mesh shells here, not model-setting objects.
+    # A coupon such as a snap pair is deliberately one named STL/object with
+    # two printable shells. The exact object-name check above remains the
+    # authoritative one-to-one inventory proof; this CLI check only proves
+    # that every object still exposes at least one readable mesh shell.
+    if info.returncode != 0 or reported_part_count < expected_part_count:
         fail(
-            f"Bambu Studio could not read all {expected_part_count} objects "
+            f"Bambu Studio could not read at least one mesh for each of the {expected_part_count} objects "
             f"from the final 3MF (reported {reported_part_count}).\n"
             f"stdout:\n{info.stdout[-2000:]}\n"
             f"stderr:\n{info.stderr[-2000:]}"

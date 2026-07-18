@@ -25,8 +25,27 @@ inventory-derived material/color groups: white/black/red PETG, charcoal/teal/
 translucent-lime PLA, and charcoal TPU. Shell and head are white PETG because
 their candidate PLA evidence gates are still open; never hand-edit the 3MF to
 bypass that fallback. Generate and print all 18 coupons before large parts;
-keep the battery and motor
-branch disconnected while following prototype-only assembly pages.
+keep the battery and motor branch disconnected while following prototype-only
+assembly pages.
+
+The coupons are themselves a tracked, ready-to-open Bambu project rather than
+an STL scavenger hunt:
+
+- [`codex_robot_body_v2_coupons_p1s.3mf`](codex_robot_body_v2_coupons_p1s.3mf)
+- [`codex_robot_body_v2_coupons_p1s_plates.json`](codex_robot_body_v2_coupons_p1s_plates.json)
+
+Regenerate its 18 logical tests / 19 correctly material-separated objects / 5
+plates with:
+
+```bash
+.venv-cad/bin/python cad/python/robot_body_v2_coupons.py
+.venv-cad/bin/python cad/bambu/generate_bambu_coupons_v2.py
+```
+
+The tire-fit test is one logical coupon but two objects: a PETG core and TPU
+95A ring. Never merge them into one material assignment. The project is a
+qualification fixture, not evidence by itself; the exact filament, settings,
+measurements, tester, and date still have to be recorded.
 
 ## v1 historical project
 
