@@ -4,6 +4,12 @@ The 27-step plan in [`plan-v2.json`](plan-v2.json) turns the release gates into
 records instead of vibes. It starts unpowered, moves through logic fixtures and
 wheels-up tests, and reaches floor/runtime tests only at the end.
 
+Provision and attest the Pi with the
+[`RB-PI-APPLIANCE-V1` guide](../docs/pi-appliance-provisioning.md). Host tests
+validate its templates and failure bookkeeping only; the real Pi, Access
+connection, both UARTs, and separately administered append-only collector stay
+red until their first-article records exist.
+
 [`fixture-v1.json`](fixture-v1.json) is the closed-world circuit for the first
 unpowered/USB-logic observations. Its generated
 [`build guide`](../docs/commissioning-fixture-v1.md), paper labels, and one-part

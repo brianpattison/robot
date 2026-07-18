@@ -75,7 +75,11 @@ Read these in order when getting oriented:
     What the automated bench checks prove, what they deliberately leave red,
     and why green CI never authorizes powered motion.
 
-16. [v1 Illustrated Assembly Guide (historical)](../output/pdf/codex_robot_body_v1_assembly_guide.pdf)
+16. [Raspberry Pi 5 Appliance Provisioning](pi-appliance-provisioning.md)
+    Reproducible Bookworm install, key-only Cloudflare Access SSH, separate Pi 5
+    debug/GPIO UARTs, tlog capture, backup limitations, and live attestations.
+
+17. [v1 Illustrated Assembly Guide (historical)](../output/pdf/codex_robot_body_v1_assembly_guide.pdf)
     Twenty-page visual build sequence synchronized with the D024 retail-only CAD, current renders, 101-part print manifest, and 26-plate P1S project.
 
 > **D024 retail-only baseline:** CAD, validation, split and print manifests,

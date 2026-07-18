@@ -129,6 +129,11 @@ The control boundary now has runnable artifacts rather than prose alone:
 - [`../software/robotd/`](../software/robotd/) implements the local Unix-socket
   API, exclusive UART ownership, one-shot setpoints, 20 Hz heartbeat, firmware
   status readback, and Pi-local plus optional off-host JSONL blackbox.
+- [`../software/appliance/`](../software/appliance/) and the
+  [Pi provisioning guide](pi-appliance-provisioning.md) define the closed-world
+  Pi 5 Bookworm appliance: key-only SSH through an outbound tunnel, full agent
+  sudo, tlog capture, preserved debug UART10, and RP1 GPIO UART0 at
+  `/dev/rover-pico`. Host checks do not substitute for its live attestations.
 - [`../firmware/pico2-safety/`](../firmware/pico2-safety/) implements and tests
   the portable safety state machine. Its Pico target is deliberately
   fail-stopped: it can exercise UART/status on the bench but contains no
@@ -252,9 +257,11 @@ so at a capped walking pace, bumps, stops, and gets audited.
 - **Blackbox:** a log of every `robotd` command, latch event, policy read,
   and firmware status change — streamed live to the dashboard client and
   to an off-robot subscriber (a laptop, a NAS, anything not the Pi). The
-  Pi-local copy is convenience only: a sudo-capable agent can edit
-  anything stored on the Pi, so the trustworthy record is the off-host
-  mirror, and a gap or silence in that stream is itself a red flag.
+  Pi-local copy is convenience only: a sudo-capable agent can edit anything
+  stored on the Pi. A read-write off-host mount is also backup only. Trust
+  requires a separately administered append-only collector whose Pi credential
+  is proven unable to read, delete, rewrite, or alter prior records; a gap or
+  silence in that stream is itself a red flag.
 - **Session recording:** agent shell sessions recorded (auditd + tlog or
   equivalent) and browsable from the dashboard, shipped to the same
   off-host mirror under the same rule.
@@ -290,8 +297,9 @@ so at a capped walking pace, bumps, stops, and gets audited.
   for agent clients, SSO for humans, both revocable per-client at the
   edge without touching the Pi, and every connection logged there — a
   second audit trail that conveniently lives off-host.
-- sshd stays key-only, no password auth, `agent` user, bound to
-  loopback/LAN only. A WireGuard/Tailscale mesh remains a fine complement
+- sshd stays key-only for remote access, no SSH password auth, `agent` user,
+  and no WAN listener. A local yescrypt console credential preserves the Pi 5
+  debug UART10 break-glass login. A WireGuard/Tailscale mesh remains a fine complement
   for Brian's own devices; the standard agent path is the tunnel.
 - The dashboard and off-host mirror stay LAN-local by default; publishing
   either is allowed only behind the same Cloudflare Access gate.

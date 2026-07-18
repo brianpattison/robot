@@ -42,7 +42,7 @@ physical first article.
 | Coupon print project | `cad/bambu/codex_robot_body_v2_coupons_p1s.3mf` | 18 logical tests / 19 objects / 5 material-separated plates. |
 | UART contract | `docs/body-protocol-v1.md` | Fixed v1 bench protocol; no flash/config-write path. |
 | Pi body daemon | `software/robotd/` | Executable local Unix-socket/UART baseline with blackbox logging. |
-| Pi installer | `software/install.sh` | Bench install; keep the motor branch physically isolated. |
+| Pi 5 appliance | `software/appliance/` + `software/install.sh` | Closed-world Bookworm provisioning baseline; real Pi, Tunnel, dual-UART, and append-only collector attestations remain open. |
 | Pico safety firmware | `firmware/pico2-safety/` | Tested portable safety core plus a deliberately fail-stopped Pico integration. Production motor outputs are absent. |
 | Harness traveler | `harness/harness-v2.json` | 27-conductor engineering schedule; exact terminals, measured lengths, fuses, and physical evidence remain red. |
 | Commissioning plan | `commissioning/plan-v2.json` | Executable 27-step evidence gate; no physical pass is bundled. |
@@ -73,6 +73,7 @@ Any row whose fit, termination, load, or test evidence is open stays open.
 
 ```bash
 python3 commissioning/run_host_tests.py
+python3 software/appliance/appliance.py --check
 python3 commissioning/fixture.py --check
 python3 harness/generate_harness_docs.py
 python3 harness/generate_harness_docs.py --release
@@ -95,7 +96,8 @@ required measurement and test record.
   setpoint lease, charger inhibit, low-battery cutoff, and hardware mic-mute
   fixture results.
 - Head wear/current/cable-drag, wheel retention, target-floor current,
-  45-minute runtime/reserve, off-host audit readback, and closure inspection.
+  45-minute runtime/reserve, real Pi/Tunnel/dual-UART proof, append-only off-host
+  audit readback and denied-mutation proof, and closure inspection.
 - Real first-article wiring and hidden-layer photographs.
 
 If a field is blank, the answer is not “probably.” The answer is “open.” Tiny

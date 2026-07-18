@@ -13,8 +13,8 @@ one insert size.
 
 > **Prototype assembly preview — do not use for powered motion.** The tracked v2
 > 3MF and builder's book are geometry and dry-assembly artifacts. The head/neck
-> load paths are fully modeled and kinematically validated. A bench-safe Pi
-> installer/`robotd`, framed UART contract, portable Pico safety core,
+> load paths are fully modeled and kinematically validated. A versioned Pi 5
+> appliance installer/`robotd`, framed UART contract, portable Pico safety core,
 > deliberately fail-stopped Pico target, nominal harness traveler, and
 > executable commissioning gate now ship. Exact-part fit, production motor
 > outputs, exact harness terminals/lengths, released fuse values, loaded
@@ -26,7 +26,7 @@ one insert size.
 - v2 qualification-coupon project: [`cad/bambu/codex_robot_body_v2_coupons_p1s.3mf`](cad/bambu/codex_robot_body_v2_coupons_p1s.3mf)
 - v2 book generator: [`docs/generate_assembly_guide_v2.py`](docs/generate_assembly_guide_v2.py)
 - bench protocol: [`docs/body-protocol-v1.md`](docs/body-protocol-v1.md)
-- Pi runtime/installer: [`software/robotd/`](software/robotd/) and [`software/install.sh`](software/install.sh)
+- Pi runtime/appliance: [`software/robotd/`](software/robotd/), [`software/appliance/`](software/appliance/), and the [provisioning guide](docs/pi-appliance-provisioning.md)
 - Pico safety-core baseline: [`firmware/pico2-safety/`](firmware/pico2-safety/)
 - harness traveler and release gate: [`harness/`](harness/)
 - executable commissioning package: [`commissioning/`](commissioning/)

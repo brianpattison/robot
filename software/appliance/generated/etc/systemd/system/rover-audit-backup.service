@@ -1,0 +1,24 @@
+[Unit]
+Description=Rover Bean session backup with explicit mount gaps
+After=local-fs.target
+
+[Service]
+Type=simple
+User=agent
+Group=robot
+ExecStart=/opt/rover-bean/appliance/audit_backup.py
+Restart=on-failure
+RestartSec=2
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+ReadWritePaths=/var/log/agent-sessions /var/log/rover-audit /var/lib/rover-bean-audit /mnt/robot-audit
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,2 @@
+# D030: the resident agent has full authority over the Pi.
+agent ALL=(ALL:ALL) NOPASSWD: ALL
