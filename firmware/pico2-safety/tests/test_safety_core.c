@@ -98,34 +98,41 @@ static void test_velocity_head_and_acceleration_clamps(void) {
     assert(state.pan_cdeg == 6000 && state.tilt_cdeg == -2000);
 }
 
-static void test_bumper_escape_clear_and_broken_wire(void) {
+static void test_bumper_open_clear_and_broken_wire(void) {
     rb_safety_state state;
     rb_safety_init(&state, 0, 11000, 11800);
     release_and_reset(&state, 10);
     rb_safety_heartbeat(&state, 20);
     rb_safety_inputs(&state, 30, RB_BUMPER_MASK & ~RB_BUMPER_FRONT_LEFT,
                      true, false, false, 12800);
-    rb_safety_drive(&state, 31, 100, 0);
-    rb_safety_tick(&state, 40);
-    assert(state.target_linear_mm_s == 0);
-    assert(state.applied_linear_mm_s == 0);
-    assert(!rb_safety_motor_enable(&state));
-    rb_safety_drive(&state, 50, -300, -1000);
-    rb_safety_tick(&state, 60);
-    assert(state.target_linear_mm_s == -100);
-    assert(state.target_angular_mrad_s == -500);
-    assert(rb_safety_motor_enable(&state));
-    rb_safety_inputs(&state, 70, RB_BUMPER_MASK, true, false, false, 12800);
+    const int16_t commands[][2] = {
+        {100, 0}, {-100, 0}, {0, 500}, {0, -500}, {100, 500}, {-100, -500},
+    };
+    uint32_t command_ms = 31;
+    for (unsigned i = 0; i < sizeof(commands) / sizeof(commands[0]); ++i) {
+        rb_safety_drive(&state, command_ms, commands[i][0], commands[i][1]);
+        rb_safety_tick(&state, command_ms + 1);
+        assert(state.target_linear_mm_s == 0);
+        assert(state.target_angular_mrad_s == 0);
+        assert(state.applied_linear_mm_s == 0);
+        assert(state.applied_angular_mrad_s == 0);
+        assert(!rb_safety_motor_enable(&state));
+        command_ms += 10;
+    }
+    rb_safety_inputs(&state, 100, RB_BUMPER_MASK, true, false, false, 12800);
     rb_safety_clear_bumper(&state, RB_BUMPER_FRONT_LEFT);
     assert(state.bumper_latched_mask == 0);
+    assert(state.wiring_fault_mask == 0);
 
-    rb_safety_inputs(&state, 80, RB_BUMPER_MASK & ~RB_BUMPER_LEFT,
-                     true, false, false, 12800);
-    rb_safety_inputs(&state, 1700, RB_BUMPER_MASK & ~RB_BUMPER_LEFT,
+    rb_safety_inputs(&state, 110, RB_BUMPER_MASK & ~RB_BUMPER_LEFT,
                      true, false, false, 12800);
     assert(state.wiring_fault_mask & RB_BUMPER_LEFT);
     rb_safety_clear_bumper(&state, RB_BUMPER_LEFT);
     assert(state.bumper_latched_mask & RB_BUMPER_LEFT);
+    rb_safety_inputs(&state, 120, RB_BUMPER_MASK, true, false, false, 12800);
+    rb_safety_clear_bumper(&state, RB_BUMPER_LEFT);
+    assert(!(state.bumper_latched_mask & RB_BUMPER_LEFT));
+    assert(!(state.wiring_fault_mask & RB_BUMPER_LEFT));
 }
 
 static void test_estop_charger_and_low_battery_latches(void) {
@@ -159,7 +166,7 @@ int main(void) {
     test_physical_reset_and_watchdog();
     test_independent_motion_lease();
     test_velocity_head_and_acceleration_clamps();
-    test_bumper_escape_clear_and_broken_wire();
+    test_bumper_open_clear_and_broken_wire();
     test_estop_charger_and_low_battery_latches();
     puts("SAFETY_CORE_TESTS_PASS");
     return 0;

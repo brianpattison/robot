@@ -77,7 +77,7 @@ Simple acknowledgements such as "stopping," "muted," "battery is low," or "I nee
 - Come-here behavior that approaches, stops, and looks up rather than crowding.
 - Go-home behavior that navigates to a manually defined home area or asks for help.
 
-Navigation code is agent-maintained under D030. It should still refuse to move on low confidence as a matter of good behavior, but the guarantee that a bad plan ends in a capped-speed latched stop comes from the firmware envelope, not from navigation.
+Navigation code is agent-maintained under D030. It should still refuse to move on low confidence as a matter of good behavior, but the guarantee that an open bumper loop produces a latched zero-motion state comes from the firmware envelope, not from navigation.
 
 ### Local Dashboard
 
@@ -161,10 +161,10 @@ The six bumper inputs should use normally-closed circuits. Any open circuit,
 including a pressed switch, disconnected plug, or broken wire, is a latched
 stop/fault until the safety controller observes a valid released loop and
 receives an explicit clear — from the agent, the dashboard, or a physical
-input. Firmware permits capped-speed escape motion away from a pressed zone
-so the robot can free itself; a loop that cannot read released holds a
-fault until repaired. Do not infer bumper safety from Linux process health
-or the LLM.
+input. Firmware permits no motion while a loop is open because a pressed
+SPST-NC switch and a broken or unplugged conductor are electrically
+indistinguishable. Do not infer bumper safety from Linux process health or the
+LLM.
 
 The motor branch's mechanical cutoff baseline is a Panasonic CB1A-R-M-12V
 sealed SPST-NO automotive relay with an integral bracket, one 5.4 mm mounting
@@ -276,7 +276,7 @@ The tracked bench implementation currently covers the boring core:
 - `docs/body-protocol-v1.md` is the fixed framed-UART contract.
 - `firmware/pico2-safety/` supplies a host-tested C11 safety core and a
   fail-stopped Pico SDK integration with no production motor output.
-- `harness/` supplies the nominal 27-conductor first-article traveler and a
+- `harness/` supplies the nominal 28-route first-article traveler and a
   deliberately red physical release gate.
 - `commissioning/` supplies the 27-step evidence plan and runner. No physical
   pass is bundled.

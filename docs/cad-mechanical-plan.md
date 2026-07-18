@@ -53,9 +53,14 @@ powered-motion release: exact-part fit, the bayonet/journal/bushing coupons,
 PETG-safe grease selection, head mass, regulated current, cable drag, axial
 play, backlash, temperature, and loaded wear cycling remain physical gates.
 
-## Current v1 implementation
+## Historical v1 implementation — not v2 build authority
 
-The current source-of-truth model is [`cad/python/robot_body.py`](../cad/python/robot_body.py), using build123d. It is organized as serviceable modules rather than one fused decorative mesh:
+The following section preserves the v1 source contract for historical rebuilds
+only. Its metal brackets, hubs, bearings, shoulder bolts, standoffs, multiple
+fastener families, and split body are not v2 purchases or assembly steps. The
+v2 authority is the pipeline at the top of this document.
+
+The historical source model is [`cad/python/robot_body.py`](../cad/python/robot_body.py), using build123d. It is organized as serviceable modules rather than one fused decorative mesh:
 
 - Hollow rounded body shell with an open lower service side, a 12 mm visible top-edge rollover paired to an 8.8 mm inner radius for a full 3.2 mm roof, a crisp lower tray/seam interface, four ribbed tray lugs, four supported lid bosses, and side-fairing insert bosses.
 - Separate handle-free base tray with matching M3 clearance holes, controller rail patterns, a locating lip, four-point pads beneath every mobility pod, and a two-half split variant with a piloted underside insert plate. Lift the unpowered robot with two hands under the tray.

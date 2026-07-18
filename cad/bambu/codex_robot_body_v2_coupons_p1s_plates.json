@@ -1,6 +1,6 @@
 {
   "project": "codex_robot_body_v2_coupons_p1s.3mf",
-  "generated_by": "cad/bambu/generate_bambu_project.py",
+  "generated_by": "cad/bambu/generate_bambu_coupons_v2.py",
   "printer": {
     "model": "Bambu Lab P1S",
     "nozzle_diameter_mm": 0.4,

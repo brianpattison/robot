@@ -1,12 +1,11 @@
 """Box-level packing screen for the printed-only 238 x 220 body (D027).
 
-STATUS: the D027 packing gate is OPEN. This screen is axis-aligned-box
-feasibility evidence only; it cannot pass the gate. The gate requires the
-v2 BREP packing model plus the inventory-driven production validator (see
-docs/printed-only-simplification-plan.md, revised Phase 2).
+STATUS: this box screen passed, and the downstream v2 BREP/inventory validator
+closed the D027 CAD packing gate on 2026-07-17. This axis-aligned study remains
+only one layer of evidence; every physical release gate remains open.
 
 As of Phase 2, the layout data lives in `robot_body_v2_inventory.py` —
-the registered inventory shared with the forthcoming v2 BREP model and
+the registered inventory shared with the v2 BREP model and
 validator. This file is only the box-level check engine.
 
 Review history (all findings verified against the source before adoption):
@@ -120,5 +119,5 @@ if problems or warnings:
     print(f"\nBOX-LEVEL RESULT: NOT CLOSED ({len(problems)} violations, {len(warnings)} thin margins).")
     sys.exit(1)
 print("BOX-LEVEL RESULT: layout v5.1 closes with zero violations and no margin below 2 mm.")
-print("D027 gate REMAINS OPEN: box screen only. The gate needs the v2 BREP")
-print("packing model + the inventory-driven production validator (plan, Phase 2).")
+print("D027 box screen PASS; the downstream v2 BREP validator is the production CAD gate")
+print("Physical fit, materials, electrical, firmware, and commissioning gates remain open.")

@@ -26,13 +26,18 @@ A green run proves only that:
   idempotent, secret formats and modes are enforced, tlog failure behavior and
   audit backup gaps/recovery/truncation are host-tested, and the installer parses;
 - the tracked builder-release page matches its lightweight source catalog.
+- beginner-facing contracts keep the v1 BOM historical, include the Pico head
+  route, enforce open-bumper-zero semantics, pin CAD dependencies, and keep the
+  tracked HTML portable and free of retired wiring/fuse claims.
 
 The runner creates an isolated Python environment, uses only the Python
 standard library and repository sources, and needs no secrets, robot hardware,
 or package download. It uses CMake/CTest when available and otherwise a strict
 C11 compiler fallback.
 
-Green CI does **not** provision a Pi, contact Cloudflare, prove either physical
+The separate `CAD release` workflow regenerates the v2 BREP geometry on macOS,
+runs the production CAD gate, and cross-checks body/coupon plate counts and
+generator identities. Green CI still does **not** provision a Pi, contact Cloudflare, prove either physical
 UART, validate an append-only collector, build or flash Pico firmware, validate
 a physical circuit, release the harness, replace any of the 27 commissioning
 steps, or authorize powered motion. It also does not prove the fixture was printed, wired, or tested.

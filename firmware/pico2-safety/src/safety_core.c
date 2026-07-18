@@ -22,29 +22,6 @@ static int16_t approach(int16_t current, int16_t target, uint32_t delta_ms, int3
     return current;
 }
 
-static bool escape_direction_ok(uint8_t open, int16_t linear, int16_t angular) {
-    if ((open & (RB_BUMPER_FRONT_LEFT | RB_BUMPER_FRONT_RIGHT)) && linear > 0) return false;
-    if ((open & (RB_BUMPER_REAR_LEFT | RB_BUMPER_REAR_RIGHT)) && linear < 0) return false;
-    if ((open & (RB_BUMPER_FRONT_LEFT | RB_BUMPER_REAR_LEFT | RB_BUMPER_LEFT)) && angular > 0) return false;
-    if ((open & (RB_BUMPER_FRONT_RIGHT | RB_BUMPER_REAR_RIGHT | RB_BUMPER_RIGHT)) && angular < 0) return false;
-    return true;
-}
-
-static bool escape_window_open(const rb_safety_state *state, uint8_t open) {
-    if (!open || (open & state->wiring_fault_mask)) return false;
-    for (unsigned bit = 0; bit < 6; ++bit) {
-        uint8_t mask = (uint8_t)(1u << bit);
-        if ((open & mask) && (state->now_ms - state->open_since_ms[bit] > RB_ESCAPE_WINDOW_MS)) return false;
-    }
-    return true;
-}
-
-static bool escape_requested(const rb_safety_state *state, uint8_t open) {
-    bool motion_requested = state->target_linear_mm_s != 0 || state->target_angular_mrad_s != 0;
-    return motion_requested && escape_window_open(state, open) &&
-        escape_direction_ok(open, state->target_linear_mm_s, state->target_angular_mrad_s);
-}
-
 void rb_safety_init(rb_safety_state *state, uint32_t now_ms,
                     uint16_t low_battery_mv, uint16_t recovery_battery_mv) {
     memset(state, 0, sizeof(*state));
@@ -82,7 +59,7 @@ void rb_safety_head(rb_safety_state *state, int16_t pan_cdeg, int16_t tilt_cdeg)
 }
 
 void rb_safety_clear_bumper(rb_safety_state *state, uint8_t requested_mask) {
-    uint8_t clearable = (uint8_t)(requested_mask & state->released_mask & ~state->wiring_fault_mask);
+    uint8_t clearable = (uint8_t)(requested_mask & state->released_mask);
     state->bumper_latched_mask &= (uint8_t)~clearable;
 }
 
@@ -92,19 +69,11 @@ void rb_safety_inputs(rb_safety_state *state, uint32_t now_ms,
                       uint16_t battery_mv) {
     state->now_ms = now_ms;
     released_mask &= RB_BUMPER_MASK;
-    state->seen_released_mask |= released_mask;
     uint8_t open = (uint8_t)(~released_mask & RB_BUMPER_MASK);
-    uint8_t newly_open = (uint8_t)(open & state->released_mask);
-    for (unsigned bit = 0; bit < 6; ++bit) {
-        uint8_t mask = (uint8_t)(1u << bit);
-        if (newly_open & mask) state->open_since_ms[bit] = now_ms;
-        if ((open & mask) && !(state->seen_released_mask & mask)) state->wiring_fault_mask |= mask;
-        if ((open & mask) && state->open_since_ms[bit] &&
-            now_ms - state->open_since_ms[bit] > RB_ESCAPE_WINDOW_MS) {
-            state->wiring_fault_mask |= mask;
-        }
-        if (released_mask & mask) state->open_since_ms[bit] = 0;
-    }
+    /* A pressed SPST-NC switch and a broken/unplugged conductor are the same
+       electrical observation. Treat every open circuit as a current wiring
+       fault and a latched stop; never guess that it is safe to move away. */
+    state->wiring_fault_mask = open;
     state->bumper_latched_mask |= open;
     state->released_mask = released_mask;
 
@@ -134,12 +103,7 @@ void rb_safety_tick(rb_safety_state *state, uint32_t now_ms) {
     bool lease_stale = now_ms - state->last_motion_ms > RB_MOTION_LEASE_MS;
     if (watchdog_stale || lease_stale) rb_safety_stop(state);
 
-    uint8_t open = (uint8_t)(~state->released_mask & RB_BUMPER_MASK);
-    bool escape = state->bumper_latched_mask && escape_requested(state, open);
-    if (escape) {
-        state->target_linear_mm_s = clamp_i16(state->target_linear_mm_s, RB_ESCAPE_LINEAR_LIMIT_MM_S);
-        state->target_angular_mrad_s = clamp_i16(state->target_angular_mrad_s, RB_ESCAPE_ANGULAR_LIMIT_MRAD_S);
-    } else if (state->bumper_latched_mask) rb_safety_stop(state);
+    if (state->bumper_latched_mask) rb_safety_stop(state);
 
     bool hard_fault = state->estop_latched || state->charger_latched || state->low_battery_latched ||
         state->wiring_fault_mask || watchdog_stale || lease_stale;
@@ -163,9 +127,6 @@ void rb_safety_tick(rb_safety_state *state, uint32_t now_ms) {
 
 bool rb_safety_motor_enable(const rb_safety_state *state) {
     uint16_t blockers = RB_FLAG_ESTOP | RB_FLAG_CHARGER | RB_FLAG_LOW_BATTERY |
-        RB_FLAG_WATCHDOG | RB_FLAG_MOTION_LEASE | RB_FLAG_WIRING;
-    if (state->flags & blockers) return false;
-    if (!(state->flags & RB_FLAG_BUMPER)) return true;
-    uint8_t open = (uint8_t)(~state->released_mask & RB_BUMPER_MASK);
-    return escape_requested(state, open);
+        RB_FLAG_WATCHDOG | RB_FLAG_MOTION_LEASE | RB_FLAG_BUMPER | RB_FLAG_WIRING;
+    return !(state->flags & blockers);
 }

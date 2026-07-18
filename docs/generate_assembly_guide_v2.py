@@ -39,6 +39,7 @@ sys.path.insert(0, str(ROOT / "cad" / "python"))
 import robot_body_v2_inventory as inv  # noqa: E402
 from builder_release_catalog_v2 import (  # noqa: E402
     FASTENER_COUNT,
+    FILAMENT_GROUPS,
     SHOP_ELECTRONICS,
     SHOP_FASTENERS,
     SHOP_FILAMENT,
@@ -548,29 +549,28 @@ WIRE_RULES = [
     "The battery stays OUT of the robot until every wire is checked against these maps.",
     "Use wire colors: RED = battery 12 V, YELLOW = switched motor 12 V, BLUE = 5 V, GREEN = 6 V, BLACK = ground, WHITE = signals.",
     "Crimp or solder every joint; no bare twists. Label both ends of every wire with tape.",
-    "Fuse values are PROTOTYPE STARTING VALUES — NOT RELEASED. A meter alone cannot select them; measured loads, conductor ampacity, inrush, selective-clearing, and thermal tests must close first.",
+    "Fuse values are UNSET — NOT RELEASED. Do not install any from a prose guess; measured loads, conductor ampacity, inrush, time-current, selective-clearing, and thermal tests must close first.",
     "The robot must FAIL STOPPED: if any of this feels wrong, it stays off.",
 ]
 POWER_MAP = [
-    ("Battery +12 V", "feeder fuse (near battery)", "Blue Sea fuse block IN"),
-    ("Fuse branch 1", "D24V90F5 regulator", "5 V to the Raspberry Pi"),
-    ("Fuse branch 2", "D36V50F6 regulator", "6 V to both neck servos"),
-    ("Fuse branch 3", "mute switch common", "mic USB power OR red mute ring"),
-    ("Fuse branch 4", "5 V accessories", "NeoPixel eyes + status lights"),
-    ("Battery +12 V", "motor fuse → relay contacts", "MDDS10 motor board power"),
-    ("Relay coil 12 V", "through BOTH red-button NC contacts", "coil ground via Pico enable"),
-    ("Charger EN2 pins 1+2", "direct to battery charge lead", "pin 3 = charger-present to Pico"),
+    ("Battery +12 V", "covered split → accessory feeder fuse", "Blue Sea fuse block IN"),
+    ("Fuse branch 1", "D24V90F5 regulator", "protected 5 V harness; Pi input BLOCKED"),
+    ("Fuse branch 2", "D36V50F6 regulator", "6 V servos; regulator qualification BLOCKED"),
+    ("Fuse branches 3 + 4", "covered spare positions", "no assigned loads or fuse values"),
+    ("Battery +12 V", "separate motor fuse → relay contacts", "MDDS10 motor board power"),
+    ("Relay coil 12 V", "BOTH E-stop NC contacts + driver", "production driver/default-off proof BLOCKED"),
+    ("Charger EN2", "assigned contacts TBD", "charge pair + protected charger-present; BLOCKED"),
 ]
 SIGNAL_MAP = [
     ("Raspberry Pi / robotd", "Pico 2", "framed UART commands + heartbeat; no flash or config-write path"),
     ("Pico 2", "MDDS10", "clamped velocity outputs after leases, watchdog, and latch checks"),
     ("Motor encoders (6 wires each)", "Pico 2", "wheel speed feedback"),
     ("Bumper switches ×6", "Pico 2", "any open NC loop = latched stop in independent safety firmware"),
-    ("ToF boards ×4", "Raspberry Pi", "I2C daisy chain (STEMMA cables)"),
-    ("NeoPixels ×4", "Raspberry Pi", "one data line, chained eye→eye→status→status"),
+    ("ToF boards ×4", "Raspberry Pi", "I2C + four XSHUT branches; connectors and address proof open"),
+    ("NeoPixels ×4", "Raspberry Pi", "data line; level shift, resistor, capacitance, and harness open"),
     ("Camera", "Raspberry Pi", "flat FPC ribbon down the hollow neck"),
-    ("Servos ×2", "Raspberry Pi", "PWM signal wires (power from the 6 V rail)"),
-    ("Mic array", "Raspberry Pi", "USB (its 5 V passes through the mute switch)"),
+    ("Servos ×2", "Pico 2", "future clamped PWM after RBSP HEAD; pins/outputs/harness open"),
+    ("Mic array", "Raspberry Pi", "USB data; physical VBUS cut and no-backfeed circuit BLOCKED"),
     ("Pi I2S pins", "MAX98357A amps", "digital sound out; board mounts, channel straps, terminals, and strain relief not released"),
 ]
 
@@ -599,7 +599,8 @@ def esc(s):
 
 
 def img_uri(path: Path) -> str:
-    return path.resolve().as_uri()
+    relative = path.resolve().relative_to(ROOT)
+    return "../../" + relative.as_posix()
 
 
 def ensure_release_qr() -> None:
@@ -903,8 +904,8 @@ def build_body_pages():
     for part_i, chunk in enumerate((SHOP_ELECTRONICS[:half], SHOP_ELECTRONICS[half:]), start=1):
         elec = "".join(f"<tr><td><b>{esc(a)}</b></td><td style='text-align:center'>{esc(b)}</td><td>{esc(c)}</td></tr>"
                        for a, b, c in chunk)
-        intro = ("Every named production component must be a normal buy-one-online part in the US. The nominal "
-                 "harness traveler ships with this version; exact terminals, measured lengths, crimp tooling, and fuse values remain open."
+        intro = ("Every production component must ultimately be a normal buy-one-online part in the US. Rows marked BLOCKED or not released are decisions to close, not shopping instructions. The nominal "
+                 "28-route harness traveler ships with this version; exact terminals, measured lengths, crimp tooling, and fuse values remain open."
                  if part_i == 1 else "The rest of the electronics box:")
         add(f"""
           {eyebrow(0)}
@@ -939,7 +940,7 @@ def build_body_pages():
         f'<div><h3 style="margin:0 0 .02in;">{esc(t)}</h3><p style="font-size:11.5px;">{d}</p></div></div>'
         for k, (t, d) in enumerate(PRINT_TIPS, start=1))
     order_data = [("#fff", "TEST PARTS", f"{len(COUPONS)} coupons first")]
-    for group in _groups.values():
+    for group in FILAMENT_GROUPS.values():
         plate, count = group["plate"], group["count"]
         theme = inv.DEFAULT_THEME[plate["color_profile"]]
         label = (f"{theme['name']} PLA" if theme["name"].startswith("Translucent") and "PLA" in plate["material"]
@@ -1259,31 +1260,35 @@ def build_body_pages():
         <text x="95" y="270" fill="#fff" font-size="20" font-weight="bold" text-anchor="middle">BATTERY</text>
         <text x="95" y="295" fill="#9fd4e2" font-size="14" text-anchor="middle">12 V LiFePO4</text>
         <rect x="240" y="150" width="120" height="60" rx="10" fill="#B8892E"/>
-        <text x="300" y="186" font-size="15" font-weight="bold" text-anchor="middle" fill="#fff">FEEDER FUSE</text>
+        <text x="300" y="177" font-size="14" font-weight="bold" text-anchor="middle" fill="#fff">ACCESSORY</text>
+        <text x="300" y="195" font-size="14" font-weight="bold" text-anchor="middle" fill="#fff">FEEDER FUSE</text>
         <rect x="430" y="130" width="170" height="100" rx="10" fill="#22231F"/>
         <text x="515" y="170" fill="#fff" font-size="16" font-weight="bold" text-anchor="middle">FUSE BLOCK</text>
-        <text x="515" y="192" fill="#bbb" font-size="12" text-anchor="middle">4 fused branches</text>
+        <text x="515" y="192" fill="#bbb" font-size="12" text-anchor="middle">4 branches; values unset</text>
         <g>
           <rect x="688" y="40" width="214" height="52" rx="10" fill="#fff" stroke="#d8cfb6"/>
           <rect x="688" y="40" width="8" height="52" rx="4" fill="#2b6cb0"/>
-          <text x="800" y="72" fill="#22231F" font-size="14" font-weight="bold" text-anchor="middle">5 V REG → RASPBERRY PI</text>
+          <text x="800" y="62" fill="#22231F" font-size="13" font-weight="bold" text-anchor="middle">BRANCH 1 → 5 V REG</text>
+          <text x="800" y="79" fill="#C4230F" font-size="11" text-anchor="middle">PROTECTED PI INPUT BLOCKED</text>
           <rect x="688" y="110" width="214" height="52" rx="10" fill="#fff" stroke="#d8cfb6"/>
           <rect x="688" y="110" width="8" height="52" rx="4" fill="#2f855a"/>
-          <text x="800" y="142" fill="#22231F" font-size="14" font-weight="bold" text-anchor="middle">6 V REG → NECK SERVOS</text>
+          <text x="800" y="132" fill="#22231F" font-size="13" font-weight="bold" text-anchor="middle">BRANCH 2 → 6 V REG</text>
+          <text x="800" y="149" fill="#C4230F" font-size="11" text-anchor="middle">SERVO QUALIFICATION BLOCKED</text>
           <rect x="688" y="180" width="214" height="52" rx="10" fill="#fff" stroke="#d8cfb6"/>
-          <rect x="688" y="180" width="8" height="52" rx="4" fill="#2b6cb0"/>
-          <text x="800" y="205" fill="#22231F" font-size="13" font-weight="bold" text-anchor="middle">MUTE SWITCH → MIC</text>
-          <text x="800" y="222" fill="#C4230F" font-size="11" text-anchor="middle">or red mute ring</text>
+          <rect x="688" y="180" width="8" height="52" rx="4" fill="#8C887E"/>
+          <text x="800" y="202" fill="#22231F" font-size="13" font-weight="bold" text-anchor="middle">BRANCH 3 → COVERED SPARE</text>
+          <text x="800" y="219" fill="#6E6553" font-size="11" text-anchor="middle">NO LOAD OR FUSE VALUE</text>
           <rect x="688" y="250" width="214" height="52" rx="10" fill="#fff" stroke="#d8cfb6"/>
-          <rect x="688" y="250" width="8" height="52" rx="4" fill="#2b6cb0"/>
-          <text x="800" y="282" fill="#22231F" font-size="14" font-weight="bold" text-anchor="middle">GLOW LIGHTS (5 V)</text>
+          <rect x="688" y="250" width="8" height="52" rx="4" fill="#8C887E"/>
+          <text x="800" y="272" fill="#22231F" font-size="13" font-weight="bold" text-anchor="middle">BRANCH 4 → COVERED SPARE</text>
+          <text x="800" y="289" fill="#6E6553" font-size="11" text-anchor="middle">NO LOAD OR FUSE VALUE</text>
         </g>
         <rect x="240" y="360" width="120" height="60" rx="10" fill="#B8892E"/>
         <text x="300" y="396" font-size="15" font-weight="bold" text-anchor="middle" fill="#fff">MOTOR FUSE</text>
         <rect x="430" y="350" width="150" height="80" rx="10" fill="#22231F"/>
         <text x="505" y="382" fill="#fff" font-size="16" font-weight="bold" text-anchor="middle">RELAY</text>
-        <text x="505" y="404" fill="#f0a89d" font-size="11" text-anchor="middle">coil runs through the</text>
-        <text x="505" y="418" fill="#f0a89d" font-size="11" text-anchor="middle">RED BUTTON + Pico OK</text>
+        <text x="505" y="404" fill="#f0a89d" font-size="11" text-anchor="middle">both E-stop NC + driver</text>
+        <text x="505" y="418" fill="#f0a89d" font-size="11" text-anchor="middle">DRIVER PROOF BLOCKED</text>
         <rect x="660" y="350" width="150" height="80" rx="10" fill="#5e2b7a"/>
         <text x="735" y="384" fill="#fff" font-size="15" font-weight="bold" text-anchor="middle">MDDS10</text>
         <text x="735" y="406" fill="#dcf" font-size="12" text-anchor="middle">motor board</text>
@@ -1293,13 +1298,13 @@ def build_body_pages():
         <text x="915" y="423" fill="#22231F" font-size="13" font-weight="bold" text-anchor="middle">MOTOR R</text>
         <rect x="20" y="440" width="220" height="70" rx="12" fill="#0B6E84"/>
         <text x="130" y="470" fill="#fff" font-size="14" font-weight="bold" text-anchor="middle">CHARGER PLUG (EN2)</text>
-        <text x="130" y="492" fill="#c9ecf5" font-size="11" text-anchor="middle">pins 1+2 → battery charge lead</text>
+        <text x="130" y="492" fill="#c9ecf5" font-size="11" text-anchor="middle">contact assignments TBD</text>
         <path d="M170,260 C210,260 210,180 240,180" stroke="#C4230F" stroke-width="5" fill="none" marker-end="url(#a)"/>
         <path d="M360,180 L430,180" stroke="#C4230F" stroke-width="5" fill="none" marker-end="url(#a)"/>
         <path d="M600,155 C650,155 650,66 688,66" stroke="#2b6cb0" stroke-width="4" fill="none" marker-end="url(#a)"/>
         <path d="M600,175 C650,175 650,136 688,136" stroke="#2f855a" stroke-width="4" fill="none" marker-end="url(#a)"/>
-        <path d="M600,195 C650,195 650,206 688,206" stroke="#2b6cb0" stroke-width="4" fill="none" marker-end="url(#a)"/>
-        <path d="M600,215 C650,215 650,276 688,276" stroke="#2b6cb0" stroke-width="4" fill="none" marker-end="url(#a)"/>
+        <path d="M600,195 C650,195 650,206 688,206" stroke="#8C887E" stroke-width="4" stroke-dasharray="8 6" fill="none" marker-end="url(#a)"/>
+        <path d="M600,215 C650,215 650,276 688,276" stroke="#8C887E" stroke-width="4" stroke-dasharray="8 6" fill="none" marker-end="url(#a)"/>
         <path d="M170,300 C210,300 210,390 240,390" stroke="#C4230F" stroke-width="5" fill="none" marker-end="url(#a)"/>
         <path d="M360,390 L430,390" stroke="#DFA400" stroke-width="5" fill="none" marker-end="url(#a)"/>
         <path d="M580,390 L660,390" stroke="#DFA400" stroke-width="5" fill="none" marker-end="url(#a)"/>
@@ -1437,12 +1442,13 @@ def build_cover(chapter_pages):
 
 
 def check_images(pages_html):
-    from urllib.parse import unquote
     missing = []
     for pg in pages_html:
-        for m in re.finditer(r'src="file://([^"]+)"', pg):
-            if not Path(unquote(m.group(1))).exists():
-                missing.append(unquote(m.group(1)))
+        for source in re.findall(r'src="([^"]+)"', pg):
+            if source.startswith(("data:", "http://", "https://")):
+                continue
+            if not (HTML_OUT.parent / source).resolve().exists():
+                missing.append(source)
     if missing:
         raise SystemExit("MISSING GUIDE IMAGES:\n" + "\n".join(missing))
 

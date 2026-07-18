@@ -690,8 +690,7 @@ command/heartbeat protocol with no flash, bootloader, or config-write path;
 the Pico's USB/SWD are service corridors never cabled to the Pi in
 operation, so reflashing requires opening the robot. Firmware clears a
 bumper latch on request once the loop reads released again and permits
-capped-speed escape motion away from a pressed zone, so the agent can
-bump, back off, and continue without a human; a loop that cannot read
+no motion while a loop is open (revised by D036); a loop that cannot read
 released holds a wiring fault. The E-stop latch always requires a
 physical reset.
 
@@ -707,8 +706,8 @@ Rationale:
 - The Pico 2 safety shelf, relay coil path, NC loops, and service-corridor
   wiring already position the hardware for exactly this boundary.
 - Policy violations become visible and auditable; physics violations stay
-  impossible from software. The worst honest failure is a capped-speed
-  bump that latches stopped.
+  impossible from software. A bumper opening latches the motion output at
+  zero until continuity returns and an explicit clear succeeds (D036).
 
 ## D033: Remote Agent Ingress Is A Cloudflare Tunnel
 
@@ -805,3 +804,29 @@ Rationale:
 - CAD proof is only the start: exact-part fit, coupons, PETG-safe grease,
   measured head mass/current, cable drag, backlash, heat, axial play, and
   loaded wear cycling remain required before powered motion.
+
+## D036: An Open NC Bumper Loop Never Permits Motion
+
+Status: accepted 2026-07-18; supersedes only D032's bumper-escape exception
+
+Any open one of the six SPST-NC bumper circuits immediately holds applied
+motion at zero in every direction. The latch may clear through the fixed
+protocol only after the requested loop reads closed again. A press, broken
+wire, and unplugged connector are identical electrical observations, so the
+firmware does not infer intent from direction or elapsed time.
+
+The wiring-fault status bit reports the currently open circuit. It clears when
+continuity returns, while the bumper latch remains until an explicit valid
+clear. This keeps a repaired or released loop serviceable without pretending
+the circuit can identify why it opened.
+
+Rationale:
+
+- Direction-aware escape relied on information a single NC contact does not
+  provide. The same reverse command that backs away from a pressed bumper
+  could energize a robot with a broken safety conductor.
+- Zero while open preserves the PRD's broken-wire fail-stop requirement and
+  produces one beginner-auditable rule: open means stopped.
+- A future escape feature requires independently supervised position evidence
+  that distinguishes switch travel from wiring continuity; it cannot be added
+  as a timing guess.

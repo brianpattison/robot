@@ -1,6 +1,6 @@
 {
   "project": "codex_robot_body_v2_p1s.3mf",
-  "generated_by": "cad/bambu/generate_bambu_project.py",
+  "generated_by": "cad/bambu/generate_bambu_project_v2.py",
   "printer": {
     "model": "Bambu Lab P1S",
     "nozzle_diameter_mm": 0.4,
@@ -13,7 +13,7 @@
     "bed_edge_margin_mm": 8.0,
     "minimum_object_spacing_mm": 4.0
   },
-  "warning": "Prototype v2 plates. Generate, print, and record the material-specific coupons before any large part; the D027 gate and all physical release gates remain open. Nothing here authorizes powered motion.",
+  "warning": "Prototype v2 plates. Generate, print, and record the material-specific coupons before any large part. The D027 CAD packing gate is closed; all named physical, electrical, firmware, and commissioning gates remain open. Nothing here authorizes powered motion.",
   "global_project_baseline": {
     "layer_height_mm": 0.2,
     "wall_loops": 4,
