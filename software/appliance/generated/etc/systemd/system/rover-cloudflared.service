@@ -1,0 +1,30 @@
+[Unit]
+Description=Rover Bean outbound-only Cloudflare Tunnel
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=/etc/cloudflared/rover-bean.token
+
+[Service]
+Type=simple
+User=cloudflared
+Group=cloudflared
+ExecStart=/usr/bin/cloudflared tunnel --no-autoupdate run --token-file /etc/cloudflared/rover-bean.token
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+CapabilityBoundingSet=
+AmbientCapabilities=
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
+ReadOnlyPaths=/etc/cloudflared/rover-bean.token
+
+[Install]
+WantedBy=multi-user.target

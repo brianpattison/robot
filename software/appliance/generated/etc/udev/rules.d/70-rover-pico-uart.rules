@@ -1,0 +1,2 @@
+# RP1 UART0 on GPIO14/15; do not alias the Pi 5 debug UART10.
+SUBSYSTEM=="tty", KERNEL=="ttyAMA*", PROGRAM=="/usr/bin/readlink -f /sys%p/device/of_node", RESULT=="*/rp1/serial@30000", SYMLINK+="rover-pico", GROUP="robot", MODE="0660"

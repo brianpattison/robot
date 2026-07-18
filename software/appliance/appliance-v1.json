@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "appliance_id": "RB-PI-APPLIANCE-V1",
+  "revision": "v1.0.0-design",
+  "status": "provisioning contract; no real-Pi, tunnel, UART, or collector pass is bundled",
+  "target": {
+    "model_contains": "Raspberry Pi 5",
+    "os_id": "debian",
+    "os_codename": "bookworm",
+    "architecture": "aarch64"
+  },
+  "packages": [
+    "auditd",
+    "ca-certificates",
+    "cloudflared",
+    "curl",
+    "openssh-server",
+    "python3",
+    "python3-venv",
+    "rsync",
+    "sudo",
+    "tlog"
+  ],
+  "users": {
+    "agent": {
+      "groups": ["robot", "dialout", "sudo"],
+      "shell": "/usr/local/libexec/rover-bean-login",
+      "authority": "full Pi authority through NOPASSWD sudo; this is D030, not a safety boundary"
+    },
+    "cloudflared": {
+      "system": true,
+      "shell": "/usr/sbin/nologin"
+    }
+  },
+  "uart": {
+    "boot_config_path": "/boot/firmware/config.txt",
+    "managed_lines": ["enable_uart=1", "dtoverlay=uart0-pi5"],
+    "rp1_of_node_suffix": "/rp1/serial@30000",
+    "kernel_device": "/dev/ttyAMA0",
+    "stable_device": "/dev/rover-pico",
+    "debug_console_device": "/dev/ttyAMA10",
+    "debug_console_policy": "preserve and physically attest after reboot; never route it to Pico GPIO14/15"
+  },
+  "secrets": {
+    "authorized_keys": "/home/agent/.ssh/authorized_keys",
+    "tunnel_token": "/etc/cloudflared/rover-bean.token",
+    "console_password_hash_input": "installer input only; apply to shadow and never copy or print",
+    "access_service_token_location": "remote client only; never the Pi"
+  },
+  "files": [
+    {"path":"/etc/ssh/sshd_config.d/10-rover-bean.conf","mode":"0644","owner":"root","group":"root"},
+    {"path":"/etc/sudoers.d/rover-bean-agent","mode":"0440","owner":"root","group":"root"},
+    {"path":"/etc/tlog/tlog-rec-session.conf","mode":"0644","owner":"root","group":"root"},
+    {"path":"/etc/udev/rules.d/70-rover-pico-uart.rules","mode":"0644","owner":"root","group":"root"},
+    {"path":"/etc/systemd/system/rover-cloudflared.service","mode":"0644","owner":"root","group":"root"},
+    {"path":"/etc/systemd/system/rover-audit-backup.service","mode":"0644","owner":"root","group":"root"},
+    {"path":"/usr/local/libexec/rover-bean-login","mode":"0755","owner":"root","group":"root"},
+    {"path":"/opt/rover-bean/appliance/appliance.py","mode":"0755","owner":"root","group":"root"},
+    {"path":"/opt/rover-bean/appliance/appliance-v1.json","mode":"0644","owner":"root","group":"root"},
+    {"path":"/opt/rover-bean/appliance/audit_backup.py","mode":"0755","owner":"root","group":"root"}
+  ],
+  "directories": [
+    {"path":"/etc/cloudflared","mode":"0750","owner":"cloudflared","group":"cloudflared"},
+    {"path":"/home/agent/.ssh","mode":"0700","owner":"agent","group":"agent"},
+    {"path":"/var/lib/rover-bean-audit","mode":"0750","owner":"agent","group":"robot"},
+    {"path":"/var/lib/rover-bean-attest","mode":"0750","owner":"agent","group":"robot"},
+    {"path":"/var/log/agent-sessions","mode":"0750","owner":"agent","group":"robot"},
+    {"path":"/var/log/rover-audit","mode":"0750","owner":"agent","group":"robot"},
+    {"path":"/mnt/robot-audit","mode":"0750","owner":"agent","group":"robot"}
+  ],
+  "services": {
+    "enable_and_start_after_access_ready": ["ssh.service", "auditd.service", "rover-cloudflared.service", "rover-audit-backup.service"],
+    "first_install_disabled_and_stopped": ["robotd.service"],
+    "rerun_policy": "preserve pre-existing robotd enabled/running state; never start or stop it implicitly"
+  },
+  "cloudflared": {
+    "minimum_version": "2025.4.0",
+    "origin": "ssh://localhost:22",
+    "token_delivery": "--token-file with a cloudflared-owned 0400 file",
+    "access_precondition": "dashboard hostname and Access SSO/Service Auth policies exist before enable"
+  },
+  "recording": {
+    "local_tlog": "/var/log/agent-sessions/tlog.jsonl",
+    "backup_mount": "/mnt/robot-audit",
+    "backup_target": "/mnt/robot-audit/agent-sessions.jsonl",
+    "trust_boundary": "the RW mount is backup only; trust requires a separately administered append-only collector and independent readback"
+  },
+  "live_attestations": [
+    "fresh SSH pubkey session and key fingerprint",
+    "debug UART console emit/input login independent from GPIO UART0",
+    "GPIO14/15 UART0 OF-node and /dev/rover-pico resolution",
+    "Cloudflare Access-gated ProxyCommand connection",
+    "external append-only collector nonce readback and denied read/delete/alter using Pi credential"
+  ]
+}
