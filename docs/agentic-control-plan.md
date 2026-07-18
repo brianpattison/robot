@@ -65,7 +65,7 @@ Pico 2) is wired, not because of software courtesy:
 - The Pi-to-Pico link is a framed UART protocol whose command set contains
   motion setpoints, latch-clear requests, heartbeat, and status queries —
   and no flash, bootloader, or config-write commands at all.
-- Nonzero motion setpoints expire in firmware (proposed 250 ms lease)
+- Nonzero motion setpoints expire in firmware (fixed 250 ms bench baseline)
   unless refreshed. The heartbeat proves the host is alive; only a fresh
   setpoint stream keeps wheels turning. A behavior that crashes mid-drive
   coasts to a leased stop even while the rest of the Pi stays healthy.
@@ -118,6 +118,28 @@ Cytron MDDS10 -> motors
           ^
 Physical E-stop relay path — above everything, independent of the Pi
 ```
+
+## Executable Bench Baseline
+
+The control boundary now has runnable artifacts rather than prose alone:
+
+- [`body-protocol-v1.md`](body-protocol-v1.md) fixes the 115200-baud framed
+  UART vocabulary, CRC, 20 Hz heartbeat, 250 ms watchdog, 250 ms independent
+  motion lease, clamps, and status payload. It has no flash/config-write path.
+- [`../software/robotd/`](../software/robotd/) implements the local Unix-socket
+  API, exclusive UART ownership, one-shot setpoints, 20 Hz heartbeat, firmware
+  status readback, and Pi-local plus optional off-host JSONL blackbox.
+- [`../firmware/pico2-safety/`](../firmware/pico2-safety/) implements and tests
+  the portable safety state machine. Its Pico target is deliberately
+  fail-stopped: it can exercise UART/status on the bench but contains no
+  production motor-output driver and can never enable the relay.
+- [`../harness/`](../harness/) and [`../commissioning/`](../commissioning/)
+  make the remaining electrical and physical evidence machine-checkable.
+
+`python3 commissioning/run_host_tests.py` exercises the daemon socket,
+protocol framing/resynchronization, motion expiry, harness engineering gate,
+and portable C safety core. Passing it is necessary and hardware-free; it is
+not a substitute for the fixture and first-article results.
 
 ## The Agent Seat
 
@@ -319,8 +341,9 @@ and software running; press the E-stop while the agent is driving.
 - Exact harness shape per seat (Claude Code headless vs Agent SDK service;
   Codex CLI equivalents), session cadence, and token budget for background
   turns.
-- Final heartbeat rate, watchdog timeout, and motion-setpoint lease
-  (proposed 20 Hz / 250 ms / 250 ms).
+- Physical validation of the fixed 20 Hz / 250 ms / 250 ms heartbeat,
+  watchdog, and motion-setpoint lease baseline under worst-case Pi load and
+  real relay/motor timing.
 - Journal/memory privacy scoping and what syncs off-robot, now that the
   agent manages its own memory.
 - Whether the perception baseline (person tracking) ships preinstalled or

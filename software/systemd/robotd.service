@@ -1,0 +1,25 @@
+[Unit]
+Description=Rover Bean body daemon
+After=local-fs.target
+
+[Service]
+Type=simple
+User=agent
+Group=robot
+SupplementaryGroups=dialout
+ExecStart=/opt/rover-bean/venv/bin/robotd --device /dev/serial0 --socket /run/robotd/robotd.sock --blackbox /var/log/robotd/blackbox.jsonl --mirror /mnt/robot-audit/robotd-blackbox.jsonl
+RuntimeDirectory=robotd
+RuntimeDirectoryMode=0770
+LogsDirectory=robotd
+LogsDirectoryMode=0750
+Restart=on-failure
+RestartSec=1
+TimeoutStopSec=2
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/run/robotd /var/log/robotd /mnt/robot-audit
+
+[Install]
+WantedBy=multi-user.target

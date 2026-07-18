@@ -13,14 +13,23 @@ one insert size.
 
 > **Prototype assembly preview — do not use for powered motion.** The tracked v2
 > 3MF and builder's book are geometry and dry-assembly artifacts. The head/neck
-> load paths are now fully modeled and kinematically validated, but exact-part
-> fit, loaded wear/current testing, the executable harness schedule, released
-> fuse values, Pi/Pico software, and commissioning evidence are still open.
+> load paths are fully modeled and kinematically validated. A bench-safe Pi
+> installer/`robotd`, framed UART contract, portable Pico safety core,
+> deliberately fail-stopped Pico target, nominal harness traveler, and
+> executable commissioning gate now ship. Exact-part fit, production motor
+> outputs, exact harness terminals/lengths, released fuse values, loaded
+> wear/current testing, and signed physical evidence remain open.
 
+- **Versioned v2 Builder Release Index:** [`docs/builder-release-v2.md`](docs/builder-release-v2.md)
 - **The Builder's Book (v2 prototype preview):** [`output/pdf/codex_robot_body_v2_assembly_guide.pdf`](output/pdf/codex_robot_body_v2_assembly_guide.pdf)
 - v2 Bambu Studio project: [`cad/bambu/codex_robot_body_v2_p1s.3mf`](cad/bambu/codex_robot_body_v2_p1s.3mf)
 - v2 qualification-coupon project: [`cad/bambu/codex_robot_body_v2_coupons_p1s.3mf`](cad/bambu/codex_robot_body_v2_coupons_p1s.3mf)
 - v2 book generator: [`docs/generate_assembly_guide_v2.py`](docs/generate_assembly_guide_v2.py)
+- bench protocol: [`docs/body-protocol-v1.md`](docs/body-protocol-v1.md)
+- Pi runtime/installer: [`software/robotd/`](software/robotd/) and [`software/install.sh`](software/install.sh)
+- Pico safety-core baseline: [`firmware/pico2-safety/`](firmware/pico2-safety/)
+- harness traveler and release gate: [`harness/`](harness/)
+- executable commissioning package: [`commissioning/`](commissioning/)
 
 Visible replaceable panels and diffusers now use configurable PLA theme slots;
 functional PETG is restricted to white structure, black wear parts, and red
@@ -149,3 +158,7 @@ python -m pip install -r cad/python/requirements.txt
 4. Purchase and bench-check one Pololu #4867 motor plus one BLF-1203AB/BPC-1502DC/EN2 charge set, the two D85MG/R-ML24 head stacks and verified component hardware, IDEC XW1E E-stop, two Omron D2HW bumper switches, both Pololu regulators, the Panasonic relay, Blue Sea 5045 fuse block, and E-Switch physical-mute switch. Qualify delivered fit, current, runtime, journal wear, cable drag, charger inhibit, relay dropout, branch fusing/selective faults/thermal behavior, axle retention, and safety/privacy interfaces before buying the remaining set or powering either motor.
 5. Print representative harness, seam, motor-pod, idler, camera, vent, and acoustic parts before a full shell.
 6. Build the stationary bench brain and deterministic safety loop before powering drive motors.
+7. Run `python3 commissioning/run_host_tests.py`, then work through the
+   27-step commissioning plan in order. The repository release gates are
+   intentionally red until the exact physical first article supplies every
+   required measurement.

@@ -266,6 +266,24 @@ systemd
 
 For early development, these can be Python processes with simple JSON/WebSocket or ROS 2 topics between them. If ROS 2 is adopted, keep `robotd` independent enough that it can still fail stopped when ROS nodes crash. The agent may reorganize anything above `robotd`; `robotd` and the firmware contract are the parts to keep boring.
 
+The tracked bench implementation currently covers the boring core:
+
+- `software/robotd/` provides the local Unix-socket/UART daemon, client,
+  simulator, blackbox, and systemd unit; `software/install.sh` installs it on
+  Raspberry Pi OS while warning that the motor branch must remain isolated.
+- `docs/body-protocol-v1.md` is the fixed framed-UART contract.
+- `firmware/pico2-safety/` supplies a host-tested C11 safety core and a
+  fail-stopped Pico SDK integration with no production motor output.
+- `harness/` supplies the nominal 27-conductor first-article traveler and a
+  deliberately red physical release gate.
+- `commissioning/` supplies the 27-step evidence plan and runner. No physical
+  pass is bundled.
+
+Run `python3 commissioning/run_host_tests.py` for the hardware-free baseline.
+The wider perception, voice, dashboard, agent-host, Cloudflare, production
+motor/encoder output, and physical commissioning layers remain to be built and
+tested.
+
 Boot behavior:
 
 1. Robot starts in `stopped`.
