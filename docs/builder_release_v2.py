@@ -6,6 +6,8 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
+from builder_release_catalog_v2 import SHOP_ELECTRONICS, SHOP_FASTENERS, SHOP_FILAMENT
+
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "docs" / "builder-release-v2.md"
 RELEASE_ID = "v2.0.0-prototype.1"
@@ -13,14 +15,12 @@ RELEASE_URL = f"https://github.com/brianpattison/robot/tree/{RELEASE_ID}"
 
 
 def render() -> str:
-    import generate_assembly_guide_v2 as guide
-
     filament_rows = "\n".join(
-        f"| {name} | {amount} | {role} |" for name, amount, role in guide.SHOP_FILAMENT)
+        f"| {name} | {amount} | {role} |" for name, amount, role in SHOP_FILAMENT)
     fastener_rows = "\n".join(
-        f"| {name} | {amount} | {role} |" for name, amount, role in guide.SHOP_FASTENERS)
+        f"| {name} | {amount} | {role} |" for name, amount, role in SHOP_FASTENERS)
     electronics_rows = "\n".join(
-        f"| {name} | {amount} | {role} |" for name, amount, role in guide.SHOP_ELECTRONICS)
+        f"| {name} | {amount} | {role} |" for name, amount, role in SHOP_ELECTRONICS)
     return f"""# Rover Bean Builder Release — {RELEASE_ID}
 
 Permanent source: [{RELEASE_URL}]({RELEASE_URL})
