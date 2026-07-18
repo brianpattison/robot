@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="8.5in" height="12.188in" viewBox="0 0 816 1170">
+<rect width="100%" height="100%" fill="white"/>
+<text x="18" y="24" font-family="Arial, sans-serif" font-size="14" fill="#444">Print at 100%; cut on rectangles; labels are not evidence.</text>
+<rect x="18" y="38" width="780" height="34" rx="4" fill="white" stroke="#171717"/>
+<text x="30" y="61" font-family="Arial, sans-serif" font-size="16" font-weight="700">RB-FIXTURE-V1</text>
+<rect x="18" y="78" width="780" height="34" rx="4" fill="white" stroke="#171717"/>
+<text x="30" y="101" font-family="Arial, sans-serif" font-size="16" font-weight="700">NO BATTERY / NO MOTORS / NO MDDS10</text>
+<rect x="18" y="118" width="780" height="34" rx="4" fill="white" stroke="#171717"/>
+<text x="30" y="141" font-family="Arial, sans-serif" font-size="16" font-weight="700">USB FIRST · 12 V LAST · 0.20 A MAX</text>
+<rect x="18" y="158" width="780" height="34" rx="4" fill="white" stroke="#171717"/>
+<text x="30" y="181" font-family="Arial, sans-serif" font-size="16" font-weight="700">REMOVE 12 V BEFORE RESET</text>
+<rect x="18" y="198" width="780" height="34" rx="4" fill="white" stroke="#171717"/>
+<text x="30" y="221" font-family="Arial, sans-serif" font-size="16" font-weight="700">PICO GP0 TX</text>
+<rect x="18" y="238" width="780" height="34" rx="4" fill="white" stroke="#171717"/>
+<text x="30" y="261" font-family="Arial, sans-serif" font-size="16" font-weight="700">PICO GP1 RX</text>
+<rect x="18" y="278" width="780" height="34" rx="4" fill="white" stroke="#171717"/>
+<text x="30" y="301" font-family="Arial, sans-serif" font-size="16" font-weight="700">COMMON GROUND</text>
+<rect x="18" y="318" width="780" height="34" rx="4" fill="white" stroke="#171717"/>
+<text x="30" y="341" font-family="Arial, sans-serif" font-size="16" font-weight="700">B1 · GP2</text>
+<rect x="18" y="358" width="780" height="34" rx="4" fill="white" stroke="#171717"/>
+<text x="30" y="381" font-family="Arial, sans-serif" font-size="16" font-weight="700">B2 · GP3</text>
+<rect x="18" y="398" width="780" height="34" rx="4" fill="white" stroke="#171717"/>
+<text x="30" y="421" font-family="Arial, sans-serif" font-size="16" font-weight="700">B3 · GP4</text>
+<rect x="18" y="438" width="780" height="34" rx="4" fill="white" stroke="#171717"/>
+<text x="30" y="461" font-family="Arial, sans-serif" font-size="16" font-weight="700">B4 · GP5</text>
+<rect x="18" y="478" width="780" height="34" rx="4" fill="white" stroke="#171717"/>
+<text x="30" y="501" font-family="Arial, sans-serif" font-size="16" font-weight="700">B5 · GP6</text>
+<rect x="18" y="518" width="780" height="34" rx="4" fill="white" stroke="#171717"/>
+<text x="30" y="541" font-family="Arial, sans-serif" font-size="16" font-weight="700">B6 · GP7</text>
+<rect x="18" y="558" width="780" height="34" rx="4" fill="white" stroke="#171717"/>
+<text x="30" y="581" font-family="Arial, sans-serif" font-size="16" font-weight="700">GP8 · E-STOP SIM</text>
+<rect x="18" y="598" width="780" height="34" rx="4" fill="white" stroke="#171717"/>
+<text x="30" y="621" font-family="Arial, sans-serif" font-size="16" font-weight="700">GP9 · RESET</text>
+<rect x="18" y="638" width="780" height="34" rx="4" fill="white" stroke="#171717"/>
+<text x="30" y="661" font-family="Arial, sans-serif" font-size="16" font-weight="700">GP10 · CHARGER SIM</text>
+<rect x="18" y="678" width="780" height="34" rx="4" fill="white" stroke="#171717"/>
+<text x="30" y="701" font-family="Arial, sans-serif" font-size="16" font-weight="700">GP11 · DRIVER IN</text>
+<rect x="18" y="718" width="780" height="34" rx="4" fill="white" stroke="#171717"/>
+<text x="30" y="741" font-family="Arial, sans-serif" font-size="16" font-weight="700">12V+</text>
+<rect x="18" y="758" width="780" height="34" rx="4" fill="white" stroke="#171717"/>
+<text x="30" y="781" font-family="Arial, sans-serif" font-size="16" font-weight="700">NC1</text>
+<rect x="18" y="798" width="780" height="34" rx="4" fill="white" stroke="#171717"/>
+<text x="30" y="821" font-family="Arial, sans-serif" font-size="16" font-weight="700">NC2</text>
+<rect x="18" y="838" width="780" height="34" rx="4" fill="white" stroke="#171717"/>
+<text x="30" y="861" font-family="Arial, sans-serif" font-size="16" font-weight="700">DRIVER V+</text>
+<rect x="18" y="878" width="780" height="34" rx="4" fill="white" stroke="#171717"/>
+<text x="30" y="901" font-family="Arial, sans-serif" font-size="16" font-weight="700">DRIVER OUT</text>
+<rect x="18" y="918" width="780" height="34" rx="4" fill="white" stroke="#171717"/>
+<text x="30" y="941" font-family="Arial, sans-serif" font-size="16" font-weight="700">COIL +</text>
+<rect x="18" y="958" width="780" height="34" rx="4" fill="white" stroke="#171717"/>
+<text x="30" y="981" font-family="Arial, sans-serif" font-size="16" font-weight="700">COIL -</text>
+<rect x="18" y="998" width="780" height="34" rx="4" fill="white" stroke="#171717"/>
+<text x="30" y="1021" font-family="Arial, sans-serif" font-size="16" font-weight="700">RELAY COM</text>
+<rect x="18" y="1038" width="780" height="34" rx="4" fill="white" stroke="#171717"/>
+<text x="30" y="1061" font-family="Arial, sans-serif" font-size="16" font-weight="700">RELAY NO</text>
+<rect x="18" y="1078" width="780" height="34" rx="4" fill="white" stroke="#171717"/>
+<text x="30" y="1101" font-family="Arial, sans-serif" font-size="16" font-weight="700">GREEN WITNESS</text>
+<rect x="18" y="1118" width="780" height="34" rx="4" fill="white" stroke="#171717"/>
+<text x="30" y="1141" font-family="Arial, sans-serif" font-size="16" font-weight="700">NEGATIVE CONTROL ONLY</text>
+</svg>

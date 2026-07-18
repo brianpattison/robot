@@ -23,6 +23,7 @@ physical first article.
 | Pico safety firmware | `firmware/pico2-safety/` | Tested portable safety core plus a deliberately fail-stopped Pico integration. Production motor outputs are absent. |
 | Harness traveler | `harness/harness-v2.json` | 27-conductor engineering schedule; exact terminals, measured lengths, fuses, and physical evidence remain red. |
 | Commissioning plan | `commissioning/plan-v2.json` | Executable 27-step evidence gate; no physical pass is bundled. |
+| Unpowered commissioning fixture | `commissioning/fixture-v1.json` + `docs/commissioning-fixture-v1.md` | Closed-world circuit, one support-free PETG plate, and USB-logic/0.20 A negative-control guide; no physical pass is bundled. |
 
 ## Filament
 
@@ -80,15 +81,16 @@ Any row whose fit, termination, load, or test evidence is open stays open.
 
 ```bash
 python3 commissioning/run_host_tests.py
+python3 commissioning/fixture.py --check
 python3 harness/generate_harness_docs.py
 python3 harness/generate_harness_docs.py --release
 python3 commissioning/commission.py list
 python3 commissioning/commission.py verify
 ```
 
-The first two commands must pass without robot hardware. The two release gates
-are intentionally red until the exact first article supplies every required
-measurement and test record.
+The first three commands must pass without robot hardware. The two release
+gates are intentionally red until the exact first article supplies every
+required measurement and test record.
 
 ## Powered-motion release remains blocked on
 
