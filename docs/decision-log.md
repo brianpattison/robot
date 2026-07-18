@@ -773,3 +773,35 @@ Rationale:
   to negotiate with the E-stop.
 - White/black/red PETG makes structure, wear, and service retainers visually
   legible while keeping the palette configurable above that fixed layer.
+
+## D035: The V2 Head Uses Fully Printed Pan And Passive-Tilt Bearings
+
+Status: accepted for CAD 2026-07-17; exact-part and loaded-motion release gated
+
+The v2 head removes the v1 6807 pan bearing, MF84ZZ passive bearing, shoulder
+screw, and multi-size retainer hardware. The fixed PETG collar bayonets into the
+structural lid, supports a greased printed journal and thrust shoulder, carries
+the pan hard stops, and integrates the D85MG cradle. A two-M3 black-PETG plate
+captures the pan-servo flange. The rotating neck keeps a 20 mm center cable
+corridor, couples to the R-ML24 horn at its component-integral M2 stations, and
+receives the yoke through four standard M3 joints.
+
+The fixed black-PETG yoke integrates the sideways D85MG frame and tilt hard
+stops. The active R-ML24 horn fastens to the moving head's integrated drive
+boss; the passive side uses a replaceable 3.2 mm printed shoulder bushing
+clamped by one M3 x 8 into a blind yoke insert, without clamping the head shell.
+Commanded ranges remain +/-60 degrees pan and +/-20 degrees tilt. The validator
+samples the actual solids throughout those ranges, verifies both servo-case and
+cable clearances, and proves physical-stop engagement beyond the commands.
+
+Rationale:
+
+- This closes the guide review's load-path gap without violating the D025
+  printed-only structure or D026 one-screw/one-insert system.
+- The servo splines transmit torque while printed thrust/journal/bushing faces
+  carry the head, making the force path explicit and serviceable.
+- Geometry-derived sweep relief prevents future yoke edits from silently
+  colliding with the moving shell.
+- CAD proof is only the start: exact-part fit, coupons, PETG-safe grease,
+  measured head mass/current, cable drag, backlash, heat, axial play, and
+  loaded wear cycling remain required before powered motion.

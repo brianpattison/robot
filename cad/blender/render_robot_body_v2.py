@@ -29,11 +29,13 @@ COLORS = {
     "top_accent": (0.04, 0.43, 0.52, 1.0),
     "dark_panel": (0.05, 0.055, 0.06, 1.0),
     "light_diffuser": (0.75, 1.0, 0.15, 1.0),
-    "structure_light": (0.88, 0.88, 0.84, 1.0),
+    # Instructional cool-grey tint: the actual slot remains white PETG, but a
+    # slightly darker render value preserves edges against cream paper.
+    "structure_light": (0.70, 0.75, 0.78, 1.0),
     "structure_wear": (0.025, 0.03, 0.035, 1.0),
     "safety_service": (0.65, 0.025, 0.035, 1.0),
     "flexible_dark": (0.025, 0.03, 0.035, 1.0),
-    "floor": (0.34, 0.16, 0.055, 1.0),
+    "floor": (0.24, 0.11, 0.04, 1.0),
 }
 
 if PRINT_MANIFEST.exists():
@@ -141,6 +143,7 @@ def setup_scene():
         ("warm_window_key", (-390, -430, 590), 8200, (1.0, 0.80, 0.60), 430, (-25, 0, 130)),
         ("warm_room_fill", (350, -220, 370), 5400, (1.0, 0.93, 0.84), 430, (0, 0, 115)),
         ("warm_window_rim", (100, 340, 470), 4000, (1.0, 0.84, 0.68), 320, (0, 0, 160)),
+        ("cool_instruction_rim", (-80, 420, 360), 3600, (0.68, 0.82, 1.0), 260, (0, 0, 145)),
         ("warm_camera_fill", (-440, -390, 260), 3500, (1.0, 0.91, 0.80), 310, (0, 0, 110)),
         ("warm_ceiling_bounce", (0, 20, 650), 2900, (1.0, 0.94, 0.85), 600, (0, 0, 100)),
     ):
@@ -222,17 +225,68 @@ def add_hero_estop():
     return made
 
 
+def add_hero_camera_lens():
+    """Visible Camera Module 3 lens stack for every assembled hero."""
+    made = []
+    for name, radius, depth, x, color in (
+        ("hero_lens_bezel", 10.5, 3.0, -64.2, (0.025, 0.028, 0.032, 1.0)),
+        ("hero_lens_glass", 6.4, 1.8, -66.6, (0.015, 0.035, 0.055, 1.0)),
+    ):
+        bpy.ops.mesh.primitive_cylinder_add(radius=radius, depth=depth,
+                                             location=(x, 0, 254),
+                                             rotation=(0, math.pi / 2, 0))
+        obj = bpy.context.object
+        obj.name = name
+        obj.data.materials.append(material(name, color, roughness=0.22))
+        made.append(obj)
+    return made
+
+
+def add_populated_electronics():
+    """Review-only purchased-part proxies for the guide's cutaway map."""
+    made = []
+    specs = (
+        ("map_battery", (110, 75, 27), (30, 0, 65.5), (0.18, 0.28, 0.55, 1)),
+        ("map_mdds10", (67, 101, 14), (-67, 0, 71), (0.34, 0.18, 0.52, 1)),
+        ("map_pi", (85, 56, 16), (-53, 0, 99), (0.12, 0.42, 0.18, 1)),
+        ("map_pico", (52, 21, 6), (3, 63.5, 56), (0.12, 0.48, 0.25, 1)),
+        ("map_reg_5v", (40.6, 20.3, 8), (102, -30, 98), (0.18, 0.46, 0.27, 1)),
+        ("map_reg_6v", (25.4, 25.4, 9.5), (73, 7, 97), (0.18, 0.52, 0.31, 1)),
+        ("map_relay", (26, 22, 25), (-23, -79, 63.5), (0.10, 0.11, 0.13, 1)),
+        ("map_fuse", (43.8, 92.5, 32.5), (46, -21, 122), (0.07, 0.08, 0.10, 1)),
+        ("map_speaker_L", (70, 17, 30), (-13, 95, 130), (0.12, 0.13, 0.15, 1)),
+        ("map_speaker_R", (70, 17, 30), (-13, -95, 130), (0.12, 0.13, 0.15, 1)),
+    )
+    for name, dims, loc, color in specs:
+        bpy.ops.mesh.primitive_cube_add(location=loc)
+        obj = bpy.context.object
+        obj.name = name
+        obj.scale = tuple(d / 2 for d in dims)
+        obj.data.materials.append(material(name, color))
+        obj.hide_render = True
+        made.append(obj)
+    return made
+
+
 def main():
     objects = setup_scene()
     hero_estop = add_hero_estop()
+    hero_lens = add_hero_camera_lens()
+    electronics = add_populated_electronics()
     render_view(objects, "codex_robot_body_v2_assembled.png",
                 (-460, -400, 300), (0, 0, 140))
     render_view(objects, "codex_robot_body_v2_rear.png",
                 (500, 400, 350), (0, 0, 152))
-    for obj in hero_estop:
+    for obj in hero_estop + hero_lens:
         obj.hide_render = True
     render_view(objects, "codex_robot_body_v2_chassis.png",
                 (-320, -300, 420), (0, 0, 85), hide=CHASSIS_HIDE)
+    for obj in electronics:
+        obj.hide_render = False
+    populated_hide = {"shell_v2", "lid_v2", "lid_skin_v2", "head_shell_v2",
+                      "head_faceplate_v2", "fascia_v2", "rear_panel_v2"}
+    render_view(objects, "codex_robot_body_v2_populated_cutaway.png",
+                (-300, -315, 455), (0, 0, 92), lens=58, hide=populated_hide)
 
 
 if __name__ == "__main__":

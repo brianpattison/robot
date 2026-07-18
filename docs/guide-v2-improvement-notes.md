@@ -1,7 +1,7 @@
 # Builder's Book v2 — Review Findings and Improvement Plan
 
 A full page-by-page review of `output/pdf/codex_robot_body_v2_assembly_guide.pdf`
-(37 pages), the step renders in `docs/images/guide_v2/`, the hero renders, and the
+(originally 37 pages), the step renders in `docs/images/guide_v2/`, the hero renders, and the
 v2 CAD model behind them. Findings are grouped by root cause; each has the fix
 applied (or proposed). Items marked **[fixed]** were implemented in this pass.
 
@@ -159,12 +159,42 @@ applied (or proposed). Items marked **[fixed]** were implemented in this pass.
 
 - **E1.** The head render on the cover is cropped tight on purpose (styling); the
   uncropped robot appears on p2.
-- **E2.** Speaker amp boards (MAX98357A) still zip-tie beside the speakers; the
-  book says a future body revision adds pockets (matches the current model).
+- **E2.** MAX98357A mounts, channel straps, terminal service, and strain relief
+  remain an explicit prototype hold; the current book no longer invents a
+  zip-tie location.
 - **E3.** Step 14's bumper halves genuinely float loose by design (they squish to
   press the switches); the check line covers it.
-- **E4.** The "44 printed pieces / 41 screws / 41 inserts / 11 plates" numbers
-  all re-verified against the live registries (plate manifest sums, joint
-  tally, insert batches 20+2+2+14+2+1 = 41). Consistent.
+- **E4.** Superseded by D034/D035: the live manifests now report 40 installed
+  functional pieces + 4 spare washers + 1 optional skin = 45 pieces, 47 M3
+  screws/inserts, 13 plates, seven material/color groups, and 18 coupons.
 - **E5.** A dedicated wiring-photo appendix (real harness photos) would help
   once a physical build exists; out of scope for renders.
+
+## F. External assembly-review follow-up (2026-07-17)
+
+- **F1. Prototype truthfulness. [fixed]** Cover, README, 3MF notes, wiring,
+  software, fuse, and commissioning pages now distinguish dry-build geometry
+  from powered-motion release. Page topology is Pi/`robotd` -> Pico framed UART
+  -> MDDS10; Pico USB/SWD are service-only.
+- **F2. Hybrid materials. [fixed]** D034 separates family, role, and theme;
+  direct PLA, qualified PLA candidates with automatic PETG fallback, the
+  optional lid skin, 18 evidence coupons, per-family plates, and exact counts
+  all derive from the canonical inventory.
+- **F3. Head mechanism. [CAD fixed; physical gates open]** D035 replaces every
+  placeholder with a three-lug collar, printed pan journal/thrust face,
+  integrated servo cradle, two-M3 pan plate, horn drive, 20 mm ribbon corridor,
+  four-M3 yoke, drawing-backed tilt-servo frame, active shell boss, passive
+  shoulder bushing, and physical pan/tilt stops. The validator samples actual
+  solids through both commanded ranges and proves stop engagement beyond them.
+- **F4. Head instructions. [fixed]** Steps 18–19 now list both R-ML24 horns and
+  the verified component hardware pack, give an ordered servo/horn/bushing
+  sequence, and use separate pan, tilt, passive-pivot, and camera panels.
+- **F5. Render legibility. [fixed]** Every assembled hero retains the dark
+  camera lens; white PETG gets a temporary cool-grey instructional tint and
+  stronger rim; page 32/back use a populated cutaway. Close panels now cover
+  Pico orientation, regulator/fuse sides, all six bumper switches, rear panel,
+  audio, the full E-stop stack, pan, tilt, and camera.
+- **F6. Still open by design.** Exact harness/terminal lengths, MAX98357A
+  mounting, NeoPixel installation, released fuse values, Pi/Pico artifacts,
+  physical photos, and commissioning evidence require delivered hardware and
+  bench results; the book must remain a prototype preview until they exist.

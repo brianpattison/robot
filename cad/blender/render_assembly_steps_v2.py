@@ -62,6 +62,10 @@ PROXIES = {
     "px_estop_base": ("cyl_z", 30, 2, (59, 56, 183), (0.95, 0.75, 0.05, 1)),
     "px_estop_stem": ("cyl_z", 11, 14, (59, 56, 191), (0.1, 0.1, 0.1, 1)),
     "px_estop_cap": ("cyl_z", 20, 14, (59, 56, 203), (0.8, 0.06, 0.05, 1)),
+    "px_estop_nut": ("cyl_z", 14, 4, (59, 56, 176), SILVER),
+    "px_estop_body": ("cyl_z", 18, 42, (59, 56, 153), (0.12, 0.13, 0.15, 1)),
+    "px_estop_nc1": ("box", (10, 18, 20), (53, 56, 122), (0.12, 0.13, 0.15, 1)),
+    "px_estop_nc2": ("box", (10, 18, 20), (65, 56, 122), (0.12, 0.13, 0.15, 1)),
     "px_mic": ("cyl_z", 35, 10, (60, -25, 168), (0.14, 0.15, 0.17, 1)),
     "px_speaker_L": ("box", (70, 17, 30), (-13, 95, 130), (0.14, 0.15, 0.17, 1)),
     "px_speaker_R": ("box", (70, 17, 30), (-13, -95, 130), (0.14, 0.15, 0.17, 1)),
@@ -69,7 +73,15 @@ PROXIES = {
     "px_tof_R": ("box", (25, 5, 17), (-20, -100, 95), (0.2, 0.35, 0.7, 1)),
     "px_tof_F": ("box", (5, 20, 15), (-113.5, 16.5, 106), (0.2, 0.35, 0.7, 1)),
     "px_tof_F2": ("box", (5, 20, 15), (-113.5, -16.5, 106), (0.2, 0.35, 0.7, 1)),
-    "px_servo": ("box", (13, 29, 30), (-30, 0, 200), (0.45, 0.47, 0.5, 1)),
+    # Drawing-backed D85MG poses.  Output collars/horns are separate accessory
+    # proxies so the assembly pages show the actual torque path rather than a
+    # mysterious grey brick floating somewhere near the neck.
+    "px_servo": ("box", (29, 13, 30), (-33.8723, 0, 158.6), (0.45, 0.47, 0.5, 1)),
+    "px_pan_output": ("cyl_z", 5.9, 6.1, (-26, 0, 176.65), SILVER),
+    "px_pan_horn": ("box", (22, 6, 4.3), (-37, 0, 178.0), (0.68, 0.08, 0.05, 1)),
+    "px_tilt_servo": ("box", (29, 30, 13), (-17.8723, 35, 257), (0.45, 0.47, 0.5, 1)),
+    "px_tilt_output": ("cyl_y", 5.9, 6.1, (-10, 53.05, 257), SILVER),
+    "px_tilt_horn": ("box", (22, 4.3, 6), (-21, 58.2, 257), (0.68, 0.08, 0.05, 1)),
     "px_camera": ("box", (4, 25, 24), (-58, 0, 254), (0.09, 0.1, 0.12, 1)),
     "px_cam_lens": ("cyl_x", 6.5, 6, (-62.5, 0, 254), (0.05, 0.05, 0.06, 1)),
     # Six feeler switches seated in the six real tray pockets: four corner
@@ -96,18 +108,27 @@ THUMB_GROUPS = {
     "px_mdds10": ["px_mdds10", "px_mdds10_terms"],
     "px_relay": ["px_relay", "px_relay_bracket"],
     "px_camera": ["px_camera", "px_cam_lens"],
-    "px_estop_cap": ["px_estop_cap", "px_estop_stem", "px_estop_base"],
+    "px_servo": ["px_servo", "px_pan_output", "px_pan_horn"],
+    "px_estop_cap": ["px_estop_cap", "px_estop_stem", "px_estop_base", "px_estop_nut",
+                     "px_estop_body", "px_estop_nc1", "px_estop_nc2"],
     **FASTENER_GROUPS,
 }
 THUMB_SKIP = {"px_insert_rib", "px_insert_rib2", "px_screw_head",
               "px_shaft_L", "px_shaft_R", "px_pi_ports", "px_mdds10_terms",
               "px_relay_bracket", "px_cam_lens", "px_estop_stem", "px_estop_base",
+              "px_estop_nut", "px_estop_body", "px_estop_nc1", "px_estop_nc2",
+              "px_pan_output", "px_pan_horn", "px_tilt_output", "px_tilt_horn",
+              "px_tilt_servo",
               "px_switch_2", "px_switch_3", "px_switch_4", "px_switch_5", "px_switch_6",
               "px_tof_F", "px_tof_F2", "px_tof_R", "px_speaker_R", "px_motor_R"}
 ACCESSORIES = {"px_shaft_L": "px_motor_L", "px_shaft_R": "px_motor_R",
                "px_pi_ports": "px_pi", "px_mdds10_terms": "px_mdds10",
                "px_relay_bracket": "px_relay", "px_cam_lens": "px_camera",
-               "px_estop_stem": "px_estop_cap", "px_estop_base": "px_estop_cap"}
+               "px_pan_output": "px_servo", "px_pan_horn": "px_servo",
+               "px_tilt_output": "px_tilt_servo", "px_tilt_horn": "px_tilt_servo",
+               "px_estop_stem": "px_estop_cap", "px_estop_base": "px_estop_cap",
+               "px_estop_nut": "px_estop_cap", "px_estop_body": "px_estop_cap",
+               "px_estop_nc1": "px_estop_cap", "px_estop_nc2": "px_estop_cap"}
 
 # (title_key, printed parts added, proxies added, camera)
 STEPS = [
@@ -133,9 +154,13 @@ STEPS = [
     ("panels", ["fascia_v2", "rear_panel_v2"], ["px_tof_F", "px_tof_F2"], "body"),
     ("speakers", ["speaker_clamp_v2", "speaker_clamp_v2_m", "tof_clamp_v2", "tof_clamp_v2_m"],
      ["px_speaker_L", "px_speaker_R", "px_tof_L", "px_tof_R"], "interior"),
-    ("lid", ["lid_v2", "lid_skin_v2", "mic_cradle_v2"], ["px_estop_base", "px_estop_stem", "px_estop_cap", "px_mic"], "body_tall"),
-    ("neck", ["neck_v2", "bayonet_collar_v2"], ["px_servo"], "neckcam"),
-    ("head", ["head_shell_v2", "yoke_v2", "head_pan_plate_v2"], ["px_camera", "px_cam_lens"], "head"),
+    ("lid", ["lid_v2", "lid_skin_v2", "mic_cradle_v2"],
+     ["px_estop_base", "px_estop_stem", "px_estop_cap", "px_estop_nut", "px_estop_body",
+      "px_estop_nc1", "px_estop_nc2", "px_mic"], "body_tall"),
+    ("neck", ["bayonet_collar_v2", "head_pan_plate_v2", "neck_v2"],
+     ["px_servo", "px_pan_output", "px_pan_horn"], "neckcam"),
+    ("head", ["yoke_v2", "head_shell_v2", "tilt_bushing_v2"],
+     ["px_tilt_servo", "px_tilt_output", "px_tilt_horn", "px_camera", "px_cam_lens"], "head"),
     ("face", ["head_faceplate_v2", "eye_diffuser_bar_v2", "status_diffuser_bar_v2"], [], "face"),
 ]
 
@@ -167,11 +192,16 @@ POP_DIR = {
     "speaker_clamp_v2": (0, 0, 78), "tof_clamp_v2": (0, 0, 76),
     "lid_v2": (0, 0, 58), "lid_skin_v2": (0, 0, 82),
     "px_estop_base": (0, 0, 70), "px_estop_stem": (0, 0, 70), "px_estop_cap": (0, 0, 70),
+    "px_estop_nut": (0, 0, 70), "px_estop_body": (0, 0, 70),
+    "px_estop_nc1": (0, 0, 70), "px_estop_nc2": (0, 0, 70),
     "px_mic": (0, 0, 52), "mic_cradle_v2": (0, 0, 36),
     "neck_v2": (0, 0, 55),
-    "bayonet_collar_v2": (0, 0, -42), "px_servo": (0, 0, -42),
+    "bayonet_collar_v2": (0, 0, 32),
+    "head_pan_plate_v2": (0, 0, -38), "px_servo": (0, 0, -38),
+    "px_pan_output": (0, 0, -38), "px_pan_horn": (0, 0, -38),
     "head_shell_v2": (0, 0, 68), "yoke_v2": (0, 0, 34),
-    "head_pan_plate_v2": (0, -75, -8),
+    "px_tilt_servo": (0, -42, 0), "px_tilt_output": (0, -42, 0),
+    "px_tilt_horn": (0, -42, 0), "tilt_bushing_v2": (0, -36, 0),
     "px_camera": (-40, 0, 68), "px_cam_lens": (-40, 0, 68),
     "head_faceplate_v2": (-36, 0, 0),
     "eye_diffuser_bar_v2": (-26, 0, 0), "status_diffuser_bar_v2": (-46, 0, 0),
@@ -383,6 +413,13 @@ def render(path, res=(1100, 850)):
 
 def all_objects():
     objects = base.setup_scene()
+    # The bushing exports in its axis-vertical print pose; seat it through the
+    # passive (-Y) head wall for assembly and step rendering.
+    if "tilt_bushing_v2" in objects:
+        objects["tilt_bushing_v2"].matrix_world = (
+            Matrix.Translation(Vector((-10.0, -70.0, 257.0)))
+            @ Matrix.Rotation(math.radians(-90), 4, "X")
+        )
     mats_cache = {}
     for name, spec in PROXIES.items():
         objects[name] = make_proxy(name, spec, mats_cache)
@@ -536,8 +573,7 @@ def steps(objects, mats_cache):
 
 
 def insets(objects, mats_cache):
-    """Two standalone insert-location views: the shell's 14 spots, and the
-    lid flipped upside down showing its 2 mic bosses."""
+    """Insert maps plus close mechanism panels for the builder's book."""
     for obj in objects.values():
         obj.hide_render = True
     shell = objects["shell_v2"]
@@ -568,6 +604,84 @@ def insets(objects, mats_cache):
     lid.matrix_world = Matrix.Identity(4)
     lid.hide_render = True
 
+    def isolate(names):
+        for obj in objects.values():
+            obj.hide_render = True
+        for name in names:
+            objects[name].hide_render = False
+
+    floor = bpy.data.objects.get("review_floor")
+    if floor:
+        floor.hide_render = True
+
+    isolate(("px_pico", "pico_clamp_v2"))
+    camera_to((-80, -235, 165), (3, 63.5, 59), lens=76)
+    render(OUT / "step_10b_pico_close.png", res=(900, 700))
+
+    isolate(("deck_v2", "px_reg1", "px_reg2"))
+    camera_to((35, -260, 40), (78, -10, 101), lens=72)
+    render(OUT / "step_12b_regulators.png", res=(900, 700))
+
+    isolate(("deck_v2", "px_fuse"))
+    camera_to((-110, -230, 260), (46, -20, 116), lens=72)
+    render(OUT / "step_12c_fuse.png", res=(900, 700))
+
+    isolate(("tray_v2", "px_switch", "px_switch_2", "px_switch_3",
+             "px_switch_4", "px_switch_5", "px_switch_6"))
+    camera_to((-285, -250, -105), (0, 0, 44), lens=62)
+    render(OUT / "step_14b_switch_underside.png", res=(900, 700))
+
+    isolate(("rear_panel_v2",))
+    camera_to((285, -150, 205), (117, 0, 132), lens=72)
+    render(OUT / "step_15b_rear_panel.png", res=(900, 700))
+
+    isolate(("px_speaker_L", "speaker_clamp_v2", "px_tof_L", "tof_clamp_v2"))
+    camera_to((-170, -130, 235), (-15, 90, 121), lens=72)
+    render(OUT / "step_16b_audio_close.png", res=(900, 700))
+
+    isolate(("px_estop_base", "px_estop_stem", "px_estop_cap", "px_estop_nut",
+             "px_estop_body", "px_estop_nc1", "px_estop_nc2"))
+    camera_to((-70, -125, 225), (59, 56, 157), lens=68)
+    render(OUT / "step_17c_estop_stack.png", res=(900, 700))
+
+    if floor:
+        floor.hide_render = False
+
+    # Head-mechanism closeups.  The main exploded scenes provide context;
+    # these uncluttered panels expose the otherwise-hidden load paths.
+    for obj in objects.values():
+        obj.hide_render = True
+    for name in ("bayonet_collar_v2", "head_pan_plate_v2", "neck_v2",
+                 "px_servo", "px_pan_output", "px_pan_horn"):
+        objects[name].hide_render = False
+    camera_to((-155, -190, 285), (-26, 0, 171), lens=65)
+    render(OUT / "step_18b_neck_cutaway.png", res=(900, 700))
+
+    for obj in objects.values():
+        obj.hide_render = True
+    for name in ("yoke_v2", "tilt_bushing_v2", "px_tilt_servo",
+                 "px_tilt_output", "px_tilt_horn"):
+        objects[name].hide_render = False
+    camera_to((-125, -235, 325), (-10, 0, 254), lens=68)
+    render(OUT / "step_19b_tilt_stack.png", res=(900, 700))
+
+    for obj in objects.values():
+        obj.hide_render = True
+    face = objects["head_faceplate_v2"]
+    camera = objects["px_camera"]
+    lens_obj = objects["px_cam_lens"]
+    saved = {obj.name: obj.matrix_world.copy() for obj in (face, camera, lens_obj)}
+    face.location.x -= 34
+    camera.location.x -= 26
+    lens_obj.location.x -= 28
+    for name in ("head_shell_v2", "head_faceplate_v2", "px_camera", "px_cam_lens"):
+        objects[name].hide_render = False
+    camera_to((-285, -185, 320), (-52, 0, 254), lens=72)
+    render(OUT / "step_19c_camera.png", res=(900, 700))
+    for obj in (face, camera, lens_obj):
+        obj.matrix_world = saved[obj.name]
+        obj.hide_render = True
+
 
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
@@ -578,6 +692,8 @@ def main():
         thumbs(objects)
     if mode in ("steps", "all"):
         steps(objects, mats_cache)
+        insets(objects, mats_cache)
+    elif mode == "insets":
         insets(objects, mats_cache)
 
 

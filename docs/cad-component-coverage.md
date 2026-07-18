@@ -21,7 +21,7 @@ interface. It does **not** mean an unpurchased placeholder is release-ready.
 | Rear drive motors | Two Pololu #4867 99:1 25D MP 12 V encoder motors, #1569 metal brackets on three tray-backed M3 spacer paths per side, #1997 4 mm aluminum hubs, four-screw PETG wheel cores, annular TPU tires, removable protective pods/covers, and routed encoder-lead corridors | Drawing-backed mechanical and electrical prototype baseline; purchased-revision, <=0.45 A-per-motor target-surface current, thermal, retention, cutoff, and floor tests required |
 | Cytron MDDS10 motor controller | Official 101.092 x 66.802 mm STEP footprint, 1.57 mm PCB, 1.93 mm underside protrusion, 12.275 mm component height, 95.25 x 60.96 mm four-hole pattern, four 6 mm M3 board standoffs, locally notched plate on four 5 mm metal spacers, front terminal fan-out, 10 mm cooling keepout, and four-standoff safety shelf | Drawing-backed mechanical baseline; purchased-board revision, polarity, terminal bend, cooling, and loaded-motor tests required |
 | ToF + bumper switches | Keyed front fascia and four ToF pods; six Omron D2HW-C202MR sealed SPST-NC switches on tray-fixed PETG plates; 13 mm M3 switch patterns; 12 blind tray inserts; side-lead corridors; independent TPU reliefs; validated 0.4 mm rest gap, 2 mm worst-case actuation, and paired 2.4 mm stops below total travel | Drawing-backed mechanical baseline; purchased-switch/TPU coupon, strain, rebound, broken-wire, and six-direction motor-cut tests required |
-| Pan/tilt | Two drawing-backed Hitec D85MG servos and R-ML24 horns; keyed Koyo/JTEKT 6807-2RS fixed carrier; 34.8 mm rotating journal, upper shoulder, and four-screw inner-ring retainer; flat ribbon corridor; fixed tilt yoke; active adapter; MF84ZZ passive bearing; McMaster 92981A143 shoulder screw; and complete moving-head collision sweep through +/-20 degrees tilt at sampled +/-60 degrees pan | Drawing-backed mechanical baseline; 6807 coupon, purchased-part fit, measured head mass/torque, regulated-power, cable-sweep, backlash, and repeated-motion tests required |
+| Pan/tilt | V2: two drawing-backed Hitec D85MG servos and R-ML24 horns; three-lug lid bayonet; 39.6/40.3 mm greased printed journal; flat thrust shoulder; integrated servo cradle + two-M3 plate; 20 mm ribbon corridor; four-M3 yoke; active shell horn boss; one-M3 3.2 mm passive shoulder bushing; printed hard stops; and actual-solid sweeps through +/-20 degrees tilt and +/-60 degrees pan | CAD-complete D035 baseline; exact-part/component-hardware fit, bayonet/journal/bushing coupons, PETG-safe grease, measured mass/current, cable drag, axial play, backlash, heat, and loaded wear cycling required |
 | LED eyes/status | Four Adafruit 5975 NeoPixel JST breakout STEP envelopes; 12.192 x 11.43 mm PCB, 5.93 mm overall component depth, two 2.0 mm holes on 8.636 mm spacing, two 3-pin JST-SH ports, eight 3 mm-OD M2 spacers, open plug/latch corridors, removable M2.5 carrier frames, stepped pockets, separate diffusers, 9 x 14 mm vertical head eyes, and horizontal body indicators | Drawing-backed mechanical baseline; buy one first and verify delivered dimensions, cable bends, brightness/current cap, diffuser hotspotting/color, camera reflections, and software-off behavior |
 | Front support/idlers | Two removable pods; two 608 seats and flush screw-on outer-race retainers per side; WDS 615-M6-8-65 shoulder bolt; M6 washer; prevailing-torque locknut; stock goBILDA spacers/shim; four-point tray pads | Retail-only metal retention baseline; purchased-hardware fit, shoulder/thread engagement, spacer squareness, axial play without bearing preload, locknut retention, wheel alignment, and loaded cornering tests required |
 | Lifting | No integrated carry interface or custom load-bearing metal | Power down and lift with two hands under the tray; never lift by shell, lid, head, bumper, fairings, wiring, or cartridges |
@@ -54,23 +54,21 @@ with M2 x 0.4 threaded stations at 13 and 16 mm. At 6 V Hitec publishes 0.9
 kg-cm peak-efficiency torque, 4.3 kg-cm stall torque, and 1.4 A stall current;
 stall is a fault boundary, not an operating target.
 
-The pan servo supplies rotation while a
-[Koyo/JTEKT 6807-2RS](https://koyo.jtekt.co.jp/en/products/detail/?pno=6807+2RS)
-35 x 47 x 7 mm bearing carries the head weight. The fixed keyed collar captures
-the outer ring; the rotating neck's 34.8 mm journal, 37.5 mm upper shoulder,
-and four-screw lower retainer capture the inner ring. A dedicated coupon tests
-46.8/47.0/47.2 mm outer seats and 34.6/34.8/35.0 mm journals before the full
-neck is printed.
+For v2, the servo splines transmit torque while printed PETG interfaces carry
+the head. The fixed collar's 40.3 mm bore supports a 39.6 mm rotating journal
+and flat thrust shoulder; three lugs bayonet into the structural lid. A
+two-screw plate captures the pan servo, and the horn drives the neck beside the
+20 mm camera-ribbon corridor. The yoke uses four M3 neck joints, a drawing-backed
+tilt-servo frame, and printed hard stops. The active horn screws to the shell
+drive boss at the 13/16 mm stations; the passive side rotates around a 3.2 mm
+printed shoulder bushing clamped by one M3 x 8 into the yoke.
 
-The passive tilt side uses an
-[MF84ZZ flanged bearing](https://www.smbbearings.com/firebrick/ckeditor/plugins/upload/Uploads/Documents/bearingpdfs/MF84ZZ-flanged-miniature-bearing-4x8x3mm.pdf)
-and McMaster 92981A143 shoulder screw. A 100%-dense 1.27 g/cm3 CAD estimate puts
-the printed moving head at about 208 g with 0.473 kg-cm static gravity torque.
-Adding a conservative 25 g electronics allowance at 50 mm produces about 0.598
-kg-cm, or 1.5x below the D85MG's published peak-efficiency torque. This is a
-sanity check only: weigh the assembled head and verify acceleration, cable drag,
-regulated current, temperature, backlash, holding behavior, and repeated motion
-on the purchased hardware.
+The validator samples the actual printed solids through commanded +/-60 pan
+and +/-20 tilt, checks both D85MG case clearances and the cable corridor, and
+requires contact beyond each range. This is a sanity check only: weigh the
+assembled head and verify exact hardware, grease compatibility, acceleration,
+cable drag, regulated current, temperature, axial play, backlash, holding
+behavior, and repeated loaded motion.
 
 ## Safety MCU reference
 
@@ -339,7 +337,7 @@ new retail-only load-path decision and physical qualification.
    5045 complete assembly, then obtain electrical review of charger inhibit,
    relay drive/suppression/reset, feeder and branch fusing, terminal and conductor
    sizing, regen/BMS behavior, and full-charge motor-voltage behavior.
-4. Purchase the selected D85MG, R-ML24, 6807, MF84ZZ, and shoulder-screw head hardware. Buy one Adafruit 5975 breakout plus representative JST-SH cables; print and measure the 6807 coupon and one eye carrier/diffuser, assemble the complete bearing/servo stack, weigh the moving head, and test regulated current, cable sweep, backlash, heat, repeated motion, LED hotspotting, and camera reflections.
+4. Purchase the selected D85MG/R-ML24 stacks and verify their component-integral spline, horn-link, and mounting hardware. Buy one Adafruit 5975 breakout plus representative JST-SH cables; print and measure the v2 bayonet/journal/bushing coupons and one eye carrier/diffuser, assemble the complete printed-bearing servo stack, weigh the moving head, and test regulated current, cable sweep, axial play, backlash, heat, wear, repeated motion, LED hotspotting, and camera reflections.
    Print one eye carrier/diffuser set first and verify brightness, hotspots,
    light leakage, color, and service access before printing the second set.
 5. Purchase one IDEC XW1E-BV402M-R, fit it to the printed keyed panel/backing

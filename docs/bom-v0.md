@@ -50,11 +50,10 @@ See [`retail-sourcing-policy.md`](retail-sourcing-policy.md) for the live audit.
 | Item | Qty | Status | Est. subtotal | Notes |
 | --- | ---: | --- | ---: | --- |
 | Raspberry Pi Camera Module 3 Wide | 1 | Buy now | $35-$45 | Wide FOV helps indoor interaction. Raspberry Pi lists Camera Module 3 from $25 and describes the Wide variant as 120 degree FOV: https://www.raspberrypi.com/products/camera-module-3/ |
-| Hitec D85MG 24T digital metal-gear servo | 2 | Selected; buy after static-head bench | $100-$160 | Drawing-backed pan/tilt baseline: 29 x 13 x 30 mm, 4.3 kg-cm stall torque and 1.4 A stall current at 6 V. Use the programmed motion limits and never treat stall torque as an operating target: https://www.hiteccs.com/actuators/product-details/D85MG |
-| Hitec R-ML24 24T aluminum horn | 2 | Selected; buy with servos | $20-$45 | Uses the modeled M2 x 0.4 stations at 13 and 16 mm. Confirm the delivered spline and center-screw hardware against the servo before assembly. |
-| Koyo/JTEKT 6807-2RS bearing | 1 | Selected; buy before neck print | $15-$35 | 35 x 47 x 7 mm pan support bearing; print the combined seat/journal coupon and press only the race being fitted: https://koyo.jtekt.co.jp/en/products/detail/?pno=6807+2RS |
-| MF84ZZ flanged bearing | 1 | Selected; buy with servos | $5-$15 | 4 x 8 x 3 mm with 9.2 x 0.6 mm flange for the passive tilt cartridge. |
-| McMaster 92981A143 shoulder screw | 1 | Selected; buy with servos | $10-$25 | 4 x 12 mm shoulder with M3 x 4 mm thread; fixes into the yoke without clamping the moving head. |
+| Hitec D85MG 24T digital metal-gear servo | 2 | v2 CAD complete; physical gate open | $100-$160 | Drawing-backed pan/tilt baseline: 29 x 13 x 30 mm, 4.3 kg-cm stall torque and 1.4 A stall current at 6 V. Use the programmed motion limits and never treat stall torque as an operating target: https://www.hiteccs.com/actuators/product-details/D85MG |
+| Hitec R-ML24 24T aluminum horn | 2 | v2 CAD complete; buy with servos | $20-$45 | Uses the modeled M2 x 0.4 stations at 13 and 16 mm. Confirm delivered H24T spline engagement and both horn-link stations against the head coupons. |
+| Verified D85MG/R-ML24 component hardware pack | 1 set | Verify before head assembly | Included / TBD | Two spline-center screws, four M2 horn-link screws, plus both servos' mounting grommets, eyelets, screws, and nuts. These component-integral parts are D026-exempt; record the delivered contents and dimensions before relying on them. |
+| Printed pan journal + passive tilt bushing | 1 set | v2 D035 baseline; coupon and wear gates open | See filament | Replaces the v1 6807, MF84ZZ, and shoulder-screw stack. Use only PETG-safe grease after the exact pan/bushing coupons pass; validate axial play, friction/current, wear, backlash, and loaded cycling. |
 | Pololu D36V50F6 6 V regulator | 1 | Selected for CAD; buy after bench | $35-$45 | Drawing-backed 25.4 mm square board on three M2 standoffs for the separate head-servo rail. Both D85MGs can demand 2.8 A combined at published stall; verify actual 12 V-input current capability, transient margin, local capacitance, heat, and wiring. [Official product](https://www.pololu.com/product/4092). |
 | Printed camera head shell and brackets | 1 set | Consumable | See filament | Source CAD only. Generated STLs belong under ignored exports, not as source assumptions. |
 
@@ -128,8 +127,8 @@ See [`retail-sourcing-policy.md`](retail-sourcing-policy.md) for the live audit.
 | Visible PLA / PLA+ | Existing collection or small spools | Prototype; exact-family coupons required | $0-$30 | Dark fascia/rear/head panels and optional teal lid skin. Standard or credible PLA+ may enter the shell/head qualification path; effect PLAs stay cosmetic-only by default. |
 | Translucent PLA | Smallest available spool | Prototype optical gate open | $15-$30 | Eye and status diffusers after brightness, hot-spot, camera-flare, clip, and LED-temperature checks. |
 | Charcoal TPU 95A | 0.5 kg | v2 prototype baseline | $20-$50 | Tires, front/rear bumper halves, and battery pad frame. |
-| M3 x 5.7 x 4.6 OD heat-set inserts, 100-pack | 1 | Buy now (v2 baseline, D026) | $12-$20 | The ONLY insert SKU in the v2 printed-only body (41 used + spares). Supersedes the old M2.5/M3/M4 kit. |
-| M3 x 8 socket head cap screws (ISO 4762), 100-pack | 1 | Buy now (v2 baseline, D026) | $8-$15 | The ONLY separately purchased screw SKU (41 used + spares); one 2.5 mm hex key drives the robot. Supersedes the old multi-size assortment and all metal standoffs/spacers. |
+| M3 x 5.7 x 4.6 OD heat-set inserts, 100-pack | 1 | Buy now (v2 baseline, D026/D035) | $12-$20 | The ONLY insert SKU in the v2 printed-only body (47 used + spares). Supersedes the old M2.5/M3/M4 kit. |
+| M3 x 8 socket head cap screws (ISO 4762), 100-pack | 1 | Buy now (v2 baseline, D026/D035) | $8-$15 | The ONLY separately purchased screw SKU (47 used + spares); one 2.5 mm hex key drives the robot. Component-integral servo hardware is the documented exemption. |
 | Cable glands, zip ties, ferrules, heat-shrink | 1 set | Buy now | $15-$50 | Cable management is robot hygiene. |
 | Rubber feet/pads and anti-vibration tape | 1 set | Buy now | $5-$25 | Useful for audio and electronics isolation. |
 

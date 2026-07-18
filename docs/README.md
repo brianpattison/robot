@@ -40,7 +40,8 @@ Read these in order when getting oriented:
     cover TOC, annotated meet-the-robot spread, shopping and printing chapters, piece
     inventory, twenty picture-first steps with progress bars and CHECK tests, wiring
     maps, and release-gap callouts. Child-followable by design, with no "grown-up"
-    callouts (D029), but not yet a standalone retail build manual: head mechanics,
+    callouts (D029), but not yet a standalone retail build manual: the D035 head
+    mechanism is CAD-complete while exact-part fit, loaded wear/current tests,
     harness details, software/firmware, fuse release, and commissioning remain open.
     Regenerate with `docs/generate_assembly_guide_v2.py`.
     The 2026-07-17 review audit behind the current render/text conventions

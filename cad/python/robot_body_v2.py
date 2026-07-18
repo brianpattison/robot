@@ -41,6 +41,7 @@ Exports land under cad/exports/v2/ (gitignored).
 
 from __future__ import annotations
 
+import math
 import sys
 from pathlib import Path
 
@@ -68,6 +69,21 @@ ARCH_BAND = (94.0, 112.0)                  # Y band the arch clears (to just pas
 BUMPER_H = P.bumper_height                 # 28
 BUMPER_Z0 = 29.0
 BUMPER_WALL = 2.5
+
+# Printed-only pan interface (D025/D026).  The collar is fixed to the lid by
+# three captive bayonet lugs; the neck journal turns inside it.  These values
+# are shared by the lid cuts, the production solids, and the validator.
+PAN_JOURNAL_R = 19.80
+PAN_JOURNAL_CLEARANCE = 0.35                 # radial, coupon-gated
+PAN_COLLAR_BORE_R = PAN_JOURNAL_R + PAN_JOURNAL_CLEARANCE
+PAN_THRUST_R = 24.0
+PAN_COLLAR_R = 30.0
+PAN_BAYONET_LUG_R = 28.2
+PAN_BAYONET_ANGLES = (90.0, 210.0, 330.0)
+PAN_LIMIT_DEG = 60.0
+PAN_STOP_STATION_DEG = 72.0
+TILT_LIMIT_DEG = 20.0
+TILT_HARD_STOP_DEG = 30.0
 
 
 def rounded_slab(length, width, height, radius, z0):
@@ -225,6 +241,18 @@ def build_lid():
     lid -= Pos(inv.ESTOP[0], inv.ESTOP[1], inv.Z_TOP - LID_RECESS / 2) * Cylinder(
         P.estop_panel_hole / 2, LID_RECESS + 2)
     lid -= Pos(P.neck_x, 0, inv.Z_TOP - LID_RECESS / 2) * Cylinder(26.5, LID_RECESS + 2)
+    # Three keyways admit the collar's under-lid lugs.  A shallow annular
+    # race on the underside lets the collar rotate 20 degrees into its
+    # detents while the uncut 2.2 mm roof skin remains the axial load path.
+    race = Pos(P.neck_x, 0, inv.Z_TOP - LID_RECESS + 0.9) * Cylinder(31.0, 1.8)
+    race -= Pos(P.neck_x, 0, inv.Z_TOP - LID_RECESS + 0.9) * Cylinder(25.6, 2.2)
+    lid -= race
+    for angle in PAN_BAYONET_ANGLES:
+        key = (Pos(P.neck_x, 0, inv.Z_TOP - LID_RECESS / 2)
+               * Rot(0, 0, angle)
+               * Pos(PAN_BAYONET_LUG_R, 0, 0)
+               * Box(7.0, 5.0, LID_RECESS + 2))
+        lid -= key
     for i in range(9):
         lid -= Pos(inv.MIC[0], inv.MIC[1] - 30 + i * 7.5, inv.Z_TOP - LID_RECESS / 2) * Box(36, 3, LID_RECESS + 2)
     for i in range(5):
@@ -426,6 +454,32 @@ def build_tire():
 HEAD_DZ = inv.DH                      # the head rises with the body height
 HEAD_C = (P.head_center_x, 0.0, 242.0 + HEAD_DZ)
 NECK_Z0, NECK_Z1 = 167.5 + HEAD_DZ, 211.5 + HEAD_DZ
+TILT_AXIS_X = P.head_tilt_axis_x
+TILT_AXIS_Z = HEAD_C[2] + 3.0
+YOKE_ARM_Y = 55.0
+PAN_SERVO_CASE_TOP_Z = inv.DROP0 + P.servo_body_height
+PAN_SERVO_BODY_C = (P.neck_x - P.servo_output_offset, 0.0,
+                    PAN_SERVO_CASE_TOP_Z - P.servo_body_height / 2)
+PAN_SERVO_FLANGE_Z = (PAN_SERVO_CASE_TOP_Z - P.servo_body_height
+                      + P.servo_mount_plane_from_bottom)
+PAN_PLATE_TOP_Z = PAN_SERVO_FLANGE_Z - P.servo_flange_thickness / 2
+PAN_HORN_Z = PAN_SERVO_CASE_TOP_Z + P.servo_output_stack_height - 2.15
+
+
+def pan_servo_body_fit():
+    """Drawing-backed D85MG case envelope in the v2 vertical pan pose."""
+    return Pos(*PAN_SERVO_BODY_C) * Box(P.servo_body_length + 0.8,
+                                        P.servo_body_width + 0.8,
+                                        P.servo_body_height + 0.8)
+
+
+def tilt_servo_body_fit():
+    """Drawing-backed D85MG case envelope in the fixed-yoke tilt pose."""
+    body_x = TILT_AXIS_X - P.servo_output_offset
+    body_y = 35.0
+    return Pos(body_x, body_y, TILT_AXIS_Z) * Box(P.servo_body_length + 0.8,
+                                                  P.servo_body_height + 0.8,
+                                                  P.servo_body_width + 0.8)
 
 
 def build_head_shell():
@@ -456,8 +510,50 @@ def build_head_shell():
     # Faceplate seating recess and the through-opening behind it.
     shell -= Pos(HEAD_C[0] - P.head_depth / 2 + 1.5, 0, HEAD_C[2]) * Box(3.1, 120.6, 56.6)
     shell -= Pos(HEAD_C[0] - P.head_depth / 2 + 4, 0, HEAD_C[2]) * Box(8, 110, 48)
-    # Underside pan-plate opening.
-    shell -= Pos(HEAD_C[0], 0, z0 + 1.5) * Box(44, 76, 8)
+    # Wide underside service opening.  The fixed yoke and sideways D85MG pass
+    # through here while the complete shell tilts +/-20 degrees around them.
+    shell -= Pos(HEAD_C[0] + 5.0, 0, z0 + 1.5) * Box(64, 118, 10)
+    # Two tucked-away corner bridges keep the lower front lip part of the
+    # one-piece shell without entering the yoke/servo sweep.
+    for sy in (-1, 1):
+        shell += Pos(HEAD_C[0] - 30.0, sy * 61.0, z0 + 4.0) * Box(8.0, 8.0, 5.0)
+
+    # Production-derived tilt sweep relief.  Carve the complete fixed yoke at
+    # two-degree samples through the hard-stop range, expressed in the moving
+    # head's neutral frame.  This is deliberately geometry-derived: changing
+    # an arm, servo frame, or base now changes the cavity instead of leaving a
+    # stale rectangular guess in the shell.
+    tilt_axis = Axis((TILT_AXIS_X, 0.0, TILT_AXIS_Z), (0.0, 1.0, 0.0))
+    fixed_yoke = build_yoke()
+    for angle in range(-int(TILT_HARD_STOP_DEG), int(TILT_HARD_STOP_DEG) + 1, 2):
+        shell -= fixed_yoke.rotate(tilt_axis, float(-angle))
+
+    # Active (+Y) tilt drive: the shell-side boss is the moving member.  The
+    # supplied R-ML24 horn lands against its inner face and its two M2 threaded
+    # stations fasten through these clearance holes.  The center bore clears
+    # the servo spline rather than asking the spline to carry head weight.
+    drive_y = P.head_width / 2 - 6.0
+    drive = Pos(TILT_AXIS_X, drive_y, TILT_AXIS_Z) * Rot(90, 0, 0) * Cylinder(17.5, 8.0)
+    drive -= Pos(TILT_AXIS_X, drive_y, TILT_AXIS_Z) * Rot(90, 0, 0) * Cylinder(3.3, 14.0)
+    for off in P.servo_horn_threaded_offsets:
+        drive -= Pos(TILT_AXIS_X - off, drive_y, TILT_AXIS_Z) * Rot(90, 0, 0) * Cylinder(1.1, 14.0)
+    # Moving hard-stop finger.  The fixed yoke carries compact mating tabs at
+    # nominal +/-30-degree stations; their finite width starts contact just
+    # outside the commanded +/-20-degree range.
+    drive += Pos(TILT_AXIS_X + 15.0, drive_y - 5.5, TILT_AXIS_Z) * Box(7.0, 4.0, 2.5)
+    shell += drive
+
+    # Passive (-Y) pivot boss and bushing bore.  The replaceable black PETG
+    # shoulder bushing is clamped by the one allowed M3x8 into the fixed yoke;
+    # this cream shell rotates on the sleeve and is never pinched by the screw.
+    passive_y = -(P.head_width / 2 - 1.5)
+    passive = Pos(TILT_AXIS_X, passive_y, TILT_AXIS_Z) * Rot(90, 0, 0) * Cylinder(12.0, 3.0)
+    passive -= Pos(TILT_AXIS_X, passive_y, TILT_AXIS_Z) * Rot(90, 0, 0) * Cylinder(4.2, 5.0)
+    shell += passive
+    # OCC can leave zero-volume edge wisps after the sampled sweep.  They are
+    # not printable geometry; retain the single production solid explicitly.
+    if len(shell.solids()) > 1:
+        shell = max(shell.solids(), key=lambda s: s.volume)
     return shell
 
 
@@ -471,20 +567,104 @@ def build_head_faceplate():
 
 
 def build_neck():
-    neck = Pos(P.neck_x, 0, (NECK_Z0 + NECK_Z1) / 2) * Cylinder(20.0, NECK_Z1 - NECK_Z0)
-    neck -= Pos(P.neck_x, 0, (NECK_Z0 + NECK_Z1) / 2) * Cylinder(14.0, NECK_Z1 - NECK_Z0 + 4)
+    # Journal + thrust shoulder.  The 0.35 mm radial clearance and PETG-safe
+    # grease are physical coupon gates; the servo spline supplies torque only.
+    journal_z0 = inv.Z_TOP - 4.0
+    journal_z1 = inv.Z_TOP + 4.0
+    neck = Pos(P.neck_x, 0, (journal_z0 + journal_z1) / 2) * Cylinder(
+        PAN_JOURNAL_R, journal_z1 - journal_z0)
+    neck += Pos(P.neck_x, 0, inv.Z_TOP + 4.9) * Cylinder(PAN_THRUST_R, 1.8)
+    neck += Pos(P.neck_x, 0, (inv.Z_TOP + 5.8 + NECK_Z1) / 2) * Cylinder(
+        20.0, NECK_Z1 - (inv.Z_TOP + 5.8))
+    neck -= Pos(P.neck_x, 0, (journal_z0 + NECK_Z1) / 2) * Cylinder(
+        10.0, NECK_Z1 - journal_z0 + 4)
+
+    # Horn drive pad below the collar.  The two holes match the R-ML24's
+    # component-integral M2 threaded stations; no new general fastener SKU is
+    # introduced.  A positive-X crescent remains open for the camera ribbon.
+    drive = Pos(P.neck_x - 10.0, 0, inv.Z_TOP - 4.7) * Box(24.0, 8.0, 2.6)
+    drive += Pos(P.neck_x, 0, inv.Z_TOP - 4.7) * Cylinder(6.0, 2.6)
+    for off in P.servo_horn_threaded_offsets:
+        drive -= Pos(P.neck_x - off, 0, inv.Z_TOP - 4.7) * Cylinder(1.1, 5.0)
+    neck += drive
+
+    # Four top insert bores receive the yoke's standard M3x8 screws.
+    for angle in (45.0, 135.0, 225.0, 315.0):
+        x = P.neck_x + 16.5 * math.cos(math.radians(angle))
+        y = 16.5 * math.sin(math.radians(angle))
+        neck -= Pos(x, y, NECK_Z1 - 3.2) * Cylinder(2.3, 6.4)
+
+    # Pan hard-stop finger on the rotating shoulder; compact fixed posts are
+    # stationed farther around the collar so contact begins outside the
+    # commanded +/-60-degree range.
+    neck += Pos(P.neck_x + 25.5, 0, inv.Z_TOP + 5.0) * Box(5.0, 4.0, 2.0)
     return neck
 
 
 def build_bayonet_collar():
-    ring = Pos(P.neck_x, 0, NECK_Z0 + 6.0) * Cylinder(26.0, 6)
-    ring -= Pos(P.neck_x, 0, NECK_Z0 + 6.0) * Cylinder(20.5, 10)
-    return ring
+    # Fixed journal/thrust ring, sandwiched to the PETG lid by three captive
+    # under-lid lugs.  The lugs enter the lid keyways and twist into its blind
+    # race; a small detent nib is coupon-gated before the large part is used.
+    ring = Pos(P.neck_x, 0, inv.Z_TOP + 1.5) * Cylinder(PAN_COLLAR_R, 5.0)
+    ring -= Pos(P.neck_x, 0, inv.Z_TOP + 1.5) * Cylinder(PAN_COLLAR_BORE_R, 8.0)
+    barrel = Pos(P.neck_x, 0, inv.Z_TOP - 1.0) * Cylinder(25.5, 4.0)
+    barrel -= Pos(P.neck_x, 0, inv.Z_TOP - 1.0) * Cylinder(PAN_COLLAR_BORE_R, 6.0)
+    collar = ring + barrel
+    for angle in PAN_BAYONET_ANGLES:
+        lug = (Pos(P.neck_x, 0, inv.Z_TOP - 2.7)
+               * Rot(0, 0, angle)
+               * Pos(PAN_BAYONET_LUG_R, 0, 0)
+               * Box(7.0, 4.2, 1.2))
+        nib = (Pos(P.neck_x, 0, inv.Z_TOP - 3.15)
+               * Rot(0, 0, angle)
+               * Pos(PAN_BAYONET_LUG_R, 1.4, 0)
+               * Box(1.4, 2.2, 0.5))
+        collar += lug + nib
+
+    # Pan-servo cradle.  Four perimeter rails connect the collar to a lower
+    # capture frame; the separate pan plate screws upward and clamps only the
+    # servo flange, leaving the body, output stack, and +X ribbon crescent free.
+    bx = PAN_SERVO_BODY_C[0]
+    frame_z = PAN_PLATE_TOP_Z + P.servo_flange_thickness
+    outer = Pos(bx, 0, frame_z + 1.8) * Box(48.0, 27.0, 3.6)
+    outer -= Pos(bx, 0, frame_z + 1.8) * Box(P.servo_body_length + 1.2,
+                                             P.servo_body_width + 1.2, 5.0)
+    collar += outer
+    # The asymmetric X stations keep every rail outside the rotating
+    # 39.6 mm journal while still touching the rectangular lower frame.
+    for x in (P.neck_x - 27.0, P.neck_x + 20.0):
+        for y in (-12.0, 12.0):
+            rail = Pos(x, y, (frame_z + 3.6 + inv.Z_TOP - 2.0) / 2) * Box(
+                4.0, 4.0, inv.Z_TOP - 2.0 - (frame_z + 3.6))
+            collar += rail
+    for y in (-12.0, 12.0):
+        collar += Pos(P.neck_x + 18.5, y, frame_z + 1.8) * Box(5.0, 4.0, 3.6)
+    # Two insert towers for the M3x8 pan-plate retention joint.
+    for x in (bx - 20.0, bx + 20.0):
+        collar += Pos(x, 0, frame_z + 1.8) * Cylinder(4.5, 7.2)
+        collar -= Pos(x, 0, frame_z - 0.2) * Cylinder(2.3, 6.0)
+
+    # Fixed pan-stop posts: the 72-degree stations plus finite tab widths put
+    # first contact a few degrees outside the commanded +/-60-degree range.
+    for angle in (-PAN_STOP_STATION_DEG, PAN_STOP_STATION_DEG):
+        collar += (Pos(P.neck_x, 0, inv.Z_TOP + 5.0)
+                   * Rot(0, 0, angle)
+                   * Pos(28.0, 0, 0)
+                   * Box(5.0, 4.0, 2.0))
+    return collar
 
 
 def build_head_pan_plate():
-    z0 = HEAD_C[2] - P.head_height / 2
-    return Pos(HEAD_C[0], 0, z0 + 2.5) * Box(42, 74, 3)
+    # Under-lid pan-servo capture plate.  It is intentionally a removable
+    # black PETG wear/service part rather than a mysterious head-bottom tile.
+    bx = PAN_SERVO_BODY_C[0]
+    plate = Pos(bx, 0, PAN_PLATE_TOP_Z - 1.6) * Box(50.0, 28.0, 3.2)
+    plate -= Pos(bx, 0, PAN_PLATE_TOP_Z - 1.6) * Box(P.servo_body_length + 1.2,
+                                                    P.servo_body_width + 1.2, 5.0)
+    for x in (bx - 20.0, bx + 20.0):
+        plate -= Pos(x, 0, PAN_PLATE_TOP_Z - 1.6) * Cylinder(1.7, 5.0)
+        plate -= Pos(x, 0, PAN_PLATE_TOP_Z - 3.15) * Cylinder(3.25, 0.9)
+    return plate
 
 
 def build_deck():
@@ -572,23 +752,80 @@ def build_battery_pad_frame():
 
 
 def build_yoke():
-    base = Pos(P.neck_x, 0, NECK_Z1 + 2.0) * Cylinder(21.5, 4)
-    base -= Pos(P.neck_x, 0, NECK_Z1 + 2.0) * Cylinder(9.0, 6)
+    # Four-screw fixed base on the rotating neck.  A 3.2 mm counterbored
+    # clamp stack keeps D026 honest; the center remains a 20 mm ribbon path.
+    base_z = NECK_Z1 + 1.6
+    base = Pos(P.neck_x, 0, base_z) * Cylinder(23.0, 3.2)
+    base -= Pos(P.neck_x, 0, base_z) * Cylinder(10.5, 5.0)
+    for angle in (45.0, 135.0, 225.0, 315.0):
+        x = P.neck_x + 16.5 * math.cos(math.radians(angle))
+        y = 16.5 * math.sin(math.radians(angle))
+        base -= Pos(x, y, base_z) * Cylinder(1.7, 5.0)
+        base -= Pos(x, y, base_z + 1.25) * Cylinder(3.25, 0.9)
     yoke = base
-    for sy in (1, -1):
-        arm = Pos(-10, sy * 38, (NECK_Z1 + 4 + 250.0) / 2) * Box(10, 6, 250.0 - NECK_Z1 - 4)
-        arm += Pos(P.neck_x + 4, sy * 38, NECK_Z1 + 6.0) * Box(24, 6, 8)
-        # Foot runs inward across the base annulus so the yoke is one piece.
-        arm += Pos(P.neck_x + 4, sy * 19.0, NECK_Z1 + 6.0) * Box(6, 40, 8)
-        arm -= Pos(-10, sy * 38, 245.0 + inv.DH) * Rot(90, 0, 0) * Cylinder(1.7, 10)
-        yoke += arm
+
+    # Low bridge feet make both uprights one connected, support-free part.
+    for sy in (-1, 1):
+        foot_y = sy * (YOKE_ARM_Y / 2)
+        foot = Pos(TILT_AXIS_X, foot_y, NECK_Z1 + 5.2) * Box(16.0, YOKE_ARM_Y, 7.2)
+        arm = Pos(TILT_AXIS_X, sy * YOKE_ARM_Y,
+                  (NECK_Z1 + 5.2 + TILT_AXIS_Z) / 2) * Box(
+                      14.0, 6.0, TILT_AXIS_Z - (NECK_Z1 + 5.2) + 10.0)
+        yoke += foot + arm
+
+    # Active-side D85MG frame.  The case passes through the open center; the
+    # manufacturer's mounting ears land on this frame and use the grommets,
+    # eyelets, screws, and nuts supplied with the servo.  No loose printed
+    # clamp or second general screw SKU is needed.
+    body_x = TILT_AXIS_X - P.servo_output_offset
+    mount_y = 40.2
+    frame = Pos(body_x, mount_y, TILT_AXIS_Z) * Box(P.servo_flange_length + 4.0,
+                                                    3.0,
+                                                    P.servo_body_width + 6.0)
+    frame -= Pos(body_x, mount_y, TILT_AXIS_Z) * Box(P.servo_body_length + 1.2,
+                                                     5.0,
+                                                     P.servo_body_width + 1.2)
+    for x in (body_x - P.servo_mount_spacing / 2, body_x + P.servo_mount_spacing / 2):
+        frame -= Pos(x, mount_y, TILT_AXIS_Z) * Rot(90, 0, 0) * Cylinder(
+            P.servo_mount_hole / 2, 6.0)
+    for z in (TILT_AXIS_Z - 9.0, TILT_AXIS_Z + 9.0):
+        frame += Pos(body_x, (mount_y + YOKE_ARM_Y) / 2, z) * Box(
+            P.servo_flange_length + 4.0, YOKE_ARM_Y - mount_y, 3.0)
+    yoke += frame
+
+    # Passive pivot boss reaches to within 0.5 mm of the moving head wall.
+    # Its blind M3 insert opens outward; the 3.2 mm bushing sleeve is the
+    # entire screw clamp stack and the head is free to rotate around it.
+    passive_face_y = -(P.head_width / 2 - 3.2)
+    passive_depth = abs(passive_face_y) - YOKE_ARM_Y + 3.0
+    passive = Pos(TILT_AXIS_X, passive_face_y + passive_depth / 2, TILT_AXIS_Z) * Rot(
+        90, 0, 0) * Cylinder(7.0, passive_depth)
+    passive -= Pos(TILT_AXIS_X, passive_face_y + 2.85, TILT_AXIS_Z) * Rot(
+        90, 0, 0) * Cylinder(2.3, 5.7)
+    yoke += passive
+
+    # Active-side horn/spline opening and fixed tilt-stop posts.  The compact
+    # tabs sit at nominal +/-30-degree stations; their finite width starts
+    # contact just outside the commanded +/-20-degree motion range.
+    yoke -= Pos(TILT_AXIS_X, YOKE_ARM_Y, TILT_AXIS_Z) * Rot(90, 0, 0) * Cylinder(7.0, 9.0)
+    # A spine outside the spline radius carries the hard-stop loads back into
+    # the upright and prevents tiny relief crescents becoming loose islands.
+    yoke += Pos(TILT_AXIS_X - 8.5, YOKE_ARM_Y, TILT_AXIS_Z) * Box(5.0, 6.0, 24.0)
+    for angle in (-TILT_HARD_STOP_DEG, TILT_HARD_STOP_DEG):
+        x = TILT_AXIS_X + 15.0 * math.cos(math.radians(angle))
+        z = TILT_AXIS_Z + 15.0 * math.sin(math.radians(angle))
+        yoke += Pos(x, 57.5, z) * Box(5.0, 4.0, 2.5)
+        yoke += Pos((x - 18.5) / 2, 54.5, z) * Box(x + 18.5, 3.0, 2.0)
+    yoke -= Pos(-4.05, 55.0, TILT_AXIS_Z + 2.5) * Box(2.3, 6.2, 5.2)
     return yoke
 
 
 def build_tilt_bushing():
-    b = Pos(0, 0, 1.5) * Cylinder(4.0, 3.0)
-    b += Pos(0, 0, 3.3) * Cylinder(4.6, 0.6)
-    b -= Pos(0, 0, 2) * Cylinder(1.75, 6)
+    # Replaceable shoulder bushing: 3.2 mm sleeve is the D026 clamp stack;
+    # the head turns on the 8.0 mm OD while the M3x8 clamps the bushing itself.
+    b = Pos(0, 0, 1.6) * Cylinder(4.0, 3.2)
+    b += Pos(0, 0, -0.3) * Cylinder(5.0, 0.6)
+    b -= Pos(0, 0, 1.3) * Cylinder(1.75, 5.0)
     return b
 
 
@@ -683,7 +920,7 @@ PRINT_UP = {
     "head_shell_v2": (1, 0, 0),        # open face down, dome rearward-up
     "head_faceplate_v2": (-1, 0, 0),   # cosmetic face down
     "neck_v2": (0, 0, -1),             # flange down
-    "bayonet_collar_v2": (0, 0, 1),    # flat
+    "bayonet_collar_v2": (0, 0, -1),   # visible flange down; cradle builds upward
     "head_pan_plate_v2": (0, 0, 1),    # flat
     "motor_cap_v2": (0, 0, -1),        # upside down: gripping arc opens up
     "battery_clamp_v2": (0, 0, 1),     # flat bar

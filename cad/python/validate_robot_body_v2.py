@@ -45,7 +45,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 import robot_body_v2 as v2  # noqa: E402
 import robot_body_v2_inventory as inv  # noqa: E402
-from build123d import Box, Pos  # noqa: E402
+from build123d import Axis, Box, Cylinder, Pos  # noqa: E402
 
 BED_XY, BED_Z = 240.0, 250.0
 OVERHANG_LIMIT_DEG = 50.0
@@ -158,7 +158,8 @@ def check_interference(solids):
             if group.rstrip("~m") in owned:
                 continue
             box = Pos((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2) * Box(x1 - x0, y1 - y0, z1 - z0)
-            vol = (solid & box).volume
+            hit = solid & box
+            vol = 0.0 if hit is None else hit.volume
             if vol > 1.0:
                 FAILS.append(f"interference: {sname} intrudes {vol:.0f} mm^3 into envelope '{name}'")
 
@@ -244,6 +245,67 @@ def check_mass_cg(solids):
     return total, cgx, cgy, cgz
 
 
+def _intersection_volume(a, b):
+    hit = a & b
+    return 0.0 if hit is None else hit.volume
+
+
+def check_head_mechanism(solids):
+    """Exercise the production pan/tilt geometry, not a second box model.
+
+    The commanded ranges must remain free; contact must appear beyond them at
+    both physical hard stops.  Servo *case* envelopes must clear their capture
+    frames (the flanges and horns intentionally touch their mounting faces).
+    """
+    if abs(v2.TILT_LIMIT_DEG - inv.P.head_tilt_limit_degrees) > 1e-6:
+        FAILS.append("head: v2 tilt command does not track the drawing-backed Params limit")
+    if not (0.25 <= v2.PAN_JOURNAL_CLEARANCE <= 0.45):
+        FAILS.append("head: printed pan journal radial clearance left the coupon-gated 0.25..0.45 mm band")
+
+    collar, neck = solids["bayonet_collar_v2"], solids["neck_v2"]
+    pan_axis = Axis((v2.P.neck_x, 0.0, 0.0), (0.0, 0.0, 1.0))
+    for angle in range(-int(v2.PAN_LIMIT_DEG), int(v2.PAN_LIMIT_DEG) + 1, 10):
+        vol = _intersection_volume(neck.rotate(pan_axis, float(angle)), collar)
+        if vol > 1.0:
+            FAILS.append(f"head pan: {vol:.1f} mm^3 collision at commanded {angle} deg")
+            break
+    for angle in (-70.0, 70.0):
+        if _intersection_volume(neck.rotate(pan_axis, angle), collar) < 5.0:
+            FAILS.append(f"head pan: {angle:+.0f} deg physical stop does not engage")
+
+    head, yoke = solids["head_shell_v2"], solids["yoke_v2"]
+    tilt_axis = Axis((v2.TILT_AXIS_X, 0.0, v2.TILT_AXIS_Z), (0.0, 1.0, 0.0))
+    # Sample more densely than the guide's stated endpoints.  A few cubic
+    # millimetres of OCC tangent noise are accepted; structural collisions are
+    # hundreds to thousands of cubic millimetres (the original placeholder
+    # mechanism measured >4,600 mm^3 at +20 degrees).
+    for angle in range(-int(v2.TILT_LIMIT_DEG), int(v2.TILT_LIMIT_DEG) + 1, 2):
+        vol = _intersection_volume(head.rotate(tilt_axis, float(angle)), yoke)
+        if vol > 8.0:
+            FAILS.append(f"head tilt: {vol:.1f} mm^3 collision at commanded {angle} deg")
+            break
+    for angle in (-25.0, 25.0):
+        if _intersection_volume(head.rotate(tilt_axis, angle), yoke) < 10.0:
+            FAILS.append(f"head tilt: {angle:+.0f} deg physical stop does not engage")
+
+    for label, fit, printed in (
+        ("pan servo/collar", v2.pan_servo_body_fit(), collar),
+        ("pan servo/plate", v2.pan_servo_body_fit(), solids["head_pan_plate_v2"]),
+        ("tilt servo/yoke", v2.tilt_servo_body_fit(), yoke),
+    ):
+        vol = _intersection_volume(fit, printed)
+        if vol > 1.0:
+            FAILS.append(f"head: {label} case clearance collision {vol:.1f} mm^3")
+
+    # The full 20 mm camera/servo cable corridor must remain open through the
+    # rotating neck.  The drive horn deliberately occupies only the -X side.
+    corridor = Pos(v2.P.neck_x, 0.0, (v2.NECK_Z0 + v2.NECK_Z1) / 2) * Cylinder(
+        9.5, v2.NECK_Z1 - v2.NECK_Z0)
+    vol = _intersection_volume(neck, corridor)
+    if vol > 1.0:
+        FAILS.append(f"head: neck cable corridor blocked by {vol:.1f} mm^3")
+
+
 def main():
     gate = "--gate" in sys.argv
     estimates = check_registry()
@@ -252,6 +314,7 @@ def main():
     check_bed_fit(solids)
     check_interference(solids)
     check_overhangs(solids)
+    check_head_mechanism(solids)
     total, cgx, cgy, cgz = check_mass_cg(solids)
 
     if estimates:
