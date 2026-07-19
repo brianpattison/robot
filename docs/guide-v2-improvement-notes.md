@@ -222,3 +222,34 @@ applied (or proposed). Items marked **[fixed]** were implemented in this pass.
   marked pass still fails if (for example) protocol clear succeeded, a service
   cable remained connected, a clamp exceeded its limit, or mirror gap/recovery
   evidence was not observed.
+
+## G. From-scratch buildability review (2026-07-19)
+
+A cold-reader pass: can a stranger with only the PDF and a credit card reach a
+finished dry build? Fixes shipped with release `v2.0.0-prototype.3`.
+
+- **G1. Build source unreachable. [fixed]** The QR pointed at a tree URL on a
+  then-private repo with no published releases. The repo is now public,
+  `RELEASE_URL` points at the GitHub *release* page (downloadable 3MFs + PDF
+  assets), and Chapter 2 tip 1 plus both QR captions now say where to download
+  the files.
+- **G2. BLOCKED rows read as shopping rows. [fixed]** R-ML24 horns, the
+  D85MG/R-ML24 hardware pack, and the D36V50F6 regulator now carry qty
+  "0 for now" and "DO NOT BUY YET" with a pointer to where the build pauses.
+  Steps 18–19 gained red SOURCING GATE banners (STEP_NOTES, rendered above the
+  moves so arrow numbering is untouched); step 12 tolerates the empty 6 V
+  pocket explicitly.
+- **G3. Wiring chapter presented as an executable step. [fixed]** TOC and
+  road-to-robot copy now say "reference maps only"; a leading wire rule states
+  no step in this book cuts a wire; the meter checklist is labeled a preview;
+  steps 11/15/20 no longer promise wiring-chapter actions that don't exist.
+- **G4. Missing tools/consumables. [fixed]** Chapter 1 tools now include the
+  P1S printer itself, an M2 driver for the head pack, a heat-set insert tip,
+  grease (applied in step 18 move 5), and zip ties; the TPU tip covers drying;
+  the camera row names the Pi 5 22-pin cable.
+- **G5. Consistency bugs. [fixed]** Step 2 insert accounting corrected
+  (20 + 27 = 47, the neck/collar 6 were missing); step 20 says "head face" vs
+  "body face panel"; cover chips read AGES 10+ WITH AN ADULT and ONE SCREW
+  SIZE; "one screw, one key" copy admits the pack's M2 hardware.
+- **G6. Electronics table overflow. [fixed]** The taller hold rows pushed page
+  1 of 2 past the footer; the split now sends one more row to page 2.

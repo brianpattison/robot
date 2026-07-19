@@ -10,8 +10,8 @@ from builder_release_catalog_v2 import SHOP_ELECTRONICS, SHOP_FASTENERS, SHOP_FI
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "docs" / "builder-release-v2.md"
-RELEASE_ID = "v2.0.0-prototype.2"
-RELEASE_URL = f"https://github.com/brianpattison/robot/tree/{RELEASE_ID}"
+RELEASE_ID = "v2.0.0-prototype.3"
+RELEASE_URL = f"https://github.com/brianpattison/robot/releases/tag/{RELEASE_ID}"
 
 
 def render() -> str:
