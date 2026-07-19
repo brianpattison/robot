@@ -197,9 +197,11 @@ safety client of record, and is exactly the kind of move the off-host
 audit mirror exists to make visible. Anything `robotd` cannot vouch for,
 the firmware envelope still clamps.
 
-Every command through `robotd` lands in the blackbox log with timestamps
-and source, streamed live off-host as described under Observability. A
-Pi-local file alone is not the audit trail — the mirror is.
+Every state-affecting command through `robotd` lands in the blackbox log
+with timestamps and source, streamed live off-host as described under
+Observability. Read-only status polls are answered without a journal write
+so supervision clients cannot drown the action trail. A Pi-local file
+alone is not the audit trail — the mirror is.
 
 ## Conversation Loop
 
@@ -251,8 +253,10 @@ so at a capped walking pace, bumps, stops, and gets audited.
 
 ## Observability
 
-- **Blackbox:** a log of every `robotd` command, latch event, policy read,
-  and firmware status change — streamed live to the dashboard client and
+- **Blackbox:** a log of every state-affecting `robotd` command, latch
+  event, policy read, and firmware status change (read-only status polls
+  and the bare uptime tick are deliberately not journaled) — streamed live
+  to the dashboard client and
   to an off-robot subscriber (a laptop, a NAS, anything not the Pi). The
   Pi-local copy is convenience only: a sudo-capable agent can edit anything
   stored on the Pi. A read-write off-host mount is also backup only. Trust

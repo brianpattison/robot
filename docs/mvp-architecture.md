@@ -273,6 +273,12 @@ The tracked bench implementation currently covers the boring core:
   `software/install.sh` provision a versioned Pi 5 Bookworm appliance with
   key-only Access-gated SSH, preserved debug UART10, RP1 GPIO UART0 pinned as
   `/dev/rover-pico`, local tlog capture, and an explicitly untrusted RW backup.
+- `software/dashboard/` provides the localhost-only supervision dashboard: a
+  stdlib-only HTTP/SSE client of `robotd` with status, decoded safety flags,
+  per-zone bumper loops, hold-to-drive manual controls, head pan/tilt, a
+  software stop, and a live blackbox tail. Camera preview, perception facts,
+  the agent panel, and policy settings are honest placeholders until those
+  layers exist. It is a supervision tool, not a safety device.
 - `docs/body-protocol-v1.md` is the fixed framed-UART contract.
 - `firmware/pico2-safety/` supplies a host-tested C11 safety core and a
   fail-stopped Pico SDK integration with no production motor output.
@@ -282,9 +288,10 @@ The tracked bench implementation currently covers the boring core:
   pass is bundled.
 
 Run `python3 commissioning/run_host_tests.py` for the hardware-free baseline.
-The wider perception, voice, dashboard, and agent-host, production motor/encoder
-output, real Pi/Tunnel/UART attestations, append-only external collector proof,
-and physical commissioning layers remain to be built and tested.
+The wider perception, voice, and agent-host layers, the dashboard's camera/
+agent-panel/settings surfaces, production motor/encoder output, real
+Pi/Tunnel/UART attestations, append-only external collector proof, and physical
+commissioning layers remain to be built and tested.
 
 Boot behavior:
 
