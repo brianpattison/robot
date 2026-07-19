@@ -107,6 +107,13 @@ CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
 SCREWS = {j.name: len(j.positions) for j in inv.JOINTS}
 
+# Red banner above a step's numbered moves, for holds the builder must see
+# before starting (kept out of the <ol> so arrow numbers stay aligned).
+STEP_NOTES = {
+    "step_18_neck": "SOURCING GATE — the horns + hardware pack are DO-NOT-BUY-YET rows; stop after move 3 until they release.",
+    "step_19_head": "SOURCING GATE — same hold as step 18; wait for the released horn + hardware pack.",
+}
+
 # Per-camera FRONT hint: rear-camera steps see the front on the far side.
 FRONT_LABEL = {
     "step_03_motors": "&#8598; FRONT (far side)",
@@ -362,18 +369,22 @@ STRIP_NAME_OVERRIDES = {
 CHAPTERS = [
     ("SHOP", "#B8892E", "Shop", "every spool, screw, and circuit board"),
     ("PRINT", "#0B6E84", "Print", "prototype plates, test parts, and a piece check"),
-    ("BUILD", "#075365", "Build", "twenty steps from flat tray to finished robot"),
-    ("WIRE", "#C4230F", "Wire", "the power and signal maps, checked with a meter"),
-    ("PLAY", "#74A22D", "Check &amp; play", "safety tests first, then floor time"),
+    ("BUILD", "#075365", "Build", "twenty steps from flat tray to finished body"),
+    ("WIRE", "#C4230F", "Wire", "reference maps only — the harness is not released yet"),
+    ("PLAY", "#74A22D", "Check &amp; play", "the commissioning gate; no powered motion yet"),
 ]
 
 # ---------------------------------------------------------------------------
 # Authored content
 # ---------------------------------------------------------------------------
 SHOP_TOOLS = [
-    ("2.5 mm hex key", "Turns every screw in this robot. Seriously, all of them."),
-    ("6 V current-limited servo tester", "Centers both D85MG servos at 1500 µs before either horn goes on."),
-    ("Soldering iron", "Melts the brass inserts into the plastic. Hot — treat it with respect."),
+    ("Bambu Lab P1S printer (0.4 mm nozzle, Textured PEI plate)", "Prints all 45 pieces. Every plate file in this book is laid out for this exact printer and Bambu Studio — other printers mean re-slicing on your own."),
+    ("2.5 mm hex key", "Turns all 47 M3 screws — every screw you buy for this robot."),
+    ("Small driver for the head’s M2 screws", "The servo hardware pack’s four M2 horn-link screws are the only fasteners the hex key can’t turn. Match a driver to the pack when it releases."),
+    ("6 V current-limited servo tester", "Centers both D85MG servos at 1500 µs before either horn goes on. Any hobby tester works — power it from a current-limited 6 V source."),
+    ("Soldering iron + heat-set insert tip", "Melts the brass inserts into the plastic at about 220 °C. The insert tip keeps them straight — a bare conical tip loves to tilt them."),
+    ("PTFE or silicone grease (small tube)", "A thin smear on the neck’s journal and thrust faces in step 18. One tube outlasts the robot."),
+    ("Zip ties (2.5 mm)", "Tie the future harness at every printed tie point — the wiring chapter shows where."),
     ("Small flush cutters / scissors", "Trims zip ties and TPU strings."),
     ("Painter’s tape + marker", "Label wires as you go."),
     ("Multimeter", "Checks every circuit before the battery ever goes in."),
@@ -399,10 +410,10 @@ SHOP_VISUALS = [
 ]
 
 PRINT_TIPS = [
-    ("Open the prototype project", f"Open <b>codex_robot_body_v2_p1s.3mf</b> in Bambu Studio. Its {N_PLATES} plates are laid out for geometry review on a P1S with a 0.4 mm nozzle and Textured PEI plate; physical release gates remain open."),
+    ("Download, then open the prototype project", f"Download <b>codex_robot_body_v2_p1s.3mf</b> from the Builder Release (scan the QR on the previous page, or github.com/brianpattison/robot) and open it in Bambu Studio. Its {N_PLATES} plates are laid out for geometry review on a P1S with a 0.4 mm nozzle and Textured PEI plate; physical release gates remain open."),
     ("Load the exact family + color", "Each plate names one material and one theme color. Never substitute PLA for a white/black/red PETG plate just to preserve the palette."),
     ("No supports", "Every part targets zero supports. If the slicer asks for supports, stop and re-check the source, plate, and declared orientation."),
-    ("TPU is slow and squishy", "Print the tire and bumper plates slowly (the profile already does this). Dry TPU prints much better."),
+    ("TPU is slow and squishy", "Print the tire and bumper plates slowly (the profile already does this). TPU that has lived outside its bag needs a night in a filament dryer first — damp TPU prints stringy foam."),
     ("Big flat parts stay put", "The tray, shell, lid, skin, and bumper plates use lots of bed. Clean the plate with dish soap first so they stick."),
 ]
 
@@ -417,7 +428,7 @@ STEPS = [
      [("px_insert", 20)],
      ["Heat the soldering iron to about 220 °C — insert temperature.",
       "Rest a brass insert in each gold-marked hole, then press it straight down with the hot iron tip until it sits flush. (The gold pegs in the pictures just point at the holes — the real insert always ends up flush inside, nothing sticking out.)",
-      "20 go into the tray now — the picture marks every spot. The other 21 come later: 2 in the wheels, 2 in the front pods, 14 in the shell, 2 in the lid, and 1 in the head. The book calls for each batch when it’s time."],
+      "20 go into the tray now — the picture marks every spot. The other 27 come later: 2 in the wheels, 2 in the front pods, 14 in the shell, 2 in the lid, 6 in the neck and collar, and 1 in the head. The book calls for each batch when it’s time."],
      "Every insert is flush and straight, none tilted."),
     ("step_03_motors", "Drop in the motors", SCREWS["motor_caps"],
      [("px_motor_L", 2), ("motor_cap_v2", 2)],
@@ -475,11 +486,11 @@ STEPS = [
      [("px_relay", 1)],
      ["The relay drops into its floor pocket on the left, behind the tower.",
       "Its metal bracket slots into the printed pocket; the terminals face UP so they’re easy to wire later.",
-      "No wires yet — all wiring happens in the wiring chapter at the back of this book."],
+      "No wires yet — the wiring chapter at the back of this book is the reference map for the future harness release."],
      "The relay clicks into its pocket and doesn’t rattle."),
     ("step_12_deck", "Put on the power deck", SCREWS["deck_towers"],
      [("deck_v2", 1), ("px_fuse", 1), ("px_reg1", 2)],
-     ["First hang the two small green regulator boards under the deck’s BACK half (they clip under; wires come later).",
+     ["First hang the two small green regulator boards under the deck’s BACK half (they clip under; wires come later). If the 6 V regulator is still on its shopping hold, hang just the 5 V one — the empty pocket is fine for the dry build.",
       "Lower the deck onto the four towers — the notch at the back-right corner goes around the battery wires.",
       "Drive 4 screws down into the tower tops.",
       "Set the black fuse box into its raised outline on the deck’s LEFT half, wire tail hanging over the left edge."],
@@ -502,7 +513,7 @@ STEPS = [
      [("fascia_v2", 1), ("px_tof_L", 2), ("rear_panel_v2", 1)],
      ["First press the two front distance boards into the pockets on the FACE panel’s back — their little lenses peer through the two low holes.",
       "Click the FACE panel into the front opening.",
-      "The dark BACK panel clicks into the back opening. Its two round holes are for the charger plug and the mute switch — they bolt in with their own nuts during the wiring chapter."],
+      "The dark BACK panel clicks into the back opening. Its two round holes are for the charger plug and the mute switch — their own nuts hold them once the harness release closes; in this dry build the holes stay empty."],
      "Both panels sit flush; two tiny lenses look out of the face."),
     ("step_16_speakers", "Speakers and distance eyes",
      SCREWS["speaker_clamps"] + SCREWS["tof_clamps"],
@@ -525,7 +536,7 @@ STEPS = [
       "From above the loose lid, align the collar’s 3 lugs with the keyways, press through, and twist about 20° until all 3 detents sit in the blind underside race.",
       "Flip the supported lid. Set the pan D85MG into the cradle with its shaft UP; the black pan plate captures its flange from below with 2 M3 screws. The case must not be pinched.",
       "Using a current-limited 6 V servo tester, center the servo at 1500 µs. Fit one R-ML24 arm toward FRONT with its verified spline screw; never force the gears by hand.",
-      "Feed the camera ribbon through the open +X crescent, lower the neck journal into the collar, and fasten the neck drive pad to both R-ML24 M2 stations with the verified component screws."],
+      "Smear a thin film of grease (tools list) on the journal and thrust faces, feed the camera ribbon through the open +X crescent, lower the neck journal into the collar, and fasten the neck drive pad to both R-ML24 M2 stations with the verified component screws."],
      "The shoulder sits flat on the greased thrust face; the neck turns by hand through ±60°, meets both hard stops beyond that range, has no lift, and never rubs the ribbon."),
     ("step_19_head", "Build the tilt head and camera", SCREWS["yoke_neck"] + SCREWS["head_tilt_pivot"],
      [("head_shell_v2", 1), ("yoke_v2", 1), ("px_camera", 1), ("px_servo", 1), ("tilt_bushing_v2", 1), ("px_insert", 1)],
@@ -537,14 +548,15 @@ STEPS = [
      "The bushing flange is flush; the shell has no axial pinch, hand-tilts freely through ±20°, and contacts both printed hard stops only beyond the commanded range."),
     ("step_20_face", "Give it a face", 0,
      [("head_faceplate_v2", 1), ("eye_diffuser_bar_v2", 1), ("status_diffuser_bar_v2", 1)],
-     ["Clip the lime eye bar behind the face panel’s eye slots (glow boards ride behind it).",
-      "Press the face panel into its recess: camera hole over the lens.",
-      "The second lime bar clips behind the front body panel’s light slots — each glow board rides in the pocket behind its bar.",
-      "Leave the 4 glow boards in their bag for now — they seat in those pockets during the wiring chapter."],
+     ["Clip the lime eye bar behind the HEAD face’s eye slots (glow boards ride behind it).",
+      "Press the head face into its recess on the head shell: camera hole over the lens.",
+      "The second lime bar clips behind the body face panel’s light slots — each glow board rides in the pocket behind its bar.",
+      "Leave the 4 glow boards in their bag for now — they seat in those pockets when the NeoPixel harness release closes."],
      "Rover Bean is looking at you. Say hi."),
 ]
 
 WIRE_RULES = [
+    "This chapter is the REFERENCE MAP for a harness that is not released yet — no step in this book cuts a wire. Read it to understand the design; build it only when the wire/terminal/fuse releases close.",
     "Wiring is the careful part. Read this whole chapter once, start to finish, before cutting a single wire.",
     "The battery stays OUT of the robot until every wire is checked against these maps.",
     "Use wire colors: RED = battery 12 V, YELLOW = switched motor 12 V, BLUE = 5 V, GREEN = 6 V, BLACK = ground, WHITE = signals.",
@@ -692,6 +704,8 @@ td b { font-weight: 600; }
 .instr { flex: 1; display: flex; flex-direction: column; }
 .instr ol { margin-left: .22in; }
 .instr li { font-size: 13.5px; margin-bottom: .1in; line-height: 1.42; }
+.instr.compact li { font-size: 12.2px; margin-bottom: .065in; line-height: 1.36; }
+.instr.compact .check { font-size: 11.5px; }
 .check { margin-top: auto; background: var(--lime); border-radius: .11in; padding: .1in .13in;
   font-weight: 600; font-size: 12.5px; display: flex; gap: .1in; align-items: flex-start; line-height: 1.35; }
 .check .box { flex: none; width: .16in; height: .16in; background: #fff; border: 2px solid var(--ink);
@@ -845,7 +859,8 @@ def build_body_pages():
           <p>Match the big picture, then read the numbered lines if you want words too. Do the little green
           CHECK before moving on — if it fails, fix it now, because later steps cover things up.</p>
           <h3>2. One screw. One key.</h3>
-          <p>Every screw in this robot is the same M3 × 8 screw, and one 2.5 mm hex key turns them all.
+          <p>Every screw you buy for this robot is the same M3 × 8 screw, and one 2.5 mm hex key turns them all.
+          (The head’s servo hardware pack adds four tiny M2 screws with their own driver.)
           “Snug” means: stop when it stops, then an eighth of a turn. Plastic hates gorillas.</p>
           <h3>3. Front and back</h3>
           <p>The FRONT is where the face panel and head look. The BACK has the charging plug, the mute switch,
@@ -866,7 +881,7 @@ def build_body_pages():
             + ('<div style="font-size:14px; color:#B4A785;">&#8594;</div>' if i < 4 else "")
             + "</div>"
             for i, ((lbl, c, _, _), hint) in enumerate(zip(CHAPTERS,
-                ["buy the box", f"{N_PLATES} plates", f"{len(STEPS)} steps", "maps + meter", "tests, then fun"])))}
+                ["buy the box", f"{N_PLATES} plates", f"{len(STEPS)} steps", "reference maps", "gates, no power"])))}
       </div>""",
         mark="how")
 
@@ -899,12 +914,13 @@ def build_body_pages():
       </div></div>""",
         chapter=0, mark="ch0")
 
-    # Shopping: electronics (split across two pages so nothing clips).
-    half = (len(SHOP_ELECTRONICS) + 1) // 2
+    # Shopping: electronics (split across two pages so nothing clips; the
+    # first page carries taller hold rows, so it takes one fewer).
+    half = (len(SHOP_ELECTRONICS) + 1) // 2 - 1
     for part_i, chunk in enumerate((SHOP_ELECTRONICS[:half], SHOP_ELECTRONICS[half:]), start=1):
         elec = "".join(f"<tr><td><b>{esc(a)}</b></td><td style='text-align:center'>{esc(b)}</td><td>{esc(c)}</td></tr>"
                        for a, b, c in chunk)
-        intro = ("Every production component must ultimately be a normal buy-one-online part in the US. Rows marked BLOCKED or not released are decisions to close, not shopping instructions. The nominal "
+        intro = ("Every production component must ultimately be a normal buy-one-online part in the US. Rows marked DO NOT BUY YET or not released are decisions to close, not shopping instructions — skip them and the book tells you where their build steps pause. The nominal "
                  "28-route harness traveler ships with this version; exact terminals, measured lengths, crimp tooling, and fuse values remain open."
                  if part_i == 1 else "The rest of the electronics box:")
         add(f"""
@@ -929,7 +945,7 @@ def build_body_pages():
       <div style="margin-top:auto; display:flex; align-items:center; gap:.14in; border-top:1px solid var(--line); padding-top:.1in;">
         <img src="{img_uri(RELEASE_QR)}" style="width:.72in; height:.72in; image-rendering:pixelated;">
         <p style="font-size:10.5px;"><b>One source, one version:</b> scan for the permanent Builder Release
-        <span class="mono">{RELEASE_ID}</span>. It contains the exact BOM, software paths, bench commands, and every open physical gate.</p>
+        <span class="mono">{RELEASE_ID}</span>. Download both 3MF print projects and this PDF there — plus the exact BOM, software paths, bench commands, and every open physical gate.</p>
       </div>""", chapter=0)
 
     # --- Chapter 2: print ----------------------------------------------------
@@ -1194,13 +1210,20 @@ def build_body_pages():
         cells = strip_cells(img_name, items, screws)
         strip_cls = "strip dense" if len(items) + (1 if screws else 0) >= 6 else "strip"
         lis = "".join(f"<li>{esc(s)}</li>" for s in subs)
+        note = ""
+        instr_cls = "instr"
+        if img_name in STEP_NOTES:
+            instr_cls = "instr compact"
+            note = (f'<div style="border:2px solid var(--red); color:var(--red); border-radius:.08in;'
+                    f' padding:.04in .08in; margin-bottom:.07in; font-size:9.5px; font-weight:700;'
+                    f' line-height:1.3;">{esc(STEP_NOTES[img_name])}</div>')
         add(f"""
           <div class="stephead"><div class="stepnum">{i}</div><h2>{esc(title)}</h2>{progress(i)}</div>
           <div class="{strip_cls}"><span class="gather">GATHER</span>{cells}</div>
             <div class="stepbody">
             <div class="imgwrap"><img class="main" src="{img_uri(GUIDE_IMG / (img_name + '.png'))}">
               {arrows}{front_chip}{axis}{inset}</div>
-            <div class="instr"><ol>{lis}</ol>
+            <div class="{instr_cls}">{note}<ol>{lis}</ol>
               <div class="check"><span class="box"></span><div><b>CHECK</b>{esc(check)}</div></div></div>
           </div>""",
             chapter=2)
@@ -1333,14 +1356,14 @@ def build_body_pages():
           through the hollow neck, into the head. Zip-tie at every printed tie point; no wire may touch a wheel or the fan.</p>
         </div>
         <div>
-          <h3 style="margin-top:0;">Before the battery goes in: the meter checklist</h3>
-          <p style="font-size:11.5px;">No shorts first: beep-test + to − at the fuse block (no fuses in yet). Then:</p>
+          <h3 style="margin-top:0;">The meter checklist (preview — runs only after the harness release)</h3>
+          <p style="font-size:11.5px;">Nothing below happens today; it goes live with the released harness. First, no shorts: beep-test + to − at the fuse block (no fuses in yet). Then:</p>
           <ol style="font-size:11.5px; margin-left:.25in;">
           <li>Red button held down = relay coil circuit reads OPEN.</li>
           <li>Regulator outputs read 5.0–5.2 V and 6.0 V on the bench before their loads connect.</li>
           <li>Do not choose or install fuses until the measured-load, conductor, inrush, selective-clearing, and thermal evidence is released.</li>
           <li>Charger plug in = motors will not run.</li>
-          <li>For the first powered test, close the lid with its 4 corner screws. Reopen only while shut down with the motor branch physically isolated.</li></ol>
+          <li>The eventual first powered test (its own future release) starts with the lid closed with its 4 corner screws; reopen only while shut down with the motor branch physically isolated.</li></ol>
         </div>
       </div>""",
         chapter=3)
@@ -1375,7 +1398,7 @@ def build_body_pages():
         for icon, t, d in [
             ('<svg width="18" height="18" viewBox="0 0 18 18"><circle cx="9" cy="9" r="6.5" fill="none" stroke="#B9E44A" stroke-width="1.8"/><path d="M9 5.2 12.3 7.1 12.3 10.9 9 12.8 5.7 10.9 5.7 7.1 Z" fill="none" stroke="#B9E44A" stroke-width="1.4"/></svg>',
              "ONE SCREW, ONE KEY",
-             f"Every one of the {N_SCREWS} screws is the same M3 × 8, and one 2.5 mm hex key turns them all."),
+             f"Every one of the {N_SCREWS} screws you buy is the same M3 × 8, and one 2.5 mm hex key turns them all. The head’s servo pack adds its own tiny M2 hardware."),
             ('<svg width="18" height="18" viewBox="0 0 18 18"><path d="M2.5 13.5 H15.5 M2.5 10 H15.5 M2.5 6.5 H15.5" stroke="#B9E44A" stroke-width="1.8" stroke-linecap="round"/><path d="M9 4.5 V1.5 M7.2 3 L9 1.2 L10.8 3" stroke="#B9E44A" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>',
              "ZERO SUPPORTS",
              f"{N_FUNCTIONAL} functional + {N_SPARES} spare + {N_OPTIONAL} optional pieces target {N_PLATES} prototype plates. Physical gates remain open."),
@@ -1401,7 +1424,7 @@ def build_body_pages():
             <div style="display:flex; align-items:center; gap:.12in; margin-top:.14in; padding:.1in; border:1px solid rgba(255,255,255,.2); border-radius:.1in;">
               <img src="{img_uri(RELEASE_QR)}" style="width:.72in; height:.72in; background:#fff; image-rendering:pixelated;">
               <div><div style="font-size:10px; font-weight:800; color:#fff; letter-spacing:.08em;">PERMANENT BUILD SOURCE</div>
-              <div style="font-size:9px; color:#B7D6DE; margin-top:.03in;">{RELEASE_ID}<br>Exact BOM · software · open gates</div></div>
+              <div style="font-size:9px; color:#B7D6DE; margin-top:.03in;">{RELEASE_ID}<br>3MF downloads · exact BOM · software · open gates</div></div>
             </div>
           </div>
         </div>
@@ -1423,8 +1446,8 @@ def build_cover(chapter_pages):
                      f'<span class="t">{name}</span><span class="d">{desc}</span>'
                      f'<span class="lead"></span><span class="pg">{chapter_pages[idx]}</span></div>')
     chips = "".join(f'<span class="statchip">{c}</span>' for c in
-                    ("AGES 10+", f"{N_FUNCTIONAL} FUNCTIONAL + {N_SPARES} SPARE + {N_OPTIONAL} OPTIONAL",
-                     f"{N_PLATES} PLATES", "ONE HEX KEY"))
+                    ("AGES 10+ WITH AN ADULT", f"{N_FUNCTIONAL} FUNCTIONAL + {N_SPARES} SPARE + {N_OPTIONAL} OPTIONAL",
+                     f"{N_PLATES} PLATES", "ONE SCREW SIZE"))
     return f"""
       <img class="hero" src="{img_uri(IMG / 'codex_robot_body_v2_assembled.png')}">
       <div style="width:4.4in; padding-top:.55in;">
