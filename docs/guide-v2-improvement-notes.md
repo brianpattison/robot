@@ -253,3 +253,106 @@ finished dry build? Fixes shipped with release `v2.0.0-prototype.3`.
   SIZE; "one screw, one key" copy admits the pack's M2 hardware.
 - **G6. Electronics table overflow. [fixed]** The taller hold rows pushed page
   1 of 2 past the footer; the split now sends one more row to page 2.
+
+## H. Prime-time pass (2026-07-19, release `v2.0.0-prototype.4`)
+
+A full five-reviewer audit of the 42-page book (four page-range readers plus a
+computed cross-consistency check), and the chapter the goal was missing: the
+guide now ends at a robot whose brain is running, not just a dry body.
+
+- **H1. Chapter 5 was an anticlimax — and the software path was absent.
+  [fixed]** "Check & play" was one page ("admire, measure, and keep the battery
+  out") plus the back cover. The chapter now carries the full bring-up a builder
+  can do without a single open gate: p42 runs the shipped `robotd --simulate` +
+  supervision dashboard on any Mac/Linux (Python 3.11+) with a real captured
+  screenshot and a four-point read of the page; p43 condenses the Pi-5 appliance
+  install (flash, Tunnel, three secret files, `install.sh`, attestations,
+  two-UART proof, and what the installer deliberately refuses to do); p44 seats
+  the resident copilot — full Pi authority, the firmware/physical floor it
+  cannot cross, the journal, a replayable `--source agent` robotctl session,
+  and the honest handoff to the commissioning gates. TOC, road-to-robot strip,
+  and the ch4 opener hand-off updated to match; book is now 45 pages.
+- **H2. The dashboard picture is evidence, not artwork.**
+  `scripts/capture_dashboard_screenshot.py` boots the real simulator +
+  dashboard, replays the narrated agent session, screenshots via headless
+  Chrome, and fails if the blackbox doesn't contain that exact session (or if
+  port 8072 is already occupied — a stale server would silently photograph the
+  wrong state). Rerun after any dashboard UI change.
+- **H3. Cross-consistency audit: all computed checks pass.** Screws (43 in-step
+  + 4 deferred lid corners = 47 everywhere), inserts (20 + 27 with per-step
+  batches matching the joint registry), pieces (40+4+1 on 13 plates, per-part
+  counts vs registry), coupons (18 tests / 19 objects / 5 plates), friendly
+  names (zero fall-throughs), TOC page numbers, and the release tag/assets all
+  reconcile. Two nits fixed: the tools table hardcoded "47" (now `N_SCREWS`),
+  and the dashboard was missing from the release index artifact map.
+- **H4. Page-audit fixes (pp. 1–11).** Rear-hero red slivers behind the motor
+  wheels are now explained in their callout (they are the red motor caps);
+  the cooling-vent callout dot sits on the vent slots instead of the wall;
+  "only fasteners you'll buy" caption reconciled with the M2 servo-pack
+  hardware (the p3 copy already was); plate-6 spares parenthetical attached to
+  the washer entry instead of dangling after "tilt bushing"; plates-page caption
+  grammar; hardware-pack contents no longer list a redundant bare "screws";
+  the 5 V regulator row now says the part is safe to buy while its wiring
+  stays blocked (it read as self-contradictory next to the 6 V hold row); the
+  6 V regulator silhouette tile says "skip for now" and the matching page
+  admits small buys have no tile; and the coupon project page explains the
+  "Body Primary PLA" try-out plate (D034's candidate family), with an optional
+  candidate-spool row added to the filament table.
+- **H5. Declined:** the plate manifest's TPU role string "battery pads"
+  (singular part, but the pad frame carries four cushion pads and fixing the
+  string means regenerating the tracked 3MF for a noun); the cream featureless
+  screw thumbnail (reads fine at GATHER size, labeled everywhere); the
+  footerless full-bleed chapter openers (a deliberate hero-page design); the
+  tiny blackbox text inside the dashboard screenshot (the numbered callouts
+  carry the meaning).
+- **H6. The L/R axis badge was mirrored — the A1 bug class in the overlay.**
+  Front-facing cameras put the robot's RIGHT on the image's LEFT, but the
+  badge statically read "L ← FRONT → R"; on step 7 it actively taught a 180°
+  MDDS10 rotation. `robot_axis_badge()` is now view-aware per step: front
+  views read "R ← FRONT · IT FACES YOU → L", the two rear-camera steps keep
+  the original, and the side-view Pico step shows no L/R badge at all (its
+  horizontal axis is front-back). The "Front and back" primer now teaches the
+  handshake flip, and the badge trigger uses word-boundary matching (it used
+  to fire on "LEFTOVERS").
+- **H7. The battery never left the renders.** Step 9 is a dry fit — the book
+  removes battery, clamp, and pad — but the renderer only accumulated parts,
+  so steps 10–16 showed them still installed (a picture-first builder would
+  leave the battery in). `render_assembly_steps_v2.py` now withdraws
+  dry-fit-only parts after their step (`REMOVED_AFTER_STEP`), and every step
+  render was regenerated from freshly rebuilt v2 exports (the worktree's
+  stale pre-D034 exports were rebuilt first — a render from them would have
+  resurrected fixed geometry). Step 12's "notch goes around the battery
+  wires" is now future-tense.
+- **H8. The numbered-arrow system was redesigned after all three page
+  auditors flagged it.** The magenta badges numbered arrow PAIRS in scene
+  order, but the anatomy page teaches numbered MOVES — so readers paired
+  arrow 2 with sentence 2 and executed wrong pairings on nine pages; several
+  projected landings were also geometrically wrong (dots on wheel faces,
+  floors, shadow gaps, or buried under detail insets). Arrows are now
+  glyphless — the unbroken line pairs a tail dot with a landing ring, so
+  nothing can be read as a move number or collide with "Detail A/B" panel
+  letters — and `STEP_ARROW_TWEAKS` prunes, per part name, every arrow whose
+  landing the audit verified as misleading (steps 1, 3, 5, 6, 7, 9–16, 18,
+  19, 20). Surviving arrows: one or two per step that land on real visible
+  destinations. The anatomy page and the Build opener now state the
+  convention, and the wheel-bench page gained BACK/FRONT identification
+  chips (its gold insert markers had been deliberately removed when the
+  insert seat moved deep into the wheel, leaving the back wheels
+  unidentifiable).
+- **H9. Text/diagram truth fixes from the audit.** Step 3's check no longer
+  claims gearmotor shafts "spin freely" (they drag through a 99:1 gearbox —
+  it contradicted step 6's motor-holds-the-wheel check) and its wire move no
+  longer depends on wires the proxies don't render; step 4's port-over-well
+  check is now the tactile hex-key probe; step 8 points the head-cable
+  promise at step 19 (in-book) instead of "later"; step 9 admits the four
+  floor pads hide behind the tower; step 15 explains the see-through light
+  slots (the "mystery green square" is the interior until step 20 — truthful,
+  now narrated); step 17 disambiguates the lid's two round holes (button vs
+  neck); step 18's check names the neck, not an unintroduced "shoulder";
+  the glow-board inset says LATER; the power-map relay row's destination is
+  the coil (status moved into the middle column); the p39 diagram's
+  branch-feed and motor-fuse wires are drawn RED per its own legend (they
+  were blue/green/yellow); Detail B's washer is printed-cream (not
+  annotation-magenta) with its 22 mm dimension spanning the washer, not the
+  wheel; three inset labels got unclipped leaders; the ch5 opener ship list
+  is now plain language; and the copilot page explains both drive arguments.

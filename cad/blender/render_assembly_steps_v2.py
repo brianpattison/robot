@@ -504,6 +504,15 @@ def project_annotations(specs):
     return projected
 
 
+# Parts a step installs only temporarily: rendered in that step's picture,
+# then withdrawn from the accumulating scene. Step 9 is a DRY FIT — the book
+# removes the battery, clamp, and pad until the meter-check page, so later
+# step pictures must show an empty bay.
+REMOVED_AFTER_STEP = {
+    "battery": {"battery_pad_frame_v2", "battery_clamp_v2", "px_battery"},
+}
+
+
 def steps(objects, mats_cache):
     placed = []
     annotation_map = {}
@@ -555,8 +564,10 @@ def steps(objects, mats_cache):
             for obj in new:
                 obj.hide_render = True   # bench parts wait for the wheels_on step
         else:
+            withdrawn = REMOVED_AFTER_STEP.get(key, set())
             placed.extend(obj for obj in new
-                          if not obj.name.startswith(("px_insert", "px_screw")))
+                          if not obj.name.startswith(("px_insert", "px_screw"))
+                          and obj.name not in withdrawn)
     (OUT / "step_annotations.json").write_text(
         json.dumps(annotation_map, indent=2) + "\n", encoding="utf-8")
     print("wrote step_annotations.json")

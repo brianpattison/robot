@@ -57,6 +57,15 @@ for _group in FILAMENT_GROUPS.values():
         )
     )
 
+SHOP_FILAMENT.append(
+    (
+        "Candidate body-color PLA (optional)",
+        "one spool per color you audition",
+        "Coupon try-out only: the shell/head color you hope to qualify. "
+        "Those parts print white PETG until a candidate passes its recorded checks.",
+    )
+)
+
 SHOP_FASTENERS = [
     (
         "M3 × 8 mm socket head screws",
@@ -79,11 +88,11 @@ SHOP_ELECTRONICS = [
     ("Pololu #4867 gearmotor (99:1, 25D, 12 V, encoder)", "2", "The wheel motors."),
     ("Hitec D85MG servo", "2", "The neck motors (look left/right, up/down)."),
     ("Hitec R-ML24 aluminum horn (H24T)", "0 for now", "DO NOT BUY YET — no normal US quantity-one source is confirmed, and an unmodeled substitute horn is forbidden. The head build pauses at the step 18 sourcing gate until this row clears."),
-    ("Verified D85MG/R-ML24 component hardware pack", "0 for now", "DO NOT BUY YET — not yet purchasable as a kit (spline-center screws, M2 horn-link screws, servo grommets, eyelets, screws, nuts). Releases with the horn row above; confirm the delivered pack against the head coupons."),
+    ("Verified D85MG/R-ML24 component hardware pack", "0 for now", "DO NOT BUY YET — not yet purchasable as a kit (spline-center screws, M2 horn-link screws, servo grommets, eyelets, nuts). Releases with the horn row above; confirm the delivered pack against the head coupons."),
     ("Bioenno BLF-1203AB 12 V 3 Ah LiFePO4 battery", "1", "The robot’s power pack."),
     ("Bioenno BPC-1502DC charger", "1", "The matching charger. Only ever use this one."),
     ("Switchcraft EN2P3M20 inlet + EN2C3F20G2 plug", "1 pair", "The keyed charging plug on the back."),
-    ("Pololu D24V90F5 regulator (5 V)", "1", "CAD envelope only. The novice-safe locking Pi input, backfeed protection, downstream fusing, boot/load margin, and thermal proof are BLOCKED; never feed the GPIO header from this preview."),
+    ("Pololu D24V90F5 regulator (5 V)", "1", "Safe to buy — the board itself is the settled pick and its deck pocket fits it. What stays BLOCKED is wiring it: the novice-safe locking Pi input, backfeed protection, downstream fusing, boot/load margin, and thermal proof are open; never feed the GPIO header from this preview."),
     ("Pololu D36V50F6 regulator (6 V)", "0 for now", "DO NOT BUY YET — availability and two-servo transient/thermal evidence are open. The dry build tolerates its empty deck pocket (step 12 notes it)."),
     ("Panasonic CB1A-R-M-12V relay", "1", "The motor power switch the red button controls."),
     ("Production relay driver", "not released", "BLOCKED: RB-FIXTURE-V1's Adafruit 5648 is negative-control evidence only; production default-off conditioning, fit, and EE review remain open."),

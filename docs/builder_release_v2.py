@@ -10,7 +10,7 @@ from builder_release_catalog_v2 import SHOP_ELECTRONICS, SHOP_FASTENERS, SHOP_FI
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "docs" / "builder-release-v2.md"
-RELEASE_ID = "v2.0.0-prototype.3"
+RELEASE_ID = "v2.0.0-prototype.4"
 RELEASE_URL = f"https://github.com/brianpattison/robot/releases/tag/{RELEASE_ID}"
 
 
@@ -43,6 +43,8 @@ physical first article.
 | UART contract | `docs/body-protocol-v1.md` | Fixed v1 bench protocol; no flash/config-write path. |
 | Pi body daemon | `software/robotd/` | Executable local Unix-socket/UART baseline with blackbox logging. |
 | Pi 5 appliance | `software/appliance/` + `software/install.sh` | Closed-world Bookworm provisioning baseline; real Pi, Tunnel, dual-UART, and append-only collector attestations remain open. |
+| Pi provisioning guide | `docs/pi-appliance-provisioning.md` | The full appliance recipe the book's "Move the brain into the robot" page condenses. |
+| Supervision dashboard | `software/dashboard/` | Localhost-only `robotd` client: status, decoded safety flags, bumper zones, hold-to-drive, blackbox tail. Not a safety device. |
 | Pico safety firmware | `firmware/pico2-safety/` | Tested portable safety core plus a deliberately fail-stopped Pico integration. Production motor outputs are absent. |
 | Harness traveler | `harness/harness-v2.json` | 28-route engineering schedule; exact terminals, measured lengths, fuses, and physical evidence remain red. |
 | Commissioning evidence | `commissioning/plan-v2.json` + `docs/first-article-evidence.md` | Executable 27-step gate plus content-addressed, externally signed per-robot bundles; no physical pass is bundled. |

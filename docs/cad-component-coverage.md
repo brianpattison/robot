@@ -19,7 +19,7 @@ must not be used as a purchase list.
 | Safety logic | Fixed protocol plus Python/C host tests | Qualified production outputs, pin/conditioning review, HIL, binary hash, real stop timing |
 | Pi appliance | Closed-world generated image and host attestations | Real Pi, Tunnel, dual UART, collector mutation denial/readback |
 | Harness | 28 nominal route records and fail-closed release checker | Every exact terminal, length, pull/continuity result, fuse, thermal/fault result |
-| Builder artifacts | Body/coupon 3MFs and 42-page guide generate from source | Physical print/fit review and wiring rewrite after blocked parts are selected |
+| Builder artifacts | Body/coupon 3MFs and 45-page guide generate from source | Physical print/fit review and wiring rewrite after blocked parts are selected |
 
 Passing `validate_robot_body_v2.py --gate` proves registered geometry and
 kinematics. It does not prove a fuse, crimp, polymer, battery, switch, relay,

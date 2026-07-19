@@ -14,9 +14,11 @@ one insert size.
 > **Prototype assembly preview — do not use for powered motion.** The tracked v2
 > 3MF and builder's book are geometry and dry-assembly artifacts. The head/neck
 > load paths are fully modeled and kinematically validated. A versioned Pi 5
-> appliance installer/`robotd`, framed UART contract, portable Pico safety core,
-> deliberately fail-stopped Pico target, nominal harness traveler, and
-> executable commissioning gate now ship. Exact-part fit, production motor
+> appliance installer/`robotd` with its localhost supervision dashboard, framed
+> UART contract, portable Pico safety core, deliberately fail-stopped Pico
+> target, nominal harness traveler, and executable commissioning gate now ship,
+> and the book's closing chapter walks the builder through the bench simulator,
+> the Pi install, and the resident copilot's seat. Exact-part fit, production motor
 > outputs, exact harness terminals/lengths, released fuse values, loaded
 > wear/current testing, and signed physical evidence remain open.
 
