@@ -123,10 +123,79 @@ FRONT_LABEL = {
 }
 
 
+# Per-step corrections to the exported arrow set. "drop" prunes arrows (by the
+# exported part name) whose projected landing sits on hidden geometry, under a
+# detail panel, or duplicates a part that is already seated in the scene —
+# verified page by page in the 2026-07-19 audit. "chips" adds small labeled
+# tags at normalized (x%, y%) for scenes that need identification, not motion.
+STEP_ARROW_TWEAKS = {
+    # Single part lying flat + FRONT chip already on the page; both arrows
+    # (tray, front-edge anchor) landed on empty table or the front notch.
+    "step_01_tray": {"drop": {"tray_v2", "front_edge"}},
+    # The robot-left pair's destinations hide behind the front skirt, so their
+    # arrows dove off the tray onto the floor. The robot-right pair lands in
+    # its cradle and the text says "each cradle".
+    "step_03_motors": {"drop": {"motor_cap_v2", "px_motor_L"}},
+    # Bench scene: the near pair are the BACK wheels (grid -Y toward camera).
+    "step_04_wheels_bench": {"chips": [
+        (27, 68, "BACK"), (57, 74, "BACK"), (29, 40, "FRONT"), (57, 36, "FRONT")]},
+    # The robot-left pod is already seated; its arrow pointed at bare tray.
+    "step_05_front_pods": {"drop": {"front_pod_left_v2"}},
+    # The board's landing projects to the tray's front edge — implausible for
+    # a part that rests on TOP of the popped tower. The tower arrow carries
+    # the step.
+    "step_07_tower": {"drop": {"px_mdds10"}},
+    # Pad, battery, and clamp arrows are near-collinear (they land in one
+    # vertical stack); three arrowheads buried each other. The pad-frame
+    # arrow defines the bay; the battery and clamp visibly hover above it.
+    "step_09_battery": {"drop": {"battery_clamp_v2", "px_battery"}},
+    # Clamp + Pico arrows collapsed into one shaft; the Pico arrow remains.
+    "step_10_pico": {"drop": {"pico_clamp_v2"}},
+    # The floor pocket is fully occluded at this camera; the arrow landed on
+    # the front wheel's face. The move text locates the pocket instead.
+    "step_11_relay": {"drop": {"px_relay"}},
+    # The deck's landing dot fell in the shadow gap between tray and wheel.
+    "step_12_deck": {"drop": {"deck_v2"}},
+    # The shell's tail and landing both projected onto the front wheel face.
+    "step_13_shell": {"drop": {"shell_v2"}},
+    # The two bumper arrows crossed mid-shell with landings on the white
+    # wall; the halves visibly wrap from front and back on their own.
+    "step_14_bumpers": {"drop": {"bumper_front_v2", "bumper_rear_v2"}},
+    # The rear panel's arrow projects under the Detail B inset; the face
+    # panel's was a degenerate stub onto the aperture. Both panels float
+    # directly in front of their openings.
+    "step_15_panels": {"drop": {"fascia_v2", "rear_panel_v2"}},
+    # Both clamp-bar arrows chained visually and the clamps are the inset
+    # panel's subject; the interior view carries the placement.
+    "step_16_speakers": {"drop": {"speaker_clamp_v2", "tof_clamp_v2"}},
+    # front_wheel_v2's arrow is buried under Detail A; rear_wheel_v2_m's tip
+    # lands in the background gap between wheels. One exemplar arrow per
+    # wheel type remains.
+    "step_06_wheels_on": {"drop": {"front_wheel_v2", "rear_wheel_v2_m"}},
+    # All three destinations stack in the same lid opening — the arrows piled
+    # into one tangle. The "lid hidden" inset is the pointer for this step.
+    "step_18_neck": {"drop": {"bayonet_collar_v2", "head_pan_plate_v2", "neck_v2"}},
+    # The bushing arrow projects under the inset cards; the camera arrow tips
+    # into the servo cluster. Both parts have dedicated detail panels.
+    "step_19_head": {"drop": {"tilt_bushing_v2", "px_camera"}},
+    # The eye bar's stub pointed at blank faceplate; the status bar renders
+    # already seated, so its arrow reached into empty background.
+    "step_20_face": {"drop": {"eye_diffuser_bar_v2", "status_diffuser_bar_v2"}},
+}
+
+
 def annotation_svg(step_key):
-    """Crisp numbered assembly arrows projected from the actual Blender scene."""
-    arrows = STEP_ANNOTATIONS.get(step_key, [])
-    if not arrows:
+    """Magenta assembly arrows projected from the actual Blender scene.
+
+    Glyphless on purpose: the unbroken line pairs a floating part with its
+    landing ring, so nothing here can be mistaken for the numbered moves or
+    the lettered detail panels."""
+    tweaks = STEP_ARROW_TWEAKS.get(step_key, {})
+    dropped = tweaks.get("drop", set())
+    arrows = [a for a in STEP_ANNOTATIONS.get(step_key, [])
+              if a.get("part") not in dropped]
+    chips = tweaks.get("chips", [])
+    if not arrows and not chips:
         return ""
     marker = f"arrow_{step_key}"
     bits = [
@@ -141,28 +210,52 @@ def annotation_svg(step_key):
         dx, dy = arrow["tip"][0] * 11, arrow["tip"][1] * 8.5
         vx, vy = dx - tx, dy - ty
         length = max((vx * vx + vy * vy) ** 0.5, 1.0)
-        # Keep the line clear of both numbered dots.
-        sx, sy = tx + vx * 13 / length, ty + vy * 13 / length
-        ex, ey = dx - vx * 18 / length, dy - vy * 18 / length
-        n = arrow["n"]
+        # Keep the line clear of the tail dot and the landing ring.
+        sx, sy = tx + vx * 9 / length, ty + vy * 9 / length
+        ex, ey = dx - vx * 16 / length, dy - vy * 16 / length
         bits.append(
             f'<line x1="{sx:.1f}" y1="{sy:.1f}" x2="{ex:.1f}" y2="{ey:.1f}" '
             f'stroke="#D41468" stroke-width="5" stroke-linecap="round" marker-end="url(#{marker})"/>'
-            f'<circle cx="{tx:.1f}" cy="{ty:.1f}" r="13" fill="#D41468" stroke="#FFF9EE" stroke-width="3"/>'
-            f'<text x="{tx:.1f}" y="{ty + 5:.1f}" text-anchor="middle" fill="#FFF9EE" '
-            f'font-size="16" font-weight="800">{n}</text>'
-            f'<circle cx="{dx:.1f}" cy="{dy:.1f}" r="13" fill="#FFF9EE" fill-opacity=".82" '
+            f'<circle cx="{tx:.1f}" cy="{ty:.1f}" r="7" fill="#D41468" stroke="#FFF9EE" stroke-width="2.5"/>'
+            f'<circle cx="{dx:.1f}" cy="{dy:.1f}" r="11" fill="none" '
             f'stroke="#D41468" stroke-width="4"/>'
-            f'<text x="{dx:.1f}" y="{dy + 5:.1f}" text-anchor="middle" fill="#A20E4A" '
-            f'font-size="16" font-weight="800">{n}</text>'
+            f'<circle cx="{dx:.1f}" cy="{dy:.1f}" r="14.5" fill="none" '
+            f'stroke="#FFF9EE" stroke-width="2.5"/>'
+        )
+    for cx, cy, label in chips:
+        x, y = cx * 11, cy * 8.5
+        w = 24 + 13 * len(label)
+        bits.append(
+            f'<rect x="{x - w / 2:.1f}" y="{y - 16:.1f}" width="{w}" height="32" rx="9" '
+            'fill="#22231F" fill-opacity=".88"/>'
+            f'<text x="{x:.1f}" y="{y + 6:.1f}" text-anchor="middle" fill="#FFF9EE" '
+            f'font-size="17" font-weight="800" letter-spacing="1.5">{label}</text>'
         )
     bits.append("</svg>")
     return "".join(bits)
 
 
-def robot_axis_badge():
-    return ('<div class="axisbadge"><span>L</span><b>&larr;</b><i>FRONT</i>'
-            '<b>&rarr;</b><span>R</span></div>')
+# Camera family per step render: "front" cameras face the robot (so the
+# robot's RIGHT projects to the image's LEFT — like looking at a friend),
+# "rear" cameras stand behind it (image left = robot left), and the pico
+# camera is a side view whose horizontal axis is front-back, where an L/R
+# badge would simply lie. Must match CAMS in render_assembly_steps_v2.py.
+STEP_VIEW = {
+    "step_03_motors": "rear",
+    "step_06_wheels_on": "rear",
+    "step_10_pico": "side",
+}
+
+
+def robot_axis_badge(step_key):
+    view = STEP_VIEW.get(step_key, "front")
+    if view == "side":
+        return ""
+    if view == "rear":
+        return ('<div class="axisbadge"><span>L</span><b>&larr;</b><i>FRONT</i>'
+                '<b>&rarr;</b><span>R</span></div>')
+    return ('<div class="axisbadge"><span>R</span><b>&larr;</b><i>FRONT &middot; IT FACES YOU</i>'
+            '<b>&rarr;</b><span>L</span></div>')
 
 
 def technical_diagram(kind):
@@ -200,10 +293,12 @@ def technical_diagram(kind):
     if kind == "front_washer":
         return common + '''
           <circle cx="208" cy="155" r="118" fill="#32312E"/>
-          <circle cx="208" cy="155" r="57" fill="#F5EEE2"/>
-          <circle cx="208" cy="155" r="68" fill="none" stroke="#D41468" stroke-width="22"/>
+          <circle cx="208" cy="155" r="57" fill="#4D4B46"/>
+          <circle cx="208" cy="155" r="68" fill="none" stroke="#E9DED0" stroke-width="22"/>
+          <circle cx="208" cy="155" r="79" fill="none" stroke="#22231F" stroke-width="2"/>
+          <circle cx="208" cy="155" r="57" fill="none" stroke="#22231F" stroke-width="2"/>
           <circle cx="208" cy="155" r="13" fill="#8A8984"/>
-          <path d="M93 42 H323 M93 34 V50 M323 34 V50" stroke="#087A8C" stroke-width="3"/>
+          <path d="M129 42 H287 M129 34 V50 M287 34 V50" stroke="#087A8C" stroke-width="3"/>
           <text x="145" y="28" font-size="17" font-weight="700" fill="#087A8C">22 mm cap washer</text>
           <path d="M151 155 H265" stroke="#FFF9EE" stroke-width="3"/>
           <text x="312" y="121" font-size="14" font-weight="700" fill="#1F2828">washer overlaps</text>
@@ -220,11 +315,14 @@ def technical_diagram(kind):
           <path d="M34 158 Q18 191 34 231 L89 255 H326 Q356 255 356 225 V204" fill="none" stroke="#242421" stroke-width="25"/>
           <path d="M96 203 H119" stroke="#D41468" stroke-width="4" marker-end="url(#tiny)"/>
           <defs><marker id="tiny" markerWidth="8" markerHeight="8" refX="7" refY="3.5" orient="auto"><path d="M0 0V7L8 3.5Z" fill="#D41468"/></marker></defs>
+          <path d="M326 70 H305 M326 112 H305 M326 154 H305" stroke="#087A8C" stroke-width="3"/>
           <text x="330" y="74" font-size="14" font-weight="700" fill="#1F2828">0.4 mm rest gap</text>
           <text x="330" y="116" font-size="14" font-weight="700" fill="#1F2828">2.0 mm switch click</text>
           <text x="330" y="158" font-size="14" font-weight="700" fill="#1F2828">2.4 mm hard stop</text>
-          <text x="330" y="216" font-size="14" font-weight="700" fill="#087A8C">button faces OUT</text>
-          <text x="330" y="244" font-size="14" font-weight="700" fill="#087A8C">lead exits IN</text>
+          <path d="M262 190 H326" stroke="#087A8C" stroke-width="3"/>
+          <text x="330" y="194" font-size="14" font-weight="700" fill="#087A8C">button faces OUT</text>
+          <path d="M148 194 Q136 240 210 288 H240" stroke="#087A8C" stroke-width="3" fill="none"/>
+          <text x="246" y="292" font-size="14" font-weight="700" fill="#087A8C">lead exits IN</text>
         ''' + end
     if kind == "fascia_back":
         return common + '''
@@ -246,8 +344,8 @@ def technical_diagram(kind):
           <rect x="42" y="46" width="430" height="220" rx="20" fill="#DED9CF"/>
           <rect x="78" y="78" width="210" height="88" rx="10" fill="#4B4944"/>
           <rect x="78" y="78" width="26" height="88" fill="#171817"/>
-          <path d="M104 92 H52 M288 122 H360" stroke="#087A8C" stroke-width="3"/>
-          <text x="8" y="88" font-size="14" font-weight="700" fill="#1F2828">grille OUT</text>
+          <path d="M91 76 V52 M288 122 H360" stroke="#087A8C" stroke-width="3"/>
+          <text x="8" y="40" font-size="14" font-weight="700" fill="#1F2828">grille OUT</text>
           <text x="364" y="118" font-size="14" font-weight="700" fill="#1F2828">magnet IN</text>
           <rect x="150" y="188" width="96" height="42" rx="7" fill="#397948"/>
           <rect x="250" y="191" width="58" height="36" rx="6" fill="#5F83D0"/>
@@ -265,7 +363,7 @@ def technical_diagram(kind):
           <rect x="137" y="171" width="108" height="32" rx="8" fill="none" stroke="#F0C34A" stroke-width="8"/>
           <rect x="138" y="232" width="52" height="47" rx="5" fill="#20211F"/>
           <rect x="194" y="232" width="52" height="47" rx="5" fill="#20211F"/>
-          <path d="M255 257 H350" stroke="#087A8C" stroke-width="3"/>
+          <path d="M250 257 H274" stroke="#087A8C" stroke-width="3"/>
           <text x="280" y="80" font-size="13" font-weight="700" fill="#1F2828">teal skin: cosmetic only</text>
           <text x="280" y="128" font-size="13" font-weight="700" fill="#1F2828">4 mm PETG lid clamps switch</text>
           <text x="280" y="178" font-size="13" font-weight="700" fill="#1F2828">nut + printed reinforcement</text>
@@ -282,8 +380,8 @@ def technical_diagram(kind):
           <rect x="319" y="192" width="56" height="32" rx="7" fill="#438851"/>
           <path d="M173 190 V160 M347 190 V160" stroke="#D41468" stroke-width="5"/>
           <text x="80" y="82" font-size="14" font-weight="700" fill="#1F2828">clip diffuser first</text>
-          <text x="258" y="82" font-size="13" font-weight="700" fill="#1F2828">seat both glow boards from behind</text>
-          <text x="124" y="286" font-size="14" font-weight="700" fill="#087A8C">LED arrows OUT, JST plugs IN</text>
+          <text x="258" y="82" font-size="13" font-weight="700" fill="#1F2828">glow boards seat from behind — LATER</text>
+          <text x="86" y="286" font-size="14" font-weight="700" fill="#087A8C">when their harness releases: LED arrows OUT, JST plugs IN</text>
         ''' + end
     raise KeyError(kind)
 # Inset panels overlaid on a step's big picture: render name + caption.
@@ -371,7 +469,7 @@ CHAPTERS = [
     ("PRINT", "#0B6E84", "Print", "prototype plates, test parts, and a piece check"),
     ("BUILD", "#075365", "Build", "twenty steps from flat tray to finished body"),
     ("WIRE", "#C4230F", "Wire", "reference maps only — the harness is not released yet"),
-    ("PLAY", "#74A22D", "Check &amp; play", "the commissioning gate; no powered motion yet"),
+    ("PLAY", "#74A22D", "Check &amp; play", "wake the brain, meet your copilot"),
 ]
 
 # ---------------------------------------------------------------------------
@@ -379,7 +477,7 @@ CHAPTERS = [
 # ---------------------------------------------------------------------------
 SHOP_TOOLS = [
     ("Bambu Lab P1S printer (0.4 mm nozzle, Textured PEI plate)", "Prints all 45 pieces. Every plate file in this book is laid out for this exact printer and Bambu Studio — other printers mean re-slicing on your own."),
-    ("2.5 mm hex key", "Turns all 47 M3 screws — every screw you buy for this robot."),
+    ("2.5 mm hex key", f"Turns all {N_SCREWS} M3 screws — every screw you buy for this robot."),
     ("Small driver for the head’s M2 screws", "The servo hardware pack’s four M2 horn-link screws are the only fasteners the hex key can’t turn. Match a driver to the pack when it releases."),
     ("6 V current-limited servo tester", "Centers both D85MG servos at 1500 µs before either horn goes on. Any hobby tester works — power it from a current-limited 6 V source."),
     ("Soldering iron + heat-set insert tip", "Melts the brass inserts into the plastic at about 220 °C. The insert tip keeps them straight — a bare conical tip loves to tilt them."),
@@ -399,7 +497,7 @@ SHOP_VISUALS = [
     ("thumb_px_relay.png", "Panasonic relay"),
     ("thumb_px_fuse.png", "Blue Sea fuse block"),
     ("thumb_px_reg1.png", "5 V regulator"),
-    ("thumb_px_reg2.png", "6 V regulator"),
+    ("thumb_px_reg2.png", "6 V regulator (skip for now)"),
     ("thumb_px_switch.png", "Bumper switch ×6"),
     ("thumb_px_servo.png", "D85MG servo ×2"),
     ("thumb_px_speaker_L.png", "Speaker + amp ×2"),
@@ -433,16 +531,16 @@ STEPS = [
     ("step_03_motors", "Drop in the motors", SCREWS["motor_caps"],
      [("px_motor_L", 2), ("motor_cap_v2", 2)],
      ["Lay a motor in each cradle with the metal shaft poking OUT through the hole toward the wheel side.",
-      "Point the wires inward, toward the middle of the robot.",
+      "Point each motor’s wire end — the end without the shaft — inward, toward the middle of the robot. (The picture’s plain grey motors leave the wires off.)",
       "Set a printed cap over each motor and screw it down with 2 screws per cap — snug, not gorilla-tight."],
-     "Motors don’t wiggle. Shafts spin freely when you twist them."),
+     "Motors don’t wiggle. Each shaft turns when you twist it firmly — the gearbox drags, and that’s normal."),
     ("step_04_wheels_bench", "Make the wheels", 0,
      [("rear_wheel_v2", 2), ("front_wheel_v2", 2), ("tire_v2", 4), ("px_insert", 2)],
-     ["Each BACK wheel has a little screw well in its rim. Drop 1 insert down each well (2 total), then press it to the bottom with the tip of the iron. It seats deep inside the wheel, close to the axle — nothing pokes out.",
+     ["The picture’s tags say which two are the BACK wheels (small middle hole with a flat). Each BACK wheel has a little screw well — a small round hole in its rim, shown in the cutaway. Drop 1 insert down each well (2 total), then press it to the bottom with the tip of the iron. It seats deep inside the wheel, close to the axle — nothing pokes out.",
       "Stretch a stretchy printed tire over each of the four wheels, like putting a rubber band on a yo-yo.",
-      "Every tire has one little round port in its tread. On the BACK wheels, spin the tire until the port sits right over the screw well (the front wheels don’t care).",
+      "Every tire has one little round port in its tread. On the BACK wheels, spin the tire until the port sits right over the screw well — poke a hex key through the port; it should slide into the well (the front wheels don’t care).",
       "Work each tire around evenly until it sits flat in the groove all the way around."],
-     "No tire bulges, and each BACK tire’s port lines up over its screw well."),
+     "No tire bulges, and a hex key through each BACK tire’s port drops into the screw well."),
     ("step_05_front_pods", "Bolt on the front pods", SCREWS["front_pods"],
      [("front_pod_left_v2", 2), ("px_insert", 2)],
      ["Melt 1 insert into the end of each pod’s peg (2 total).",
@@ -467,11 +565,11 @@ STEPS = [
      [("px_pi", 1)],
      ["The Raspberry Pi lies flat on the tower’s top shelf frame.",
       "Its USB ports face the BACK of the robot so the cables can reach.",
-      "Don’t screw anything — the shelf pocket holds it, and the head’s cable will come down to it later."],
+      "Don’t screw anything — the shelf pocket holds it, and the head’s camera cable drops down to it in step 19."],
      "The Pi sits in its pocket, ports facing backward."),
     ("step_09_battery", "Dry-fit the battery, then remove it", SCREWS["battery_clamp"],
      [("battery_pad_frame_v2", 1), ("px_battery", 1), ("battery_clamp_v2", 1)],
-     ["Lay the soft TPU pad frame onto the four pads behind the tower.",
+     ["Lay the soft TPU pad frame onto the four little floor pads behind the tower — the arrow shows the bay; the pads hide behind the tower from this angle.",
       "Set the battery on it, wires pointing at the BACK of the robot.",
       "Bridge the clamp bar across the battery onto the two posts and screw it down with 2 screws — firm, so the battery cannot slide.",
       "This is a DRY FIT only. Remove the screws, clamp, battery, and soft pad; put the battery in a safe box away from the build until the meter-check page calls for it."],
@@ -491,7 +589,7 @@ STEPS = [
     ("step_12_deck", "Put on the power deck", SCREWS["deck_towers"],
      [("deck_v2", 1), ("px_fuse", 1), ("px_reg1", 2)],
      ["First hang the two small green regulator boards under the deck’s BACK half (they clip under; wires come later). If the 6 V regulator is still on its shopping hold, hang just the 5 V one — the empty pocket is fine for the dry build.",
-      "Lower the deck onto the four towers — the notch at the back-right corner goes around the battery wires.",
+      "Lower the deck onto the four towers — the notch at the back-right corner is where the battery’s wires will pass once it moves back in.",
       "Drive 4 screws down into the tower tops.",
       "Set the black fuse box into its raised outline on the deck’s LEFT half, wire tail hanging over the left edge."],
      "The deck is level and the fuse box sits inside its printed fence."),
@@ -513,7 +611,8 @@ STEPS = [
      [("fascia_v2", 1), ("px_tof_L", 2), ("rear_panel_v2", 1)],
      ["First press the two front distance boards into the pockets on the FACE panel’s back — their little lenses peer through the two low holes.",
       "Click the FACE panel into the front opening.",
-      "The dark BACK panel clicks into the back opening. Its two round holes are for the charger plug and the mute switch — their own nuts hold them once the harness release closes; in this dry build the holes stay empty."],
+      "The dark BACK panel clicks into the back opening. Its two round holes are for the charger plug and the mute switch — their own nuts hold them once the harness release closes; in this dry build the holes stay empty.",
+      "The face panel’s two light slots stay see-through into the body until the lime bars clip in at step 20 — that’s normal."],
      "Both panels sit flush; two tiny lenses look out of the face."),
     ("step_16_speakers", "Speakers and distance eyes",
      SCREWS["speaker_clamps"] + SCREWS["tof_clamps"],
@@ -525,7 +624,7 @@ STEPS = [
     ("step_17_lid", "The lid and the BIG RED BUTTON",
      SCREWS["mic_cradle"],
      [("lid_v2", 1), ("lid_skin_v2", 1), ("px_estop_cap", 1), ("px_mic", 1), ("mic_cradle_v2", 1), ("px_insert", 2)],
-     ["Melt the lid’s 2 mic-boss inserts, then drop the red emergency-stop through the lid’s round hole and spin its nut on underneath — the lid IS its mounting panel, and the printed ring under the lid makes it strong.",
+     ["Melt the lid’s 2 mic-boss inserts, then drop the red emergency-stop through the SMALLER of the lid’s two round holes (the big front one belongs to the neck) and spin its nut on underneath — the lid IS its mounting panel, and the printed ring under the lid makes it strong.",
       "Set the round microphone under the lid’s slotted area and screw its ring cradle to the two bosses (2 screws).",
       "OPTIONAL: after the E-stop is clamped, press the teal skin’s four integral tabs into the lid’s blind pockets. It stays above the lid and never goes under the E-stop nut, neck, microphone, or corner screws.",
       "Rest the lid in its ledge — DON’T screw it yet. The neck, the head, and all the wiring still need the inside. Its 4 corner screws are the very last thing in this book."],
@@ -537,7 +636,7 @@ STEPS = [
       "Flip the supported lid. Set the pan D85MG into the cradle with its shaft UP; the black pan plate captures its flange from below with 2 M3 screws. The case must not be pinched.",
       "Using a current-limited 6 V servo tester, center the servo at 1500 µs. Fit one R-ML24 arm toward FRONT with its verified spline screw; never force the gears by hand.",
       "Smear a thin film of grease (tools list) on the journal and thrust faces, feed the camera ribbon through the open +X crescent, lower the neck journal into the collar, and fasten the neck drive pad to both R-ML24 M2 stations with the verified component screws."],
-     "The shoulder sits flat on the greased thrust face; the neck turns by hand through ±60°, meets both hard stops beyond that range, has no lift, and never rubs the ribbon."),
+     "The neck sits flat on the greased thrust face; it turns by hand through ±60°, meets both hard stops beyond that range, has no lift, and never rubs the ribbon."),
     ("step_19_head", "Build the tilt head and camera", SCREWS["yoke_neck"] + SCREWS["head_tilt_pivot"],
      [("head_shell_v2", 1), ("yoke_v2", 1), ("px_camera", 1), ("px_servo", 1), ("tilt_bushing_v2", 1), ("px_insert", 1)],
      ["Melt 1 insert into the yoke’s passive-pivot boss from the OUTSIDE end. Seat the yoke on the neck and install its 4 M3 screws without trapping the center ribbon.",
@@ -570,7 +669,7 @@ POWER_MAP = [
     ("Fuse branch 2", "D36V50F6 regulator", "6 V servos; regulator qualification BLOCKED"),
     ("Fuse branches 3 + 4", "covered spare positions", "no assigned loads or fuse values"),
     ("Battery +12 V", "separate motor fuse → relay contacts", "MDDS10 motor board power"),
-    ("Relay coil 12 V", "BOTH E-stop NC contacts + driver", "production driver/default-off proof BLOCKED"),
+    ("12 V coil feed (exact tap OPEN)", "BOTH E-stop NC contacts + driver (proof BLOCKED)", "relay coil"),
     ("Charger EN2", "assigned contacts TBD", "charge pair + protected charger-present; BLOCKED"),
 ]
 SIGNAL_MAP = [
@@ -596,10 +695,10 @@ MEET_FRONT = [
     (83, 72, "Four wheels with grippy printed tires. The back pair are the motor wheels."),
 ]
 MEET_REAR = [
-    (28, 32, "Cooling vents — warm air from the computer leaves here."),
+    (36, 38.5, "Cooling vents — warm air from the computer leaves here."),
     (51.5, 39, "The BIG RED BUTTON. Push = everything stops; twist to release."),
     (27, 57, "The charging plug and the mic mute switch bolt into these two holes."),
-    (70, 77, "Motor wheels. Each one has its own motor and its own speed sensor."),
+    (70, 77, "Motor wheels. Each one has its own motor and its own speed sensor — the sliver of red behind the wheel is its motor cap."),
 ]
 
 
@@ -718,6 +817,10 @@ td b { font-weight: 600; }
   color: #A2967C; text-transform: uppercase; }
 .rule { background: #FFF8F1; border: 1.5px solid #E8B8A9;
   border-radius: .07in; padding: .07in .13in; margin-bottom: .08in; font-size: 12.5px; }
+.cmd { background: #22231F; color: #E8E4D8; border-radius: .1in; padding: .1in .13in;
+  font-family: Menlo, monospace; font-size: 9.5px; line-height: 1.55; white-space: pre-wrap;
+  word-break: break-all; }
+.cmd b { color: #B9E44A; font-weight: 700; }
 .hero { position: absolute; right: 0; top: 0; width: 6in; height: 8.5in; object-fit: cover; object-position: 62% 22%; }
 .invgrid { display: grid; grid-template-columns: repeat(8, 1fr); gap: .08in; }
 .invcell { background: #fff; border: 1px solid var(--line-soft); border-radius: .1in;
@@ -779,6 +882,8 @@ def strip_cells(step_key, items, screws):
     cells = ""
     for t, n in items:
         name = STRIP_NAME_OVERRIDES.get((step_key, t), friendly(t))
+        if t == "px_insert" and n == 1:
+            name = "brass insert"
         cells += (f'<div class="cell"><img src="{img_uri(GUIDE_IMG / ("thumb_" + t + ".png"))}">'
                   f'<div><b>&times;{n}</b><small>{esc(name)}</small></div></div>')
     if screws:
@@ -852,7 +957,8 @@ def build_body_pages():
         <div>{anatomy}
           <p style="font-size:11px; color:var(--ink2); margin-top:.1in; width:4.9in;">The tan GATHER strip lists every
           part and screw the step needs — lay them out like a cooking show. The picture shows the robot so far,
-          with the new parts floating just off their spot. The FRONT tag always points at the robot’s face.</p>
+          with the new parts floating just off their spot; a magenta arrow slides a floating part into its landing ring.
+          The FRONT tag points at the robot’s face.</p>
         </div>
         <div style="flex:1;">
           <h3 style="margin-top:0;">1. The pictures do the talking</h3>
@@ -864,7 +970,9 @@ def build_body_pages():
           “Snug” means: stop when it stops, then an eighth of a turn. Plastic hates gorillas.</p>
           <h3>3. Front and back</h3>
           <p>The FRONT is where the face panel and head look. The BACK has the charging plug, the mute switch,
-          and the motor wheels. Left and right are the robot’s left and right, not yours.</p>
+          and the motor wheels. Left and right are always the robot’s left and right, not yours — and most pictures
+          FACE the robot, so its R sits on your left, like shaking hands. The corner badge on those pictures
+          spells out the flip.</p>
           <h3>4. Go in order</h3>
           <p>The steps nest like LEGO bags: wheels before shell, shell before lid. The soldering iron and the
           multimeter each come out for their own steps — the book tells you exactly when.</p>
@@ -881,7 +989,7 @@ def build_body_pages():
             + ('<div style="font-size:14px; color:#B4A785;">&#8594;</div>' if i < 4 else "")
             + "</div>"
             for i, ((lbl, c, _, _), hint) in enumerate(zip(CHAPTERS,
-                ["buy the box", f"{N_PLATES} plates", f"{len(STEPS)} steps", "reference maps", "gates, no power"])))}
+                ["buy the box", f"{N_PLATES} plates", f"{len(STEPS)} steps", "reference maps", "brain on, motors off"])))}
       </div>""",
         mark="how")
 
@@ -908,8 +1016,9 @@ def build_body_pages():
              padding:.12in; display:flex; gap:.22in; align-items:center;">
           <img src="{img_uri(GUIDE_IMG / 'thumb_px_screw.png')}" style="width:1.15in;">
           <img src="{img_uri(GUIDE_IMG / 'thumb_px_insert.png')}" style="width:1.15in;">
-          <p style="font-size:11.5px;">This screw and this brass insert are the only fasteners you’ll buy for the
-          whole robot. When a step says “2 screws,” it always means these.</p>
+          <p style="font-size:11.5px;">This screw and this brass insert are the only fasteners you’ll buy on their own
+          for the whole robot — the head’s servo pack ships with its own tiny M2 hardware. When a step says “2 screws,”
+          it always means these.</p>
         </div>
       </div></div>""",
         chapter=0, mark="ch0")
@@ -939,8 +1048,9 @@ def build_body_pages():
     add(f"""
       {eyebrow(0)}
       <h2>Match the electronics before they enter the robot</h2>
-      <p style="margin-bottom:.12in;">Use these silhouettes to sort the purchased parts. They show identity and connector direction,
-      not exact scale; the delivered-part fit record still decides whether a component passes.</p>
+      <p style="margin-bottom:.12in;">Use these silhouettes to sort the big purchased parts. They show identity and connector direction,
+      not exact scale; small buys (memory card, charger, plugs, glow boards) go by their bag labels, and the delivered-part
+      fit record still decides whether a component passes.</p>
       <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:.08in;">{visual_cells}</div>
       <div style="margin-top:auto; display:flex; align-items:center; gap:.14in; border-top:1px solid var(--line); padding-top:.1in;">
         <img src="{img_uri(RELEASE_QR)}" style="width:.72in; height:.72in; image-rendering:pixelated;">
@@ -979,7 +1089,7 @@ def build_body_pages():
         <div>
           <img src="{img_uri(IMG / 'codex_robot_body_v2_p1s_plates.png')}"
                style="width:100%; border-radius:.12in; border:1px solid var(--line-soft);">
-          <p style="font-size:10px; margin-top:.06in; color:var(--ink2);">All {N_PLATES} prototype plates, exactly as they open in Bambu Studio. Layout is not powered-motion release.</p>
+          <p style="font-size:10px; margin-top:.06in; color:var(--ink2);">All {N_PLATES} prototype plates, exactly as they open in Bambu Studio. The layout is print review, not a powered-motion release.</p>
         </div>
       </div>
       <div style="border-top:1px solid var(--line); padding-top:.12in; margin-top:auto;">
@@ -996,11 +1106,13 @@ def build_body_pages():
         for pp in p["parts"]:
             base = re.sub(r"_i\d+$", "", pp["name"])
             plate_counts[base] = plate_counts.get(base, 0) + 1
-        parts_txt = esc(", ".join(
-            friendly(base) if n == 1 else f"{friendly(base)} ×{n}"
-            for base, n in plate_counts.items()))
-        if "washer" in parts_txt:
-            parts_txt += " <i>(the robot uses 2 — the rest are spares)</i>"
+        items = []
+        for base, n in plate_counts.items():
+            txt = esc(friendly(base)) if n == 1 else f"{esc(friendly(base))} ×{n}"
+            if base == "printed_washer_v2":
+                txt += " <i>(the robot uses 2 — the rest are spares)</i>"
+            items.append(txt)
+        parts_txt = ", ".join(items)
         rows += (
             f"<tr><td style='text-align:center'><b>{p['plate_number']}</b></td>"
             f"<td><span style='display:inline-block;width:.13in;height:.13in;border-radius:50%;"
@@ -1058,7 +1170,12 @@ def build_body_pages():
             <li>Run the matching fit, load, wear, heat, or optical check on the next two pages.</li>
             <li>Record the machine, filament, settings, measured result, tester, and date. Blank means OPEN.</li>
           </ol>
-          <div class="check" style="margin-top:.2in;"><span class="box"></span><div><b>CHECK</b>
+          <div style="margin-top:.14in; background:var(--cream); border-radius:.1in; padding:.09in .12in;">
+            <p style="font-size:10.5px;"><b>About the “Body Primary PLA” plate:</b> that one is the try-out plate — print it in the
+            body-color PLA you <i>hope</i> to use for the shell and head. Until a candidate passes every check, those parts print in
+            white PETG (this book’s plates already do), so the try-out spool is a color audition, not a shopping-list item.</p>
+          </div>
+          <div class="check" style="margin-top:.14in;"><span class="box"></span><div><b>CHECK</b>
             Every coupon object is present, each plate contains one material/color, and no support is enabled.</div></div>
         </div>
       </div>""", chapter=1)
@@ -1142,8 +1259,9 @@ def build_body_pages():
         <h1 style="font-size:52px;">Build it</h1>
         <p style="font-size:14px; margin-top:.2in; width:3.9in;">Twenty steps. Lay out the parts from each step’s
         GATHER strip before you start, match the big picture, then run the green CHECK.</p>
-        <p style="font-size:13px; margin-top:.15in; width:3.9in;">The little <b>FRONT</b> tag on every picture points
-        at the robot’s face, so left and right never get confusing.</p>
+        <p style="font-size:13px; margin-top:.15in; width:3.9in;">The little <b>FRONT</b> tag on the robot pictures points
+        at the robot’s face, so left and right never get confusing. (The wheel-bench step has no robot in it — no tag.)
+        Magenta arrows slide floating parts into their landing rings.</p>
         <p style="font-size:13px; margin-top:.15in; width:3.9in;">One rule: <b>go in order.</b> The steps nest —
         skipping ahead means taking things apart later.</p>
         <div style="display:flex; gap:.3in; margin-top:.32in; width:4in; border-top:1px solid var(--line); padding-top:.18in;">
@@ -1163,8 +1281,8 @@ def build_body_pages():
         label = FRONT_LABEL.get(img_name, "&#8601; FRONT")
         front_chip = f'<div class="frontchip">{label}</div>' if label else ""
         direction_text = " ".join((title, *subs, check)).upper()
-        axis = (robot_axis_badge()
-                if label is not None and any(word in direction_text for word in ("LEFT", "RIGHT"))
+        axis = (robot_axis_badge(img_name)
+                if label is not None and re.search(r"\b(LEFT|RIGHT)\b", direction_text)
                 else "")
         arrows = annotation_svg(img_name)
         inset = ""
@@ -1255,7 +1373,9 @@ def build_body_pages():
             <tr><td><b>Pan + tilt servos</b></td><td>pan inside the neck, tilt in the head’s side</td><td>pan shaft UP, tilt shaft SIDEWAYS</td></tr>
             <tr><td><b>Glow boards ×4</b></td><td>pockets behind the eye + status bars</td><td>lights OUT</td></tr>
           </table>
-          <p style="font-size:10px; margin-top:.08in; color:var(--red);"><b>PROTOTYPE HOLD:</b> This populated cutaway
+          <p style="font-size:10px; margin-top:.08in; color:var(--ink2);">The cutaway hides the shell, lid, and head, so parts
+          that mount on them — the white neck collar ring, the side speakers — hover at their true installed heights.</p>
+          <p style="font-size:10px; margin-top:.05in; color:var(--red);"><b>PROTOTYPE HOLD:</b> This populated cutaway
           proves placement only. MAX98357A mounts, NeoPixel installation, and the exact harness schedule are not released yet.</p>
         </div>
       </div>""",
@@ -1324,12 +1444,12 @@ def build_body_pages():
         <text x="130" y="492" fill="#c9ecf5" font-size="11" text-anchor="middle">contact assignments TBD</text>
         <path d="M170,260 C210,260 210,180 240,180" stroke="#C4230F" stroke-width="5" fill="none" marker-end="url(#a)"/>
         <path d="M360,180 L430,180" stroke="#C4230F" stroke-width="5" fill="none" marker-end="url(#a)"/>
-        <path d="M600,155 C650,155 650,66 688,66" stroke="#2b6cb0" stroke-width="4" fill="none" marker-end="url(#a)"/>
-        <path d="M600,175 C650,175 650,136 688,136" stroke="#2f855a" stroke-width="4" fill="none" marker-end="url(#a)"/>
+        <path d="M600,155 C650,155 650,66 688,66" stroke="#C4230F" stroke-width="4" fill="none" marker-end="url(#a)"/>
+        <path d="M600,175 C650,175 650,136 688,136" stroke="#C4230F" stroke-width="4" fill="none" marker-end="url(#a)"/>
         <path d="M600,195 C650,195 650,206 688,206" stroke="#8C887E" stroke-width="4" stroke-dasharray="8 6" fill="none" marker-end="url(#a)"/>
         <path d="M600,215 C650,215 650,276 688,276" stroke="#8C887E" stroke-width="4" stroke-dasharray="8 6" fill="none" marker-end="url(#a)"/>
         <path d="M170,300 C210,300 210,390 240,390" stroke="#C4230F" stroke-width="5" fill="none" marker-end="url(#a)"/>
-        <path d="M360,390 L430,390" stroke="#DFA400" stroke-width="5" fill="none" marker-end="url(#a)"/>
+        <path d="M360,390 L430,390" stroke="#C4230F" stroke-width="5" fill="none" marker-end="url(#a)"/>
         <path d="M580,390 L660,390" stroke="#DFA400" stroke-width="5" fill="none" marker-end="url(#a)"/>
         <path d="M810,368 L860,362" stroke="#DFA400" stroke-width="4" fill="none" marker-end="url(#a)"/>
         <path d="M810,412 L860,418" stroke="#DFA400" stroke-width="4" fill="none" marker-end="url(#a)"/>
@@ -1375,18 +1495,173 @@ def build_body_pages():
         {eyebrow(4)}
         <div style="display:inline-block; background:var(--red); color:white; padding:.06in .12in; font-size:11px; font-weight:800; letter-spacing:.08em;">PROTOTYPE PREVIEW — NO POWERED MOTION</div>
         <h2 style="font-size:36px; letter-spacing:-.8px; margin-top:.12in;">The body preview is assembled</h2>
-        <p style="font-size:13px; margin-top:.08in; width:3.9in;">This version ships a bench Pi installer, local <span class="mono">robotd</span>,
-        framed UART contract, tested portable Pico safety core, fail-stopped Pico target, nominal harness traveler, and executable commissioning gate.
-        Production motor outputs, exact terminals/lengths/fuses, and signed physical results are not released. Do not energize the motor branch from this book.</p>
+        <p style="font-size:13px; margin-top:.08in; width:3.9in;">This version really ships the robot’s software: the Pi installer, the
+        <span class="mono">robotd</span> body daemon with its supervision dashboard, the fixed Pi-to-Pico message rules, a tested safety
+        core that always fails stopped, the wiring plan, and the step-by-step commissioning checklist. What it does <b>not</b> ship:
+        production motor outputs, exact wire lengths and fuse values, or signed physical test results. Do not energize the motor branch from this book.</p>
         <h3 style="margin-top:.2in;">Commissioning gate</h3>
         <p style="font-size:11.5px; width:3.9in;">A released checklist must cover both E-stop NC channels and physical reset;
         all six NC bumper zones plus a broken wire; watchdog and setpoint-lease expiry; velocity/acceleration clamps;
         charger inhibit; low-battery cutoff; hardware mic mute with no backfeed; regulator polarity and voltage;
         branch-by-branch power-up; stop latency; motor direction; and a wheels-off-ground run before any floor test.</p>
         <p style="font-size:11.5px; margin-top:.1in; width:3.9in;">Until those physical results and production integrations exist,
-        Rover Bean’s number one rule is wonderfully easy: <b>admire, measure, and keep the battery out.</b></p>
+        the body’s number one rule is wonderfully easy: <b>admire, measure, and keep the battery out.</b></p>
+        <p style="font-size:11.5px; margin-top:.1in; width:3.9in;">The brain is a different story. Nothing on the next three pages
+        needs the battery, the motors, or a single open gate — <b>you can wake Rover Bean’s mind up tonight.</b></p>
       </div>""",
         chapter=4, footer=False, mark="ch4")
+
+    # Bench brain: the shipped robotd simulator + dashboard, runnable today.
+    add(f"""
+      {eyebrow(4)}
+      <h2>Wake the brain up tonight (no robot needed)</h2>
+      <div style="display:flex; gap:.26in; flex:1;">
+        <div style="width:4.15in; flex:none;">
+          <p style="font-size:12px;">The robot’s mind ships in this release as two programs: <span class="mono" style="font-size:11px;">robotd</span>,
+          the body daemon, and a supervision dashboard. They run on any Mac or Linux computer with Python 3.11 or newer —
+          today, before a single part is printed — because <span class="mono" style="font-size:11px;">robotd</span> carries a
+          deterministic pretend body (the simulator) for exactly this.</p>
+          <p style="font-size:12px; margin-top:.08in;">Open a terminal in the downloaded release folder and type:</p>
+          <div class="cmd" style="margin-top:.06in;">python3 -m venv /tmp/rover-bean
+/tmp/rover-bean/bin/pip install -e software/robotd \\
+    -e software/dashboard
+/tmp/rover-bean/bin/robotd --simulate --socket /tmp/robotd.sock \\
+    --blackbox /tmp/robotd-blackbox.jsonl &amp;
+/tmp/rover-bean/bin/robot-dashboard --socket /tmp/robotd.sock \\
+    --blackbox /tmp/robotd-blackbox.jsonl</div>
+          <p style="font-size:12px; margin-top:.08in;">Then point a browser at <b>http://127.0.0.1:8072/</b> — the page in this
+          picture, live on your desk. It only ever listens to your own computer.</p>
+          <div style="margin-top:.1in; background:var(--cream); border-radius:.1in; padding:.09in .12in;">
+            <p style="font-size:10.5px;"><b>It’s a window, not a remote override.</b> The dashboard talks to
+            <span class="mono" style="font-size:9.5px;">robotd</span> like every other client. On the real robot the Pico firmware
+            still owns safety: it cannot clear an E-stop latch, cannot bypass the open-bumper zero-motion rule, and cannot exceed
+            the firmware speed clamps. Release a drive button (or lose the page) and the firmware’s 250&nbsp;ms lease zeros motion by itself.</p>
+          </div>
+          <div class="check" style="margin-top:.1in;"><span class="box"></span>
+            <div><b>CHECK</b> The STATUS card reads <i>robotd reachable · firmware link up</i>, and dragging the head slider changes
+            its numbers while the blackbox log grows.</div></div>
+        </div>
+        <div style="flex:1; display:flex; flex-direction:column;">
+          <img src="{img_uri(GUIDE_IMG / 'dashboard_bench.png')}"
+               style="width:100%; border-radius:.12in; border:1px solid var(--line-soft);">
+          <div class="legend" style="margin-top:.08in;">
+            <div><b class="n">1</b><span><b>STATUS</b> — the simulated body reporting in: battery, speed, and the head aimed at
+            pan 25.0°, tilt &minus;8.0° from the little session below.</span></div>
+            <div><b class="n">2</b><span><b>SAFETY FLAGS + BUMPER LOOPS</b> — quiet chips mean nothing is latched. Six NC zones;
+            any open loop means zero motion (D036), and this page can show that but never overrule it.</span></div>
+            <div><b class="n">3</b><span><b>DRIVE + HEAD</b> — hold-to-drive buttons and sliders, capped at the firmware limits
+            the page prints next to each control.</span></div>
+            <div><b class="n">4</b><span><b>BLACKBOX LOG</b> — the flight recorder. Every command from every client lands here
+            with its source name. This capture shows a <span class="mono" style="font-size:9.5px;">source="agent"</span> session:
+            a head aim, one drive setpoint, a stop.</span></div>
+          </div>
+        </div>
+      </div>""",
+        chapter=4)
+
+    # Real brain: the Pi 5 appliance install.
+    add(f"""
+      {eyebrow(4)}
+      <h2>Move the brain into the robot</h2>
+      <p style="margin-bottom:.1in; font-size:12px;">The robot’s real computer is the Raspberry Pi 5 from your electronics box. The release
+      turns a fresh Pi into the <b>versioned bench appliance</b> — same <span class="mono" style="font-size:11px;">robotd</span>, plus key-only SSH
+      through an outbound-only Cloudflare Tunnel (the robot opens no door into your house), recorded shell sessions, and a stable name for the
+      safety Pico’s wire. This is the longest recipe in the book; the full card is <b>docs/pi-appliance-provisioning.md</b> in the release. The short version:</p>
+      <div class="cols">
+        <div>
+          <ol style="margin-left:.22in; font-size:11.5px; line-height:1.5;">
+            <li style="margin-bottom:.07in;"><b>Flash the microSD</b> with 64-bit Raspberry Pi OS <b>Lite</b> (Bookworm) using Raspberry Pi Imager,
+              and boot the Pi once.</li>
+            <li style="margin-bottom:.07in;"><b>Make the robot’s only door.</b> In Cloudflare Zero Trust (the free tier is fine): create a named
+              Tunnel whose one route points your chosen hostname at <span class="mono" style="font-size:10px;">ssh://localhost:22</span>, protect that
+              hostname with an Access application, and install <span class="mono" style="font-size:10px;">cloudflared</span> on the computer you will
+              connect from.</li>
+            <li style="margin-bottom:.07in;"><b>Prepare three secret files</b> outside the release folder, and never share or commit them:
+              an option-free Ed25519 public key, a yescrypt console-password hash, and the Tunnel’s run token (one line each).</li>
+            <li style="margin-bottom:.07in;"><b>Run the installer on the Pi</b> from the release folder:</li>
+          </ol>
+          <div class="cmd">sudo software/install.sh \\
+  --ssh-public-key-file  /secure/path/agent.pub \\
+  --tunnel-token-file    /secure/path/tunnel.token \\
+  --console-password-hash-file /secure/path/console.hash \\
+  --access-ready</div>
+          <ol start="5" style="margin-left:.22in; font-size:11.5px; line-height:1.5; margin-top:.08in;">
+            <li style="margin-bottom:.07in;"><b>Keep that first session open.</b> From your second computer, SSH in through the tunnel, run the
+              two attestation commands from the recipe card, and only then close the original session.</li>
+            <li><b>Reboot once and prove the two serial ports</b> exactly as the card shows: the debug console still answers, and the Pico’s future
+              wire is pinned to <span class="mono" style="font-size:10px;">/dev/rover-pico</span> — with the Pico’s USB and SWD still unplugged. They are
+              service corridors, never robot wiring.</li>
+          </ol>
+        </div>
+        <div>
+          <h3 style="margin-top:0;">What the installer refuses to do (on purpose)</h3>
+          <div class="rule">It does not start <span class="mono" style="font-size:10px;">robotd</span>. On a first install the body daemon is parked —
+          stopped and disabled — until the commissioning plan says otherwise.</div>
+          <div class="rule">It does not touch the Pico, the motor branch, or any power wiring. Software cannot close a physical gate.</div>
+          <div class="rule">It does not reboot for you, and it never prints your secrets.</div>
+          <h3 style="margin-top:.16in;">When the verifier stays red</h3>
+          <p style="font-size:11.5px;">The live check (<span class="mono" style="font-size:10px;">appliance.py verify --live</span>) stays red until
+          the SSH, console, and independent audit-collector attestations all exist. Red here is the system telling the truth about missing evidence —
+          not a sad robot. The 27-step commissioning plan in the release closes it.</p>
+          <div class="check" style="margin-top:.14in;"><span class="box"></span>
+            <div><b>CHECK</b> A fresh SSH login works through the tunnel, both serial-port readbacks match the card, and
+            <span class="mono" style="font-size:9.5px;">systemctl status robotd</span> reports it parked (inactive, disabled) — exactly as shipped.</div></div>
+        </div>
+      </div>""",
+        chapter=4)
+
+    # The resident agent: the copilot's seat, its floor, and its journal.
+    add(f"""
+      {eyebrow(4)}
+      <h2>The copilot takes the seat</h2>
+      <div class="cols">
+        <div>
+          <p style="font-size:12px;">Rover Bean’s resident narrator is a frontier AI copilot — <b>Claude or Codex, one at a time</b> —
+          living on the robot’s own computer. Through the tunnel you built on the last page, it gets the whole seat by design:
+          it can log in from anywhere, read its own sensors, write and run new code for itself, install what it needs, and send
+          drive and head setpoints to <span class="mono" style="font-size:11px;">robotd</span> like any other client. Root on the Pi
+          is the copilot’s to hold.</p>
+          <h3 style="margin-top:.14in;">The floor it can never cross</h3>
+          <p style="font-size:11.5px;">Root on the Pi is <b>not</b> root on physics. Every hard guarantee lives in the safety Pico’s
+          firmware and in real circuits the Pi cannot reach — there is no way to reflash or reconfigure the Pico over the robot’s
+          one UART wire, and its USB/SWD service plugs are never cabled in operation:</p>
+          <div class="rule">Speed and acceleration clamps trim every setpoint, whoever sends it.</div>
+          <div class="rule">A drive setpoint dies in 250&nbsp;ms unless refreshed — a crashed or distracted driver coasts to a stop.</div>
+          <div class="rule">Any open bumper loop means zero motion, latched until cleared. Same for the E-stop, the charger plug,
+          low battery, and a lost heartbeat.</div>
+          <div class="rule">The BIG RED BUTTON and the microphone mute switch are physical. No software — copilot included — can
+          press or unpress them.</div>
+          <p style="font-size:11.5px; margin-top:.08in;">House rules like quiet hours and no-go rooms are <i>policy</i> the copilot
+          is instructed to honor and the journal audits; the hardware floor above is what makes even a misbehaving brain safe to stop.</p>
+        </div>
+        <div>
+          <h3 style="margin-top:0;">Everything on the record</h3>
+          <p style="font-size:11.5px;">Every <span class="mono" style="font-size:10px;">robotd</span> command carries a source name into
+          the blackbox journal, and every shell session on the Pi is recorded and mirrored off the robot (the commissioning plan is what
+          proves the off-robot copy can’t be quietly edited). You met the journal on the dashboard page — its
+          <span class="mono" style="font-size:9.5px;">source="agent"</span> lines are a copilot session exactly as it will appear on the real robot.</p>
+          <h3 style="margin-top:.16in;">Try the copilot’s hands yourself</h3>
+          <p style="font-size:11.5px;">With the bench simulator from two pages ago still running:</p>
+          <div class="cmd">/tmp/rover-bean/bin/robotctl --socket /tmp/robotd.sock \\
+    --source agent head 2500 -800
+/tmp/rover-bean/bin/robotctl --socket /tmp/robotd.sock \\
+    --source agent drive 120 0
+/tmp/rover-bean/bin/robotctl --socket /tmp/robotd.sock \\
+    --source agent stop</div>
+          <p style="font-size:11px; margin-top:.06in;">Head angles are hundredths of a degree (2500 = pan 25.00°); drive takes forward
+          speed (mm/s), then turn rate (0 = straight). Watch the dashboard while you type — and notice the drive setpoint zeroing itself
+          a quarter-second after you stop refreshing it.</p>
+          <h3 style="margin-top:.16in;">Then, when the gates close</h3>
+          <p style="font-size:11.5px;">Today the copilot’s robot is the simulator plus a parked body daemon — that is this release,
+          honestly. As your printed coupons, purchased parts, harness, and the 27-step commissioning record close the gates on the
+          previous pages, the very same seat starts the real wheels. You built its body; it will help you finish its own bring-up.</p>
+          <div class="check" style="margin-top:.12in;"><span class="box"></span>
+            <div><b>CHECK</b> All three commands answer <span class="mono" style="font-size:9.5px;">"accepted": true</span>, appear in
+            the blackbox with <span class="mono" style="font-size:9.5px;">source="agent"</span>, and the STATUS card’s head numbers match
+            the aim you sent.</div></div>
+        </div>
+      </div>""",
+        chapter=4)
 
     # --- Back cover ----------------------------------------------------------
     features = "".join(

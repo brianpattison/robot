@@ -1,6 +1,6 @@
-# Rover Bean Builder Release — v2.0.0-prototype.3
+# Rover Bean Builder Release — v2.0.0-prototype.4
 
-Permanent source: [https://github.com/brianpattison/robot/releases/tag/v2.0.0-prototype.3](https://github.com/brianpattison/robot/releases/tag/v2.0.0-prototype.3)
+Permanent source: [https://github.com/brianpattison/robot/releases/tag/v2.0.0-prototype.4](https://github.com/brianpattison/robot/releases/tag/v2.0.0-prototype.4)
 
 ## Verdict
 
@@ -20,6 +20,8 @@ physical first article.
 | UART contract | `docs/body-protocol-v1.md` | Fixed v1 bench protocol; no flash/config-write path. |
 | Pi body daemon | `software/robotd/` | Executable local Unix-socket/UART baseline with blackbox logging. |
 | Pi 5 appliance | `software/appliance/` + `software/install.sh` | Closed-world Bookworm provisioning baseline; real Pi, Tunnel, dual-UART, and append-only collector attestations remain open. |
+| Pi provisioning guide | `docs/pi-appliance-provisioning.md` | The full appliance recipe the book's "Move the brain into the robot" page condenses. |
+| Supervision dashboard | `software/dashboard/` | Localhost-only `robotd` client: status, decoded safety flags, bumper zones, hold-to-drive, blackbox tail. Not a safety device. |
 | Pico safety firmware | `firmware/pico2-safety/` | Tested portable safety core plus a deliberately fail-stopped Pico integration. Production motor outputs are absent. |
 | Harness traveler | `harness/harness-v2.json` | 28-route engineering schedule; exact terminals, measured lengths, fuses, and physical evidence remain red. |
 | Commissioning evidence | `commissioning/plan-v2.json` + `docs/first-article-evidence.md` | Executable 27-step gate plus content-addressed, externally signed per-robot bundles; no physical pass is bundled. |
@@ -36,6 +38,7 @@ physical first article.
 | Teal PLA | a small spool or known-good leftovers | direct visible cosmetic parts; physical fit/temperature gates open (1 plate). |
 | Translucent lime PLA | a small spool or known-good leftovers | light diffusers; optical/thermal gates open (1 plate). |
 | Charcoal TPU 95A | one 500 g spool | tires, bumper halves, battery pads (3 plates). |
+| Candidate body-color PLA (optional) | one spool per color you audition | Coupon try-out only: the shell/head color you hope to qualify. Those parts print white PETG until a candidate passes its recorded checks. |
 
 ## Fasteners
 
@@ -59,11 +62,11 @@ Any row whose fit, termination, load, or test evidence is open stays open.
 | Pololu #4867 gearmotor (99:1, 25D, 12 V, encoder) | 2 | The wheel motors. |
 | Hitec D85MG servo | 2 | The neck motors (look left/right, up/down). |
 | Hitec R-ML24 aluminum horn (H24T) | 0 for now | DO NOT BUY YET — no normal US quantity-one source is confirmed, and an unmodeled substitute horn is forbidden. The head build pauses at the step 18 sourcing gate until this row clears. |
-| Verified D85MG/R-ML24 component hardware pack | 0 for now | DO NOT BUY YET — not yet purchasable as a kit (spline-center screws, M2 horn-link screws, servo grommets, eyelets, screws, nuts). Releases with the horn row above; confirm the delivered pack against the head coupons. |
+| Verified D85MG/R-ML24 component hardware pack | 0 for now | DO NOT BUY YET — not yet purchasable as a kit (spline-center screws, M2 horn-link screws, servo grommets, eyelets, nuts). Releases with the horn row above; confirm the delivered pack against the head coupons. |
 | Bioenno BLF-1203AB 12 V 3 Ah LiFePO4 battery | 1 | The robot’s power pack. |
 | Bioenno BPC-1502DC charger | 1 | The matching charger. Only ever use this one. |
 | Switchcraft EN2P3M20 inlet + EN2C3F20G2 plug | 1 pair | The keyed charging plug on the back. |
-| Pololu D24V90F5 regulator (5 V) | 1 | CAD envelope only. The novice-safe locking Pi input, backfeed protection, downstream fusing, boot/load margin, and thermal proof are BLOCKED; never feed the GPIO header from this preview. |
+| Pololu D24V90F5 regulator (5 V) | 1 | Safe to buy — the board itself is the settled pick and its deck pocket fits it. What stays BLOCKED is wiring it: the novice-safe locking Pi input, backfeed protection, downstream fusing, boot/load margin, and thermal proof are open; never feed the GPIO header from this preview. |
 | Pololu D36V50F6 regulator (6 V) | 0 for now | DO NOT BUY YET — availability and two-servo transient/thermal evidence are open. The dry build tolerates its empty deck pocket (step 12 notes it). |
 | Panasonic CB1A-R-M-12V relay | 1 | The motor power switch the red button controls. |
 | Production relay driver | not released | BLOCKED: RB-FIXTURE-V1's Adafruit 5648 is negative-control evidence only; production default-off conditioning, fit, and EE review remain open. |
