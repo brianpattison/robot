@@ -27,6 +27,7 @@ one insert size.
 - v2 book generator: [`docs/generate_assembly_guide_v2.py`](docs/generate_assembly_guide_v2.py)
 - bench protocol: [`docs/body-protocol-v1.md`](docs/body-protocol-v1.md)
 - Pi runtime/appliance: [`software/robotd/`](software/robotd/), [`software/appliance/`](software/appliance/), and the [provisioning guide](docs/pi-appliance-provisioning.md)
+- localhost supervision dashboard: [`software/dashboard/`](software/dashboard/)
 - Pico safety-core baseline: [`firmware/pico2-safety/`](firmware/pico2-safety/)
 - harness traveler and release gate: [`harness/`](harness/)
 - executable commissioning package: [`commissioning/`](commissioning/)
@@ -143,6 +144,7 @@ python -m pip install -r cad/python/requirements.txt
 |-- firmware/pico2-safety/
 |-- harness/
 |-- software/robotd/
+|-- software/dashboard/
 |-- software/appliance/
 `-- README.md
 ```

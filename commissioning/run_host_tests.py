@@ -30,11 +30,15 @@ def main() -> None:
         python = venv / "bin" / "python"
         test_env = os.environ.copy()
         robotd_source = str(ROOT / "software" / "robotd" / "src")
+        dashboard_source = str(ROOT / "software" / "dashboard" / "src")
+        source_path = robotd_source + os.pathsep + dashboard_source
         existing_path = test_env.get("PYTHONPATH")
         test_env["PYTHONPATH"] = (
-            robotd_source + os.pathsep + existing_path if existing_path else robotd_source
+            source_path + os.pathsep + existing_path if existing_path else source_path
         )
         run([str(python), "-m", "unittest", "discover", "-s", "software/robotd/tests", "-v"],
+            env=test_env)
+        run([str(python), "-m", "unittest", "discover", "-s", "software/dashboard/tests", "-v"],
             env=test_env)
         run([str(python), "-m", "unittest", "discover", "-s", "commissioning/tests", "-v"],
             env=test_env)

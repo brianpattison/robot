@@ -114,6 +114,12 @@ class RobotDaemon:
             self.send(Frame(MessageType.HEARTBEAT, self.next_sequence()))
             await asyncio.sleep(max(0, period - (time.monotonic() - started)))
 
+    @staticmethod
+    def _without_uptime_tick(status: dict[str, int]) -> dict[str, int]:
+        # uptime_ms advances in every frame; treating it as a change would turn
+        # the blackbox into a 10 Hz ticker instead of a state-change journal.
+        return {key: value for key, value in status.items() if key != "uptime_ms"}
+
     async def serial_loop(self) -> None:
         request_at = 0.0
         while not self.stopping.is_set():
@@ -129,7 +135,8 @@ class RobotDaemon:
                         self.state.last_error = str(exc)
                         await self.blackbox.write("protocol_error", error=str(exc))
                         continue
-                    if new_status != self.state.firmware:
+                    if self._without_uptime_tick(new_status) != self._without_uptime_tick(
+                            self.state.firmware):
                         await self.blackbox.write("firmware_status", status=new_status)
                     self.state.firmware = new_status
                     self.state.last_status_monotonic = time.monotonic()
@@ -164,9 +171,12 @@ class RobotDaemon:
             response = {"accepted": True, "requested_mask": mask}
         else:
             raise ValueError(f"unsupported operation {op!r}")
-        await self.blackbox.write("command", source=source, operation=op,
-                                  request={k: v for k, v in request.items() if k != "id"},
-                                  response=response)
+        if op != "status":
+            # Read-only status queries change nothing; logging every supervision
+            # poll would drown the action audit trail and grind the SD card.
+            await self.blackbox.write("command", source=source, operation=op,
+                                      request={k: v for k, v in request.items() if k != "id"},
+                                      response=response)
         return response
 
     async def handle_client(self, reader: asyncio.StreamReader,

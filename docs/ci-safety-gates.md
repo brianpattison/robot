@@ -10,7 +10,11 @@ python3 docs/builder_release_v2.py --check
 
 A green run proves only that:
 
-- the `robotd` protocol, simulator, socket, and blackbox tests pass;
+- the `robotd` protocol, simulator, socket, and blackbox tests pass, and the
+  blackbox stays a quiet state-change journal under status polling;
+- the supervision dashboard serves its UI, decodes safety flags/bumper masks
+  in firmware bit order, clamps and forwards commands through `robotd`,
+  refuses non-loopback binds by default, and streams status/blackbox events;
 - commissioning evidence rejects incomplete/contradictory records, unsafe
   artifacts, changed source provenance, damaged event chains, transplanted
   signatures, bundled trust roots, and signer/robot mismatches;

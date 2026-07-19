@@ -73,6 +73,42 @@ class DaemonTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(records[-1]["kind"], "robotd_stop")
             self.assertFalse(socket.exists())
 
+    async def test_status_reads_and_uptime_ticks_do_not_spam_blackbox(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="robotd-quiet-test-") as temp:
+            root = Path(temp)
+            socket = root / "robotd.sock"
+            log = root / "blackbox.jsonl"
+            daemon = RobotDaemon(SimulatorTransport(), socket, Blackbox(log))
+            running = asyncio.create_task(daemon.run())
+            for _ in range(100):
+                if socket.exists():
+                    break
+                await asyncio.sleep(0.01)
+
+            async def request(payload: dict) -> dict:
+                reader, writer = await asyncio.open_unix_connection(str(socket))
+                writer.write((json.dumps(payload) + "\n").encode())
+                await writer.drain()
+                response = json.loads(await reader.readline())
+                writer.close()
+                await writer.wait_closed()
+                return response
+
+            # Let several 10 Hz status frames land, polling like a dashboard would.
+            for index in range(5):
+                response = await request({"id": f"status-{index}", "op": "status",
+                                          "source": "test"})
+                self.assertTrue(response["ok"])
+                await asyncio.sleep(0.06)
+            daemon.stop()
+            await asyncio.wait_for(running, 2)
+            records = [json.loads(line) for line in log.read_text().splitlines()]
+            status_commands = [r for r in records if r.get("operation") == "status"]
+            self.assertEqual(status_commands, [])
+            firmware_updates = [r for r in records if r["kind"] == "firmware_status"]
+            self.assertEqual(len(firmware_updates), 1,
+                             "an idle simulator must log exactly the initial firmware status")
+
 
 if __name__ == "__main__":
     unittest.main()

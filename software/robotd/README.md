@@ -16,9 +16,13 @@ python3 -m venv /tmp/rover-bean-robotd
 
 `drive` sends one setpoint. `robotd` does not refresh it on behalf of a silent
 client; the Pico's independent 250 ms lease zeros motion. The daemon does send
-the 20 Hz host heartbeat while its event loop is healthy. Every command and
-firmware status change is appended to the Pi-local blackbox and, when
-configured, a second off-host/mounted path.
+the 20 Hz host heartbeat while its event loop is healthy. Every state-affecting
+command (`drive`, `head`, `stop`, `clear_bumper`) and every firmware status
+change is appended to the Pi-local blackbox and, when configured, a second
+off-host/mounted path. The blackbox is a state-change journal, not a ticker:
+read-only `status` queries are answered without a write, and the firmware
+uptime counter alone does not count as a status change, so an idle bench stays
+quiet instead of grinding the SD card at 10 Hz.
 
 The local log is authoritative. The mirror parent must be a real mount point;
 `robotd` will not silently write into the bare directory beneath a missing

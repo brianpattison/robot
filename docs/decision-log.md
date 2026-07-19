@@ -830,3 +830,34 @@ Rationale:
 - A future escape feature requires independently supervised position evidence
   that distinguishes switch travel from wiring continuity; it cannot be added
   as a timing guess.
+
+## D037: The Bench Dashboard Is A Localhost Supervision Client, And The Blackbox Is A State-Change Journal
+
+Status: accepted 2026-07-19
+
+The MVP local dashboard ships as `software/dashboard/`: a Python
+standard-library HTTP + Server-Sent-Events service that talks to `robotd`
+through the same Unix socket contract as every other client. It binds
+loopback only by default and refuses a non-loopback host without an explicit
+`--expose-lan`; remote viewing remains the Cloudflare Tunnel's job (D033).
+The page renders offline (no external assets), decodes the safety flags in
+firmware bit order, and shows honest "not built yet" cards for camera
+preview, perception facts, the agent panel, and policy settings.
+
+Manual drive is hold-to-refresh: the browser re-sends the setpoint at 10 Hz
+while a control is held and sends `stop` on release, so a dead page falls
+into the Pico's independent 250 ms motion lease instead of relying on any
+dashboard cleanup. The UI clamps requests to the fixed firmware caps only so
+it never claims to request more than firmware will apply. The dashboard is a
+supervision convenience, not a safety layer, and adds no permission gate
+between the agent and `robotd` (D030).
+
+With a supervision client polling status continuously, the blackbox contract
+is refined to a state-change journal: read-only `status` queries are answered
+without a journal write, and the firmware uptime counter alone is not a
+status change. Every state-affecting command (`drive`, `head`, `stop`,
+`clear_bumper`), every real firmware state transition, and every latch/error
+event is still journaled with timestamp and source. Before this refinement an
+idle simulated bench wrote roughly fifteen fsynced records per second, which
+would have ground the Pi's SD card and buried the action audit trail that the
+blackbox exists to preserve.

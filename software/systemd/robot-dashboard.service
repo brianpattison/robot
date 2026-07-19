@@ -1,0 +1,22 @@
+[Unit]
+Description=Rover Bean supervision dashboard (localhost only)
+After=robotd.service
+Wants=robotd.service
+
+[Service]
+Type=simple
+User=agent
+Group=robot
+ExecStart=/opt/rover-bean/venv/bin/robot-dashboard --socket /run/robotd/robotd.sock --blackbox /var/log/robotd/blackbox.jsonl --host 127.0.0.1 --port 8072
+Restart=on-failure
+RestartSec=1
+TimeoutStopSec=2
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadOnlyPaths=/var/log/robotd
+ReadWritePaths=/run/robotd
+
+[Install]
+WantedBy=multi-user.target
