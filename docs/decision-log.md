@@ -861,3 +861,41 @@ event is still journaled with timestamp and source. Before this refinement an
 idle simulated bench wrote roughly fifteen fsynced records per second, which
 would have ground the Pi's SD card and buried the action audit trail that the
 blackbox exists to preserve.
+
+## D038: The V2 Qualification Pieces Are Called Proofs, Not Coupons
+
+Date: 2026-07-19
+Status: accepted
+
+The small printed qualification pieces were called "coupons" (the
+materials-engineering sense). Brian dislikes the word; "sample" was rejected
+because it undersells the pass/fail gating role and already means numeric
+sampling and purchased sample units in this repo. The accepted name is
+**proof**: each piece proves exactly one v2 design contract ("print and pass
+these proofs"), which is also what the release gate consumes.
+
+Scope: the full v2 surface — code identifiers, JSON schema fields
+(`proof_3mf_sha256`, `proof_record_uri`, `proof_failures_open`, artifact role
+`proof_record`, `logical_proof_tests`), status tokens
+(`CAD_RELEASE_PASS ... proofs=...`, `BAMBU_V2_PROOFS_VALID`), tracked
+manifests, object/STL names (`proof_*`), file names
+(`cad/python/robot_body_v2_proofs.py`, `cad/bambu/generate_bambu_proofs_v2.py`,
+`cad/bambu/codex_robot_body_v2_proofs_p1s.3mf` plus its plates JSON and
+contact-sheet PNG, `docs/cad-proofs.md`), the commissioning plan (revision
+bumped to `v2-commissioning-C4`; C002 retitled "Pass the qualification
+proofs"), the Builder Release index, and the current Builder's Book. In prose,
+first mentions prefer "qualification proof" wherever bare "proof" could read
+as generic evidence.
+
+Historical material keeps its original wording: all v1 files
+(`robot_body_coupons.py`, `render_coupons.py`, the v1 3MF/plates/PNG, v1 docs
+and the frozen v1 block of `AGENTS.md`), past decision-log entries, and the
+dated planning records `printed-only-simplification-plan.md` and
+`guide-v2-improvement-notes.md` (each now carries a one-line note). No
+physical evidence existed yet (`physical_evidence_status: "open"`), so the
+schema-field and hashed-artifact renames land in a safe window.
+
+The rename was executed with the full regeneration chain on macOS: proofs
+exports, the Bambu-round-tripped proofs 3MF/plates/contact sheet (internal
+object names included), the builder-release index, and the book, so no
+tracked artifact retains stale internal "coupon" strings.

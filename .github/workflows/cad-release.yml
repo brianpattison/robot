@@ -33,5 +33,5 @@ jobs:
           python scripts/check_cad_release.py
 
   # Bambu Studio round trips, Blender renders, Chrome PDF printing, page-by-page
-  # visual review, printer coupons, and physical evidence remain explicit local
+  # visual review, printer proofs, and physical evidence remain explicit local
   # release steps. A hosted runner does not own those native apps or tiny parts.

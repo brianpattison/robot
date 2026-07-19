@@ -902,7 +902,7 @@ def validate_output(output: Path, manifest: dict, layout: list[dict]) -> None:
         )
     )
     # Bambu reports disconnected mesh shells here, not model-setting objects.
-    # A coupon such as a snap pair is deliberately one named STL/object with
+    # A qualification proof such as a snap pair is deliberately one named STL/object with
     # two printable shells. The exact object-name check above remains the
     # authoritative one-to-one inventory proof; this CLI check only proves
     # that every object still exposes at least one readable mesh shell.

@@ -118,7 +118,7 @@ def build_instance_manifest() -> dict:
                 "qualification": entry["qualification"],
                 "qualification_status": entry["qualification_status"],
                 "optional": entry["optional"],
-                "release_status": "prototype: material coupons + purchased-part fit gates apply",
+                "release_status": "prototype: material proofs + purchased-part fit gates apply",
             }
     return {
         "printer_target": {
@@ -129,7 +129,7 @@ def build_instance_manifest() -> dict:
             "plate_type": gb.PLATE_TYPE,
         },
         "release_warning": (
-            "Prototype v2 plates. Generate, print, and record the material-specific coupons "
+            "Prototype v2 plates. Generate, print, and record the material-specific proofs "
             "before any large part. The D027 CAD packing gate is closed; all "
             "named physical, electrical, firmware, and commissioning gates remain "
             "open. Nothing here authorizes powered motion."

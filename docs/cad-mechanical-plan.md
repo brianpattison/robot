@@ -18,7 +18,7 @@ microphone, corner-screw, or shell load; the complete 4 mm white PETG lid works
 without it. Inventory is 40 installed functional pieces + four spare washers +
 one optional skin, 45 printed pieces total. The support-exception list is empty.
 
-Eighteen material/mechanical coupons now cover the legacy interfaces plus PLA
+Eighteen material/mechanical qualification proofs now cover the legacy interfaces plus PLA
 insert, shell-wall/opening, head-pivot, snap, optical, and PETG/PLA lid-boundary
 evidence. The generated manifest requires manufacturer, product line, subtype,
 color, nozzle, layer height, walls, insert temperature where applicable,
@@ -49,7 +49,7 @@ the hard-stop range rather than from a hand-maintained box.
 `validate_robot_body_v2.py --gate` now checks both servo-case clearances, the
 pan journal clearance, the 20 mm cable corridor, sampled collision-free command
 ranges, and engagement of all four physical stops. CAD completion is not a
-powered-motion release: exact-part fit, the bayonet/journal/bushing coupons,
+powered-motion release: exact-part fit, the bayonet/journal/bushing proofs,
 PETG-safe grease selection, head mass, regulated current, cable drag, axial
 play, backlash, temperature, and loaded wear cycling remain physical gates.
 
@@ -249,7 +249,7 @@ pilot fusion and recess clearance, bumper reconstruction/seating/rest-gap/
 nominal-stroke behavior, fairing free insertion/backing-floor contact,
 legacy distribution-gauge reconstruction,
 grounding, contact area, and bed fit.
-Use the measurement and selection protocol in [CAD Calibration Coupons](cad-coupons.md)
+Use the measurement and selection protocol in [v2 Qualification Proofs](cad-proofs.md)
 before changing shared parameters.
 
 The validator checks that every main, fit, and split artifact is one valid

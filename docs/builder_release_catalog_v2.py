@@ -61,7 +61,7 @@ SHOP_FILAMENT.append(
     (
         "Candidate body-color PLA (optional)",
         "one spool per color you audition",
-        "Coupon try-out only: the shell/head color you hope to qualify. "
+        "Proof try-out only: the shell/head color you hope to qualify. "
         "Those parts print white PETG until a candidate passes its recorded checks.",
     )
 )
@@ -88,7 +88,7 @@ SHOP_ELECTRONICS = [
     ("Pololu #4867 gearmotor (99:1, 25D, 12 V, encoder)", "2", "The wheel motors."),
     ("Hitec D85MG servo", "2", "The neck motors (look left/right, up/down)."),
     ("Hitec R-ML24 aluminum horn (H24T)", "0 for now", "DO NOT BUY YET — no normal US quantity-one source is confirmed, and an unmodeled substitute horn is forbidden. The head build pauses at the step 18 sourcing gate until this row clears."),
-    ("Verified D85MG/R-ML24 component hardware pack", "0 for now", "DO NOT BUY YET — not yet purchasable as a kit (spline-center screws, M2 horn-link screws, servo grommets, eyelets, nuts). Releases with the horn row above; confirm the delivered pack against the head coupons."),
+    ("Verified D85MG/R-ML24 component hardware pack", "0 for now", "DO NOT BUY YET — not yet purchasable as a kit (spline-center screws, M2 horn-link screws, servo grommets, eyelets, nuts). Releases with the horn row above; confirm the delivered pack against the head proofs."),
     ("Bioenno BLF-1203AB 12 V 3 Ah LiFePO4 battery", "1", "The robot’s power pack."),
     ("Bioenno BPC-1502DC charger", "1", "The matching charger. Only ever use this one."),
     ("Switchcraft EN2P3M20 inlet + EN2C3F20G2 plug", "1 pair", "The keyed charging plug on the back."),

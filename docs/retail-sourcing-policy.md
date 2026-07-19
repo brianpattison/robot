@@ -28,7 +28,7 @@ stock, and a shopping-cart screenshot is not a datasheet.
 | Motor relay | Panasonic CB1A-R-M-12V | manufacturer identity and US distributor trail | production driver/terminal/dropout/thermal/fault tests open |
 | Fuse block | Blue Sea 5045 | normal marine retail trail | every fuse value remains unset |
 | Charge connector | Switchcraft EN2P3M20/EN2C3F20G2 | active manufacturer/distributors | pin/polarity/strain tests open |
-| Bumper switches | Omron D2HW-C202MR | mainstream distributor family | exact suffix/lead and coupon tests open |
+| Bumper switches | Omron D2HW-C202MR | mainstream distributor family | exact suffix/lead and proof tests open |
 | Mobile Pi input | protected Pi 5 battery input | no accepted part/interface | **hard sourcing/design blocker** |
 | Physical reset | Pico-local momentary control | no accepted part/location | **hard design blocker** |
 | Mic mute/backfeed gate | protected USB data/power interface | no accepted exact circuit/parts | **hard electrical blocker** |
@@ -48,7 +48,7 @@ servo horn, regulator, battery, relay, switch contact form, or connector.
 ## Purchase batches
 
 1. Buy only filament, the two body-fastener packs, bench supplies, and one
-   sample of each fit-critical component needed for coupons/dry fit.
+   sample of each fit-critical component needed for proofs/dry fit.
 2. Close delivered-fit and bench electrical gates before paired motors,
    servos, horns, regulators, or harness inventory.
 3. Buy final wire, terminals, and fuses only from the measured, reviewed

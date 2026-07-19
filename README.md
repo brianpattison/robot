@@ -25,7 +25,7 @@ one insert size.
 - **Versioned v2 Builder Release Index:** [`docs/builder-release-v2.md`](docs/builder-release-v2.md)
 - **The Builder's Book (v2 prototype preview):** [`output/pdf/codex_robot_body_v2_assembly_guide.pdf`](output/pdf/codex_robot_body_v2_assembly_guide.pdf)
 - v2 Bambu Studio project: [`cad/bambu/codex_robot_body_v2_p1s.3mf`](cad/bambu/codex_robot_body_v2_p1s.3mf)
-- v2 qualification-coupon project: [`cad/bambu/codex_robot_body_v2_coupons_p1s.3mf`](cad/bambu/codex_robot_body_v2_coupons_p1s.3mf)
+- v2 qualification-proof project: [`cad/bambu/codex_robot_body_v2_proofs_p1s.3mf`](cad/bambu/codex_robot_body_v2_proofs_p1s.3mf)
 - v2 book generator: [`docs/generate_assembly_guide_v2.py`](docs/generate_assembly_guide_v2.py)
 - bench protocol: [`docs/body-protocol-v1.md`](docs/body-protocol-v1.md)
 - Pi runtime/appliance: [`software/robotd/`](software/robotd/), [`software/appliance/`](software/appliance/), and the [provisioning guide](docs/pi-appliance-provisioning.md)
@@ -53,7 +53,7 @@ of truth for open release gates. Start with the docs index:
 - CAD mechanical plan: [`docs/cad-mechanical-plan.md`](docs/cad-mechanical-plan.md)
 - CAD v1 body and renders: [`docs/cad-v1-body.md`](docs/cad-v1-body.md)
 - CAD component/release coverage: [`docs/cad-component-coverage.md`](docs/cad-component-coverage.md)
-- CAD calibration coupons: [`docs/cad-coupons.md`](docs/cad-coupons.md)
+- v2 qualification proofs: [`docs/cad-proofs.md`](docs/cad-proofs.md)
 - Python CAD tooling notes: [`cad/python/README.md`](cad/python/README.md)
 - Bambu Studio P1S project: [`cad/bambu/README.md`](cad/bambu/README.md)
 - v1 illustrated assembly guide (historical): [`output/pdf/codex_robot_body_v1_assembly_guide.pdf`](output/pdf/codex_robot_body_v1_assembly_guide.pdf)
@@ -126,7 +126,7 @@ python -m pip install -r cad/python/requirements.txt
 |   |   |-- README.md
 |   |   |-- generate_bambu_project_v2.py
 |   |   |-- codex_robot_body_v2_p1s.3mf
-|   |   `-- codex_robot_body_v2_coupons_p1s.3mf
+|   |   `-- codex_robot_body_v2_proofs_p1s.3mf
 |   |-- blender/
 |   |   |-- render_robot_body_v2.py
 |   |   `-- render_assembly_steps_v2.py
@@ -135,7 +135,7 @@ python -m pip install -r cad/python/requirements.txt
 |       |-- requirements.txt
 |       |-- robot_body_v2_inventory.py
 |       |-- robot_body_v2.py
-|       |-- robot_body_v2_coupons.py
+|       |-- robot_body_v2_proofs.py
 |       `-- validate_robot_body_v2.py
 |-- commissioning/
 |-- docs/
@@ -157,7 +157,7 @@ python -m pip install -r cad/python/requirements.txt
    hardware-free contracts.
 2. Use [`docs/builder-release-v2.md`](docs/builder-release-v2.md), never the
    historical v1 BOM, for the current selection list and explicit blockers.
-3. Print and record all 18 v2 coupons before committing to large body parts.
+3. Print and record all 18 v2 proofs before committing to large body parts.
 4. Close the protected mobile-Pi input, R-ML24 sourcing, servo-regulator,
    production relay-driver, Pico-reset, USB-mute/backfeed, and exact harness
    decisions before treating the electronics table as a complete shopping list.

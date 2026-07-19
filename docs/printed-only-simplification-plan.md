@@ -1,5 +1,8 @@
 # Printed-Only Body Simplification Plan
 
+*Dated record, written before D038 renamed the v2 "coupons" to "proofs";
+historical wording retained.*
+
 Date: 2026-07-16
 Status: direction accepted — Brian approved all three recommendations on
 2026-07-16 (recorded as D025/D026/D027 in the decision log) and approved

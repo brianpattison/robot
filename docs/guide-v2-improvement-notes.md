@@ -1,5 +1,8 @@
 # Builder's Book v2 — Review Findings and Improvement Plan
 
+*Dated record, written before D038 renamed the v2 "coupons" to "proofs";
+historical wording retained.*
+
 A full page-by-page review of `output/pdf/codex_robot_body_v2_assembly_guide.pdf`
 (originally 37 pages), the step renders in `docs/images/guide_v2/`, the hero renders, and the
 v2 CAD model behind them. Findings are grouped by root cause; each has the fix

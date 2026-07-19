@@ -1,4 +1,7 @@
-"""Generate small calibration coupons for the robot body's critical interfaces."""
+"""Generate small calibration coupons for the robot body's critical interfaces.
+
+Historical v1 tooling: keeps the original "coupon" name on purpose. D038
+renamed only the v2 pieces to "proofs" (see robot_body_v2_proofs.py)."""
 
 from __future__ import annotations
 

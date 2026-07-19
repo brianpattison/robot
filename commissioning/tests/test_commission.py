@@ -18,7 +18,7 @@ import commission  # noqa: E402
 AUTO_FIELDS = [
     "guide_sha256",
     "body_3mf_sha256",
-    "coupon_3mf_sha256",
+    "proof_3mf_sha256",
     "fixture_sha256",
     "firmware_tree_sha256",
     "robotd_tree_sha256",
@@ -95,7 +95,7 @@ class SyntheticRepository:
             commission.PLAN_PATH.as_posix(): commission.canonical_json(synthetic_plan()),
             "output/pdf/codex_robot_body_v2_assembly_guide.pdf": b"synthetic-guide\x00",
             "cad/bambu/codex_robot_body_v2_p1s.3mf": b"synthetic-body-3mf\x00",
-            "cad/bambu/codex_robot_body_v2_coupons_p1s.3mf": b"synthetic-coupon-3mf\x00",
+            "cad/bambu/codex_robot_body_v2_proofs_p1s.3mf": b"synthetic-proof-3mf\x00",
             "commissioning/fixture-v1.json": b'{"synthetic":true}',
             "firmware/pico2-safety/main.c": b"int synthetic_firmware;\n",
             "software/robotd/daemon.py": b"SYNTHETIC = True\n",

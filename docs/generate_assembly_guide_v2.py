@@ -4,13 +4,13 @@ Authors the complete builder's book as fixed-size HTML pages (11 x 8.5 in
 landscape) designed like a professionally produced kit manual, then prints
 it to PDF with headless Chrome. Content is generated from the live
 artifacts — the printed-part registry, joint/fastener registries, the
-Bambu plate manifest, and the coupon manifest — plus the authored step
+Bambu plate manifest, and the proof manifest — plus the authored step
 and wiring copy below, so the book cannot drift from the model.
 
 Pages: cover with a real table of contents, the annotated "meet the
 robot" spread, the how-to-read anatomy page, shopping (filament /
 fasteners / electronics / tools), printing with Bambu Studio (plates +
-coupons + a LEGO-style piece inventory), twenty assembly steps with
+proofs + a LEGO-style piece inventory), twenty assembly steps with
 progress bars and checks, the electronics orientation page, the wiring
 chapter with SVG power and signal maps, the first-checks page, and a
 back cover. The design system: Avenir Next type, chapter thumb tabs,
@@ -51,55 +51,55 @@ GUIDE_IMG = IMG / "guide_v2"
 RELEASE_QR = GUIDE_IMG / "builder_release_v2_qr.png"
 STEP_ANNOTATIONS = json.loads((GUIDE_IMG / "step_annotations.json").read_text())
 PLATES = json.loads((ROOT / "cad" / "bambu" / "codex_robot_body_v2_p1s_plates.json").read_text())
-COUPON_PLATES = json.loads(
-    (ROOT / "cad" / "bambu" / "codex_robot_body_v2_coupons_p1s_plates.json").read_text())
+PROOF_PLATES = json.loads(
+    (ROOT / "cad" / "bambu" / "codex_robot_body_v2_proofs_p1s_plates.json").read_text())
 N_PLATES = len(PLATES["plates"])
 N_PIECES = sum(pl["part_count"] for pl in PLATES["plates"])
 INVENTORY_COUNTS = PLATES.get("inventory_counts", {})
 N_FUNCTIONAL = INVENTORY_COUNTS.get("functional_installed", 40)
 N_SPARES = INVENTORY_COUNTS.get("spares", 4)
 N_OPTIONAL = INVENTORY_COUNTS.get("optional_cosmetics", max(0, N_PIECES - N_FUNCTIONAL - N_SPARES))
-COUPONS = json.loads((ROOT / "cad" / "exports" / "v2" / "coupons" /
-                      "codex_robot_body_v2_coupons_manifest.json").read_text())
-COUPON_NOTES = {
-    "coupon_insert_m3": "Melt one insert into each of the three holes. The one that sits flush without squeezing out goo is your printer’s perfect fit.",
-    "coupon_joint_flange": "Screw the small plate onto the block with one screw. It should pull down tight with no wobble and no cracking.",
-    "coupon_joint_boss": "The partner block for the plate test above.",
-    "coupon_dbore_torque": "Push this onto a motor shaft and twist HARD — twice as hard as driving ever will. If it never slips, wheels are safe.",
-    "coupon_axle_stub": "Spin the ring on the peg a few hundred times with some pressure. It should stay smooth, not sloppy.",
-    "coupon_bushing_ring": "The spinning ring for the peg test above.",
-    "coupon_snap_pair": "Click the two pieces together and apart ten times. The little hook must survive and still hold on.",
-    "coupon_bayonet_pair": "Twist the ring onto the stub a quarter turn — it should lock with a nice click and not pull straight off.",
-    "coupon_switch_pocket": "Seat one bumper switch in the pocket: it must click when pressed and spring back, never jammed.",
-    "coupon_tire_fit": "Stretch the mini tire onto the mini wheel. Snug and even = your big tires will fit too.",
-    "coupon_pcb_clamp": "Rest the little green safety board on the pegs and screw the bar over it. Held gently, nothing bending.",
-    "coupon_pla_insert_shell": "Use your exact body PLA and record the insert temperature. No white stress marks, cracks, sink, tilt, or pull-through.",
-    "coupon_pla_shell_wall": "Check the wall, rounded edge, opening, and panel seat after a bump test, warm soak, and full cool-down.",
-    "coupon_pla_head_pivot": "Fit the insert and bushing, load it like the finished head, then check for cracks and growing wobble.",
-    "coupon_pla_snap_pair": "Print this in every candidate visible PLA. Click it ten times; it must still latch fully with no whitening or crack.",
-    "coupon_pla_optical": "Print once per translucent PLA family/color. Compare the three thicknesses for brightness, hot spots, heat, and camera flare.",
-    "coupon_lid_boundary_petg": "Print with the white PETG lid profile and mate it to the teal PLA tab. The blind socket must not crack.",
-    "coupon_lid_boundary_pla": "Snap into the white PETG coupon ten times, warm it, and check that it still holds without rattling.",
+PROOFS = json.loads((ROOT / "cad" / "exports" / "v2" / "proofs" /
+                      "codex_robot_body_v2_proofs_manifest.json").read_text())
+PROOF_NOTES = {
+    "proof_insert_m3": "Melt one insert into each of the three holes. The one that sits flush without squeezing out goo is your printer’s perfect fit.",
+    "proof_joint_flange": "Screw the small plate onto the block with one screw. It should pull down tight with no wobble and no cracking.",
+    "proof_joint_boss": "The partner block for the plate test above.",
+    "proof_dbore_torque": "Push this onto a motor shaft and twist HARD — twice as hard as driving ever will. If it never slips, wheels are safe.",
+    "proof_axle_stub": "Spin the ring on the peg a few hundred times with some pressure. It should stay smooth, not sloppy.",
+    "proof_bushing_ring": "The spinning ring for the peg test above.",
+    "proof_snap_pair": "Click the two pieces together and apart ten times. The little hook must survive and still hold on.",
+    "proof_bayonet_pair": "Twist the ring onto the stub a quarter turn — it should lock with a nice click and not pull straight off.",
+    "proof_switch_pocket": "Seat one bumper switch in the pocket: it must click when pressed and spring back, never jammed.",
+    "proof_tire_fit": "Stretch the mini tire onto the mini wheel. Snug and even = your big tires will fit too.",
+    "proof_pcb_clamp": "Rest the little green safety board on the pegs and screw the bar over it. Held gently, nothing bending.",
+    "proof_pla_insert_shell": "Use your exact body PLA and record the insert temperature. No white stress marks, cracks, sink, tilt, or pull-through.",
+    "proof_pla_shell_wall": "Check the wall, rounded edge, opening, and panel seat after a bump test, warm soak, and full cool-down.",
+    "proof_pla_head_pivot": "Fit the insert and bushing, load it like the finished head, then check for cracks and growing wobble.",
+    "proof_pla_snap_pair": "Print this in every candidate visible PLA. Click it ten times; it must still latch fully with no whitening or crack.",
+    "proof_pla_optical": "Print once per translucent PLA family/color. Compare the three thicknesses for brightness, hot spots, heat, and camera flare.",
+    "proof_lid_boundary_petg": "Print with the white PETG lid profile and mate it to the teal PLA tab. The blind socket must not crack.",
+    "proof_lid_boundary_pla": "Snap into the white PETG proof ten times, warm it, and check that it still holds without rattling.",
 }
-COUPON_TITLES = {
-    "coupon_insert_m3": "Insert fit",
-    "coupon_joint_flange": "Screw joint",
-    "coupon_joint_boss": "Screw joint partner",
-    "coupon_dbore_torque": "Wheel grip",
-    "coupon_axle_stub": "Axle spin",
-    "coupon_bushing_ring": "Axle spin ring",
-    "coupon_snap_pair": "Snap click",
-    "coupon_bayonet_pair": "Bayonet twist",
-    "coupon_switch_pocket": "Switch pocket",
-    "coupon_tire_fit": "Tire stretch",
-    "coupon_pcb_clamp": "Board clamp",
-    "coupon_pla_insert_shell": "PLA insert boss",
-    "coupon_pla_shell_wall": "PLA shell wall",
-    "coupon_pla_head_pivot": "PLA head pivot",
-    "coupon_pla_snap_pair": "PLA snap",
-    "coupon_pla_optical": "PLA light test",
-    "coupon_lid_boundary_petg": "PETG lid socket",
-    "coupon_lid_boundary_pla": "PLA skin tab",
+PROOF_TITLES = {
+    "proof_insert_m3": "Insert fit",
+    "proof_joint_flange": "Screw joint",
+    "proof_joint_boss": "Screw joint partner",
+    "proof_dbore_torque": "Wheel grip",
+    "proof_axle_stub": "Axle spin",
+    "proof_bushing_ring": "Axle spin ring",
+    "proof_snap_pair": "Snap click",
+    "proof_bayonet_pair": "Bayonet twist",
+    "proof_switch_pocket": "Switch pocket",
+    "proof_tire_fit": "Tire stretch",
+    "proof_pcb_clamp": "Board clamp",
+    "proof_pla_insert_shell": "PLA insert boss",
+    "proof_pla_shell_wall": "PLA shell wall",
+    "proof_pla_head_pivot": "PLA head pivot",
+    "proof_pla_snap_pair": "PLA snap",
+    "proof_pla_optical": "PLA light test",
+    "proof_lid_boundary_petg": "PETG lid socket",
+    "proof_lid_boundary_pla": "PLA skin tab",
 }
 HTML_OUT = ROOT / "output" / "guide" / "codex_robot_body_v2_guide.html"
 PDF_OUT = ROOT / "output" / "pdf" / "codex_robot_body_v2_assembly_guide.pdf"
@@ -1065,7 +1065,7 @@ def build_body_pages():
         f' font-size:14px; font-weight:800; display:flex; align-items:center; justify-content:center;">{k}</div>'
         f'<div><h3 style="margin:0 0 .02in;">{esc(t)}</h3><p style="font-size:11.5px;">{d}</p></div></div>'
         for k, (t, d) in enumerate(PRINT_TIPS, start=1))
-    order_data = [("#fff", "TEST PARTS", f"{len(COUPONS)} coupons first")]
+    order_data = [("#fff", "TEST PARTS", f"{len(PROOFS)} proofs first")]
     for group in FILAMENT_GROUPS.values():
         plate, count = group["plate"], group["count"]
         theme = inv.DEFAULT_THEME[plate["color_profile"]]
@@ -1147,24 +1147,24 @@ def build_body_pages():
       All {N_PLATES} boxes are labeled, and their piece totals match the plate manifest before assembly starts.</div></div>""",
         chapter=1)
 
-    # Coupons are a real tracked P1S project, not an STL treasure hunt.
+    # Proofs are a real tracked P1S project, not an STL treasure hunt.
     add(f"""
       {eyebrow(1)}
-      <div style="display:inline-block; margin-bottom:.1in; background:var(--lime); color:var(--ink); padding:.07in .12in; font-size:11px; font-weight:850; letter-spacing:.08em;">FIRST PRINT: QUALIFICATION COUPONS</div>
+      <div style="display:inline-block; margin-bottom:.1in; background:var(--lime); color:var(--ink); padding:.07in .12in; font-size:11px; font-weight:850; letter-spacing:.08em;">FIRST PRINT: QUALIFICATION PROOFS</div>
       <h2>Open one file. Print the evidence first.</h2>
       <div class="cols">
         <div>
-          <img src="{img_uri(IMG / 'codex_robot_body_v2_coupons_p1s_plates.png')}"
+          <img src="{img_uri(IMG / 'codex_robot_body_v2_proofs_p1s_plates.png')}"
                style="width:100%; border-radius:.12in; border:1px solid var(--line-soft);">
           <p style="font-size:10px; margin-top:.06in; color:var(--ink2);">
-            {len(COUPONS)} logical tests, {sum(p['part_count'] for p in COUPON_PLATES['plates'])} printable objects,
-            {len(COUPON_PLATES['plates'])} material-separated P1S plates. The tire ring and core are separate objects.
+            {len(PROOFS)} logical tests, {sum(p['part_count'] for p in PROOF_PLATES['plates'])} printable objects,
+            {len(PROOF_PLATES['plates'])} material-separated P1S plates. The tire ring and core are separate objects.
           </p>
         </div>
         <div>
-          <h3 style="margin-top:0;">codex_robot_body_v2_coupons_p1s.3mf</h3>
+          <h3 style="margin-top:0;">codex_robot_body_v2_proofs_p1s.3mf</h3>
           <ol style="font-size:12px; margin-left:.24in;">
-            <li>Open the tracked coupon 3MF in Bambu Studio.</li>
+            <li>Open the tracked proof 3MF in Bambu Studio.</li>
             <li>Load the exact filament product and color you intend to use.</li>
             <li>Print one material plate at a time; do not substitute a pass from another spool family.</li>
             <li>Run the matching fit, load, wear, heat, or optical check on the next two pages.</li>
@@ -1176,44 +1176,44 @@ def build_body_pages():
             white PETG (this book’s plates already do), so the try-out spool is a color audition, not a shopping-list item.</p>
           </div>
           <div class="check" style="margin-top:.14in;"><span class="box"></span><div><b>CHECK</b>
-            Every coupon object is present, each plate contains one material/color, and no support is enabled.</div></div>
+            Every proof object is present, each plate contains one material/color, and no support is enabled.</div></div>
         </div>
       </div>""", chapter=1)
 
-    # Coupons: keep the original mechanical checks and the new material
+    # Proofs: keep the original mechanical checks and the new material
     # qualification evidence on separate pages so the recording fields remain
     # readable instead of becoming microscopic ant paperwork.
-    standard_coupons = [(k, v) for k, v in COUPONS.items()
+    standard_proofs = [(k, v) for k, v in PROOFS.items()
                         if "_pla_" not in k and "lid_boundary" not in k]
-    material_coupons = [(k, v) for k, v in COUPONS.items()
+    material_proofs = [(k, v) for k, v in PROOFS.items()
                         if "_pla_" in k or "lid_boundary" in k]
-    for coupon_page, coupon_items in enumerate((standard_coupons, material_coupons), start=1):
-        crows = "".join(f"<tr><td><b>{esc(COUPON_TITLES.get(k, k))}</b><br>"
+    for proof_page, proof_items in enumerate((standard_proofs, material_proofs), start=1):
+        crows = "".join(f"<tr><td><b>{esc(PROOF_TITLES.get(k, k))}</b><br>"
                         f"<span class='mono'>{esc(' + '.join(o['stl'] for o in v['objects']))}</span></td>"
-                        f"<td>{esc(v['material'])}</td><td>{esc(COUPON_NOTES.get(k, v['note']))}</td></tr>"
-                        for k, v in coupon_items)
+                        f"<td>{esc(v['material'])}</td><td>{esc(PROOF_NOTES.get(k, v['note']))}</td></tr>"
+                        for k, v in proof_items)
         intro = ("These checks prove the shared screw, wheel, switch, board, and motion interfaces."
-                 if coupon_page == 1 else
+                 if proof_page == 1 else
                  "These checks are specific to the exact PLA/PETG product lines you load. A pass never transfers to another brand, subtype, or effect filament.")
-        record = "" if coupon_page == 1 else """
+        record = "" if proof_page == 1 else """
           <div style="margin-top:.12in; border:2px solid var(--red); border-radius:.1in; padding:.08in .12in; font-size:10px;">
             <b>RECORD BEFORE PASS:</b> manufacturer · product line · subtype · color · nozzle · layer height · wall count ·
             insert-tool temperature (when used) · measurements · pass/fail · tester · date. Blank evidence means the gate is open.
           </div>"""
         add(f"""
           {eyebrow(1)}
-          <h2>Print the little test parts first ({coupon_page} of 2)</h2>
-          <p style="margin-bottom:.1in;">Print them from <b>codex_robot_body_v2_coupons_p1s.3mf</b>. {intro}</p>
+          <h2>Print the little test parts first ({proof_page} of 2)</h2>
+          <p style="margin-bottom:.1in;">Print them from <b>codex_robot_body_v2_proofs_p1s.3mf</b>. {intro}</p>
           <table class="roomy" style="font-size:10.5px;"><tr><th>Test part</th><th>Filament</th><th>What it proves</th></tr>{crows}</table>
           {record}""", chapter=1)
 
-    coupon_record_rows = "".join(
-        f'<tr><td><b>{esc(COUPON_TITLES.get(key, key))}</b></td><td>{esc(value["material"])}</td>'
+    proof_record_rows = "".join(
+        f'<tr><td><b>{esc(PROOF_TITLES.get(key, key))}</b></td><td>{esc(value["material"])}</td>'
         '<td>&nbsp;</td><td>&nbsp;</td><td>&#9633; P&nbsp; &#9633; F</td><td>&nbsp;</td><td>&nbsp;</td></tr>'
-        for key, value in COUPONS.items())
+        for key, value in PROOFS.items())
     add(f"""
       {eyebrow(1)}
-      <h2>Coupon qualification record — blank means OPEN</h2>
+      <h2>Proof qualification record — blank means OPEN</h2>
       <div style="display:grid; grid-template-columns:1.3fr 1fr 1fr; gap:.1in; margin-bottom:.1in; font-size:10px;">
         <div><b>Printer / serial:</b> ____________________</div>
         <div><b>Nozzle:</b> ______</div><div><b>Date started:</b> __________</div>
@@ -1222,7 +1222,7 @@ def build_body_pages():
         <tr><th style="width:1.45in;">Test</th><th style="width:1.1in;">Required family</th>
         <th style="width:1.55in;">Exact product + color</th><th style="width:1.7in;">Settings + measurements</th>
         <th style="width:.72in;">Result</th><th style="width:.72in;">Tester</th><th style="width:.72in;">Date</th></tr>
-        {coupon_record_rows}
+        {proof_record_rows}
       </table>
       <p style="font-size:9px; margin-top:.08in;"><b>Attach detail sheets</b> for loads, cycles, temperatures, photos, and failure notes.
       Every row must identify the exact machine, spool product/color, settings, measured result, tester, and date; another spool family’s pass does not transfer.</p>""",
@@ -1653,7 +1653,7 @@ def build_body_pages():
           a quarter-second after you stop refreshing it.</p>
           <h3 style="margin-top:.16in;">Then, when the gates close</h3>
           <p style="font-size:11.5px;">Today the copilot’s robot is the simulator plus a parked body daemon — that is this release,
-          honestly. As your printed coupons, purchased parts, harness, and the 27-step commissioning record close the gates on the
+          honestly. As your printed proofs, purchased parts, harness, and the 27-step commissioning record close the gates on the
           previous pages, the very same seat starts the real wheels. You built its body; it will help you finish its own bring-up.</p>
           <div class="check" style="margin-top:.12in;"><span class="box"></span>
             <div><b>CHECK</b> All three commands answer <span class="mono" style="font-size:9.5px;">"accepted": true</span>, appear in
@@ -1688,7 +1688,7 @@ def build_body_pages():
         <div style="display:flex; gap:.55in; flex:1; align-items:center;">
           <div style="width:4.1in;">
             <div style="font-size:33px; font-weight:800; color:#fff; line-height:1.12; letter-spacing:-.5px; margin-bottom:.32in;">
-              Print coupons.<br>Dry-build the chassis.<br>Measure everything.</div>
+              Print proofs.<br>Dry-build the chassis.<br>Measure everything.</div>
             {features}
           </div>
           <div style="flex:1;">
@@ -1730,7 +1730,7 @@ def build_cover(chapter_pages):
         <div style="display:inline-block; margin:.08in 0 .04in; background:var(--red); color:#fff; padding:.07in .12in; font-size:11px; font-weight:800; letter-spacing:.08em;">DO NOT USE FOR POWERED MOTION</div>
         <h1 style="font-size:55px;">CODEX<br>ROVER BEAN</h1>
         <p style="font-size:19px; font-weight:600; margin-top:.16in;">The Robot Body Builder’s Book</p>
-        <p style="font-size:13px; margin-top:.08in; color:var(--ink2);">Review the geometry, print coupons, and dry-build the released chassis steps.<br>
+        <p style="font-size:13px; margin-top:.08in; color:var(--ink2);">Review the geometry, print proofs, and dry-build the released chassis steps.<br>
         Bench software/firmware and evidence runners ship; production wiring, powered outputs, head physical qualification, and signed commissioning remain open.</p>
         <div style="display:flex; gap:.09in; margin-top:.22in; flex-wrap:wrap;">{chips}</div>
         <div class="toc">{toc_rows}</div>
