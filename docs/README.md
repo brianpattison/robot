@@ -7,12 +7,12 @@ Read these in order:
 1. [v2 Builder Release Index](builder-release-v2.md) - the current artifact
    map, prototype selection list, and explicit purchase/release blockers.
 2. [The Builder's Book](../output/pdf/codex_robot_body_v2_assembly_guide.pdf) -
-   picture-first coupon and dry-assembly preview; never powered-motion authority.
+   picture-first proof and dry-assembly preview; never powered-motion authority.
 3. [Bambu Studio projects](../cad/bambu/README.md) - the 13-plate body and
-   five-plate coupon projects.
+   five-plate proof projects.
 4. [v2 component/release coverage](cad-component-coverage.md) - what CAD proves
    and what still requires delivered-part or physical evidence.
-5. [v2 coupon protocol](cad-coupons.md) - all 18 logical qualification tests.
+5. [v2 proof protocol](cad-proofs.md) - all 18 logical qualification tests.
 6. [Harness traveler](../harness/README.md) - 28 nominal routes with the
    production gate intentionally red.
 7. [Commissioning package](../commissioning/README.md) and

@@ -45,7 +45,7 @@ MEASUREMENT_TYPES = ("string", "boolean", "integer", "number")
 SOURCE_BLOBS = {
     "guide_sha256": "output/pdf/codex_robot_body_v2_assembly_guide.pdf",
     "body_3mf_sha256": "cad/bambu/codex_robot_body_v2_p1s.3mf",
-    "coupon_3mf_sha256": "cad/bambu/codex_robot_body_v2_coupons_p1s.3mf",
+    "proof_3mf_sha256": "cad/bambu/codex_robot_body_v2_proofs_p1s.3mf",
     "fixture_sha256": "commissioning/fixture-v1.json",
 }
 SOURCE_TREES = {

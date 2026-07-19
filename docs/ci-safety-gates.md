@@ -40,7 +40,7 @@ or package download. It uses CMake/CTest when available and otherwise a strict
 C11 compiler fallback.
 
 The separate `CAD release` workflow regenerates the v2 BREP geometry on macOS,
-runs the production CAD gate, and cross-checks body/coupon plate counts and
+runs the production CAD gate, and cross-checks body/proof plate counts and
 generator identities. Green CI still does **not** provision a Pi, contact Cloudflare, prove either physical
 UART, validate an append-only collector, build or flash Pico firmware, validate
 a physical circuit, release the harness, replace any of the 27 commissioning

@@ -1,16 +1,16 @@
 {
   "schema_version": 2,
-  "revision": "v2-commissioning-C3",
+  "revision": "v2-commissioning-C4",
   "status": "executable procedure; no physical evidence bundled",
   "measurement_types": {
     "string": [
       "appliance_tree_sha256", "battery_serial", "body_3mf_sha256", "charge_polarity",
-      "closure_photo_uri", "collector_nonce", "coupon_3mf_sha256", "coupon_record_uri",
-      "debug_uart_device", "firmware_status_version", "firmware_tree_sha256",
-      "firmware_uart_device", "fit_record_uri", "fixture_sha256", "fuse_schedule_uri",
-      "guide_sha256", "harness_gate_output", "harness_revision", "host_test_output",
-      "left_direction", "left_encoder_sign", "pico_uart_device", "remote_record_uri",
-      "review_date", "reviewer", "right_direction", "right_encoder_sign", "robot_serial",
+      "closure_photo_uri", "collector_nonce", "debug_uart_device", "firmware_status_version",
+      "firmware_tree_sha256", "firmware_uart_device", "fit_record_uri", "fixture_sha256",
+      "fuse_schedule_uri", "guide_sha256", "harness_gate_output", "harness_revision",
+      "host_test_output", "left_direction", "left_encoder_sign", "pico_uart_device",
+      "proof_3mf_sha256", "proof_record_uri", "remote_record_uri", "review_date",
+      "reviewer", "right_direction", "right_encoder_sign", "robot_serial",
       "robotd_tree_sha256", "separation_photo_uri", "uf2_sha256"
     ],
     "boolean": [
@@ -23,11 +23,12 @@
     ],
     "integer": [
       "automatic_restarts", "bms_trips", "captured_samples", "cases_run", "command_count",
-      "continuity_failures", "coupon_failures_open", "cycles", "open_motion_cases_passed",
-      "false_trips", "fault_cases_passed", "open_deviations", "open_fit_deviations",
-      "pull_test_failures", "restore_cycles_passed", "selective_faults_passed",
-      "shell_session_count", "surfaces_passed", "unexpected_accepts",
-      "watchdog_refreshes_from_bad_frames", "zone_identity_errors", "zones_passed"
+      "continuity_failures", "cycles", "false_trips", "fault_cases_passed",
+      "open_deviations", "open_fit_deviations", "open_motion_cases_passed",
+      "proof_failures_open", "pull_test_failures", "restore_cycles_passed",
+      "selective_faults_passed", "shell_session_count", "surfaces_passed",
+      "unexpected_accepts", "watchdog_refreshes_from_bad_frames", "zone_identity_errors",
+      "zones_passed"
     ],
     "number": [
       "backfeed_mv", "both_cut_ms", "channel_a_cut_ms", "channel_b_cut_ms",
@@ -47,8 +48,8 @@
   },
   "bench_fixture": {"id":"RB-FIXTURE-V1","manifest":"commissioning/fixture-v1.json","guide":"docs/commissioning-fixture-v1.md","boundary":"unpowered continuity, USB logic observations, and current-limited 12 V negative control only; no physical pass bundled"},
   "steps": [
-    {"id":"C001","title":"Identify the first article","phase":"records","condition":"unpowered","procedure":"Photograph the durable robot/battery/harness labels. The runner derives the exact guide, both 3MFs, fixture, firmware, robotd, and appliance source digests from the recorded Git commit; record only the physical battery serial and exact harness revision.","required_measurements":["robot_serial","guide_sha256","body_3mf_sha256","coupon_3mf_sha256","fixture_sha256","firmware_tree_sha256","robotd_tree_sha256","appliance_tree_sha256","battery_serial","harness_revision"],"required_artifacts":[{"role":"first_article_identity_photo"}]},
-    {"id":"C002","title":"Pass the qualification coupons","phase":"mechanical","condition":"unpowered","procedure":"Attach the completed 18-test coupon record for the exact printer and each exact filament family/color.","required_measurements":["coupon_record_uri","coupon_failures_open"],"required_artifacts":[{"role":"coupon_record","measurement":"coupon_record_uri","value":"uri"}],"acceptance":[{"field":"coupon_failures_open","op":"eq","value":0}]},
+    {"id":"C001","title":"Identify the first article","phase":"records","condition":"unpowered","procedure":"Photograph the durable robot/battery/harness labels. The runner derives the exact guide, both 3MFs, fixture, firmware, robotd, and appliance source digests from the recorded Git commit; record only the physical battery serial and exact harness revision.","required_measurements":["robot_serial","guide_sha256","body_3mf_sha256","proof_3mf_sha256","fixture_sha256","firmware_tree_sha256","robotd_tree_sha256","appliance_tree_sha256","battery_serial","harness_revision"],"required_artifacts":[{"role":"first_article_identity_photo"}]},
+    {"id":"C002","title":"Pass the qualification proofs","phase":"mechanical","condition":"unpowered","procedure":"Attach the completed 18-test proof record for the exact printer and each exact filament family/color.","required_measurements":["proof_record_uri","proof_failures_open"],"required_artifacts":[{"role":"proof_record","measurement":"proof_record_uri","value":"uri"}],"acceptance":[{"field":"proof_failures_open","op":"eq","value":0}]},
     {"id":"C003","title":"Inspect purchased-part fit","phase":"mechanical","condition":"unpowered","procedure":"Record delivered dimensions and fit for battery, motors, wheels, switches, relay, fuse block, regulators, Pico, Pi, audio boards, NeoPixels, servos, horns, camera, charge inlet, and mute switch.","required_measurements":["fit_record_uri","open_fit_deviations"],"required_artifacts":[{"role":"fit_record","measurement":"fit_record_uri","value":"uri"}],"acceptance":[{"field":"open_fit_deviations","op":"eq","value":0}]},
     {"id":"C004","title":"Validate harness traveler","phase":"electrical","condition":"battery removed","procedure":"Run the harness release gate after recording every measured cut length, termination, continuity, pull test, fuse value, selective fault, and thermal result.","command":["python3","harness/generate_harness_docs.py","--release"],"automated_artifact_role":"harness_gate_output","required_measurements":["harness_gate_output","continuity_failures","pull_test_failures"],"required_artifacts":[{"role":"harness_gate_output","measurement":"harness_gate_output","value":"uri"}],"acceptance":[{"field":"continuity_failures","op":"eq","value":0},{"field":"pull_test_failures","op":"eq","value":0}]},
     {"id":"C005","title":"Inspect deterministic separation","phase":"electrical","condition":"battery removed","procedure":"Photograph Pico USB/SWD service corridors disconnected from the Pi, independent E-stop relay-coil cut, NC bumper inputs, conditioned GPIO, and motor/logic branch separation. Prove Pi debug UART10 remains the physical console while RP1 GPIO UART0 at /dev/rover-pico is the framed Pico link, with no contention. Compare bench wiring with RB-FIXTURE-V1, while treating its direct-GPIO circuits as fixture-only rather than production conditioning evidence.","required_measurements":["separation_photo_uri","pico_usb_to_pi","pico_swd_to_pi","debug_uart_device","pico_uart_device","dual_uart_contention"],"required_artifacts":[{"role":"separation_photo","measurement":"separation_photo_uri","value":"uri"}],"acceptance":[{"field":"pico_usb_to_pi","op":"eq","value":false},{"field":"pico_swd_to_pi","op":"eq","value":false},{"field":"debug_uart_device","op":"eq","value":"/dev/ttyAMA10"},{"field":"pico_uart_device","op":"eq","value":"/dev/rover-pico"},{"field":"dual_uart_contention","op":"eq","value":false}]},

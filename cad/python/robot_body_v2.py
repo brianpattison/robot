@@ -74,7 +74,7 @@ BUMPER_WALL = 2.5
 # three captive bayonet lugs; the neck journal turns inside it.  These values
 # are shared by the lid cuts, the production solids, and the validator.
 PAN_JOURNAL_R = 19.80
-PAN_JOURNAL_CLEARANCE = 0.35                 # radial, coupon-gated
+PAN_JOURNAL_CLEARANCE = 0.35                 # radial, proof-gated
 PAN_COLLAR_BORE_R = PAN_JOURNAL_R + PAN_JOURNAL_CLEARANCE
 PAN_THRUST_R = 24.0
 PAN_COLLAR_R = 30.0
@@ -568,7 +568,7 @@ def build_head_faceplate():
 
 def build_neck():
     # Journal + thrust shoulder.  The 0.35 mm radial clearance and PETG-safe
-    # grease are physical coupon gates; the servo spline supplies torque only.
+    # grease are physical proof gates; the servo spline supplies torque only.
     journal_z0 = inv.Z_TOP - 4.0
     journal_z1 = inv.Z_TOP + 4.0
     neck = Pos(P.neck_x, 0, (journal_z0 + journal_z1) / 2) * Cylinder(
@@ -604,7 +604,7 @@ def build_neck():
 def build_bayonet_collar():
     # Fixed journal/thrust ring, sandwiched to the PETG lid by three captive
     # under-lid lugs.  The lugs enter the lid keyways and twist into its blind
-    # race; a small detent nib is coupon-gated before the large part is used.
+    # race; a small detent nib is proof-gated before the large part is used.
     ring = Pos(P.neck_x, 0, inv.Z_TOP + 1.5) * Cylinder(PAN_COLLAR_R, 5.0)
     ring -= Pos(P.neck_x, 0, inv.Z_TOP + 1.5) * Cylinder(PAN_COLLAR_BORE_R, 8.0)
     barrel = Pos(P.neck_x, 0, inv.Z_TOP - 1.0) * Cylinder(25.5, 4.0)

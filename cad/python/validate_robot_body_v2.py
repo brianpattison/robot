@@ -260,7 +260,7 @@ def check_head_mechanism(solids):
     if abs(v2.TILT_LIMIT_DEG - inv.P.head_tilt_limit_degrees) > 1e-6:
         FAILS.append("head: v2 tilt command does not track the drawing-backed Params limit")
     if not (0.25 <= v2.PAN_JOURNAL_CLEARANCE <= 0.45):
-        FAILS.append("head: printed pan journal radial clearance left the coupon-gated 0.25..0.45 mm band")
+        FAILS.append("head: printed pan journal radial clearance left the proof-gated 0.25..0.45 mm band")
 
     collar, neck = solids["bayonet_collar_v2"], solids["neck_v2"]
     pan_axis = Axis((v2.P.neck_x, 0.0, 0.0), (0.0, 0.0, 1.0))

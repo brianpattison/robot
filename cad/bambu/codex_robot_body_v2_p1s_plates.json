@@ -13,7 +13,7 @@
     "bed_edge_margin_mm": 8.0,
     "minimum_object_spacing_mm": 4.0
   },
-  "warning": "Prototype v2 plates. Generate, print, and record the material-specific coupons before any large part. The D027 CAD packing gate is closed; all named physical, electrical, firmware, and commissioning gates remain open. Nothing here authorizes powered motion.",
+  "warning": "Prototype v2 plates. Generate, print, and record the material-specific proofs before any large part. The D027 CAD packing gate is closed; all named physical, electrical, firmware, and commissioning gates remain open. Nothing here authorizes powered motion.",
   "global_project_baseline": {
     "layer_height_mm": 0.2,
     "wall_loops": 4,
@@ -119,7 +119,7 @@
             220.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "shell",
           "mechanical_role": "qualified_enclosure",
           "requested_material_family": "PLA",
@@ -155,7 +155,7 @@
             220.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "tray",
           "mechanical_role": "structure",
           "requested_material_family": "PETG",
@@ -191,7 +191,7 @@
             195.5
           ],
           "brim_mm": 4.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "lid",
           "mechanical_role": "structure",
           "requested_material_family": "PETG",
@@ -212,7 +212,7 @@
             86.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "speaker_clamp_bar",
           "mechanical_role": "structure",
           "requested_material_family": "PETG",
@@ -233,7 +233,7 @@
             86.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "speaker_clamp_bar",
           "mechanical_role": "structure",
           "requested_material_family": "PETG",
@@ -254,7 +254,7 @@
             20.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "tof_side_clamp",
           "mechanical_role": "structure",
           "requested_material_family": "PETG",
@@ -275,7 +275,7 @@
             20.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "tof_side_clamp",
           "mechanical_role": "structure",
           "requested_material_family": "PETG",
@@ -311,7 +311,7 @@
             140.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "head_shell",
           "mechanical_role": "qualified_enclosure",
           "requested_material_family": "PLA",
@@ -332,7 +332,7 @@
             93.8
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "deck",
           "mechanical_role": "structure",
           "requested_material_family": "PETG",
@@ -353,7 +353,7 @@
             126.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "controller_tower",
           "mechanical_role": "structure",
           "requested_material_family": "PETG",
@@ -374,7 +374,7 @@
             61.7
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "bayonet_collar",
           "mechanical_role": "structure",
           "requested_material_family": "PETG",
@@ -395,7 +395,7 @@
             48.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "neck",
           "mechanical_role": "structure",
           "requested_material_family": "PETG",
@@ -431,7 +431,7 @@
             76.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "mic_cradle",
           "mechanical_role": "structure",
           "requested_material_family": "PETG",
@@ -467,7 +467,7 @@
             126.3
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "yoke",
           "mechanical_role": "wear_motion",
           "requested_material_family": "PETG",
@@ -488,7 +488,7 @@
             50.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "head_pan_plate",
           "mechanical_role": "wear_motion",
           "requested_material_family": "PETG",
@@ -509,7 +509,7 @@
             43.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "front_pod",
           "mechanical_role": "wear_motion",
           "requested_material_family": "PETG",
@@ -530,7 +530,7 @@
             43.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "front_pod",
           "mechanical_role": "wear_motion",
           "requested_material_family": "PETG",
@@ -551,7 +551,7 @@
             42.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "wheel_front",
           "mechanical_role": "wear_motion",
           "requested_material_family": "PETG",
@@ -572,7 +572,7 @@
             42.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "wheel_front",
           "mechanical_role": "wear_motion",
           "requested_material_family": "PETG",
@@ -593,7 +593,7 @@
             42.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "wheel_core_rear",
           "mechanical_role": "wear_motion",
           "requested_material_family": "PETG",
@@ -614,7 +614,7 @@
             42.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "wheel_core_rear",
           "mechanical_role": "wear_motion",
           "requested_material_family": "PETG",
@@ -635,7 +635,7 @@
             22.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "printed_washer_set",
           "mechanical_role": "wear_motion",
           "requested_material_family": "PETG",
@@ -656,7 +656,7 @@
             22.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "printed_washer_set",
           "mechanical_role": "wear_motion",
           "requested_material_family": "PETG",
@@ -677,7 +677,7 @@
             22.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "printed_washer_set",
           "mechanical_role": "wear_motion",
           "requested_material_family": "PETG",
@@ -698,7 +698,7 @@
             22.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "printed_washer_set",
           "mechanical_role": "wear_motion",
           "requested_material_family": "PETG",
@@ -719,7 +719,7 @@
             22.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "printed_washer_set",
           "mechanical_role": "wear_motion",
           "requested_material_family": "PETG",
@@ -740,7 +740,7 @@
             22.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "printed_washer_set",
           "mechanical_role": "wear_motion",
           "requested_material_family": "PETG",
@@ -761,7 +761,7 @@
             10.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "tilt_bushing",
           "mechanical_role": "wear_motion",
           "requested_material_family": "PETG",
@@ -797,7 +797,7 @@
             99.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "battery_clamp_bar",
           "mechanical_role": "safety_service",
           "requested_material_family": "PETG",
@@ -818,7 +818,7 @@
             49.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "pico_clamp_bar",
           "mechanical_role": "safety_service",
           "requested_material_family": "PETG",
@@ -839,7 +839,7 @@
             28.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "motor_clamp_cap",
           "mechanical_role": "safety_service",
           "requested_material_family": "PETG",
@@ -860,7 +860,7 @@
             28.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "motor_clamp_cap",
           "mechanical_role": "safety_service",
           "requested_material_family": "PETG",
@@ -896,7 +896,7 @@
             120.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "head_faceplate",
           "mechanical_role": "visible_cosmetic",
           "requested_material_family": "PLA",
@@ -917,7 +917,7 @@
             103.4
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "rear_panel",
           "mechanical_role": "visible_cosmetic",
           "requested_material_family": "PLA",
@@ -938,7 +938,7 @@
             75.4
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "fascia",
           "mechanical_role": "visible_cosmetic",
           "requested_material_family": "PLA",
@@ -974,7 +974,7 @@
             190.0
           ],
           "brim_mm": 4.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "lid_skin",
           "mechanical_role": "visible_cosmetic",
           "requested_material_family": "PLA",
@@ -1010,7 +1010,7 @@
             32.8
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "eye_diffuser_bar",
           "mechanical_role": "optical",
           "requested_material_family": "PLA",
@@ -1031,7 +1031,7 @@
             12.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "status_diffuser_bar",
           "mechanical_role": "optical",
           "requested_material_family": "PLA",
@@ -1067,7 +1067,7 @@
             238.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "bumper_half",
           "mechanical_role": "flexible",
           "requested_material_family": "TPU",
@@ -1103,7 +1103,7 @@
             238.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "bumper_half",
           "mechanical_role": "flexible",
           "requested_material_family": "TPU",
@@ -1139,7 +1139,7 @@
             56.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "battery_pad_frame",
           "mechanical_role": "flexible",
           "requested_material_family": "TPU",
@@ -1160,7 +1160,7 @@
             86.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "tire",
           "mechanical_role": "flexible",
           "requested_material_family": "TPU",
@@ -1181,7 +1181,7 @@
             86.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "tire",
           "mechanical_role": "flexible",
           "requested_material_family": "TPU",
@@ -1202,7 +1202,7 @@
             86.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "tire",
           "mechanical_role": "flexible",
           "requested_material_family": "TPU",
@@ -1223,7 +1223,7 @@
             86.0
           ],
           "brim_mm": 0.0,
-          "release_status": "prototype: material coupons + purchased-part fit gates apply",
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
           "registry_part": "tire",
           "mechanical_role": "flexible",
           "requested_material_family": "TPU",

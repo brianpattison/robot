@@ -1,6 +1,6 @@
-# Rover Bean Builder Release — v2.0.0-prototype.4
+# Rover Bean Builder Release — v2.0.0-prototype.5
 
-Permanent source: [https://github.com/brianpattison/robot/releases/tag/v2.0.0-prototype.4](https://github.com/brianpattison/robot/releases/tag/v2.0.0-prototype.4)
+Permanent source: [https://github.com/brianpattison/robot/releases/tag/v2.0.0-prototype.5](https://github.com/brianpattison/robot/releases/tag/v2.0.0-prototype.5)
 
 ## Verdict
 
@@ -16,7 +16,7 @@ physical first article.
 | --- | --- | --- |
 | Builder's Book | `output/pdf/codex_robot_body_v2_assembly_guide.pdf` | Picture-first dry assembly plus explicit release holds. |
 | Body print project | `cad/bambu/codex_robot_body_v2_p1s.3mf` | 45 prototype pieces on 13 material-separated plates. |
-| Coupon print project | `cad/bambu/codex_robot_body_v2_coupons_p1s.3mf` | 18 logical tests / 19 objects / 5 material-separated plates. |
+| Proof print project | `cad/bambu/codex_robot_body_v2_proofs_p1s.3mf` | 18 logical tests / 19 objects / 5 material-separated plates. |
 | UART contract | `docs/body-protocol-v1.md` | Fixed v1 bench protocol; no flash/config-write path. |
 | Pi body daemon | `software/robotd/` | Executable local Unix-socket/UART baseline with blackbox logging. |
 | Pi 5 appliance | `software/appliance/` + `software/install.sh` | Closed-world Bookworm provisioning baseline; real Pi, Tunnel, dual-UART, and append-only collector attestations remain open. |
@@ -38,7 +38,7 @@ physical first article.
 | Teal PLA | a small spool or known-good leftovers | direct visible cosmetic parts; physical fit/temperature gates open (1 plate). |
 | Translucent lime PLA | a small spool or known-good leftovers | light diffusers; optical/thermal gates open (1 plate). |
 | Charcoal TPU 95A | one 500 g spool | tires, bumper halves, battery pads (3 plates). |
-| Candidate body-color PLA (optional) | one spool per color you audition | Coupon try-out only: the shell/head color you hope to qualify. Those parts print white PETG until a candidate passes its recorded checks. |
+| Candidate body-color PLA (optional) | one spool per color you audition | Proof try-out only: the shell/head color you hope to qualify. Those parts print white PETG until a candidate passes its recorded checks. |
 
 ## Fasteners
 
@@ -62,7 +62,7 @@ Any row whose fit, termination, load, or test evidence is open stays open.
 | Pololu #4867 gearmotor (99:1, 25D, 12 V, encoder) | 2 | The wheel motors. |
 | Hitec D85MG servo | 2 | The neck motors (look left/right, up/down). |
 | Hitec R-ML24 aluminum horn (H24T) | 0 for now | DO NOT BUY YET — no normal US quantity-one source is confirmed, and an unmodeled substitute horn is forbidden. The head build pauses at the step 18 sourcing gate until this row clears. |
-| Verified D85MG/R-ML24 component hardware pack | 0 for now | DO NOT BUY YET — not yet purchasable as a kit (spline-center screws, M2 horn-link screws, servo grommets, eyelets, nuts). Releases with the horn row above; confirm the delivered pack against the head coupons. |
+| Verified D85MG/R-ML24 component hardware pack | 0 for now | DO NOT BUY YET — not yet purchasable as a kit (spline-center screws, M2 horn-link screws, servo grommets, eyelets, nuts). Releases with the horn row above; confirm the delivered pack against the head proofs. |
 | Bioenno BLF-1203AB 12 V 3 Ah LiFePO4 battery | 1 | The robot’s power pack. |
 | Bioenno BPC-1502DC charger | 1 | The matching charger. Only ever use this one. |
 | Switchcraft EN2P3M20 inlet + EN2C3F20G2 plug | 1 pair | The keyed charging plug on the back. |
@@ -104,7 +104,7 @@ OpenSSH `allowed_signers` / revocation policy.
 
 - A protected mobile Pi 5 input, normal US R-ML24 source, available/qualified
   servo regulator, production relay driver, and Pico-local physical reset.
-- Exact delivered-part fit and the completed 18-coupon record.
+- Exact delivered-part fit and the completed 18-proof record.
 - Exact connector housings/contacts, measured harness lengths, continuity and
   pull tests, released fuse values, selective-fault tests, and thermal soak.
 - Reviewed conditioned-input, relay-driver, battery-sense, motor-output, and

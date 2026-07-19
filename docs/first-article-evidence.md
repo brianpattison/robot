@@ -101,7 +101,7 @@ predates this workflow and must not be moved or reused.
 tag, plan blob hash, and hashes derived from committed bytes for:
 
 - the builder's book;
-- the body and coupon 3MF projects;
+- the body and proof 3MF projects;
 - the RB-FIXTURE-V1 manifest;
 - the complete Pico safety, `robotd`, and Pi-appliance source trees.
 

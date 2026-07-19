@@ -10,7 +10,7 @@ from builder_release_catalog_v2 import SHOP_ELECTRONICS, SHOP_FASTENERS, SHOP_FI
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "docs" / "builder-release-v2.md"
-RELEASE_ID = "v2.0.0-prototype.4"
+RELEASE_ID = "v2.0.0-prototype.5"
 RELEASE_URL = f"https://github.com/brianpattison/robot/releases/tag/{RELEASE_ID}"
 
 
@@ -39,7 +39,7 @@ physical first article.
 | --- | --- | --- |
 | Builder's Book | `output/pdf/codex_robot_body_v2_assembly_guide.pdf` | Picture-first dry assembly plus explicit release holds. |
 | Body print project | `cad/bambu/codex_robot_body_v2_p1s.3mf` | 45 prototype pieces on 13 material-separated plates. |
-| Coupon print project | `cad/bambu/codex_robot_body_v2_coupons_p1s.3mf` | 18 logical tests / 19 objects / 5 material-separated plates. |
+| Proof print project | `cad/bambu/codex_robot_body_v2_proofs_p1s.3mf` | 18 logical tests / 19 objects / 5 material-separated plates. |
 | UART contract | `docs/body-protocol-v1.md` | Fixed v1 bench protocol; no flash/config-write path. |
 | Pi body daemon | `software/robotd/` | Executable local Unix-socket/UART baseline with blackbox logging. |
 | Pi 5 appliance | `software/appliance/` + `software/install.sh` | Closed-world Bookworm provisioning baseline; real Pi, Tunnel, dual-UART, and append-only collector attestations remain open. |
@@ -93,7 +93,7 @@ OpenSSH `allowed_signers` / revocation policy.
 
 - A protected mobile Pi 5 input, normal US R-ML24 source, available/qualified
   servo regulator, production relay driver, and Pico-local physical reset.
-- Exact delivered-part fit and the completed 18-coupon record.
+- Exact delivered-part fit and the completed 18-proof record.
 - Exact connector housings/contacts, measured harness lengths, continuity and
   pull tests, released fuse values, selective-fault tests, and thermal soak.
 - Reviewed conditioned-input, relay-driver, battery-sense, motor-output, and

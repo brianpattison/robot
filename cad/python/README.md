@@ -18,9 +18,9 @@ python cad/python/packing_study_printed_only.py
 python cad/python/robot_body_v2.py
 python cad/python/validate_robot_body_v2.py --gate
 python cad/python/robot_body_v2_print.py
-python cad/python/robot_body_v2_coupons.py
+python cad/python/robot_body_v2_proofs.py
 python cad/bambu/generate_bambu_project_v2.py
-python cad/bambu/generate_bambu_coupons_v2.py
+python cad/bambu/generate_bambu_proofs_v2.py
 python cad/blender/render_robot_body_v2.py
 python cad/blender/render_assembly_steps_v2.py
 python docs/generate_assembly_guide_v2.py
@@ -28,8 +28,8 @@ python docs/generate_assembly_guide_v2.py
 
 The authoritative registry is `robot_body_v2_inventory.py`. Current tracked
 release counts are 40 installed functional parts, four spare washers, one
-optional lid skin, 47 M3 joints, 13 body plates, and 18 logical coupons / 19
-coupon objects on five plates. `validate_robot_body_v2.py --gate` is necessary
+optional lid skin, 47 M3 joints, 13 body plates, and 18 logical proofs / 19
+proof objects on five plates. `validate_robot_body_v2.py --gate` is necessary
 geometry evidence, never electrical, material, fit, or powered-motion evidence.
 
 ## v1 dependency boundary
@@ -46,10 +46,10 @@ ReportLab guide; it layers that legacy dependency on the current v2 toolchain.
 ## Generated artifacts
 
 Meshes, STEP files, and intermediate manifests live under `cad/exports/` and
-are ignored. The tracked body/coupon 3MFs, plate manifests, rendered guide
+are ignored. The tracked body/proof 3MFs, plate manifests, rendered guide
 images, HTML, and PDF are deliberate release artifacts and must be regenerated
 from source. Never hand-edit a 3MF archive or generated guide.
 
 The Bambu round-trip, Blender renders, Chrome PDF print, visual page review,
-coupon printing, and every physical qualification remain explicit local steps;
+proof printing, and every physical qualification remain explicit local steps;
 hosted CI cannot substitute for their native applications, printer, or parts.
