@@ -899,3 +899,38 @@ The rename was executed with the full regeneration chain on macOS: proofs
 exports, the Bambu-round-tripped proofs 3MF/plates/contact sheet (internal
 object names included), the builder-release index, and the book, so no
 tracked artifact retains stale internal "coupon" strings.
+
+## D039: The Ages Chip Is A Plain-Language Bar, Not An Age Grading
+
+Date: 2026-08-12
+Status: accepted
+
+The book's cover chip "AGES 10+ WITH AN ADULT" — and the D029
+child-followable requirement behind it — states the **writing and
+experience standard** for the builder-facing surface: every instruction
+must stay simple enough for a ten-year-old building alongside an adult.
+Pictures first, plain words, no jargon, and no engineering degree assumed
+anywhere the builder reads. That is the whole claim.
+
+What the chip is **not**: a consumer age grading, a toy-safety
+classification, a hazard assessment, or a marketing promise about who may
+safely build or operate the robot. This prototype has produced no
+compliance evidence of that kind, and a real retail age grade is a
+separate future decision that requires it (hazard review of the tool
+list, temperatures, small parts, battery handling, and the applicable
+consumer-product rules for the market it ships in).
+
+Direction for agents (Brian, 2026-08-12, following the market-readiness
+review):
+
+- Keep the chip and keep the simple language. Do not remove or soften it
+  as "overpromising," and do not restate it in technical or legal terms.
+- Never cite the chip as evidence of a safety claim, in docs or in
+  reviews.
+- The known tension between the bar and today's tool list (soldering
+  iron for inserts, multimeter, servo tester) is real and acknowledged.
+  It resolves by simplifying the product experience — moving skilled
+  steps out of the builder's hands — never by re-labeling the book with
+  harder language.
+- When retail packaging becomes real, decide a compliance-grade age
+  label then, as its own logged decision. Nothing here pre-commits it.
