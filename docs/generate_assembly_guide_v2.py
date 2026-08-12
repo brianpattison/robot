@@ -1106,6 +1106,9 @@ def build_body_pages():
 
     # Plate table: aggregate instances and use the same friendly part names
     # as the piece chart and step strips, so a kid can match them.
+    from guide_estimates_v2 import plate_estimates, totals
+    estimates = plate_estimates(PLATES)
+    est_g, est_h = totals(estimates)
     rows = ""
     for p in PLATES["plates"]:
         plate_counts: dict[str, int] = {}
@@ -1125,13 +1128,18 @@ def build_body_pages():
             f"background:{p['color_hex']};border:1px solid rgba(0,0,0,.25); vertical-align:-2px;'></span> "
             f"{esc(p['name'].replace(' - ', ' · '))}</td>"
             f"<td style='text-align:center'>{p['part_count']}</td>"
-            f"<td>{parts_txt}</td></tr>")
+            f"<td>{parts_txt}</td>"
+            f"<td style='text-align:center; white-space:nowrap;'>≈{estimates[p['plate_number']]['grams']} g<br>"
+            f"≈{estimates[p['plate_number']]['hours']:g} h</td></tr>")
     add(f"""
       {eyebrow(1)}
       <h2>The {N_PLATES} prototype plates, in printing order</h2>
-      <table class="roomy" style="font-size:10.5px;"><tr><th style="width:.35in;">#</th><th style="width:2.4in;">Plate (load this filament)</th><th style="width:.5in;">Parts</th><th>What’s on it</th></tr>{rows}</table>
-      <p style="margin-top:.12in; font-size:11px;"><b>Tip:</b> the plates are already grouped by exact material and color.
-      Print each group back to back, then label its box before changing filament.</p>""",
+      <table class="roomy" style="font-size:10.5px;"><tr><th style="width:.35in;">#</th><th style="width:2.3in;">Plate (load this filament)</th><th style="width:.5in;">Parts</th><th>What’s on it</th><th style="width:.7in;">Plan for*</th></tr>{rows}</table>
+      <p style="margin-top:.12in; font-size:11px;"><b>The whole job plans at ≈{est_g:,} g of filament and ≈{est_h:g} printer-hours.</b>
+      *Planning estimates computed from the exported geometry — your slicer’s numbers win.
+      <b>Tip:</b> the plates are grouped by exact material and color — print each group back to back, then label its box before
+      changing filament. Every plate carries a small corner <b>check tab</b>: test its insert bore and screw hole
+      before starting the next plate, and fix the printer first if either is off.</p>""",
         chapter=1)
 
     bin_labels = "".join(
@@ -1536,7 +1544,10 @@ def build_body_pages():
 /tmp/rover-bean/bin/robot-dashboard --socket /tmp/robotd.sock \\
     --blackbox /tmp/robotd-blackbox.jsonl</div>
           <p style="font-size:12px; margin-top:.08in;">Then point a browser at <b>http://127.0.0.1:8072/</b> — the page in this
-          picture, live on your desk. It only ever listens to your own computer.</p>
+          picture, live on your desk. It only ever listens to your own computer. When you want the pretend body to perform,
+          run <span class="mono" style="font-size:11px;">/tmp/rover-bean/bin/robot-hello --socket /tmp/robotd.sock</span> —
+          Rover Bean looks left, looks right, and settles back to center, narrating as it goes. On the real robot this same
+          script is the mid-build wake-up: head and lights only, battery still out, no gate crossed.</p>
           <div style="margin-top:.1in; background:var(--cream); border-radius:.1in; padding:.09in .12in;">
             <p style="font-size:10.5px;"><b>It’s a window, not a remote override.</b> The dashboard talks to
             <span class="mono" style="font-size:9.5px;">robotd</span> like every other client. On the real robot the Pico firmware

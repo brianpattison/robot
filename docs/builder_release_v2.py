@@ -6,7 +6,8 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from builder_release_catalog_v2 import SHOP_ELECTRONICS, SHOP_FASTENERS, SHOP_FILAMENT
+from builder_release_catalog_v2 import (SHOP_BENCH_GEAR, SHOP_ELECTRONICS,
+                                         SHOP_FASTENERS, SHOP_FILAMENT)
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "docs" / "builder-release-v2.md"
@@ -21,6 +22,8 @@ def render() -> str:
         f"| {name} | {amount} | {role} |" for name, amount, role in SHOP_FASTENERS)
     electronics_rows = "\n".join(
         f"| {name} | {amount} | {role} |" for name, amount, role in SHOP_ELECTRONICS)
+    bench_rows = "\n".join(
+        f"| {name} | {amount} | {role} |" for name, amount, role in SHOP_BENCH_GEAR)
     return f"""# Rover Bean Builder Release — {RELEASE_ID}
 
 Permanent source: [{RELEASE_URL}]({RELEASE_URL})
@@ -70,6 +73,15 @@ Any row whose fit, termination, load, or test evidence is open stays open.
 | Part | Qty | Role / hold |
 | --- | --- | --- |
 {electronics_rows}
+
+## Bench equipment
+
+The commissioning plan's acceptance thresholds assume these instruments; they
+are commissioning tools, not robot parts, and none of them ride in the body.
+
+| Instrument | Qty | What it proves |
+| --- | --- | --- |
+{bench_rows}
 
 ## Bench commands
 

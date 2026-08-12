@@ -79,6 +79,32 @@ SHOP_FASTENERS = [
     ),
 ]
 
+# Commissioning-grade bench equipment. The 27-step plan specifies acceptance
+# thresholds down to millivolts and milliseconds; this table names the
+# instruments those thresholds assume so no builder has to reverse-engineer
+# the equipment list from the acceptance math. Quantity-one US retail rule
+# applies as everywhere else.
+SHOP_BENCH_GEAR = [
+    ("Current-limited DC bench supply (0–15 V, ≥3 A, settable current limit)",
+     "1",
+     "Regulator bring-up (C006), the fixture's 0.20 A negative-control stage, the "
+     "low-battery sweep (C017), and the 6 V servo bench (C022). A settable limit is "
+     "the requirement; programmable sweep is a convenience."),
+    ("Multimeter with continuity beeper, mV resolution, and 0.01 A DC current",
+     "1",
+     "Every continuity check in the harness traveler, the ≤100 mV mute/backfeed "
+     "readings (C018), and the per-motor / pack current ceilings (C024)."),
+    ("Contactless IR thermometer (or thermocouple meter)",
+     "1",
+     "Terminal, conductor, servo, motor, driver, and pack temperature evidence "
+     "(C019, C022, C024, C025)."),
+    ("Raspberry Pi Debug Probe (SC0889)",
+     "1",
+     "Already in the fixture BOM: the Pi debug-console attestation cable, the "
+     "Pico service corridor, and the one-time independent cross-check of the "
+     "firmware's self-reported stop-latency telemetry."),
+]
+
 SHOP_ELECTRONICS = [
     ("Raspberry Pi 5 (8 GB)", "1", "The robot’s computer."),
     ("32 GB+ A2 microSD card", "1", "The computer’s memory card — the robot’s programs live here."),

@@ -32,85 +32,22 @@ from __future__ import annotations
 
 import json
 import shutil
-import struct
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import generate_assembly_guide_v2 as book  # noqa: E402  (shared content source)
-import robot_body_v2_inventory as inv  # noqa: E402
+from builder_release_catalog_v2 import SHOP_BENCH_GEAR  # noqa: E402
+from guide_estimates_v2 import plate_estimates  # noqa: E402  (shared numbers)
 
 ROOT = book.ROOT
 SITE_OUT = ROOT / "output" / "site"
 SITE_IMG = SITE_OUT / "img"
-PRINT_READY = ROOT / "cad" / "exports" / "v2" / "print_ready"
-PRINT_MANIFEST = PRINT_READY / "codex_robot_body_v2_print_manifest.json"
-
-# Planning-estimate throughput for a P1S at the project's 0.2 mm baseline.
-# Deliberately conservative round numbers; the site labels every derived
-# figure "planning estimate — confirm in the slicer" per repo honesty rules.
-GRAMS_PER_HOUR = {"PETG": 40.0, "PLA": 44.0, "TPU": 16.0}
 
 
 def esc(s):
     return book.esc(s)
-
-
-# ---------------------------------------------------------------------------
-# Filament mass / print-time planning estimates from the exported print STLs
-# ---------------------------------------------------------------------------
-def binary_stl_volume_mm3(path: Path) -> float:
-    """Signed-tetrahedron volume of a binary STL (mm^3)."""
-    data = path.read_bytes()
-    (count,) = struct.unpack_from("<I", data, 80)
-    vol = 0.0
-    off = 84
-    for _ in range(count):
-        # 12 floats: normal, v0, v1, v2 — 50-byte stride with attribute short.
-        f = struct.unpack_from("<12f", data, off)
-        x0, y0, z0, x1, y1, z1, x2, y2, z2 = f[3:12]
-        vol += (x0 * (y1 * z2 - y2 * z1)
-                - y0 * (x1 * z2 - x2 * z1)
-                + z0 * (x1 * y2 - x2 * y1))
-        off += 50
-    return abs(vol) / 6.0
-
-
-def plate_estimates() -> dict[int, dict]:
-    """plate_number -> {grams, hours, family} planning estimates."""
-    manifest = json.loads(PRINT_MANIFEST.read_text())
-    designs = manifest["parts"] if "parts" in manifest else manifest
-    density = dict(getattr(inv, "EFFECTIVE_DENSITY", {}))  # g/mm^3, screen-grade
-
-    def design_key(instance_name: str) -> str:
-        base = instance_name.rsplit("_i", 1)[0] if "_i" in instance_name else instance_name
-        return base
-
-    volumes: dict[str, float] = {}
-    out: dict[int, dict] = {}
-    for plate in book.PLATES["plates"]:
-        grams = 0.0
-        family = plate["material"].split()[0].upper()
-        family = "TPU" if family.startswith("TPU") else family
-        for part in plate["parts"]:
-            base = design_key(part["name"])
-            if base not in volumes:
-                stl = PRINT_READY / f"{base}_print.stl"
-                volumes[base] = binary_stl_volume_mm3(stl) if stl.exists() else 0.0
-            entry = designs.get(base, {}) if isinstance(designs, dict) else {}
-            fam = (entry.get("effective_material_family") or family or "PETG").upper()
-            fam = "TPU" if fam.startswith("TPU") else fam
-            rho = density.get(fam) or density.get(fam.title()) or 0.60e-3
-            grams += volumes[base] * rho
-        rate = GRAMS_PER_HOUR.get("TPU" if family.startswith("TPU") else
-                                  ("PLA" if "PLA" in plate["material"].upper() else "PETG"), 40.0)
-        hours = grams / rate if rate else 0.0
-        out[plate["plate_number"]] = {
-            "grams": round(grams),
-            "hours": max(0.5, round(hours * 2) / 2),
-        }
-    return out
 
 
 # ---------------------------------------------------------------------------
@@ -223,6 +160,11 @@ def shop_view() -> str:
     for i, (label, why) in enumerate(book.SHOP_TOOLS):
         tool_rows += (f'<label class="checkrow" data-check="shop" data-key="tool{i}">'
                       f'<input type="checkbox"><b>{esc(label)}</b><span>{esc(why)}</span></label>')
+    bench_rows = ""
+    for i, (label, qty, why) in enumerate(SHOP_BENCH_GEAR):
+        bench_rows += (f'<label class="checkrow" data-check="shop" data-key="bench{i}">'
+                       f'<input type="checkbox"><b>{esc(label)} <i class="qty">&times;{esc(qty)}</i></b>'
+                       f'<span>{esc(why)}</span></label>')
 
     elec_rows = ""
     for i, (name, qty, what) in enumerate(book.SHOP_ELECTRONICS):
@@ -256,6 +198,10 @@ def shop_view() -> str:
   <h2>Filament</h2><div class="checklist">{fil_rows}</div>
   <h2>The only two fastener packs</h2><div class="checklist">{fast_rows}</div>
   <h2>Tools</h2><div class="checklist">{tool_rows}</div>
+  <h2>Bench equipment (for the check-out chapters)</h2>
+  <p class="lead">Commissioning tools, not robot parts — the measured-evidence steps assume
+  these instruments.</p>
+  <div class="checklist">{bench_rows}</div>
   <h2>The electronics box</h2><div class="checklist">{elec_rows}</div>
   <h2>Match the electronics</h2>
   <p class="lead">When a box arrives, match it to its picture.</p>
@@ -967,7 +913,7 @@ JS = r"""
 # ---------------------------------------------------------------------------
 def build_site() -> Path:
     copy_assets()
-    estimates = plate_estimates()
+    estimates = plate_estimates(book.PLATES)
     nav = "".join(
         f'<a href="#{r}">{label}</a>'
         for r, label in [("home", "HOME"), ("shop", "SHOP"), ("print", "PRINT"),

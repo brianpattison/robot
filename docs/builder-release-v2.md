@@ -82,6 +82,18 @@ Any row whose fit, termination, load, or test evidence is open stays open.
 | Enclosed 3 W 4 ohm speakers + 2× Adafruit MAX98357A amps | 1 set | The robot’s voice. |
 | Prototype wire, terminal, and connector kit | not released | The production terminal schedule, measured lengths, and crimp tooling are still open; do not improvise a powered harness from this preview. |
 
+## Bench equipment
+
+The commissioning plan's acceptance thresholds assume these instruments; they
+are commissioning tools, not robot parts, and none of them ride in the body.
+
+| Instrument | Qty | What it proves |
+| --- | --- | --- |
+| Current-limited DC bench supply (0–15 V, ≥3 A, settable current limit) | 1 | Regulator bring-up (C006), the fixture's 0.20 A negative-control stage, the low-battery sweep (C017), and the 6 V servo bench (C022). A settable limit is the requirement; programmable sweep is a convenience. |
+| Multimeter with continuity beeper, mV resolution, and 0.01 A DC current | 1 | Every continuity check in the harness traveler, the ≤100 mV mute/backfeed readings (C018), and the per-motor / pack current ceilings (C024). |
+| Contactless IR thermometer (or thermocouple meter) | 1 | Terminal, conductor, servo, motor, driver, and pack temperature evidence (C019, C022, C024, C025). |
+| Raspberry Pi Debug Probe (SC0889) | 1 | Already in the fixture BOM: the Pi debug-console attestation cable, the Pico service corridor, and the one-time independent cross-check of the firmware's self-reported stop-latency telemetry. |
+
 ## Bench commands
 
 ```bash
