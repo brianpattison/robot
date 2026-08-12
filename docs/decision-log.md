@@ -1105,3 +1105,46 @@ cannot guarantee.
 Nothing in this entry releases the harness: measured lengths,
 continuity, pull tests, fuse values, and the first-article evidence
 stay exactly as red as they were.
+
+## D048: Printed Arm-Capture Cradles Retire The R-ML24 Horn
+
+Date: 2026-08-12
+Status: accepted (arm-envelope constants provisional pending
+delivered-arm measurement)
+
+The Hitec R-ML24 aluminum horn had no US quantity-one source, which
+froze the head build at step 18 — a product stopped by a small metal
+arm. Both drive interfaces (pan and tilt) are redesigned as parametric
+printed ARM-CAPTURE CRADLES: a close-fitting open-ended slot seats a
+generic single-arm 24T servo horn — the arm shipped in the D85MG's own
+bag qualifies — and drive torque rides the slot walls on the arm
+flanks, never screws through the horn's link holes. The pan cover
+clamps with the standard M3 x 8 + insert system; the tilt capture
+closes in the assembled position (arm held by its bag spline screw, the
+head station by the passive bushing's existing M3).
+
+Consequences, all verified by the gate:
+
+- The R-ML24 row and the D85MG/R-ML24 hardware-pack row leave the
+  purchase list; the D85MG's own bag supplies the arm, spline screw,
+  grommets, and eyelets. Two DO-NOT-BUY-YET gates die by design change.
+- The four M2 horn-link screws and the M2 driver leave the build.
+  **M3 is now the only fastener thread anywhere in the robot**; the
+  tally stays 47 screws + 47 inserts and the installed budget stays 40
+  (the pan cover reuses the freed flange-plate registry slot).
+- Embossed centering ticks at pan and tilt center support the
+  nearest-spline-tooth landing whose residual D042's software trim
+  absorbs; the 6 V servo tester is gone from the tool list.
+- `proof_pla_head_pivot` becomes `proof_horn_capture` (PLA cradle +
+  PETG cover; measure the delivered arm, seat it, clamp at the 3.2
+  stack, hold 2x rated stall torque warm and cold, ten remove/refit
+  cycles). Still 18 logical proofs; the proofs project is now
+  20 objects on 5 plates.
+- Arm envelope constants (slot 4.6 mm wide for a 4.0 +0.6/-0 arm,
+  1.8-2.6 mm thickness band, 18-27 mm accepted length) are PROVISIONAL:
+  the horn-capture proof against real delivered arms is the release
+  evidence, and the step 18/19 banners now hold on that proof instead
+  of on sourcing.
+
+D035's journal, collar, yoke, ranges, and hard stops are unchanged;
+only its drive-interface sentences are superseded.

@@ -116,8 +116,8 @@ SCREWS = {j.name: len(j.positions) for j in inv.JOINTS}
 # Red banner above a step's numbered moves, for holds the builder must see
 # before starting (kept out of the <ol> so arrow numbers stay aligned).
 STEP_NOTES = {
-    "step_18_neck": "SOURCING GATE — the horns + hardware pack are DO-NOT-BUY-YET rows; stop after move 3 until they release.",
-    "step_19_head": "SOURCING GATE — same hold as step 18; wait for the released horn + hardware pack.",
+    "step_18_neck": "DELIVERED-ARM PROOF FIRST — the arm from your servo's bag must pass the horn-capture proof (chapter 2) before it goes in; the capture slot's sizes are provisional until real arms are measured.",
+    "step_19_head": "DELIVERED-ARM PROOF FIRST — same hold as step 18; prove the bag arm in the capture proof before building the head.",
 }
 
 # Per-camera FRONT hint: rear-camera steps see the front on the far side.
@@ -459,7 +459,7 @@ PART_NAMES = {
     "px_fuse": "fuse block", "px_reg1": "regulators",
     "px_switch": "feeler switches", "px_tof_L": "distance boards",
     "px_speaker_L": "speakers", "px_estop_cap": "red button",
-    "px_mic": "mic array", "px_servo": "D85MG + R-ML24", "px_camera": "camera",
+    "px_mic": "mic array", "px_servo": "D85MG servo (arm in its bag)", "px_camera": "camera",
     "px_pico": "Pico 2",
 }
 STRIP_NAME_OVERRIDES = {
@@ -484,8 +484,6 @@ CHAPTERS = [
 SHOP_TOOLS = [
     ("Bambu Lab P1S printer (0.4 mm nozzle, Textured PEI plate)", "Prints all 45 pieces. Every plate file in this book is laid out for this exact printer and Bambu Studio — other printers mean re-slicing on your own."),
     ("2.5 mm hex key", f"Turns all {N_SCREWS} M3 screws — every screw you buy for this robot."),
-    ("Small driver for the head’s M2 screws", "The servo hardware pack’s four M2 horn-link screws are the only fasteners the hex key can’t turn. Match a driver to the pack when it releases."),
-    ("6 V current-limited servo tester", "Centers both D85MG servos at 1500 µs before either horn goes on. Any hobby tester works — power it from a current-limited 6 V source."),
     ("Soldering iron + heat-set insert tip", "Melts the brass inserts into the plastic at about 220 °C. The insert tip keeps them straight — a bare conical tip loves to tilt them."),
     ("PTFE or silicone grease (small tube)", "A thin smear on the neck’s journal and thrust faces in step 18. One tube outlasts the robot."),
     ("Zip ties (2.5 mm)", "Tie the future harness at every printed tie point — the wiring chapter shows where."),
@@ -640,14 +638,14 @@ STEPS = [
      ["Melt 2 inserts into the collar’s pan-plate towers and 4 into the neck’s top flange. Keep heat away from the smooth journal and thrust faces.",
       "From above the loose lid, align the collar’s 3 lugs with the keyways, press through, and twist about 20° until all 3 detents sit in the blind underside race.",
       "Flip the supported lid. Set the pan D85MG into the cradle with its shaft UP; the black pan plate captures its flange from below with 2 M3 screws. The case must not be pinched.",
-      "Using a current-limited 6 V servo tester, center the servo at 1500 µs. Fit one R-ML24 arm toward FRONT with its verified spline screw; never force the gears by hand.",
-      "Smear a thin film of grease (tools list) on the journal and thrust faces, feed the camera ribbon through the open +X crescent, lower the neck journal into the collar, and fasten the neck drive pad to both R-ML24 M2 stations with the verified component screws."],
+      "Take the single arm out of the servo’s own bag and land it on the spline tooth closest to the two tick marks lining up — the marks on the collar and neck show center, and the robot’s software trims away the last few degrees later. Fix it with the bag’s spline screw; never force the gears by hand.",
+      "Smear a thin film of grease (tools list) on the journal and thrust faces, feed the camera ribbon through the open +X crescent, lower the neck journal into the collar so the arm slides into the neck’s capture slot, and clamp the slot cover over it with 2 M3 screws — the slot walls carry the turning force, not the screws."],
      "The neck sits flat on the greased thrust face; it turns by hand through ±60°, meets both hard stops beyond that range, has no lift, and never rubs the ribbon."),
     ("step_19_head", "Build the tilt head and camera", SCREWS["yoke_neck"] + SCREWS["head_tilt_pivot"],
      [("head_shell_v2", 1), ("yoke_v2", 1), ("px_camera", 1), ("px_servo", 1), ("tilt_bushing_v2", 1), ("px_insert", 1)],
      ["Melt 1 insert into the yoke’s passive-pivot boss from the OUTSIDE end. Seat the yoke on the neck and install its 4 M3 screws without trapping the center ribbon.",
-      "Mount the second D85MG sideways in the active frame with its verified Hitec grommets, eyelets, screws, and nuts. Center it at 1500 µs on the current-limited 6 V tester; fit the R-ML24 arm toward FRONT.",
-      "Slide the head shell over the yoke. Through the two +Y service holes, fasten the shell’s drive boss to the horn’s 13 and 16 mm M2 stations. The servo supplies torque; the printed pivots carry the head.",
+      "Mount the second D85MG sideways in the active frame with the grommets, eyelets, screws, and nuts from its own bag. Land its bag arm on the spline tooth closest to the tick marks on the yoke and head boss — software trims the rest.",
+      "Slide the head shell over the yoke so the arm settles into the shell’s capture slot — the slot walls carry the turning force. The servo supplies torque; the printed pivots carry the head.",
       "From the -Y outside face, slide the black shoulder bushing through the shell and install 1 M3 screw into the yoke insert. Tighten against the bushing’s 3.2 mm sleeve — never pinch the moving shell.",
       "Dry-seat the Camera Module 3 behind the face opening and feed its FPC down the hollow neck. Permanent camera-board retention and the exact harness remain prototype release gates."],
      "The bushing flange is flush; the shell has no axial pinch, hand-tilts freely through ±20°, and contacts both printed hard stops only beyond the commanded range."),
@@ -971,8 +969,8 @@ def build_body_pages():
           <p>Match the big picture, then read the numbered lines if you want words too. Do the little green
           CHECK before moving on — if it fails, fix it now, because later steps cover things up.</p>
           <h3>2. One screw. One key.</h3>
-          <p>Every screw you buy for this robot is the same M3 × 8 screw, and one 2.5 mm hex key turns them all.
-          (The head’s servo hardware pack adds four tiny M2 screws with their own driver.)
+          <p>Every screw in this robot is the same M3 × 8 screw, and one 2.5 mm hex key turns them all —
+          the only other fastener anywhere is the tiny spline screw that comes in each servo’s own bag.
           “Snug” means: stop when it stops, then an eighth of a turn. Plastic hates gorillas.</p>
           <h3>3. Front and back</h3>
           <p>The FRONT is where the face panel and head look. The BACK has the charging plug, the mute switch,
@@ -1023,7 +1021,7 @@ def build_body_pages():
           <img src="{img_uri(GUIDE_IMG / 'thumb_px_screw.png')}" style="width:1.15in;">
           <img src="{img_uri(GUIDE_IMG / 'thumb_px_insert.png')}" style="width:1.15in;">
           <p style="font-size:11.5px;">This screw and this brass insert are the only fasteners you’ll buy on their own
-          for the whole robot — the head’s servo pack ships with its own tiny M2 hardware. When a step says “2 screws,”
+          for the whole robot — everything else a step needs ships in a component’s own box. When a step says “2 screws,”
           it always means these.</p>
         </div>
       </div></div>""",
@@ -1690,7 +1688,7 @@ def build_body_pages():
         for icon, t, d in [
             ('<svg width="18" height="18" viewBox="0 0 18 18"><circle cx="9" cy="9" r="6.5" fill="none" stroke="#B9E44A" stroke-width="1.8"/><path d="M9 5.2 12.3 7.1 12.3 10.9 9 12.8 5.7 10.9 5.7 7.1 Z" fill="none" stroke="#B9E44A" stroke-width="1.4"/></svg>',
              "ONE SCREW, ONE KEY",
-             f"Every one of the {N_SCREWS} screws you buy is the same M3 × 8, and one 2.5 mm hex key turns them all. The head’s servo pack adds its own tiny M2 hardware."),
+             f"Every one of the {N_SCREWS} screws you buy is the same M3 × 8, and one 2.5 mm hex key turns them all. M3 is the only fastener thread in the robot."),
             ('<svg width="18" height="18" viewBox="0 0 18 18"><path d="M2.5 13.5 H15.5 M2.5 10 H15.5 M2.5 6.5 H15.5" stroke="#B9E44A" stroke-width="1.8" stroke-linecap="round"/><path d="M9 4.5 V1.5 M7.2 3 L9 1.2 L10.8 3" stroke="#B9E44A" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>',
              "ZERO SUPPORTS",
              f"{N_FUNCTIONAL} functional + {N_SPARES} spare + {N_OPTIONAL} optional pieces target {N_PLATES} prototype plates. Physical gates remain open."),
