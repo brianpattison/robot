@@ -934,3 +934,174 @@ review):
   harder language.
 - When retail packaging becomes real, decide a compliance-grade age
   label then, as its own logged decision. Nothing here pre-commits it.
+
+## D040: Every Body Plate Carries A Corner QC Proof Tab
+
+Date: 2026-08-12
+Status: accepted
+
+Each of the 13 body plates now includes one 20 x 14 x 3.2 mm printed tab
+in a bed corner: a recessed "RB Pn" plate label, one heat-set insert
+test bore, and one M3 clearance hole, printed in the plate's own
+filament group. The 18-proof program qualifies a material family once;
+the tabs catch printer drift plate by plate, before the next hours-long
+part is committed. The builder's rule is one sentence: test the tab
+before starting the next plate, and fix the printer first if the insert
+or screw fit is off.
+
+Tabs are QC pieces at the print layer only: they are not registry
+parts, they do not count against the 40-part budget or the 45-piece
+inventory, and the plates JSON lists each one additively under its
+plate as `qc_tab`. The shell and tray solo plates shift 10 mm along
+their slack axis to open corner room; layout margin/spacing rules and
+the round-trip validation now cover the tabs
+(`BAMBU_V2_QC_TABS_VALID qc_tabs=13`).
+
+## D041: The Safety Core Self-Reports Stop Latency (EVENT 0x82)
+
+Date: 2026-08-12
+Status: accepted
+
+Six commissioning steps demand millisecond stop-timing evidence and no
+instrument was specified. The portable safety core now records each new
+stopping-cause onset — cause flags, the tick the input was observed,
+the tick motor enable dropped — in a take-once, latest-wins slot with a
+dropped-events counter, and the Pico target emits one EVENT 0x82 frame
+per event (13-byte payload documented in `docs/body-protocol-v1.md`).
+`robotd` journals every event in the blackbox as `firmware_stop_event`
+with the computed latency.
+
+Boundaries, stated plainly: the telemetry is read-only, carries no
+authority, adds no Pi-to-Pico config path, and changes no output logic
+(the bench target stays hard-off). Self-reported numbers count as
+C013/C015/C016/C023 evidence only after a one-time independent probe
+cross-check of sensor-edge-to-sample latency, which stays in the
+commissioning plan. This converts scope-class bench steps into
+read-the-number steps without moving the trust boundary.
+
+## D042: Horns Land On The Nearest Spline Tooth; Software Trim Absorbs The Rest
+
+Date: 2026-08-12
+Status: accepted
+
+The 6 V current-limited servo tester existed only to center servos
+before horn installation. Retired from the builder's path: embossed
+centering index marks let the builder land each horn on the nearest
+24T spline tooth by eye (≤7.5° residual), and `robotd` gains
+`--head-trim-pan-cdeg` / `--head-trim-tilt-cdeg` (clamped to ±800
+centidegrees — one spline tooth) applied Pi-side before setpoints are
+framed. The firmware floor is untouched: clamps and stops see trimmed
+values exactly as they saw raw ones, and the blackbox journals both raw
+and trimmed numbers on every head command.
+
+The same release adds `robot-hello`: a narrated, plain-language head
+sweep (source="hello") against a running `robotd` — the designed
+mid-build wake-up milestone. It works against the simulator today; on
+the real robot it moves only the head, requires the same
+started-by-you `robotd`, and crosses no safety gate. The build's
+emotional arc now pays out in stages (simulator on day one, the head
+waking mid-build, motion only after gates), instead of saving
+everything for a finale the gates still hold shut.
+
+## D043: The Guide Ships As Two Renderers Over One Content Source
+
+Date: 2026-08-12
+Status: accepted
+
+The guide is the product, and it now has two outputs of equal rank
+generated from the same live manifests: the print/PDF book, and the
+interactive builder's site (`docs/generate_guide_site_v2.py` →
+`output/site/`, gitignored; CI builds it after the geometry gate). The
+site generator imports the book generator as its content model — steps,
+shop tables, proof copy, wiring maps, arrows — so the two outputs
+cannot drift from each other or from the CAD. Hand-forking guide
+content between renderers is forbidden, exactly as hand-editing
+generated exports is.
+
+What the site adds is state and liveness, not new claims: localStorage
+build progress (shop, plates, pieces, proofs, twenty steps) with an
+exportable build-log JSON; user-entered price totals (the repo still
+publishes no prices); per-plate filament-mass and print-time planning
+estimates from `docs/guide_estimates_v2.py` (shared with the book's
+plate table, always labeled "confirm in the slicer"); digital proof
+record forms matching the proofs manifest schema; step-per-screen build
+mode with wake-lock; and a Check & play page that pings the localhost
+dashboard. It is offline-first, static, account-free, and repeats every
+release hold the book states. D029/D039 govern its language.
+
+## D044: Protected Mobile Pi Input — Proposed Direction
+
+Date: 2026-08-12
+Status: proposed (EE review required before any purchase or wiring)
+
+Requirements, restated from the open blocker: the 5 V feed from the
+D24V90F5 to the Pi 5 must use a positive-locking, polarized connector a
+novice cannot reverse or half-seat; backfeed between bench USB-C power
+and the regulator rail must be impossible; the Pi branch takes its own
+fuse from the accessory side; boot/load voltage margin and thermal
+behavior get measured evidence (C006 family).
+
+Proposed direction: a two-circuit latching connector pair
+(candidate families: Molex Mini-Fit Jr., which is latching and
+polarized and satisfies quantity-one US retail, or XT30 with a printed
+latch shroud), plus an ideal-diode or scheduled-review backfeed element
+between the USB-C bench path and the rail. Not accepted until an
+electrical review closes connector, protection element, fuse value,
+and measured margins together.
+
+## D045: Pico-Local Physical Reset — Proposed Direction
+
+Date: 2026-08-12
+Status: proposed (EE review + CAD service location required)
+
+Requirements: a deliberate, physical, Pico-local momentary control that
+can clear a latched stop only through the firmware's existing recovery
+rules; protected input conditioning; impossible to actuate by casual
+contact; reachable without lifting the powered deck; labeled.
+
+Proposed direction: a sealed momentary pushbutton (candidate families:
+E-Switch TL2201 series or Omron B3F behind a printed guard ring)
+recessed in the rear service corridor near the Pico shelf, wired to the
+Pico reset/recovery input through series resistance and RC
+conditioning, with a debossed "SAFETY RESET" label. Not accepted until
+the exact part, conditioning circuit, and CAD pocket land together and
+the fixture proves casual contact cannot trip it.
+
+## D046: Microphone VBUS Cut With No Backfeed — Proposed Direction
+
+Date: 2026-08-12
+Status: proposed (exact circuit review required)
+
+Requirements: the maintained physical mute switch must break the
+microphone's USB VBUS conductor itself (not a data or software mute);
+the red mute-indication branch must be unable to energize VBUS
+(≤100 mV at C018); the protected state input to the Pi must read the
+switch without providing a backfeed path.
+
+Proposed direction: keep the selected E-Switch PVB3F230SS311 maintained
+switch as the actuator; route fused microphone 5 V through the switch
+common so the mic position carries VBUS and the mute position carries
+only the diode-isolated indication/state branch, each behind its own
+series resistance. Not accepted until the exact schematic, diode and
+resistor values, and measured no-backfeed evidence exist.
+
+## D047: Zero-Skill Harness Termination Policy
+
+Date: 2026-08-12
+Status: accepted as policy; the harness release gate stays red
+
+When the harness releases, its exact terminal selections must be made
+under this policy, in priority order: (1) purchased pre-crimped leads
+wherever a mating retail pigtail exists (the JST-SH LED chain already
+proves the pattern); (2) WAGO 221 lever nuts for splices — already
+trusted hardware in the commissioning fixture; (3) crimped ring or
+quick-connect terminals only where the component demands them (fuse
+block studs, relay tabs), with ONE named ratcheting crimper in the
+bench list; (4) solder only where a component's own terminations
+require it (the EN2 inlet's solder cups). The goal the policy encodes:
+the wiring chapter never asks the builder to learn a skill a tool
+cannot guarantee.
+
+Nothing in this entry releases the harness: measured lengths,
+continuity, pull tests, fuse values, and the first-article evidence
+stay exactly as red as they were.
