@@ -168,8 +168,10 @@ def shop_view() -> str:
 
     elec_rows = ""
     for i, (name, qty, what) in enumerate(book.SHOP_ELECTRONICS):
-        blocked = ("DO NOT BUY YET" in what or "BLOCKED" in what
-                   or qty in ("0 for now", "not released"))
+        # A row is a gate only when the quantity itself says so or the copy
+        # leads with the hold; rows that are safe to buy but carry a wiring
+        # caveat (D24V90F5, ReSpeaker) stay checkable with their caveat shown.
+        blocked = qty in ("0 for now", "not released") or what.startswith("DO NOT BUY YET")
         cls = "checkrow blocked" if blocked else "checkrow"
         price = ("" if blocked else
                  f'<span class="price">$<input type="number" min="0" step="0.01" '
