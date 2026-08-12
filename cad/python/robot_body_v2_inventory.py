@@ -362,16 +362,19 @@ PRINTED_PARTS = [
     PP("tof_side_clamp", 2, "PETG", "structure", "structure_light", "fixed-PETG", "flat", "side ToF capture in shell pockets"),
     PP("head_shell", 1, "PLA", "qualified_enclosure", "body_primary", "physical-gate-required", "open face down", "one-piece head enclosure (v1 front/rear covers merged)",
        qualification_status="open", fallback_material_family="PETG", fallback_color_slot="structure_light"),
-    PP("head_pan_plate", 1, "PETG", "wear_motion", "structure_wear", "fixed-PETG", "flat",
-       "under-lid service plate; clamps the pan-servo flange into the collar cradle with two standard joints"),
+    PP("head_pan_plate", 1, "PETG", "wear_motion", "structure_wear", "fixed-PETG", "flat on boss feet; shim ribs up",
+       "pan arm-capture cover (reused part slot, D028 budget): closes the neck's horn-arm slot "
+       "with shim ribs and two standard joints; the retired flange-plate duty moved to the "
+       "servo's supplied ear hardware on the collar frame"),
     PP("head_faceplate", 1, "PLA", "visible_cosmetic", "dark_panel", "direct", "flat, face down",
        "color break + fused camera annulus + camera pocket and eye NeoPixel pockets (merges executed)", qualification_status="open"),
     PP("neck", 1, "PETG", "structure", "structure_light", "fixed-PETG", "top flange down",
-       "rotating pan journal, thrust shoulder, horn drive, cable corridor, and four-insert yoke interface"),
+       "rotating pan journal, thrust shoulder, horn-arm capture slot, cable corridor, and four-insert yoke interface"),
     PP("bayonet_collar", 1, "PETG", "structure", "structure_light", "fixed-PETG", "visible flange down; cradle rises",
-       "printed pan journal/thrust face, three-lug tool-free lid retention, hard stops, and integrated pan-servo cradle"),
+       "printed pan journal/thrust face, three-lug tool-free lid retention, hard stops, and "
+       "integrated pan-servo cradle with supplied-hardware flange stations"),
     PP("yoke", 1, "PETG", "wear_motion", "structure_wear", "fixed-PETG", "neck flange down",
-       "four-screw neck bridge, drawing-backed D85MG frame, active horn opening, hard stops, and passive insert boss"),
+       "four-screw neck bridge, drawing-backed D85MG frame, active arm/spline opening, hard stops, and passive insert boss"),
     PP("tilt_bushing", 1, "PETG", "wear_motion", "structure_wear", "fixed-PETG", "axis vertical", "designated tilt wear part"),
     PP("eye_diffuser_bar", 1, "PLA", "optical", "light_diffuser", "direct", "flat", "color/optics: both eye diffusers as one bar", qualification_status="open"),
     PP("status_diffuser_bar", 1, "PLA", "optical", "light_diffuser", "direct", "flat", "color/optics: both status diffusers as one bar", qualification_status="open"),
@@ -442,7 +445,10 @@ JOINTS = [
     J("speaker_clamps", ((-52, 100), (26, 100), (-52, -100), (26, -100)), modeled=True),
     J("tof_clamps", ((-32, 100), (-32, -100)), modeled=True),
     J("pico_clamp", ((3, 43), (3, 84)), modeled=True),
-    J("pan_servo_plate", ((-54, 0), (-14, 0)), modeled=True),
+    # Kept joint name (build/docs step tables key on it): these two screws now
+    # clamp the pan horn cover to the neck's arm-capture pad, replacing the
+    # retired flange-plate joint at the same 3.2 mm stack.
+    J("pan_servo_plate", ((-32, 11.5), (-32, -11.5)), modeled=True),
     J("yoke_neck", ((-14.3, 11.7), (-37.7, 11.7), (-37.7, -11.7), (-14.3, -11.7)), modeled=True),
     J("head_tilt_pivot", ((-10, -66.8),), modeled=True),
 ]

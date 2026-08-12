@@ -28,7 +28,12 @@ order. Each proof exercises one contract the v2 design leans on:
 10. pla_insert      — production shell-style PLA boss and insert bore.
 11. pla_shell_wall  — representative shell wall, rollover/opening, and
                       panel-interface edge.
-12. pla_head_pivot  — production tilt-pivot wall/boss stack in PLA.
+12. horn_capture    — production-like arm-capture cradle + cover: seat a
+                      real D85MG bag arm, hold rated torque on the slot
+                      flanks, and survive 10 remove/refit cycles (replaces
+                      the R-ML24-era PLA head-pivot proof; pivot boss and
+                      insert behavior stay covered by proofs 4/10 and the
+                      bushing pair).
 13. pla_snap        — visible-panel, diffuser, and lid-skin snap cycling.
 14. pla_optical     — three optical thickness windows; print once per
                       candidate translucent PLA family/color.
@@ -170,14 +175,32 @@ def pla_shell_wall():
     return wall
 
 
-def pla_head_pivot():
-    wall = pad(42, 36, 5.0)
-    boss = Pos(0, 0, 10.0) * Cylinder(8.0, 15.0)
-    boss -= Pos(0, 0, 10.0) * Cylinder(F["insert_bore"] / 2, 17)
-    # Bushing-side shoulder wall representative of the passive pivot.
-    boss += Pos(0, 0, 17.0) * Cylinder(11.0, 3.0)
-    boss -= Pos(0, 0, 17.0) * Cylinder(4.1, 5.0)
-    return wall + boss
+def horn_capture_cradle():
+    # Production-like ARM-CAPTURE CRADLE slice (v2 pan/tilt drive): hub
+    # relief, open-ended 4.6 x 2.6 blade slot, and the two insert stations of
+    # the standard cover joint (values mirror robot_body_v2 ARM_* constants;
+    # PROVISIONAL pending delivered-arm measurement). PLA covers the head
+    # cradle worst case; the PETG neck pad is stronger.
+    base = pad(56, 34, 10.0)
+    base -= Pos(-6, 0, 10.0 - 1.3) * Box(48, 4.6, 2.6)          # open-ended slot
+    base -= Pos(16, 0, 10.0 - 2.5) * Cylinder(6.0, 5.0)          # hub + screw relief
+    for sy in (1, -1):
+        base -= Pos(10, sy * 11.5, 10.0 - 3.5) * Cylinder(F["insert_bore"] / 2, 7)
+    return base
+
+
+def horn_capture_cover():
+    # Mate of the cradle: 3.2 mm clamp bosses (the D026 stack), a thin web
+    # over the slot, and two shim ribs that press the blade to the ceiling
+    # (rib height is the reprint-to-measure tuning feature).
+    cover = Pos(-2, 0, 0.4) * Box(30, 29, 0.8)
+    for sy in (1, -1):
+        boss = Pos(10, sy * 11.5, 1.6) * Cylinder(3.5, 3.2)
+        boss -= Pos(10, sy * 11.5, 1.6) * Cylinder(F["clearance_hole"] / 2, 4)
+        cover += boss
+    for x in (-6, -12):
+        cover += Pos(x, 0, 0.6) * Box(1.6, 4.2, 1.2)
+    return cover
 
 
 def pla_optical():
@@ -219,7 +242,7 @@ PROOFS = {
     "proof_pcb_clamp": (pcb_clamp, "PETG", "drop in the Pico 2, verify peg engagement without board stress, clamp bar seats at 3.2 stack"),
     "proof_pla_insert_shell": (pla_insert_shell, "PLA", "production shell-style boss: record insert temperature, whitening/cracks/sink/tilt, pull-through, and M3x8 engagement for this exact PLA family"),
     "proof_pla_shell_wall": (pla_shell_wall, "PLA", "representative 3.2 wall, rollover/opening, and panel seat: record dimensions, impact result, warm soak, and post-cool distortion"),
-    "proof_pla_head_pivot": (pla_head_pivot, "PLA", "production-like tilt-pivot boss/wall: install insert and bushing, cycle under representative head load, inspect cracks and slop"),
+    "proof_horn_capture": (None, "PLA+PETG", "measure the delivered D85MG bag arm first (accepted: length 18-27, width 4.0 +0.6/-0, thickness 1.8-2.6 — PROVISIONAL); seat it in the slot, clamp the cover (M3x8 + inserts, 3.2 stack), hold 2x rated stall torque on the slot flanks warm and cold, then 10 remove/refit cycles with no flank yield, cracking, or retention loss; tune the cover rib height to the measured thickness"),
     "proof_pla_snap_pair": (snap_pair, "PLA", "print in each candidate visible PLA family; 10 service cycles with full latch engagement and no whitening, fracture, or retention loss"),
     "proof_pla_optical": (pla_optical, "Translucent PLA", "print once per candidate family/color; record brightness, hot spots, camera flare, clip fit, and LED temperature at 1.2/1.6/2.0 mm"),
     "proof_lid_boundary_petg": (lid_boundary_petg, "White PETG", "mate with proof_lid_boundary_pla; verify blind-socket fit, retention, removal, and no socket cracking"),
@@ -245,6 +268,10 @@ MULTI_OBJECT_PROOFS = {
     "proof_tire_fit": (
         ("proof_tire_fit_core", tire_fit_core, "PETG"),
         ("proof_tire_fit_ring", tire_fit_ring, "TPU 95A"),
+    ),
+    "proof_horn_capture": (
+        ("proof_horn_capture_cradle", horn_capture_cradle, "PLA"),
+        ("proof_horn_capture_cover", horn_capture_cover, "PETG"),
     ),
 }
 
