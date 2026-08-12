@@ -111,7 +111,7 @@
           "name": "shell_v2",
           "center_mm": [
             128.0,
-            128.0
+            118.0
           ],
           "rotated_z_degrees": 0,
           "span_xy_mm": [
@@ -128,7 +128,19 @@
           "qualification_status": "open",
           "optional": false
         }
-      ]
+      ],
+      "qc_tab": {
+        "name": "qc_tab_p1",
+        "center_mm": [
+          238.0,
+          241.0
+        ],
+        "span_xy_mm": [
+          20.0,
+          14.0
+        ],
+        "release_status": "QC proof tab: printer self-check only; never installed on the robot; outside the 40-part budget and the 45-piece inventory"
+      }
     },
     {
       "plate_number": 2,
@@ -147,7 +159,7 @@
           "name": "tray_v2",
           "center_mm": [
             128.0,
-            128.0
+            118.0
           ],
           "rotated_z_degrees": 0,
           "span_xy_mm": [
@@ -164,7 +176,19 @@
           "qualification_status": "not-required",
           "optional": false
         }
-      ]
+      ],
+      "qc_tab": {
+        "name": "qc_tab_p2",
+        "center_mm": [
+          238.0,
+          241.0
+        ],
+        "span_xy_mm": [
+          20.0,
+          14.0
+        ],
+        "release_status": "QC proof tab: printer self-check only; never installed on the robot; outside the 40-part budget and the 45-piece inventory"
+      }
     },
     {
       "plate_number": 3,
@@ -284,7 +308,19 @@
           "qualification_status": "not-required",
           "optional": false
         }
-      ]
+      ],
+      "qc_tab": {
+        "name": "qc_tab_p3",
+        "center_mm": [
+          18.0,
+          241.0
+        ],
+        "span_xy_mm": [
+          20.0,
+          14.0
+        ],
+        "release_status": "QC proof tab: printer self-check only; never installed on the robot; outside the 40-part budget and the 45-piece inventory"
+      }
     },
     {
       "plate_number": 4,
@@ -404,7 +440,19 @@
           "qualification_status": "not-required",
           "optional": false
         }
-      ]
+      ],
+      "qc_tab": {
+        "name": "qc_tab_p4",
+        "center_mm": [
+          238.0,
+          241.0
+        ],
+        "span_xy_mm": [
+          20.0,
+          14.0
+        ],
+        "release_status": "QC proof tab: printer self-check only; never installed on the robot; outside the 40-part budget and the 45-piece inventory"
+      }
     },
     {
       "plate_number": 5,
@@ -440,7 +488,19 @@
           "qualification_status": "not-required",
           "optional": false
         }
-      ]
+      ],
+      "qc_tab": {
+        "name": "qc_tab_p5",
+        "center_mm": [
+          238.0,
+          241.0
+        ],
+        "span_xy_mm": [
+          20.0,
+          14.0
+        ],
+        "release_status": "QC proof tab: printer self-check only; never installed on the robot; outside the 40-part budget and the 45-piece inventory"
+      }
     },
     {
       "plate_number": 6,
@@ -770,7 +830,19 @@
           "qualification_status": "not-required",
           "optional": false
         }
-      ]
+      ],
+      "qc_tab": {
+        "name": "qc_tab_p6",
+        "center_mm": [
+          238.0,
+          241.0
+        ],
+        "span_xy_mm": [
+          20.0,
+          14.0
+        ],
+        "release_status": "QC proof tab: printer self-check only; never installed on the robot; outside the 40-part budget and the 45-piece inventory"
+      }
     },
     {
       "plate_number": 7,
@@ -869,7 +941,19 @@
           "qualification_status": "not-required",
           "optional": false
         }
-      ]
+      ],
+      "qc_tab": {
+        "name": "qc_tab_p7",
+        "center_mm": [
+          238.0,
+          241.0
+        ],
+        "span_xy_mm": [
+          20.0,
+          14.0
+        ],
+        "release_status": "QC proof tab: printer self-check only; never installed on the robot; outside the 40-part budget and the 45-piece inventory"
+      }
     },
     {
       "plate_number": 8,
@@ -947,7 +1031,19 @@
           "qualification_status": "open",
           "optional": false
         }
-      ]
+      ],
+      "qc_tab": {
+        "name": "qc_tab_p8",
+        "center_mm": [
+          238.0,
+          241.0
+        ],
+        "span_xy_mm": [
+          20.0,
+          14.0
+        ],
+        "release_status": "QC proof tab: printer self-check only; never installed on the robot; outside the 40-part budget and the 45-piece inventory"
+      }
     },
     {
       "plate_number": 9,
@@ -983,7 +1079,19 @@
           "qualification_status": "open",
           "optional": true
         }
-      ]
+      ],
+      "qc_tab": {
+        "name": "qc_tab_p9",
+        "center_mm": [
+          238.0,
+          241.0
+        ],
+        "span_xy_mm": [
+          20.0,
+          14.0
+        ],
+        "release_status": "QC proof tab: printer self-check only; never installed on the robot; outside the 40-part budget and the 45-piece inventory"
+      }
     },
     {
       "plate_number": 10,
@@ -1040,7 +1148,19 @@
           "qualification_status": "open",
           "optional": false
         }
-      ]
+      ],
+      "qc_tab": {
+        "name": "qc_tab_p10",
+        "center_mm": [
+          238.0,
+          241.0
+        ],
+        "span_xy_mm": [
+          20.0,
+          14.0
+        ],
+        "release_status": "QC proof tab: printer self-check only; never installed on the robot; outside the 40-part budget and the 45-piece inventory"
+      }
     },
     {
       "plate_number": 11,
@@ -1076,7 +1196,19 @@
           "qualification_status": "not-required",
           "optional": false
         }
-      ]
+      ],
+      "qc_tab": {
+        "name": "qc_tab_p11",
+        "center_mm": [
+          238.0,
+          241.0
+        ],
+        "span_xy_mm": [
+          20.0,
+          14.0
+        ],
+        "release_status": "QC proof tab: printer self-check only; never installed on the robot; outside the 40-part budget and the 45-piece inventory"
+      }
     },
     {
       "plate_number": 12,
@@ -1112,7 +1244,19 @@
           "qualification_status": "not-required",
           "optional": false
         }
-      ]
+      ],
+      "qc_tab": {
+        "name": "qc_tab_p12",
+        "center_mm": [
+          238.0,
+          241.0
+        ],
+        "span_xy_mm": [
+          20.0,
+          14.0
+        ],
+        "release_status": "QC proof tab: printer self-check only; never installed on the robot; outside the 40-part budget and the 45-piece inventory"
+      }
     },
     {
       "plate_number": 13,
@@ -1232,7 +1376,19 @@
           "qualification_status": "not-required",
           "optional": false
         }
-      ]
+      ],
+      "qc_tab": {
+        "name": "qc_tab_p13",
+        "center_mm": [
+          238.0,
+          241.0
+        ],
+        "span_xy_mm": [
+          20.0,
+          14.0
+        ],
+        "release_status": "QC proof tab: printer self-check only; never installed on the robot; outside the 40-part budget and the 45-piece inventory"
+      }
     }
   ],
   "inventory_counts": {
