@@ -21,6 +21,16 @@ def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="milliseconds")
 
 
+# Servo horns land on the nearest spline tooth (D041); one tooth on the D85MG's
+# 24T output is 15 degrees, so a residual offset can never legitimately exceed
+# half a tooth plus linkage slop. ±8 degrees of software trim covers that.
+HEAD_TRIM_LIMIT_CDEG = 800
+
+
+def clamp_head_trim(value: int) -> int:
+    return max(-HEAD_TRIM_LIMIT_CDEG, min(HEAD_TRIM_LIMIT_CDEG, int(value)))
+
+
 class Blackbox:
     def __init__(self, local_path: Path, mirror_path: Path | None = None) -> None:
         local_path.parent.mkdir(parents=True, exist_ok=True)
@@ -89,10 +99,13 @@ class RobotState:
 
 
 class RobotDaemon:
-    def __init__(self, transport: Transport, socket_path: Path, blackbox: Blackbox) -> None:
+    def __init__(self, transport: Transport, socket_path: Path, blackbox: Blackbox,
+                 head_trim_pan_cdeg: int = 0, head_trim_tilt_cdeg: int = 0) -> None:
         self.transport = transport
         self.socket_path = socket_path
         self.blackbox = blackbox
+        self.head_trim_pan_cdeg = clamp_head_trim(head_trim_pan_cdeg)
+        self.head_trim_tilt_cdeg = clamp_head_trim(head_trim_tilt_cdeg)
         self.state = RobotState()
         self.parser = FrameParser()
         self.sequence = 0
@@ -150,16 +163,24 @@ class RobotDaemon:
         source = str(request.get("source", "unknown"))[:128]
         if op == "status":
             response = self.state.as_dict()
+            response["head_trim"] = {"pan_cdeg": self.head_trim_pan_cdeg,
+                                     "tilt_cdeg": self.head_trim_tilt_cdeg}
         elif op == "drive":
             linear = int(request["linear_mm_s"])
             angular = int(request["angular_mrad_s"])
             self.send(drive_frame(self.next_sequence(), linear, angular))
             response = {"accepted": True, "firmware_clamps": True, "lease_ms": 250}
         elif op == "head":
-            pan = int(request["pan_cdeg"])
-            tilt = int(request["tilt_cdeg"])
+            # The trim only absorbs the spline-tooth mounting offset (D041); the
+            # trimmed sum goes out un-clamped so the firmware envelope treats it
+            # exactly like an untrimmed request. Logging the response (which
+            # carries the trimmed values) alongside the raw request keeps both
+            # in the same blackbox record.
+            pan = int(request["pan_cdeg"]) + self.head_trim_pan_cdeg
+            tilt = int(request["tilt_cdeg"]) + self.head_trim_tilt_cdeg
             self.send(head_frame(self.next_sequence(), pan, tilt))
-            response = {"accepted": True, "firmware_clamps": True}
+            response = {"accepted": True, "firmware_clamps": True,
+                        "trimmed_pan_cdeg": pan, "trimmed_tilt_cdeg": tilt}
         elif op == "stop":
             self.send(Frame(MessageType.STOP, self.next_sequence()))
             response = {"accepted": True}
@@ -202,7 +223,9 @@ class RobotDaemon:
         self.socket_path.parent.mkdir(parents=True, exist_ok=True)
         self.socket_path.unlink(missing_ok=True)
         self.send(Frame(MessageType.STOP, self.next_sequence()))
-        await self.blackbox.write("robotd_start", socket=str(self.socket_path))
+        await self.blackbox.write("robotd_start", socket=str(self.socket_path),
+                                  head_trim_pan_cdeg=self.head_trim_pan_cdeg,
+                                  head_trim_tilt_cdeg=self.head_trim_tilt_cdeg)
         self.server = await asyncio.start_unix_server(self.handle_client, path=self.socket_path)
         os.chmod(self.socket_path, 0o660)
         self.tasks = [asyncio.create_task(self.heartbeat_loop()),
@@ -232,7 +255,7 @@ class RobotDaemon:
             self.stopping.set()
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--device", help="Pico UART device, for example /dev/serial0")
@@ -240,12 +263,20 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--socket", type=Path, default=Path("/run/robotd/robotd.sock"))
     parser.add_argument("--blackbox", type=Path, default=Path("/var/log/robotd/blackbox.jsonl"))
     parser.add_argument("--mirror", type=Path, help="second append-only/off-host JSONL path")
-    return parser.parse_args()
+    parser.add_argument("--head-trim-pan-cdeg", type=int, default=0,
+                        help="centidegrees added to every HEAD pan to absorb the spline-tooth "
+                             "mounting offset; clamped to +/-800 (about one 15-degree tooth)")
+    parser.add_argument("--head-trim-tilt-cdeg", type=int, default=0,
+                        help="centidegrees added to every HEAD tilt to absorb the spline-tooth "
+                             "mounting offset; clamped to +/-800 (about one 15-degree tooth)")
+    return parser.parse_args(argv)
 
 
 async def async_main(args: argparse.Namespace) -> None:
     transport: Transport = SimulatorTransport() if args.simulate else SerialTransport(args.device)
-    daemon = RobotDaemon(transport, args.socket, Blackbox(args.blackbox, args.mirror))
+    daemon = RobotDaemon(transport, args.socket, Blackbox(args.blackbox, args.mirror),
+                         head_trim_pan_cdeg=args.head_trim_pan_cdeg,
+                         head_trim_tilt_cdeg=args.head_trim_tilt_cdeg)
     loop = asyncio.get_running_loop()
     for sig in (signal.SIGINT, signal.SIGTERM):
         loop.add_signal_handler(sig, daemon.stop)

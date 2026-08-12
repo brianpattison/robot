@@ -12,6 +12,7 @@ dependencies = []
 [project.scripts]
 robotd = "robotd.daemon:main"
 robotctl = "robotd.cli:main"
+robot-hello = "robotd.hello:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

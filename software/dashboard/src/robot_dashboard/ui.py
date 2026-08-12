@@ -100,6 +100,7 @@ footer { padding: 0 20px 18px; color: var(--dim); font-size: 12px; }
       <dt>battery</dt><dd id="s-batt">&mdash;</dd>
       <dt>applied velocity</dt><dd id="s-vel">&mdash;</dd>
       <dt>head</dt><dd id="s-head">&mdash;</dd>
+      <dt>head trim</dt><dd id="s-trim">&mdash;</dd>
       <dt>motor enable</dt><dd id="s-motor">&mdash;</dd>
       <dt>last error</dt><dd id="s-err">&mdash;</dd>
     </dl>
@@ -215,6 +216,10 @@ function renderStatus(s) {
     ? fw.linear_mm_s + " mm/s, " + fw.angular_mrad_s + " mrad/s" : "—";
   $("s-head").textContent = haveFw
     ? "pan " + (fw.pan_cdeg / 100).toFixed(1) + "°, tilt " + (fw.tilt_cdeg / 100).toFixed(1) + "°"
+    : "—";
+  const trim = s.head_trim || {};
+  $("s-trim").textContent = trim.pan_cdeg != null
+    ? "pan " + (trim.pan_cdeg / 100).toFixed(1) + "°, tilt " + (trim.tilt_cdeg / 100).toFixed(1) + "°"
     : "—";
   const flags = s.safety_flags || {};
   $("s-motor").textContent = haveFw ? (flags.motor_enable ? "ON" : "off (bench-safe)") : "—";
