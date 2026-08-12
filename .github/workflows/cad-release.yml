@@ -35,6 +35,7 @@ jobs:
       - name: Build the interactive guide site from the same content source
         run: |
           python cad/python/robot_body_v2_print.py
+          python cad/python/robot_body_v2_proofs.py
           python docs/generate_guide_site_v2.py
 
   # Bambu Studio round trips, Blender renders, Chrome PDF printing, page-by-page
