@@ -1194,3 +1194,36 @@ grazed the fuse-block lip (trimmed 4 to 2.5 mm, still locating). Five
 stations carry commented waivers where the corridor legitimately ends
 in open service space (tires off, deck out, head not yet mounted). The
 gate result is PASS with the waivers reported.
+
+## D051: Every Part Wears Its Name; Wrong Orientations Don't Seat
+
+Date: 2026-08-12
+Status: accepted
+
+Every printed part now carries a recessed ID mark (`P TRAY`, `P CAP`,
+`P WHL R`, ...) on a non-cosmetic, non-bearing face that is up- or
+side-facing in its declared print pose — matching 45 pieces to the
+chart becomes reading, not guessing, and future service is
+self-documenting. TPU parts and pieces too small to mark legibly are
+skipped. The companion orientation audit physically keyed the one part
+geometry allowed to seat wrong (the ToF clamp bar gains a shell fence
+that leaves its flipped pose 4 mm proud) and documents at each build
+site why geometry already forbids every other wrong orientation
+(asymmetric deck stations, buried counterbores on a flipped motor cap,
+congruent pods, symmetric bars).
+
+## D052: The Builder's Tools Are Printed Too
+
+Date: 2026-08-12
+Status: accepted
+
+`cad/python/robot_body_v2_tools.py` exports four PETG tool pieces
+(zero supports, sized from the shared fastener registry, exported like
+the proofs with their own manifest): three insert-alignment funnel jigs
+— flat-face, paired-boss rows at the standard joint spacings, and a
+deep-well snout — that hold every M3 insert square while the iron
+presses, and a grease doser whose 0.26 mL bowl meters exactly one
+neck-greasing with a wipe blade. Two judgment steps (insert tilt,
+grease amount) become tool-guaranteed. Tool pieces are bench equipment
+like the fixture, never registry parts: no budget, tally, or body-plate
+impact.

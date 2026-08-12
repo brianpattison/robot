@@ -408,10 +408,10 @@ EXTRA_PANELS = {
         ("step_17c_estop_stack", "Detail B - full E-stop body, nut, and 2 NC blocks"),
     ],
     "step_18_neck": [
-        ("step_18b_neck_cutaway", "Lid hidden: collar, cradle, servo, plate, horn"),
+        ("step_18b_neck_cutaway", "Lid hidden: collar, cradle, servo, slot cover, bag arm"),
     ],
     "step_19_head": [
-        ("step_19b_tilt_stack", "Tilt servo, horn, hard stops, passive bushing"),
+        ("step_19b_tilt_stack", "Tilt servo, bag arm, hard stops, passive bushing"),
         ("step_19c_camera", "Camera board, lens, and ribbon entrance"),
     ],
 }
@@ -439,7 +439,7 @@ PART_NAMES = {
     "tray_v2": "floor tray", "deck_v2": "power deck",
     "controller_tower_v2": "brain tower", "battery_clamp_v2": "battery clamp",
     "speaker_clamp_v2": "speaker clamp", "yoke_v2": "head yoke",
-    "mic_cradle_v2": "mic cradle", "head_pan_plate_v2": "pan-servo plate",
+    "mic_cradle_v2": "mic cradle", "head_pan_plate_v2": "pan slot cover",
     "pico_clamp_v2": "safety-board clamp", "front_pod_left_v2": "front pod (L)",
     "front_pod_right_v2": "front pod (R)", "motor_cap_v2": "motor cap",
     "tof_clamp_v2": "sensor clamp", "tilt_bushing_v2": "tilt bushing",
@@ -485,7 +485,8 @@ SHOP_TOOLS = [
     ("Bambu Lab P1S printer (0.4 mm nozzle, Textured PEI plate)", "Prints all 45 pieces. Every plate file in this book is laid out for this exact printer and Bambu Studio — other printers mean re-slicing on your own."),
     ("2.5 mm hex key", f"Turns all {N_SCREWS} M3 screws — every screw you buy for this robot."),
     ("Soldering iron + heat-set insert tip", "Melts the brass inserts into the plastic at about 220 °C. The insert tip keeps them straight — a bare conical tip loves to tilt them."),
-    ("PTFE or silicone grease (small tube)", "A thin smear on the neck’s journal and thrust faces in step 18. One tube outlasts the robot."),
+    ("PTFE or silicone grease (small tube)", "One doser-scoop on the neck’s journal and thrust faces in step 18 — the printed doser’s little bowl IS the right amount. One tube outlasts the robot."),
+    ("Printed insert jigs + grease doser (free — you print them)", "Three funnel jigs hold every brass insert perfectly square while the iron presses, and the doser scoops exactly one neck-greasing. They export with the proofs from the release’s tools folder — print them with your first PETG plate."),
     ("Zip ties (2.5 mm)", "Tie the future harness at every printed tie point — the wiring chapter shows where."),
     ("Small flush cutters / scissors", "Trims zip ties and TPU strings."),
     ("Painter’s tape + marker", "Label wires as you go."),
@@ -530,7 +531,7 @@ STEPS = [
      [("px_insert", 20)],
      ["Heat the soldering iron to about 220 °C — insert temperature.",
       "Rest a brass insert in each gold-marked hole, then press it straight down with the hot iron tip until it sits flush. (The gold pegs in the pictures just point at the holes — the real insert always ends up flush inside, nothing sticking out.)",
-      "20 go into the tray now — the picture marks every spot. The other 27 come later: 2 in the wheels, 2 in the front pods, 14 in the shell, 2 in the lid, 6 in the neck and collar, and 1 in the head. The book calls for each batch when it’s time."],
+      "20 go into the tray now — the picture marks every spot. The other 31 come later: 2 in the wheels, 2 in the front pods, 4 in the power deck, 14 in the shell, 2 in the lid, 6 in the neck, and 1 in the head. The book calls for each batch when it’s time."],
      "Every insert is flush and straight, none tilted."),
     ("step_03_motors", "Drop in the motors", SCREWS["motor_caps"],
      [("px_motor_L", 2), ("motor_cap_v2", 2)],
@@ -590,9 +591,9 @@ STEPS = [
       "Its metal bracket slots into the printed pocket; the terminals face UP so they’re easy to wire later.",
       "No wires yet — the wiring chapter at the back of this book is the reference map for the future harness release."],
      "The relay clicks into its pocket and doesn’t rattle."),
-    ("step_12_deck", "Put on the power deck", SCREWS["deck_towers"],
-     [("deck_v2", 1), ("px_fuse", 1), ("px_reg1", 2)],
-     ["First hang the two small green regulator boards under the deck’s BACK half (they clip under; wires come later). If the 6 V regulator is still on its shopping hold, hang just the 5 V one — the empty pocket is fine for the dry build.",
+    ("step_12_deck", "Put on the power deck", SCREWS["deck_towers"] + SCREWS["pi_regulator_bay"] + SCREWS["servo_regulator_bay"],
+     [("deck_v2", 1), ("px_fuse", 1), ("px_reg1", 2), ("px_insert", 4)],
+     ["Flip the deck over and melt 4 inserts into the regulator stations (the jig keeps them straight), then seat each small green regulator board in its underside bay and snug its 2 screws — the screw heads hold the board’s edges like little hands. If the 6 V regulator is still on its shopping hold, its bay stays empty for the dry build; the bay fits two different 6 V boards on purpose.",
       "Lower the deck onto the four towers — the notch at the back-right corner is where the battery’s wires will pass once it moves back in.",
       "Drive 4 screws down into the tower tops.",
       "Set the black fuse box into its raised outline on the deck’s LEFT half, wire tail hanging over the left edge."],
@@ -635,9 +636,9 @@ STEPS = [
      "The optional skin sits flat with every slot open; with the PETG lid supported and nut tight, a centered firm press latches the red button; twist to release."),
     ("step_18_neck", "Build the pan journal and neck", SCREWS["pan_servo_plate"],
      [("neck_v2", 1), ("bayonet_collar_v2", 1), ("head_pan_plate_v2", 1), ("px_servo", 1), ("px_insert", 6)],
-     ["Melt 2 inserts into the collar’s pan-plate towers and 4 into the neck’s top flange. Keep heat away from the smooth journal and thrust faces.",
+     ["Melt 4 inserts into the neck’s top flange and 2 into its underside capture-pad bores — the insert jigs from the tools plate hold them square. Keep heat away from the smooth journal and thrust faces.",
       "From above the loose lid, align the collar’s 3 lugs with the keyways, press through, and twist about 20° until all 3 detents sit in the blind underside race.",
-      "Flip the supported lid. Set the pan D85MG into the cradle with its shaft UP; the black pan plate captures its flange from below with 2 M3 screws. The case must not be pinched.",
+      "Flip the supported lid. Set the pan D85MG into the cradle with its shaft UP and bolt its mounting ears to the two frame stations with the screws and nuts from the servo’s own bag. The case must not be pinched.",
       "Take the single arm out of the servo’s own bag and land it on the spline tooth closest to the two tick marks lining up — the marks on the collar and neck show center, and the robot’s software trims away the last few degrees later. Fix it with the bag’s spline screw; never force the gears by hand.",
       "Smear a thin film of grease (tools list) on the journal and thrust faces, feed the camera ribbon through the open +X crescent, lower the neck journal into the collar so the arm slides into the neck’s capture slot, and clamp the slot cover over it with 2 M3 screws — the slot walls carry the turning force, not the screws."],
      "The neck sits flat on the greased thrust face; it turns by hand through ±60°, meets both hard stops beyond that range, has no lift, and never rubs the ribbon."),
@@ -1133,11 +1134,10 @@ def build_body_pages():
       {eyebrow(1)}
       <h2>The {N_PLATES} prototype plates, in printing order</h2>
       <table class="roomy" style="font-size:10.5px;"><tr><th style="width:.35in;">#</th><th style="width:2.3in;">Plate (load this filament)</th><th style="width:.5in;">Parts</th><th>What’s on it</th><th style="width:.7in;">Plan for*</th></tr>{rows}</table>
-      <p style="margin-top:.12in; font-size:11px;"><b>The whole job plans at ≈{est_g:,} g of filament and ≈{est_h:g} printer-hours.</b>
-      *Planning estimates computed from the exported geometry — your slicer’s numbers win.
-      <b>Tip:</b> the plates are grouped by exact material and color — print each group back to back, then label its box before
-      changing filament. Every plate carries a small corner <b>check tab</b>: test its insert bore and screw hole
-      before starting the next plate, and fix the printer first if either is off.</p>""",
+      <p style="margin-top:.12in; font-size:11px;"><b>The whole job plans at ≈{est_g:,} g and ≈{est_h:g} printer-hours</b>
+      — *planning estimates from the exported geometry; your slicer’s numbers win. Print each material group back to back and
+      label its box. Every plate carries a corner <b>check tab</b>: test its insert bore and screw hole before the next plate;
+      if either is off, fix the printer first.</p>""",
         chapter=1)
 
     bin_labels = "".join(
