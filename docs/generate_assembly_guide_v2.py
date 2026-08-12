@@ -1,5 +1,11 @@
 """Generate the v2 assembly guide: print-first HTML -> PDF, ages 10+.
 
+"Ages 10+" here (and the cover chip it produces) is D039's plain-language
+bar — every instruction stays simple enough for a ten-year-old building
+with an adult — not a consumer age grading or safety claim. Keep the copy
+at that reading level; a real retail age label is a separate future
+compliance decision.
+
 Authors the complete builder's book as fixed-size HTML pages (11 x 8.5 in
 landscape) designed like a professionally produced kit manual, then prints
 it to PDF with headless Chrome. Content is generated from the live
@@ -1720,6 +1726,9 @@ def build_cover(chapter_pages):
         toc_rows += (f'<div class="row"><span class="n" style="color:{color}">{idx + 1}</span>'
                      f'<span class="t">{name}</span><span class="d">{desc}</span>'
                      f'<span class="lead"></span><span class="pg">{chapter_pages[idx]}</span></div>')
+    # The ages chip is D039's plain-language bar (a ten-year-old with an
+    # adult can follow the book), not an age grading or safety claim —
+    # keep it, and keep it worded simply.
     chips = "".join(f'<span class="statchip">{c}</span>' for c in
                     ("AGES 10+ WITH AN ADULT", f"{N_FUNCTIONAL} FUNCTIONAL + {N_SPARES} SPARE + {N_OPTIONAL} OPTIONAL",
                      f"{N_PLATES} PLATES", "ONE SCREW SIZE"))
