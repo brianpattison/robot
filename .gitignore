@@ -86,3 +86,7 @@ rosbags/
 output/commissioning/
 *.bag
 *.mcap
+
+# Built interactive guide site (regenerate with docs/generate_guide_site_v2.py;
+# its images are copies of tracked render assets)
+output/site/
