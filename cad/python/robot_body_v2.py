@@ -176,6 +176,9 @@ def build_tray():
         else:
             sx = 1 if cx > 0 else -1
             tray -= Pos((cx + sx * inv.BODY_L / 2) / 2, cy, TRAY_Z0 + 3.0) * Box(20, 12, 6.0)
+    # Recessed part-ID (poka-yoke): open floor between the battery pads,
+    # up-facing in the flat print pose and hidden under the pack.
+    tray -= Pos(55.0, 0, inv.TRAY_TOP - 0.3) * material_mark("P TRAY")
     return tray
 
 
@@ -235,6 +238,11 @@ def build_shell():
         shell += Pos(-20, sy * (inv.BODY_W / 2 - WALL - 3), 89.5) * Box(24, 6, 5)
         shell += Pos(-32, sy * (inv.BODY_W / 2 - WALL - 3), (87.0 + 100.0) / 2) * Cylinder(4.0, 13)
         shell -= Pos(-32, sy * (inv.BODY_W / 2 - WALL - 3), 100.0 - 3.5) * Cylinder(2.3, 7)
+        # ToF-clamp orientation fence (poka-yoke): rotated 180 degrees about
+        # its single screw the clamp bar would sweep X -48..-28; this wall
+        # stub occupies X -38..-36.5 so the wrong pose sits 4 mm proud,
+        # while the correct bar (X -36..-16) clears it by 0.5.
+        shell += Pos(-37.25, sy * 105.0, 102.0) * Box(1.5, 5.0, 4.0)
 
     # Fascia opening: two 27 mm sub-openings with a hidden 4 mm mullion
     # (every bridge span <= 30; the fascia panel covers the mullions).
@@ -246,6 +254,10 @@ def build_shell():
     # Flush seating recesses for the snap-in fascia and rear panels.
     shell -= Pos(-(inv.BODY_L / 2 - 0.7), 0, 110.0) * Box(1.5, 76, 40)
     shell -= Pos(inv.BODY_L / 2 - 0.7, 0, 132.0) * Box(1.5, 104, 50)
+    # Recessed part-ID on the interior rear wall (side-facing in the
+    # upright print pose; hidden inside the bay, below the panel opening).
+    shell -= (Pos(inv.IX - 0.05, 0, 70.0) * Rot(0, 90, 0) * Rot(0, 0, 90)
+              * material_mark("P SHELL"))
     return shell
 
 
@@ -372,6 +384,14 @@ def build_front_pod(left: bool):
     # Axle-end insert bore for the retaining screw (prints axis-vertical in
     # the pod's inboard-face-down orientation).
     pod -= Pos(inv.FRONT_AXLE_X, sy * 126.0, P.wheel_center_z) * Rot(90, 0, 0) * Cylinder(2.3, 12)
+    # Orientation audit: every pod feature is symmetric about the axle
+    # plane X = -74, so a 180-degree turn about vertical maps left onto
+    # right — the two pods are congruent and interchangeable, and the
+    # flange holes only align with the flange inboard and axle outboard,
+    # so no cross-mount or wrong pose can seat.  Recessed ID on the
+    # outboard face (up-facing in the inboard-face-down print pose).
+    pod -= (Pos(inv.FRONT_AXLE_X, sy * 105.05, 84.0)
+            * Rot(sy * 90, 0, 0) * material_mark("P POD"))
     return pod
 
 
@@ -426,6 +446,9 @@ def build_controller_tower():
     for wx, wy in ((-77, -34.5), (-77, 0.0), (-77, 34.5), (-29, -34.5), (-29, 0.0), (-29, 34.5)):
         frame -= Pos(wx, wy, inv.SHELF0 + 2.0) * Box(36, 23, 6)
     tower += frame
+    # Recessed part-ID on the base top face (up-facing in the flat print
+    # pose), on the solid strip between cable channels, under the MDDS10.
+    tower -= Pos(-67.0, 20.0, 57.7) * material_mark("P TWR")
     return tower
 
 
@@ -445,12 +468,23 @@ def build_rear_wheel():
     wheel -= Pos(inv.REAR_AXLE_X, 118, (z + 9.2 + z + 22.5) / 2) * Cylinder(3.7, 13.3)
     wheel -= Pos(inv.REAR_AXLE_X, 118, (z + 3.5 + z + 9.2) / 2) * Cylinder(2.3, 5.7)
     wheel -= Pos(inv.REAR_AXLE_X, 118, (z + 1.0 + z + 3.5) / 2) * Cylinder(1.7, 2.5)
+    # Orientation audit: the wheel is symmetric about its own Y midplane
+    # (through D-bore, centered radial clamp well), so either face may sit
+    # inboard.  Recessed ID on the modeled inboard face (up-facing in the
+    # axis-vertical print pose), clear of the D-flat and the clamp well.
+    wheel -= (Pos(inv.REAR_AXLE_X, 105.95, 74.0)
+              * Rot(-90, 0, 0) * material_mark("P WHL R", size=3.0))
     return wheel
 
 
 def build_front_wheel():
     wheel = Pos(inv.FRONT_AXLE_X, 118, P.wheel_center_z) * Rot(90, 0, 0) * Cylinder(21.0, 24)
     wheel -= Pos(inv.FRONT_AXLE_X, 118, P.wheel_center_z) * Rot(90, 0, 0) * Cylinder(9.25, 26)
+    # Orientation audit: plain cylinder + through bearing bore — flip- and
+    # side-agnostic.  Recessed ID on the modeled inboard face (up-facing
+    # in the axis-vertical print pose).
+    wheel -= (Pos(inv.FRONT_AXLE_X, 105.95, 81.0)
+              * Rot(-90, 0, 0) * material_mark("P WHL F", size=3.0))
     return wheel
 
 
@@ -595,6 +629,10 @@ def build_head_shell():
     passive = Pos(TILT_AXIS_X, passive_y, TILT_AXIS_Z) * Rot(90, 0, 0) * Cylinder(12.0, 3.0)
     passive -= Pos(TILT_AXIS_X, passive_y, TILT_AXIS_Z) * Rot(90, 0, 0) * Cylinder(4.2, 5.0)
     shell += passive
+    # Recessed part-ID on the flat -Y interior cavity wall (vertical in
+    # the open-face-down print pose; hidden inside the head).
+    shell -= (Pos(-35.0, -(P.head_width - 5) / 2 + 0.05, 250.0)
+              * Rot(90, 0, 0) * material_mark("P HEAD", size=3.5))
     # OCC can leave zero-volume edge wisps after the sampled sweep.  They are
     # not printable geometry; retain the single production solid explicitly.
     if len(shell.solids()) > 1:
@@ -608,6 +646,10 @@ def build_head_faceplate():
     plate -= Pos(x0 + 1.5, 0, HEAD_C[2]) * Cylinder(P.head_camera_aperture_radius, 5, rotation=(0, 90, 0))
     for sy in (1, -1):
         plate -= Pos(x0 + 1.5, sy * 40.0, HEAD_C[2]) * Box(4, 9, 14)
+    # Recessed part-ID on the interior face, below the camera bore and
+    # clear of the eye slots (hidden when the faceplate is mounted).
+    plate -= (Pos(x0 + 2.95, 0, HEAD_C[2] - 22.0)
+              * Rot(0, -90, 0) * Rot(0, 0, 90) * material_mark("P FACE", size=3.0))
     return plate
 
 
@@ -654,6 +696,10 @@ def build_neck():
     # stationed farther around the collar so contact begins outside the
     # commanded +/-60-degree range.
     neck += Pos(P.neck_x + 25.5, 0, inv.Z_TOP + 5.0) * Box(5.0, 4.0, 2.0)
+    # Recessed part-ID on the journal's bottom annulus, +X of the arm pad
+    # (up-facing in the flange-down print pose; hidden inside the bay).
+    neck -= (Pos(P.neck_x + 15.0, 0, inv.Z_TOP - 3.7)
+             * Rot(180, 0, 0) * Rot(0, 0, 90) * material_mark("P NECK", size=3.0))
     return neck
 
 
@@ -720,6 +766,10 @@ def build_bayonet_collar():
                    * Rot(0, 0, angle)
                    * Pos(28.0, 0, 0)
                    * Box(5.0, 4.0, 2.0))
+    # Recessed part-ID on the barrel's bottom annulus at the -Y lug gap
+    # (up-facing in the flange-down print pose; hidden in the lid opening).
+    collar -= (Pos(P.neck_x, -23.0, inv.Z_TOP - 2.7)
+               * Rot(180, 0, 0) * material_mark("P COL", size=2.5))
     return collar
 
 
@@ -767,6 +817,10 @@ def build_deck():
     deck += Pos(69.8, -20.75, inv.DECK1 + 1.5) * Box(4, 92.5, 3)
     deck += Pos(45.9, 27.5, inv.DECK1 + 1.5) * Box(51.8, 4, 3)
     # Tower joint holes: through 3.4 with a 0.8 top counterbore -> 3.2 stack.
+    # Orientation audit (poka-yoke): the four stations share no 180-degree
+    # symmetry (paired midpoints (62.5, 0) vs (96.5, -3) disagree), so a
+    # rotated or flipped deck can never line up with its towers — the hole
+    # pattern itself is the locator key.
     for jx, jy in ((30, -61), (86, -61), (95, 61), (107, 55)):
         deck -= Pos(jx, jy, (inv.DECK0 + inv.DECK1) / 2) * Cylinder(1.7, 6)
         deck -= Pos(jx, jy, inv.DECK1 - 0.35) * Cylinder(3.25, 0.9)
@@ -826,6 +880,9 @@ def build_deck():
         deck -= Pos(jx, jy, (97.3 + 100.3) / 2) * Cylinder(1.7, 3.0)
         deck -= Pos(jx, jy, (100.3 + inv.DECK1 + 0.5) / 2) * Cylinder(
             2.3, inv.DECK1 + 0.5 - 100.3)
+    # Recessed part-ID on the underside (up-facing in the top-face-down
+    # print pose), clear of the bays, harness ribs, and tower bores.
+    deck -= Pos(40.0, -20.0, inv.DECK0 + 0.3) * Rot(180, 0, 0) * material_mark("P DECK")
     return deck
 
 
@@ -837,6 +894,15 @@ def build_motor_cap():
     for jx in (63, 85):
         cap -= Pos(jx, 83.0, 81.4) * Cylinder(1.7, 8)
         cap -= Pos(jx, 83.0, 83.4) * Cylinder(3.25, 2.2)
+    # Orientation audit (poka-yoke): the cap is symmetric in plan — joint
+    # holes at the trough center +/-11 and the trough itself centered — so
+    # the two caps are interchangeable and 180-degree rotation is harmless.
+    # Upside-down installation is refused by the fastener system: the
+    # counterbores would face the saddle and the M3 x 8, standing 2.2 proud
+    # of the D026 clamp stack, could not reach its insert.  Recessed ID on
+    # the +X side face (vertical in the arc-up print pose).
+    cap -= (Pos(88.05, 83.0, 81.4) * Rot(0, -90, 0) * Rot(0, 0, 90)
+            * material_mark("P CAP", size=3.0))
     return cap
 
 
@@ -846,6 +912,10 @@ def build_battery_clamp():
     bar = Pos(17.0, 0, 81.6) * Box(16, 99, 3.2)
     for sy in (1, -1):
         bar -= Pos(17.0, sy * 42.5, 81.6) * Cylinder(1.7, 5)
+    # Orientation audit: holes at +/-42.5 about the bar center, constant
+    # flat section, plain through-holes — symmetric under rotation and face
+    # flip, so no orientation can be wrong.  Recessed ID on the top face.
+    bar -= Pos(17.0, 0, 82.9) * Rot(0, 0, 90) * material_mark("P BAT", size=3.0)
     return bar
 
 
@@ -857,6 +927,11 @@ def build_mic_cradle():
         ear = Pos(jx, jy, 173.6) * Cylinder(6.0, 3.2)
         ear -= Pos(jx, jy, 173.6) * Cylinder(1.7, 5)
         ring += ear
+    # Orientation audit: annulus + two ears at +/-30 from center, uniform
+    # 3.2 section, plain through-holes — symmetric under the 180-degree
+    # turn and the face flip, so no orientation can be wrong.  Recessed ID
+    # on the underside, clear of the two screw-head seats.
+    ring -= Pos(60.0, 8.0, 172.3) * Rot(180, 0, 0) * material_mark("P MIC", size=3.0)
     return ring
 
 
@@ -865,12 +940,21 @@ def build_speaker_clamp():
     bar = Pos(-13, bar_y, 149.6) * Box(86, 8, 3.2)
     for jx in (-52.0, 26.0):
         bar -= Pos(jx, bar_y, 149.6) * Cylinder(1.7, 5)
+    # Orientation audit: holes at +/-39 about the bar center, constant flat
+    # section — symmetric under rotation, face flip, and Y-mirror, so one
+    # design serves both sides in any pose.  Recessed ID on the top face.
+    bar -= Pos(-13.0, bar_y, 150.9) * material_mark("P SPK", size=3.0)
     return bar
 
 
 def build_tof_clamp():
     bar = Pos(-26, inv.BODY_W / 2 - WALL - 3, 101.6) * Box(20, 8, 3.2)
     bar -= Pos(-32, inv.BODY_W / 2 - WALL - 3, 101.6) * Cylinder(1.7, 5)
+    # The single off-center screw would let this bar seat rotated 180
+    # degrees (clamping nothing); the shell's fence stub at X -38..-36.5
+    # blocks that footprint (see build_shell).  Face flip is harmless:
+    # flat bar, plain through-hole.  Recessed ID on the top face.
+    bar -= Pos(-23.0, inv.BODY_W / 2 - WALL - 3, 102.9) * material_mark("P TOF", size=2.8)
     return bar
 
 
@@ -878,6 +962,9 @@ def build_pico_clamp():
     bar = Pos(3, 63.5, 68.6) * Box(10, 49, 3.2)
     for jy in (43.0, 84.0):
         bar -= Pos(3, jy, 68.6) * Cylinder(1.7, 5)
+    # Orientation audit: holes at +/-20.5 about the bar center, constant
+    # flat section — symmetric under rotation and face flip.
+    bar -= Pos(3.0, 63.5, 69.9) * Rot(0, 0, 90) * material_mark("P PICO", size=3.0)
     return bar
 
 
@@ -958,6 +1045,9 @@ def build_yoke():
         yoke += Pos(x, 57.5, z) * Box(5.0, 4.0, 2.5)
         yoke += Pos((x - 18.5) / 2, 54.5, z) * Box(x + 18.5, 3.0, 2.0)
     yoke -= Pos(-4.05, 55.0, TILT_AXIS_Z + 2.5) * Box(2.3, 6.2, 5.2)
+    # Recessed part-ID on the exposed base-flange top, west of the bridge
+    # feet (up-facing in the neck-flange-down print pose).
+    yoke -= Pos(-42.0, 0, base_z + 1.3) * Rot(0, 0, 90) * material_mark("P YOKE", size=3.0)
     return yoke
 
 
