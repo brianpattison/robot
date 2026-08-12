@@ -44,8 +44,8 @@ physical first article.
 
 | Exact size | Buy | Role |
 | --- | --- | --- |
-| M3 × 8 mm socket head screws | one 100-pack | The ONLY screw in the robot (47 used + spares). |
-| M3 × 5.7 mm brass heat-set inserts (4.6 mm OD) | one 100-pack | The only insert (47 used + spares). |
+| M3 × 8 mm socket head screws | one 100-pack | The ONLY screw in the robot (51 used + spares). |
+| M3 × 5.7 mm brass heat-set inserts (4.6 mm OD) | one 100-pack | The only insert (51 used + spares). |
 
 ## Electronics and purchased hardware
 

@@ -695,6 +695,13 @@ def build_bayonet_collar():
             collar += rail
     for y in (-12.0, 12.0):
         collar += Pos(P.neck_x + 18.5, y, frame_z + 1.8) * Box(5.0, 4.0, 3.6)
+    # D050 hex-key corridors: the pan-cover screws at (neck_x - 6, +/-11.5)
+    # seat ~4 mm above this frame's north/south wall band (|Y| 10.6..13.5),
+    # which would bury their heads for any straight driver.  Two 7.5 mm
+    # bites through the walls open the corridors; the interrupted ring
+    # still hangs from all four rails and both +X support tabs.
+    for sy in (1, -1):
+        collar -= Pos(P.neck_x - 6.0, sy * 11.5, frame_z + 1.8) * Cylinder(3.75, 6.0)
     # Pan-servo flange mount: the under-servo plate part is retired (its
     # registry slot is now the pan horn cover), and the servo hangs from this
     # frame by its manufacturer-supplied ear screws and nuts through two
@@ -753,14 +760,72 @@ def build_deck():
     for y in (39.0 + 1.0, 57.0 - 1.0):
         deck += Pos(56.5, y, (96 + inv.DECK0) / 2) * Box(61, 2, inv.DECK0 - 96)
     # Fuse block pocket lip (west/east/north; the south edge is the wire
-    # overhang) — the block drops in and the lip locates its base.
-    deck += Pos(22.0, -20.75, inv.DECK1 + 1.5) * Box(4, 92.5, 3)
+    # overhang) — the block drops in and the lip locates its base.  The
+    # west lip is trimmed to 2.5 mm (X 21.5..24) so the battery-clamp
+    # screw at (17, -42.5) keeps a clear D050 hex-key corridor beside it.
+    deck += Pos(22.75, -20.75, inv.DECK1 + 1.5) * Box(2.5, 92.5, 3)
     deck += Pos(69.8, -20.75, inv.DECK1 + 1.5) * Box(4, 92.5, 3)
     deck += Pos(45.9, 27.5, inv.DECK1 + 1.5) * Box(51.8, 4, 3)
     # Tower joint holes: through 3.4 with a 0.8 top counterbore -> 3.2 stack.
     for jx, jy in ((30, -61), (86, -61), (95, 61), (107, 55)):
         deck -= Pos(jx, jy, (inv.DECK0 + inv.DECK1) / 2) * Cylinder(1.7, 6)
         deck -= Pos(jx, jy, inv.DECK1 - 0.35) * Cylinder(3.25, 0.9)
+
+    # --- D049 under-deck regulator bays ------------------------------------
+    # Both Pololu regulators hang component-side-down under the plate:
+    # the bare PCB back seats on rim pads at Z 98.7 and standard M3 x 8 +
+    # insert stations clamp the PCB edges (socket heads overlap each edge
+    # by ~0.95 mm; the boards' drawing-backed 2.18 mm holes cannot pass
+    # the single-SKU M3).  Every pocket opens downward, so all features
+    # build upward in the deck's declared top-face-down print pose.
+    # PROVISIONAL: a 3 mm component-free strip is assumed along each
+    # clamped PCB edge (both boards are edge-sparse per their drawings).
+    #
+    # 5 V bay — D24V90F5 at X 92..112.3, Y -50..-9.4 (envelope regD24_*):
+    # stations SW (90.2, -46) and N (91.6, -7.6) stay west of the X 94..110
+    # terminal-service envelopes; E/S walls locate the free edges.
+    #
+    # 6 V bay — shared-SE-datum dual-footprint pocket (envelope regD36_*):
+    # the D36V50F6 (25.4 sq, X 60..85.4, Y -6..19.4) and a D36V28F6-class
+    # alternate (17.8 x 20.3 PROVISIONAL, anchored to the same SE corner
+    # at X 85.4 / Y -6, so it spans X 67.6..85.4, Y -6..14.3) share the
+    # SAME two stations S (76, -7.8) and E (87.2, 4): both heads overlap
+    # whichever board is seated.  The big board gets a N wall and W stop;
+    # the alternate's NW quadrant relies on the SE datum walls plus the
+    # two clamp heads (PROVISIONAL until delivered-part dims confirm).
+    for x0, x1, y0, y1 in (
+            (92.0, 97.0, -49.5, -42.5),    # 5 V pad over the SW station
+            (88.2, 97.0, -14.4, -9.4),     # 5 V pad over the N station
+            (107.3, 112.3, -46.0, -36.0),  # 5 V east rest pad
+            (107.3, 112.3, -24.0, -14.0),  # 5 V east rest pad
+            (72.5, 79.5, -6.0, -1.0),      # 6 V pad over the S station
+            (80.4, 85.4, 0.5, 7.5),        # 6 V pad over the E station
+            (60.0, 65.0, 14.4, 19.4),      # 6 V NW rest pad (big board)
+            (80.4, 85.4, 9.3, 14.3)):      # 6 V NE rest pad (both boards)
+        deck += Pos((x0 + x1) / 2, (y0 + y1) / 2, (98.7 + inv.DECK0) / 2) * Box(
+            x1 - x0, y1 - y0, inv.DECK0 - 98.7)
+    for x0, x1, y0, y1 in (
+            (86.8, 92.0, -49.5, -42.5),    # 5 V SW boss, face flush X 92
+            (88.2, 94.0, -9.4, -3.6),      # 5 V N boss, face flush Y -9.4
+            (72.5, 79.5, -11.4, -6.0),     # 6 V S boss, face flush Y -6
+            (85.4, 90.7, 0.5, 7.5)):       # 6 V E boss, face flush X 85.4
+        deck += Pos((x0 + x1) / 2, (y0 + y1) / 2, (97.3 + inv.DECK0) / 2) * Box(
+            x1 - x0, y1 - y0, inv.DECK0 - 97.3)
+    for x0, x1, y0, y1 in (
+            (112.55, 113.35, -45.0, -15.0),  # 5 V east wall (0.25 clearance)
+            (88.5, 93.9, -51.0, -50.25),     # 5 V south wall, west of term_S
+            (62.0, 84.0, 19.65, 20.45),      # 6 V north wall (big board)
+            (59.2, 59.75, -6.0, -2.25)):     # 6 V west stop, south of wire_W
+        deck += Pos((x0 + x1) / 2, (y0 + y1) / 2, (96.7 + inv.DECK0) / 2) * Box(
+            x1 - x0, y1 - y0, inv.DECK0 - 96.7)
+    # Station bores.  Head seat 97.3 clamps the 1.6 PCB (0.2 recess); the
+    # D026 stack between head and insert mouth is 0.2 + 1.6 + boss = 3.2.
+    # The 4.6 insert bore runs through the plate so the M3 x 5.7 insert
+    # presses in flush from the deck top; the M3 x 8 tip stays inside it.
+    for jx, jy in ((90.2, -46.0), (91.6, -7.6), (76.0, -7.8), (87.2, 4.0)):
+        deck -= Pos(jx, jy, (97.3 + 100.3) / 2) * Cylinder(1.7, 3.0)
+        deck -= Pos(jx, jy, (100.3 + inv.DECK1 + 0.5) / 2) * Cylinder(
+            2.3, inv.DECK1 + 0.5 - 100.3)
     return deck
 
 

@@ -1148,3 +1148,49 @@ Consequences, all verified by the gate:
 
 D035's journal, collar, yoke, ranges, and hard stops are unchanged;
 only its drive-interface sentences are superseded.
+
+## D049: The Deck Grows Real Under-Deck Regulator Bays, With A Dual-Footprint 6 V Bay
+
+Date: 2026-08-12
+Status: accepted (alternate-footprint dimensions provisional)
+
+The regulators previously existed as inventory envelopes with no
+mounting geometry — "clips under the deck" was copy, not CAD. The deck
+now carries real under-deck bays: boards hang component-side-down on
+seat pads, gripped edge-wise by standard M3 x 8 socket heads in
+insert-backed stations (the boards' 2.18 mm holes cannot pass M3, so
+the screw heads act as edge clamps with ~0.95 mm overlap; clamp stack
+3.2 within the D026 rule). The 5 V bay seats the D24V90F5 exactly. The
+6 V bay is DUAL-FOOTPRINT off a shared SE datum: the D36V50F6 and a
+D36V28F6-class alternate are held by the same two stations, so a
+regulator availability gap is a substitution, not a build-stopper. The
+alternate's dimensions are PROVISIONAL pending a delivered part;
+qualification evidence (two-servo transient/thermal) still gates the
+6 V purchase row. Pockets print support-free in the deck's declared
+pose; terminal- and wire-service envelopes stay clear.
+
+Consequence: **the fastener tally moves from 47 to 51** (two new
+two-station joints). Still one screw SKU, one insert SKU, one hex key;
+every count in the book, site, release index, and CI tokens follows the
+registry automatically or was updated with this decision.
+
+## D050: The Validator Proves A Hex Key Can Actually Reach Every Screw
+
+Date: 2026-08-12
+Status: accepted
+
+The rear-wheel stepped-well bug taught the lesson: a joint entry can be
+geometrically satisfiable and humanly unbuildable. `--gate` now runs an
+access audit: for every joint station, a 7 mm diameter by 60 mm tool
+corridor from the screw-head seat along the joint's declared drive axis
+must intersect no other solid in the assembled pose. The Joint registry
+gained per-joint drive-axis, head-height, mate, and documented-waiver
+metadata; waivers print as warnings, never silently.
+
+First run found real bugs and fixed them in geometry: the pan-servo
+plate screws were buried under the collar's frame walls (now two 7.5 mm
+access notches — the well precedent), and a battery-clamp corridor
+grazed the fuse-block lip (trimmed 4 to 2.5 mm, still locating). Five
+stations carry commented waivers where the corridor legitimately ends
+in open service space (tires off, deck out, head not yet mounted). The
+gate result is PASS with the waivers reported.

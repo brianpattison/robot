@@ -15,7 +15,7 @@ PLATES = json.loads(
     (ROOT / "cad" / "bambu" / "codex_robot_body_v2_p1s_plates.json").read_text()
 )
 
-FASTENER_COUNT = 47
+FASTENER_COUNT = 51
 THEME_NAMES = {
     "structure_light": "White",
     "structure_wear": "Black",
