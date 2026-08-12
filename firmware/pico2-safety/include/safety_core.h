@@ -34,6 +34,36 @@ enum rb_bumper_zone {
     RB_BUMPER_RIGHT = 1u << 5,
 };
 
+/* Every flag that forces motor enable off. */
+#define RB_STOP_CAUSE_MASK \
+    (RB_FLAG_ESTOP | RB_FLAG_CHARGER | RB_FLAG_LOW_BATTERY | RB_FLAG_WATCHDOG | \
+     RB_FLAG_MOTION_LEASE | RB_FLAG_BUMPER | RB_FLAG_WIRING)
+
+/* Stop-latency telemetry (read-only; it feeds nothing back into safety logic).
+ *
+ * Onset semantics: one event is recorded for every NEW onset of a stopping
+ * cause (any flag in RB_STOP_CAUSE_MASK), regardless of whether motor enable
+ * was already off for another reason -- commissioning triggers causes one at
+ * a time while parked, and each trigger still deserves a number. A cause must
+ * be observed inactive for at least one tick before its next onset counts;
+ * rb_safety_init seeds every cause as already active, so the deliberate
+ * boot-time latches (E-stop, charger, stale watchdog/lease, open bumper
+ * loops) never produce a spurious event.
+ *
+ * observed_ms is the caller-provided now_ms of the update that first saw the
+ * stopping input (rb_safety_inputs for E-stop, bumper, wiring, charger, and
+ * low-battery edges; the expiring rb_safety_tick for watchdog and motion
+ * lease). enacted_ms is the now_ms of the rb_safety_tick that folded the
+ * cause into the motor-enable decision. Storage is a single latest-wins
+ * slot: a newer event overwrites an untaken older one, and dropped_events
+ * counts the events overwritten since the last take. */
+typedef struct {
+    uint16_t cause_flags;
+    uint32_t observed_ms;
+    uint32_t enacted_ms;
+    uint16_t dropped_events;
+} rb_stop_event;
+
 typedef struct {
     uint32_t now_ms;
     uint32_t previous_tick_ms;
@@ -58,6 +88,11 @@ typedef struct {
     int16_t pan_cdeg;
     int16_t tilt_cdeg;
     uint16_t flags;
+    uint16_t stop_active_causes;
+    uint16_t stop_pending_causes;
+    uint32_t stop_pending_observed_ms;
+    bool stop_event_pending;
+    rb_stop_event stop_event;
 } rb_safety_state;
 
 void rb_safety_init(rb_safety_state *state, uint32_t now_ms,
@@ -74,5 +109,9 @@ void rb_safety_inputs(rb_safety_state *state, uint32_t now_ms,
                       uint16_t battery_mv);
 void rb_safety_tick(rb_safety_state *state, uint32_t now_ms);
 bool rb_safety_motor_enable(const rb_safety_state *state);
+/* Copies the most recent unreported stop event into *out and clears it.
+   Returns false when no unreported event exists (take-semantics: a second
+   call without a new onset returns false). */
+bool rb_safety_take_stop_event(rb_safety_state *state, rb_stop_event *out);
 
 #endif

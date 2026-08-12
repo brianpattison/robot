@@ -56,7 +56,7 @@ opinions.
 | --- | --- | --- |
 | `0x80` | ACK | `u8 command_type`, `u8 result` |
 | `0x81` | STATUS | `u32 uptime_ms`, `u16 flags`, `u8 released_mask`, `u8 latched_mask`, `u16 battery_mv`, `i16 linear_mm_s`, `i16 angular_mrad_s`, `i16 pan_cdeg`, `i16 tilt_cdeg` |
-| `0x82` | EVENT | `u8 event`, `u8 zone_mask`, `u32 uptime_ms` |
+| `0x82` | EVENT | `u8 event_type`, then event-specific fields; see "EVENT: stop-latency telemetry" below |
 
 Safety flags are: E-stop latched, charger present, low battery, heartbeat stale,
 motion lease stale, bumper latched, wiring fault, and motor-enable output. The
@@ -70,6 +70,44 @@ the wiring-fault flag because a press and a broken conductor are electrically
 indistinguishable. Continuity returning clears the wiring-fault flag; the
 bumper flag remains latched until a valid `CLEAR_BUMPER` request. The flags are
 therefore complementary state, not mutually exclusive fault categories.
+
+## EVENT `0x82`: stop-latency telemetry
+
+EVENT is telemetry and nothing more. The Pi may ignore every EVENT frame
+without losing any safety property: the frame carries no authority, changes no
+firmware state, and has no acknowledgement or configuration path attached to
+it. The safety envelope is identical whether the frames are read, logged, or
+discarded.
+
+The only defined event type is `0x01`, stop latency. The firmware self-reports
+how long its own loop took to turn a stopping input into a motor-enable drop.
+Payload after the frame header, little-endian like everything else:
+
+| Field | Meaning |
+| --- | --- |
+| `u8 event_type` | `0x01` = stop latency. Other values are reserved. |
+| `u16 cause_flags` | The safety flags whose onset produced this event, using the STATUS flag bit definitions. |
+| `u32 observed_ms` | Firmware uptime at the update that first observed the stopping input. |
+| `u32 enacted_ms` | Firmware uptime at the tick that folded the cause into the motor-enable decision. |
+| `u16 dropped_events` | Events overwritten since the last emitted EVENT. Storage is a single latest-wins slot, not a queue. |
+
+Onset semantics: the firmware records one event for every *new* onset of a
+stopping cause -- E-stop, charger, low battery, watchdog, motion lease,
+bumper, wiring -- regardless of whether motor enable was already off for
+another reason, because commissioning triggers causes one at a time while the
+robot is parked wheels-off. A cause must first be observed inactive for at
+least one update before its next onset is reported, so the deliberate
+boot-time latches (E-stop, charger, stale watchdog and lease, open bumper
+loops) never produce a spurious event.
+
+`enacted_ms - observed_ms` measures the firmware loop only. It deliberately
+excludes everything the firmware cannot see: switch bounce, input
+conditioning, UART transit, and relay drop-out. Commissioning therefore still
+requires a one-time independent probe cross-check of sensor-edge-to-sample
+latency -- external instrument from the physical edge to the relay coil --
+before any self-reported number is trusted as stop-timing evidence. After
+that cross-check, the C013/C015/C016/C023 stop-timing steps become
+read-the-number exercises.
 
 ## Fixed safety constants in the bench baseline
 

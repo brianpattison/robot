@@ -20,6 +20,11 @@ enum rb_message_type {
     RB_MSG_EVENT = 0x82,
 };
 
+/* First payload byte of an EVENT (0x82) frame. */
+enum rb_event_type {
+    RB_EVENT_STOP_LATENCY = 0x01,
+};
+
 typedef struct {
     uint8_t type;
     uint16_t sequence;
