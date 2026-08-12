@@ -100,3 +100,20 @@ def decode_status(payload: bytes) -> dict[str, int]:
     keys = ("uptime_ms", "flags", "released_mask", "latched_mask", "battery_mv",
             "linear_mm_s", "angular_mrad_s", "pan_cdeg", "tilt_cdeg")
     return dict(zip(keys, values, strict=True))
+
+
+# Mirror of the EVENT 0x82 stop-latency payload in docs/body-protocol-v1.md;
+# keep field order identical to firmware/pico2-safety/src/pico_main.c.
+STOP_EVENT_STRUCT = struct.Struct("<BHIIH")
+STOP_EVENT_TYPE = 0x01
+
+
+def decode_stop_event(payload: bytes) -> dict[str, int]:
+    if len(payload) != STOP_EVENT_STRUCT.size:
+        raise ValueError(f"EVENT payload must be {STOP_EVENT_STRUCT.size} bytes")
+    event_type, cause_flags, observed_ms, enacted_ms, dropped = STOP_EVENT_STRUCT.unpack(payload)
+    if event_type != STOP_EVENT_TYPE:
+        raise ValueError(f"unknown EVENT type 0x{event_type:02x}")
+    return {"event_type": event_type, "cause_flags": cause_flags,
+            "observed_ms": observed_ms, "enacted_ms": enacted_ms,
+            "latency_ms": max(0, enacted_ms - observed_ms), "dropped_events": dropped}

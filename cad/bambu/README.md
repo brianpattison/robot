@@ -90,8 +90,9 @@ release waiver. Review every plate in the current Bambu Studio slicer before
 printing. Honor the release status in the plate manifest and print the calibration
 coupons first. The rear drivetrain uses drawing-backed Pololu motors in printed
 saddles/caps with direct D-shaft wheel clamps; the v2 head targets two Hitec D85MG servos
-and R-ML24 horns around a greased printed pan journal and printed passive tilt
-bushing — no 6807/MF84ZZ/shoulder-screw stack. Both still require delivered-part
+whose own bag arms sit in printed arm-capture cradles (D048) around a greased printed pan
+journal and printed passive tilt bushing — no metal horn, no M2 links, no
+6807/MF84ZZ/shoulder-screw stack. Both still require delivered-part
 inspection and loaded testing. The IDEC XW1E E-stop and
 Omron D2HW bumper interfaces are also drawing-backed but remain gated on exact
 coupons and deterministic cutoff tests. D024 replaces the Albright/custom-

@@ -70,6 +70,21 @@ static void send_status(void) {
     send_frame(&frame);
 }
 
+static void send_stop_event(const rb_stop_event *event) {
+    /* Telemetry only: the safety core self-reports the tick that observed a
+       stopping input and the tick that dropped motor enable. Emitting (or
+       not emitting) this frame never changes any output decision. Payload,
+       little-endian: u8 event_type=0x01, u16 cause_flags, u32 observed_ms,
+       u32 enacted_ms, u16 dropped_events. */
+    rb_frame frame = {.type = RB_MSG_EVENT, .sequence = ++tx_sequence, .length = 13,
+                      .payload = {RB_EVENT_STOP_LATENCY}};
+    write_u16(frame.payload + 1, event->cause_flags);
+    write_u32(frame.payload + 3, event->observed_ms);
+    write_u32(frame.payload + 7, event->enacted_ms);
+    write_u16(frame.payload + 11, event->dropped_events);
+    send_frame(&frame);
+}
+
 static void handle_frame(const rb_frame *frame, uint32_t now_ms) {
     switch (frame->type) {
         case RB_MSG_HEARTBEAT:
@@ -158,6 +173,8 @@ int main(void) {
                          gpio_get(RB_CHARGER_SENSE_PIN), 0);
         rb_safety_tick(&safety, now_ms);
         apply_outputs();
+        rb_stop_event stop_event;
+        if (rb_safety_take_stop_event(&safety, &stop_event)) send_stop_event(&stop_event);
         if (now_ms - last_status_ms >= 100) {
             send_status();
             last_status_ms = now_ms;

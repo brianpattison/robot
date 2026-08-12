@@ -22,6 +22,20 @@ static int16_t approach(int16_t current, int16_t target, uint32_t delta_ms, int3
     return current;
 }
 
+static void record_stop_event(rb_safety_state *state, uint16_t cause_flags,
+                              uint32_t observed_ms, uint32_t enacted_ms) {
+    uint16_t dropped = 0;
+    if (state->stop_event_pending) {
+        dropped = state->stop_event.dropped_events;
+        if (dropped < UINT16_MAX) ++dropped;
+    }
+    state->stop_event.cause_flags = cause_flags;
+    state->stop_event.observed_ms = observed_ms;
+    state->stop_event.enacted_ms = enacted_ms;
+    state->stop_event.dropped_events = dropped;
+    state->stop_event_pending = true;
+}
+
 void rb_safety_init(rb_safety_state *state, uint32_t now_ms,
                     uint16_t low_battery_mv, uint16_t recovery_battery_mv) {
     memset(state, 0, sizeof(*state));
@@ -33,6 +47,10 @@ void rb_safety_init(rb_safety_state *state, uint32_t now_ms,
     state->recovery_battery_mv = recovery_battery_mv;
     state->estop_latched = true;
     state->charger_latched = true;
+    /* Seed every stopping cause as already active so the deliberate boot-time
+       latches never register as stop-event onsets. A cause must be observed
+       inactive for one tick before its next onset is reported. */
+    state->stop_active_causes = RB_STOP_CAUSE_MASK;
 }
 
 void rb_safety_heartbeat(rb_safety_state *state, uint32_t now_ms) {
@@ -93,6 +111,21 @@ void rb_safety_inputs(rb_safety_state *state, uint32_t now_ms,
         state->low_battery_latched = false;
         rb_safety_stop(state);
     }
+
+    /* Telemetry only: stamp when an input-driven stopping cause is first
+       observed, so the next tick can report observed-to-enacted latency. */
+    uint16_t input_causes = 0;
+    if (state->estop_latched) input_causes |= RB_FLAG_ESTOP;
+    if (state->charger_latched || state->charger_present) input_causes |= RB_FLAG_CHARGER;
+    if (state->low_battery_latched) input_causes |= RB_FLAG_LOW_BATTERY;
+    if (state->bumper_latched_mask) input_causes |= RB_FLAG_BUMPER;
+    if (state->wiring_fault_mask) input_causes |= RB_FLAG_WIRING;
+    uint16_t newly_observed = (uint16_t)(input_causes & (uint16_t)~state->stop_active_causes &
+                                         (uint16_t)~state->stop_pending_causes);
+    if (newly_observed) {
+        if (!state->stop_pending_causes) state->stop_pending_observed_ms = now_ms;
+        state->stop_pending_causes |= newly_observed;
+    }
 }
 
 void rb_safety_tick(rb_safety_state *state, uint32_t now_ms) {
@@ -123,10 +156,28 @@ void rb_safety_tick(rb_safety_state *state, uint32_t now_ms) {
     if (state->bumper_latched_mask) state->flags |= RB_FLAG_BUMPER;
     if (state->wiring_fault_mask) state->flags |= RB_FLAG_WIRING;
     if (rb_safety_motor_enable(state)) state->flags |= RB_FLAG_MOTOR_ENABLE;
+
+    /* Telemetry only: report every new stopping-cause onset. Causes stamped
+       by rb_safety_inputs keep their observation time; watchdog and motion
+       lease are first observable here, so they observe and enact together. */
+    uint16_t stopping = state->flags & RB_STOP_CAUSE_MASK;
+    uint16_t new_causes = (uint16_t)(stopping & (uint16_t)~state->stop_active_causes);
+    if (new_causes) {
+        uint32_t observed_ms = (state->stop_pending_causes & new_causes)
+            ? state->stop_pending_observed_ms : now_ms;
+        record_stop_event(state, new_causes, observed_ms, now_ms);
+    }
+    state->stop_active_causes = stopping;
+    state->stop_pending_causes = 0;
 }
 
 bool rb_safety_motor_enable(const rb_safety_state *state) {
-    uint16_t blockers = RB_FLAG_ESTOP | RB_FLAG_CHARGER | RB_FLAG_LOW_BATTERY |
-        RB_FLAG_WATCHDOG | RB_FLAG_MOTION_LEASE | RB_FLAG_BUMPER | RB_FLAG_WIRING;
-    return !(state->flags & blockers);
+    return !(state->flags & RB_STOP_CAUSE_MASK);
+}
+
+bool rb_safety_take_stop_event(rb_safety_state *state, rb_stop_event *out) {
+    if (!state->stop_event_pending) return false;
+    *out = state->stop_event;
+    state->stop_event_pending = false;
+    return true;
 }

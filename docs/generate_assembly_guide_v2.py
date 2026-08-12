@@ -116,8 +116,8 @@ SCREWS = {j.name: len(j.positions) for j in inv.JOINTS}
 # Red banner above a step's numbered moves, for holds the builder must see
 # before starting (kept out of the <ol> so arrow numbers stay aligned).
 STEP_NOTES = {
-    "step_18_neck": "SOURCING GATE — the horns + hardware pack are DO-NOT-BUY-YET rows; stop after move 3 until they release.",
-    "step_19_head": "SOURCING GATE — same hold as step 18; wait for the released horn + hardware pack.",
+    "step_18_neck": "DELIVERED-ARM PROOF FIRST — the arm from your servo's bag must pass the horn-capture proof (chapter 2) before it goes in; the capture slot's sizes are provisional until real arms are measured.",
+    "step_19_head": "DELIVERED-ARM PROOF FIRST — same hold as step 18; prove the bag arm in the capture proof before building the head.",
 }
 
 # Per-camera FRONT hint: rear-camera steps see the front on the far side.
@@ -408,10 +408,10 @@ EXTRA_PANELS = {
         ("step_17c_estop_stack", "Detail B - full E-stop body, nut, and 2 NC blocks"),
     ],
     "step_18_neck": [
-        ("step_18b_neck_cutaway", "Lid hidden: collar, cradle, servo, plate, horn"),
+        ("step_18b_neck_cutaway", "Lid hidden: collar, cradle, servo, slot cover, bag arm"),
     ],
     "step_19_head": [
-        ("step_19b_tilt_stack", "Tilt servo, horn, hard stops, passive bushing"),
+        ("step_19b_tilt_stack", "Tilt servo, bag arm, hard stops, passive bushing"),
         ("step_19c_camera", "Camera board, lens, and ribbon entrance"),
     ],
 }
@@ -439,7 +439,7 @@ PART_NAMES = {
     "tray_v2": "floor tray", "deck_v2": "power deck",
     "controller_tower_v2": "brain tower", "battery_clamp_v2": "battery clamp",
     "speaker_clamp_v2": "speaker clamp", "yoke_v2": "head yoke",
-    "mic_cradle_v2": "mic cradle", "head_pan_plate_v2": "pan-servo plate",
+    "mic_cradle_v2": "mic cradle", "head_pan_plate_v2": "pan slot cover",
     "pico_clamp_v2": "safety-board clamp", "front_pod_left_v2": "front pod (L)",
     "front_pod_right_v2": "front pod (R)", "motor_cap_v2": "motor cap",
     "tof_clamp_v2": "sensor clamp", "tilt_bushing_v2": "tilt bushing",
@@ -459,7 +459,7 @@ PART_NAMES = {
     "px_fuse": "fuse block", "px_reg1": "regulators",
     "px_switch": "feeler switches", "px_tof_L": "distance boards",
     "px_speaker_L": "speakers", "px_estop_cap": "red button",
-    "px_mic": "mic array", "px_servo": "D85MG + R-ML24", "px_camera": "camera",
+    "px_mic": "mic array", "px_servo": "D85MG servo (arm in its bag)", "px_camera": "camera",
     "px_pico": "Pico 2",
 }
 STRIP_NAME_OVERRIDES = {
@@ -484,10 +484,9 @@ CHAPTERS = [
 SHOP_TOOLS = [
     ("Bambu Lab P1S printer (0.4 mm nozzle, Textured PEI plate)", "Prints all 45 pieces. Every plate file in this book is laid out for this exact printer and Bambu Studio — other printers mean re-slicing on your own."),
     ("2.5 mm hex key", f"Turns all {N_SCREWS} M3 screws — every screw you buy for this robot."),
-    ("Small driver for the head’s M2 screws", "The servo hardware pack’s four M2 horn-link screws are the only fasteners the hex key can’t turn. Match a driver to the pack when it releases."),
-    ("6 V current-limited servo tester", "Centers both D85MG servos at 1500 µs before either horn goes on. Any hobby tester works — power it from a current-limited 6 V source."),
     ("Soldering iron + heat-set insert tip", "Melts the brass inserts into the plastic at about 220 °C. The insert tip keeps them straight — a bare conical tip loves to tilt them."),
-    ("PTFE or silicone grease (small tube)", "A thin smear on the neck’s journal and thrust faces in step 18. One tube outlasts the robot."),
+    ("PTFE or silicone grease (small tube)", "One doser-scoop on the neck’s journal and thrust faces in step 18 — the printed doser’s little bowl IS the right amount. One tube outlasts the robot."),
+    ("Printed insert jigs + grease doser (free — you print them)", "Three funnel jigs hold every brass insert perfectly square while the iron presses, and the doser scoops exactly one neck-greasing. They export with the proofs from the release’s tools folder — print them with your first PETG plate."),
     ("Zip ties (2.5 mm)", "Tie the future harness at every printed tie point — the wiring chapter shows where."),
     ("Small flush cutters / scissors", "Trims zip ties and TPU strings."),
     ("Painter’s tape + marker", "Label wires as you go."),
@@ -532,7 +531,7 @@ STEPS = [
      [("px_insert", 20)],
      ["Heat the soldering iron to about 220 °C — insert temperature.",
       "Rest a brass insert in each gold-marked hole, then press it straight down with the hot iron tip until it sits flush. (The gold pegs in the pictures just point at the holes — the real insert always ends up flush inside, nothing sticking out.)",
-      "20 go into the tray now — the picture marks every spot. The other 27 come later: 2 in the wheels, 2 in the front pods, 14 in the shell, 2 in the lid, 6 in the neck and collar, and 1 in the head. The book calls for each batch when it’s time."],
+      "20 go into the tray now — the picture marks every spot. The other 31 come later: 2 in the wheels, 2 in the front pods, 4 in the power deck, 14 in the shell, 2 in the lid, 6 in the neck, and 1 in the head. The book calls for each batch when it’s time."],
      "Every insert is flush and straight, none tilted."),
     ("step_03_motors", "Drop in the motors", SCREWS["motor_caps"],
      [("px_motor_L", 2), ("motor_cap_v2", 2)],
@@ -592,9 +591,9 @@ STEPS = [
       "Its metal bracket slots into the printed pocket; the terminals face UP so they’re easy to wire later.",
       "No wires yet — the wiring chapter at the back of this book is the reference map for the future harness release."],
      "The relay clicks into its pocket and doesn’t rattle."),
-    ("step_12_deck", "Put on the power deck", SCREWS["deck_towers"],
-     [("deck_v2", 1), ("px_fuse", 1), ("px_reg1", 2)],
-     ["First hang the two small green regulator boards under the deck’s BACK half (they clip under; wires come later). If the 6 V regulator is still on its shopping hold, hang just the 5 V one — the empty pocket is fine for the dry build.",
+    ("step_12_deck", "Put on the power deck", SCREWS["deck_towers"] + SCREWS["pi_regulator_bay"] + SCREWS["servo_regulator_bay"],
+     [("deck_v2", 1), ("px_fuse", 1), ("px_reg1", 2), ("px_insert", 4)],
+     ["Flip the deck over and melt 4 inserts into the regulator stations (the jig keeps them straight), then seat each small green regulator board in its underside bay and snug its 2 screws — the screw heads hold the board’s edges like little hands. If the 6 V regulator is still on its shopping hold, its bay stays empty for the dry build; the bay fits two different 6 V boards on purpose.",
       "Lower the deck onto the four towers — the notch at the back-right corner is where the battery’s wires will pass once it moves back in.",
       "Drive 4 screws down into the tower tops.",
       "Set the black fuse box into its raised outline on the deck’s LEFT half, wire tail hanging over the left edge."],
@@ -637,17 +636,17 @@ STEPS = [
      "The optional skin sits flat with every slot open; with the PETG lid supported and nut tight, a centered firm press latches the red button; twist to release."),
     ("step_18_neck", "Build the pan journal and neck", SCREWS["pan_servo_plate"],
      [("neck_v2", 1), ("bayonet_collar_v2", 1), ("head_pan_plate_v2", 1), ("px_servo", 1), ("px_insert", 6)],
-     ["Melt 2 inserts into the collar’s pan-plate towers and 4 into the neck’s top flange. Keep heat away from the smooth journal and thrust faces.",
+     ["Melt 4 inserts into the neck’s top flange and 2 into its underside capture-pad bores — the insert jigs from the tools plate hold them square. Keep heat away from the smooth journal and thrust faces.",
       "From above the loose lid, align the collar’s 3 lugs with the keyways, press through, and twist about 20° until all 3 detents sit in the blind underside race.",
-      "Flip the supported lid. Set the pan D85MG into the cradle with its shaft UP; the black pan plate captures its flange from below with 2 M3 screws. The case must not be pinched.",
-      "Using a current-limited 6 V servo tester, center the servo at 1500 µs. Fit one R-ML24 arm toward FRONT with its verified spline screw; never force the gears by hand.",
-      "Smear a thin film of grease (tools list) on the journal and thrust faces, feed the camera ribbon through the open +X crescent, lower the neck journal into the collar, and fasten the neck drive pad to both R-ML24 M2 stations with the verified component screws."],
+      "Flip the supported lid. Set the pan D85MG into the cradle with its shaft UP and bolt its mounting ears to the two frame stations with the screws and nuts from the servo’s own bag. The case must not be pinched.",
+      "Take the single arm out of the servo’s own bag and land it on the spline tooth closest to the two tick marks lining up — the marks on the collar and neck show center, and the robot’s software trims away the last few degrees later. Fix it with the bag’s spline screw; never force the gears by hand.",
+      "Smear a thin film of grease (tools list) on the journal and thrust faces, feed the camera ribbon through the open +X crescent, lower the neck journal into the collar so the arm slides into the neck’s capture slot, and clamp the slot cover over it with 2 M3 screws — the slot walls carry the turning force, not the screws."],
      "The neck sits flat on the greased thrust face; it turns by hand through ±60°, meets both hard stops beyond that range, has no lift, and never rubs the ribbon."),
     ("step_19_head", "Build the tilt head and camera", SCREWS["yoke_neck"] + SCREWS["head_tilt_pivot"],
      [("head_shell_v2", 1), ("yoke_v2", 1), ("px_camera", 1), ("px_servo", 1), ("tilt_bushing_v2", 1), ("px_insert", 1)],
      ["Melt 1 insert into the yoke’s passive-pivot boss from the OUTSIDE end. Seat the yoke on the neck and install its 4 M3 screws without trapping the center ribbon.",
-      "Mount the second D85MG sideways in the active frame with its verified Hitec grommets, eyelets, screws, and nuts. Center it at 1500 µs on the current-limited 6 V tester; fit the R-ML24 arm toward FRONT.",
-      "Slide the head shell over the yoke. Through the two +Y service holes, fasten the shell’s drive boss to the horn’s 13 and 16 mm M2 stations. The servo supplies torque; the printed pivots carry the head.",
+      "Mount the second D85MG sideways in the active frame with the grommets, eyelets, screws, and nuts from its own bag. Land its bag arm on the spline tooth closest to the tick marks on the yoke and head boss — software trims the rest.",
+      "Slide the head shell over the yoke so the arm settles into the shell’s capture slot — the slot walls carry the turning force. The servo supplies torque; the printed pivots carry the head.",
       "From the -Y outside face, slide the black shoulder bushing through the shell and install 1 M3 screw into the yoke insert. Tighten against the bushing’s 3.2 mm sleeve — never pinch the moving shell.",
       "Dry-seat the Camera Module 3 behind the face opening and feed its FPC down the hollow neck. Permanent camera-board retention and the exact harness remain prototype release gates."],
      "The bushing flange is flush; the shell has no axial pinch, hand-tilts freely through ±20°, and contacts both printed hard stops only beyond the commanded range."),
@@ -971,8 +970,8 @@ def build_body_pages():
           <p>Match the big picture, then read the numbered lines if you want words too. Do the little green
           CHECK before moving on — if it fails, fix it now, because later steps cover things up.</p>
           <h3>2. One screw. One key.</h3>
-          <p>Every screw you buy for this robot is the same M3 × 8 screw, and one 2.5 mm hex key turns them all.
-          (The head’s servo hardware pack adds four tiny M2 screws with their own driver.)
+          <p>Every screw in this robot is the same M3 × 8 screw, and one 2.5 mm hex key turns them all —
+          the only other fastener anywhere is the tiny spline screw that comes in each servo’s own bag.
           “Snug” means: stop when it stops, then an eighth of a turn. Plastic hates gorillas.</p>
           <h3>3. Front and back</h3>
           <p>The FRONT is where the face panel and head look. The BACK has the charging plug, the mute switch,
@@ -1023,7 +1022,7 @@ def build_body_pages():
           <img src="{img_uri(GUIDE_IMG / 'thumb_px_screw.png')}" style="width:1.15in;">
           <img src="{img_uri(GUIDE_IMG / 'thumb_px_insert.png')}" style="width:1.15in;">
           <p style="font-size:11.5px;">This screw and this brass insert are the only fasteners you’ll buy on their own
-          for the whole robot — the head’s servo pack ships with its own tiny M2 hardware. When a step says “2 screws,”
+          for the whole robot — everything else a step needs ships in a component’s own box. When a step says “2 screws,”
           it always means these.</p>
         </div>
       </div></div>""",
@@ -1106,6 +1105,9 @@ def build_body_pages():
 
     # Plate table: aggregate instances and use the same friendly part names
     # as the piece chart and step strips, so a kid can match them.
+    from guide_estimates_v2 import plate_estimates, totals
+    estimates = plate_estimates(PLATES)
+    est_g, est_h = totals(estimates)
     rows = ""
     for p in PLATES["plates"]:
         plate_counts: dict[str, int] = {}
@@ -1125,13 +1127,17 @@ def build_body_pages():
             f"background:{p['color_hex']};border:1px solid rgba(0,0,0,.25); vertical-align:-2px;'></span> "
             f"{esc(p['name'].replace(' - ', ' · '))}</td>"
             f"<td style='text-align:center'>{p['part_count']}</td>"
-            f"<td>{parts_txt}</td></tr>")
+            f"<td>{parts_txt}</td>"
+            f"<td style='text-align:center; white-space:nowrap;'>≈{estimates[p['plate_number']]['grams']} g<br>"
+            f"≈{estimates[p['plate_number']]['hours']:g} h</td></tr>")
     add(f"""
       {eyebrow(1)}
       <h2>The {N_PLATES} prototype plates, in printing order</h2>
-      <table class="roomy" style="font-size:10.5px;"><tr><th style="width:.35in;">#</th><th style="width:2.4in;">Plate (load this filament)</th><th style="width:.5in;">Parts</th><th>What’s on it</th></tr>{rows}</table>
-      <p style="margin-top:.12in; font-size:11px;"><b>Tip:</b> the plates are already grouped by exact material and color.
-      Print each group back to back, then label its box before changing filament.</p>""",
+      <table class="roomy" style="font-size:10.5px;"><tr><th style="width:.35in;">#</th><th style="width:2.3in;">Plate (load this filament)</th><th style="width:.5in;">Parts</th><th>What’s on it</th><th style="width:.7in;">Plan for*</th></tr>{rows}</table>
+      <p style="margin-top:.12in; font-size:11px;"><b>The whole job plans at ≈{est_g:,} g and ≈{est_h:g} printer-hours</b>
+      — *planning estimates from the exported geometry; your slicer’s numbers win. Print each material group back to back and
+      label its box. Every plate carries a corner <b>check tab</b>: test its insert bore and screw hole before the next plate;
+      if either is off, fix the printer first.</p>""",
         chapter=1)
 
     bin_labels = "".join(
@@ -1536,7 +1542,10 @@ def build_body_pages():
 /tmp/rover-bean/bin/robot-dashboard --socket /tmp/robotd.sock \\
     --blackbox /tmp/robotd-blackbox.jsonl</div>
           <p style="font-size:12px; margin-top:.08in;">Then point a browser at <b>http://127.0.0.1:8072/</b> — the page in this
-          picture, live on your desk. It only ever listens to your own computer.</p>
+          picture, live on your desk. It only ever listens to your own computer. When you want the pretend body to perform,
+          run <span class="mono" style="font-size:11px;">/tmp/rover-bean/bin/robot-hello --socket /tmp/robotd.sock</span> —
+          Rover Bean looks left, looks right, and settles back to center, narrating as it goes. On the real robot this same
+          script is the mid-build wake-up: head and lights only, battery still out, no gate crossed.</p>
           <div style="margin-top:.1in; background:var(--cream); border-radius:.1in; padding:.09in .12in;">
             <p style="font-size:10.5px;"><b>It’s a window, not a remote override.</b> The dashboard talks to
             <span class="mono" style="font-size:9.5px;">robotd</span> like every other client. On the real robot the Pico firmware
@@ -1679,7 +1688,7 @@ def build_body_pages():
         for icon, t, d in [
             ('<svg width="18" height="18" viewBox="0 0 18 18"><circle cx="9" cy="9" r="6.5" fill="none" stroke="#B9E44A" stroke-width="1.8"/><path d="M9 5.2 12.3 7.1 12.3 10.9 9 12.8 5.7 10.9 5.7 7.1 Z" fill="none" stroke="#B9E44A" stroke-width="1.4"/></svg>',
              "ONE SCREW, ONE KEY",
-             f"Every one of the {N_SCREWS} screws you buy is the same M3 × 8, and one 2.5 mm hex key turns them all. The head’s servo pack adds its own tiny M2 hardware."),
+             f"Every one of the {N_SCREWS} screws you buy is the same M3 × 8, and one 2.5 mm hex key turns them all. M3 is the only fastener thread in the robot."),
             ('<svg width="18" height="18" viewBox="0 0 18 18"><path d="M2.5 13.5 H15.5 M2.5 10 H15.5 M2.5 6.5 H15.5" stroke="#B9E44A" stroke-width="1.8" stroke-linecap="round"/><path d="M9 4.5 V1.5 M7.2 3 L9 1.2 L10.8 3" stroke="#B9E44A" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>',
              "ZERO SUPPORTS",
              f"{N_FUNCTIONAL} functional + {N_SPARES} spare + {N_OPTIONAL} optional pieces target {N_PLATES} prototype plates. Physical gates remain open."),

@@ -934,3 +934,296 @@ review):
   harder language.
 - When retail packaging becomes real, decide a compliance-grade age
   label then, as its own logged decision. Nothing here pre-commits it.
+
+## D040: Every Body Plate Carries A Corner QC Proof Tab
+
+Date: 2026-08-12
+Status: accepted
+
+Each of the 13 body plates now includes one 20 x 14 x 3.2 mm printed tab
+in a bed corner: a recessed "RB Pn" plate label, one heat-set insert
+test bore, and one M3 clearance hole, printed in the plate's own
+filament group. The 18-proof program qualifies a material family once;
+the tabs catch printer drift plate by plate, before the next hours-long
+part is committed. The builder's rule is one sentence: test the tab
+before starting the next plate, and fix the printer first if the insert
+or screw fit is off.
+
+Tabs are QC pieces at the print layer only: they are not registry
+parts, they do not count against the 40-part budget or the 45-piece
+inventory, and the plates JSON lists each one additively under its
+plate as `qc_tab`. The shell and tray solo plates shift 10 mm along
+their slack axis to open corner room; layout margin/spacing rules and
+the round-trip validation now cover the tabs
+(`BAMBU_V2_QC_TABS_VALID qc_tabs=13`).
+
+## D041: The Safety Core Self-Reports Stop Latency (EVENT 0x82)
+
+Date: 2026-08-12
+Status: accepted
+
+Six commissioning steps demand millisecond stop-timing evidence and no
+instrument was specified. The portable safety core now records each new
+stopping-cause onset — cause flags, the tick the input was observed,
+the tick motor enable dropped — in a take-once, latest-wins slot with a
+dropped-events counter, and the Pico target emits one EVENT 0x82 frame
+per event (13-byte payload documented in `docs/body-protocol-v1.md`).
+`robotd` journals every event in the blackbox as `firmware_stop_event`
+with the computed latency.
+
+Boundaries, stated plainly: the telemetry is read-only, carries no
+authority, adds no Pi-to-Pico config path, and changes no output logic
+(the bench target stays hard-off). Self-reported numbers count as
+C013/C015/C016/C023 evidence only after a one-time independent probe
+cross-check of sensor-edge-to-sample latency, which stays in the
+commissioning plan. This converts scope-class bench steps into
+read-the-number steps without moving the trust boundary.
+
+## D042: Horns Land On The Nearest Spline Tooth; Software Trim Absorbs The Rest
+
+Date: 2026-08-12
+Status: accepted
+
+The 6 V current-limited servo tester existed only to center servos
+before horn installation. Retired from the builder's path: embossed
+centering index marks let the builder land each horn on the nearest
+24T spline tooth by eye (≤7.5° residual), and `robotd` gains
+`--head-trim-pan-cdeg` / `--head-trim-tilt-cdeg` (clamped to ±800
+centidegrees — one spline tooth) applied Pi-side before setpoints are
+framed. The firmware floor is untouched: clamps and stops see trimmed
+values exactly as they saw raw ones, and the blackbox journals both raw
+and trimmed numbers on every head command.
+
+The same release adds `robot-hello`: a narrated, plain-language head
+sweep (source="hello") against a running `robotd` — the designed
+mid-build wake-up milestone. It works against the simulator today; on
+the real robot it moves only the head, requires the same
+started-by-you `robotd`, and crosses no safety gate. The build's
+emotional arc now pays out in stages (simulator on day one, the head
+waking mid-build, motion only after gates), instead of saving
+everything for a finale the gates still hold shut.
+
+## D043: The Guide Ships As Two Renderers Over One Content Source
+
+Date: 2026-08-12
+Status: accepted
+
+The guide is the product, and it now has two outputs of equal rank
+generated from the same live manifests: the print/PDF book, and the
+interactive builder's site (`docs/generate_guide_site_v2.py` →
+`output/site/`, gitignored; CI builds it after the geometry gate). The
+site generator imports the book generator as its content model — steps,
+shop tables, proof copy, wiring maps, arrows — so the two outputs
+cannot drift from each other or from the CAD. Hand-forking guide
+content between renderers is forbidden, exactly as hand-editing
+generated exports is.
+
+What the site adds is state and liveness, not new claims: localStorage
+build progress (shop, plates, pieces, proofs, twenty steps) with an
+exportable build-log JSON; user-entered price totals (the repo still
+publishes no prices); per-plate filament-mass and print-time planning
+estimates from `docs/guide_estimates_v2.py` (shared with the book's
+plate table, always labeled "confirm in the slicer"); digital proof
+record forms matching the proofs manifest schema; step-per-screen build
+mode with wake-lock; and a Check & play page that pings the localhost
+dashboard. It is offline-first, static, account-free, and repeats every
+release hold the book states. D029/D039 govern its language.
+
+## D044: Protected Mobile Pi Input — Proposed Direction
+
+Date: 2026-08-12
+Status: proposed (EE review required before any purchase or wiring)
+
+Requirements, restated from the open blocker: the 5 V feed from the
+D24V90F5 to the Pi 5 must use a positive-locking, polarized connector a
+novice cannot reverse or half-seat; backfeed between bench USB-C power
+and the regulator rail must be impossible; the Pi branch takes its own
+fuse from the accessory side; boot/load voltage margin and thermal
+behavior get measured evidence (C006 family).
+
+Proposed direction: a two-circuit latching connector pair
+(candidate families: Molex Mini-Fit Jr., which is latching and
+polarized and satisfies quantity-one US retail, or XT30 with a printed
+latch shroud), plus an ideal-diode or scheduled-review backfeed element
+between the USB-C bench path and the rail. Not accepted until an
+electrical review closes connector, protection element, fuse value,
+and measured margins together.
+
+## D045: Pico-Local Physical Reset — Proposed Direction
+
+Date: 2026-08-12
+Status: proposed (EE review + CAD service location required)
+
+Requirements: a deliberate, physical, Pico-local momentary control that
+can clear a latched stop only through the firmware's existing recovery
+rules; protected input conditioning; impossible to actuate by casual
+contact; reachable without lifting the powered deck; labeled.
+
+Proposed direction: a sealed momentary pushbutton (candidate families:
+E-Switch TL2201 series or Omron B3F behind a printed guard ring)
+recessed in the rear service corridor near the Pico shelf, wired to the
+Pico reset/recovery input through series resistance and RC
+conditioning, with a debossed "SAFETY RESET" label. Not accepted until
+the exact part, conditioning circuit, and CAD pocket land together and
+the fixture proves casual contact cannot trip it.
+
+## D046: Microphone VBUS Cut With No Backfeed — Proposed Direction
+
+Date: 2026-08-12
+Status: proposed (exact circuit review required)
+
+Requirements: the maintained physical mute switch must break the
+microphone's USB VBUS conductor itself (not a data or software mute);
+the red mute-indication branch must be unable to energize VBUS
+(≤100 mV at C018); the protected state input to the Pi must read the
+switch without providing a backfeed path.
+
+Proposed direction: keep the selected E-Switch PVB3F230SS311 maintained
+switch as the actuator; route fused microphone 5 V through the switch
+common so the mic position carries VBUS and the mute position carries
+only the diode-isolated indication/state branch, each behind its own
+series resistance. Not accepted until the exact schematic, diode and
+resistor values, and measured no-backfeed evidence exist.
+
+## D047: Zero-Skill Harness Termination Policy
+
+Date: 2026-08-12
+Status: accepted as policy; the harness release gate stays red
+
+When the harness releases, its exact terminal selections must be made
+under this policy, in priority order: (1) purchased pre-crimped leads
+wherever a mating retail pigtail exists (the JST-SH LED chain already
+proves the pattern); (2) WAGO 221 lever nuts for splices — already
+trusted hardware in the commissioning fixture; (3) crimped ring or
+quick-connect terminals only where the component demands them (fuse
+block studs, relay tabs), with ONE named ratcheting crimper in the
+bench list; (4) solder only where a component's own terminations
+require it (the EN2 inlet's solder cups). The goal the policy encodes:
+the wiring chapter never asks the builder to learn a skill a tool
+cannot guarantee.
+
+Nothing in this entry releases the harness: measured lengths,
+continuity, pull tests, fuse values, and the first-article evidence
+stay exactly as red as they were.
+
+## D048: Printed Arm-Capture Cradles Retire The R-ML24 Horn
+
+Date: 2026-08-12
+Status: accepted (arm-envelope constants provisional pending
+delivered-arm measurement)
+
+The Hitec R-ML24 aluminum horn had no US quantity-one source, which
+froze the head build at step 18 — a product stopped by a small metal
+arm. Both drive interfaces (pan and tilt) are redesigned as parametric
+printed ARM-CAPTURE CRADLES: a close-fitting open-ended slot seats a
+generic single-arm 24T servo horn — the arm shipped in the D85MG's own
+bag qualifies — and drive torque rides the slot walls on the arm
+flanks, never screws through the horn's link holes. The pan cover
+clamps with the standard M3 x 8 + insert system; the tilt capture
+closes in the assembled position (arm held by its bag spline screw, the
+head station by the passive bushing's existing M3).
+
+Consequences, all verified by the gate:
+
+- The R-ML24 row and the D85MG/R-ML24 hardware-pack row leave the
+  purchase list; the D85MG's own bag supplies the arm, spline screw,
+  grommets, and eyelets. Two DO-NOT-BUY-YET gates die by design change.
+- The four M2 horn-link screws and the M2 driver leave the build.
+  **M3 is now the only fastener thread anywhere in the robot**; the
+  tally stays 47 screws + 47 inserts and the installed budget stays 40
+  (the pan cover reuses the freed flange-plate registry slot).
+- Embossed centering ticks at pan and tilt center support the
+  nearest-spline-tooth landing whose residual D042's software trim
+  absorbs; the 6 V servo tester is gone from the tool list.
+- `proof_pla_head_pivot` becomes `proof_horn_capture` (PLA cradle +
+  PETG cover; measure the delivered arm, seat it, clamp at the 3.2
+  stack, hold 2x rated stall torque warm and cold, ten remove/refit
+  cycles). Still 18 logical proofs; the proofs project is now
+  20 objects on 5 plates.
+- Arm envelope constants (slot 4.6 mm wide for a 4.0 +0.6/-0 arm,
+  1.8-2.6 mm thickness band, 18-27 mm accepted length) are PROVISIONAL:
+  the horn-capture proof against real delivered arms is the release
+  evidence, and the step 18/19 banners now hold on that proof instead
+  of on sourcing.
+
+D035's journal, collar, yoke, ranges, and hard stops are unchanged;
+only its drive-interface sentences are superseded.
+
+## D049: The Deck Grows Real Under-Deck Regulator Bays, With A Dual-Footprint 6 V Bay
+
+Date: 2026-08-12
+Status: accepted (alternate-footprint dimensions provisional)
+
+The regulators previously existed as inventory envelopes with no
+mounting geometry — "clips under the deck" was copy, not CAD. The deck
+now carries real under-deck bays: boards hang component-side-down on
+seat pads, gripped edge-wise by standard M3 x 8 socket heads in
+insert-backed stations (the boards' 2.18 mm holes cannot pass M3, so
+the screw heads act as edge clamps with ~0.95 mm overlap; clamp stack
+3.2 within the D026 rule). The 5 V bay seats the D24V90F5 exactly. The
+6 V bay is DUAL-FOOTPRINT off a shared SE datum: the D36V50F6 and a
+D36V28F6-class alternate are held by the same two stations, so a
+regulator availability gap is a substitution, not a build-stopper. The
+alternate's dimensions are PROVISIONAL pending a delivered part;
+qualification evidence (two-servo transient/thermal) still gates the
+6 V purchase row. Pockets print support-free in the deck's declared
+pose; terminal- and wire-service envelopes stay clear.
+
+Consequence: **the fastener tally moves from 47 to 51** (two new
+two-station joints). Still one screw SKU, one insert SKU, one hex key;
+every count in the book, site, release index, and CI tokens follows the
+registry automatically or was updated with this decision.
+
+## D050: The Validator Proves A Hex Key Can Actually Reach Every Screw
+
+Date: 2026-08-12
+Status: accepted
+
+The rear-wheel stepped-well bug taught the lesson: a joint entry can be
+geometrically satisfiable and humanly unbuildable. `--gate` now runs an
+access audit: for every joint station, a 7 mm diameter by 60 mm tool
+corridor from the screw-head seat along the joint's declared drive axis
+must intersect no other solid in the assembled pose. The Joint registry
+gained per-joint drive-axis, head-height, mate, and documented-waiver
+metadata; waivers print as warnings, never silently.
+
+First run found real bugs and fixed them in geometry: the pan-servo
+plate screws were buried under the collar's frame walls (now two 7.5 mm
+access notches — the well precedent), and a battery-clamp corridor
+grazed the fuse-block lip (trimmed 4 to 2.5 mm, still locating). Five
+stations carry commented waivers where the corridor legitimately ends
+in open service space (tires off, deck out, head not yet mounted). The
+gate result is PASS with the waivers reported.
+
+## D051: Every Part Wears Its Name; Wrong Orientations Don't Seat
+
+Date: 2026-08-12
+Status: accepted
+
+Every printed part now carries a recessed ID mark (`P TRAY`, `P CAP`,
+`P WHL R`, ...) on a non-cosmetic, non-bearing face that is up- or
+side-facing in its declared print pose — matching 45 pieces to the
+chart becomes reading, not guessing, and future service is
+self-documenting. TPU parts and pieces too small to mark legibly are
+skipped. The companion orientation audit physically keyed the one part
+geometry allowed to seat wrong (the ToF clamp bar gains a shell fence
+that leaves its flipped pose 4 mm proud) and documents at each build
+site why geometry already forbids every other wrong orientation
+(asymmetric deck stations, buried counterbores on a flipped motor cap,
+congruent pods, symmetric bars).
+
+## D052: The Builder's Tools Are Printed Too
+
+Date: 2026-08-12
+Status: accepted
+
+`cad/python/robot_body_v2_tools.py` exports four PETG tool pieces
+(zero supports, sized from the shared fastener registry, exported like
+the proofs with their own manifest): three insert-alignment funnel jigs
+— flat-face, paired-boss rows at the standard joint spacings, and a
+deep-well snout — that hold every M3 insert square while the iron
+presses, and a grease doser whose 0.26 mL bowl meters exactly one
+neck-greasing with a wipe blade. Two judgment steps (insert tilt,
+grease amount) become tool-guaranteed. Tool pieces are bench equipment
+like the fixture, never registry parts: no budget, tally, or body-plate
+impact.

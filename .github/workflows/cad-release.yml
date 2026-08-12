@@ -32,6 +32,12 @@ jobs:
           python cad/python/validate_robot_body_v2.py --gate
           python scripts/check_cad_release.py
 
+      - name: Build the interactive guide site from the same content source
+        run: |
+          python cad/python/robot_body_v2_print.py
+          python cad/python/robot_body_v2_proofs.py
+          python docs/generate_guide_site_v2.py
+
   # Bambu Studio round trips, Blender renders, Chrome PDF printing, page-by-page
   # visual review, printer proofs, and physical evidence remain explicit local
   # release steps. A hosted runner does not own those native apps or tiny parts.

@@ -20,7 +20,11 @@ keepouts, and a screen-grade mass/CG budget with support-polygon limits):
    passes). Keepout envelopes are air contracts checked at box level and
    are excluded here, since several are bounded by the very structure
    being built (arches, roof hardware).
-5. D028 overhang audit: per primary solid, in its declared print pose
+5. D050 hex-key access: every modeled joint keeps a straight 7 mm
+   diameter tool corridor, 60 mm along its driving axis from just above
+   the screw-head seat, clear of every non-mate primary solid (per-joint
+   allowances are declared and commented in the joint registry).
+6. D028 overhang audit: per primary solid, in its declared print pose
    (an axis-aligned UP vector, so flipped and side-printed parts audit
    correctly), downward-facing surfaces beyond 50 degrees fail unless
    they are bed contact, inside an allowlisted region (the rollover
@@ -45,7 +49,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 import robot_body_v2 as v2  # noqa: E402
 import robot_body_v2_inventory as inv  # noqa: E402
-from build123d import Axis, Box, Cylinder, Pos  # noqa: E402
+from build123d import Axis, Box, Cylinder, Plane, Pos, Rot, mirror  # noqa: E402
 
 BED_XY, BED_Z = 240.0, 250.0
 OVERHANG_LIMIT_DEG = 50.0
@@ -218,6 +222,71 @@ def check_overhangs(solids):
                          f"{OVERHANG_LIMIT_DEG:.0f} deg (worst {worst:.0f} deg) outside allowances")
 
 
+# D050 hex-key straight-path access. Solids modeled single-sided get a
+# mirrored copy so negative-Y corridors meet real geometry; the tire is
+# modeled at the origin, so its four mounted instances are placed here
+# (the rear clamp corridor must thread the tire's 7.2 mm tread port).
+# The printed washer is likewise origin-modeled AND a front-axle joint
+# mate, so it is simply excluded.
+ACCESS_MIRRORED = ("rear_wheel_v2", "front_wheel_v2", "motor_cap_v2",
+                   "speaker_clamp_v2", "tof_clamp_v2")
+ACCESS_EXCLUDED = {"tire_v2", "printed_washer_v2"}
+ACCESS_R, ACCESS_LEN, ACCESS_EPS = 3.5, 60.0, 0.5
+
+
+def check_access(solids):
+    """D050: every modeled joint keeps a straight 7 mm tool corridor,
+    60 mm along its driving axis from just above the screw-head seat,
+    clear of every primary solid that is not a declared mate (or a
+    commented per-joint allowance)."""
+    env = []
+    for name, solid in solids.items():
+        if name in ACCESS_EXCLUDED:
+            continue
+        env.append((name, solid, solid.bounding_box()))
+        if name in ACCESS_MIRRORED:
+            m = mirror(solid, Plane.XZ)
+            env.append((name, m, m.bounding_box()))
+    for ax in (inv.FRONT_AXLE_X, inv.REAR_AXLE_X):
+        for sy in (1, -1):
+            t = Pos(ax, sy * 118.0, inv.P.wheel_center_z) * solids["tire_v2"]
+            env.append(("tire_v2:mounted", t, t.bounding_box()))
+
+    for j in inv.JOINTS:
+        if not j.modeled:
+            continue
+        if j.head_z is None:
+            FAILS.append(f"access: joint '{j.name}' lacks D050 head_z metadata")
+            continue
+        for x, y in j.positions:
+            d = list(j.drive)
+            if d[1] and y < 0:
+                d[1] = -d[1]  # drive metadata is for the +Y instance
+            cx = x + d[0] * (ACCESS_EPS + ACCESS_LEN / 2)
+            cy = y + d[1] * (ACCESS_EPS + ACCESS_LEN / 2)
+            cz = j.head_z + d[2] * (ACCESS_EPS + ACCESS_LEN / 2)
+            rot = Rot(90, 0, 0) if d[1] else (Rot(0, 90, 0) if d[0] else Rot(0, 0, 0))
+            corridor = Pos(cx, cy, cz) * rot * Cylinder(ACCESS_R, ACCESS_LEN)
+            cb = corridor.bounding_box()
+            for name, solid, bb in env:
+                base = name.split(":")[0]
+                if base in j.mates:
+                    continue
+                if (cb.min.X > bb.max.X or cb.max.X < bb.min.X
+                        or cb.min.Y > bb.max.Y or cb.max.Y < bb.min.Y
+                        or cb.min.Z > bb.max.Z or cb.max.Z < bb.min.Z):
+                    continue
+                vol = _intersection_volume(corridor, solid)
+                if vol <= 1.0:
+                    continue
+                if base in j.access_allow:
+                    WARNS.append(f"access: '{j.name}' at ({x}, {y}) crosses "
+                                 f"{base} ({vol:.0f} mm^3) under its documented allowance")
+                else:
+                    FAILS.append(f"access: joint '{j.name}' screw at ({x}, {y}) has no "
+                                 f"straight hex-key path — corridor hits {base} ({vol:.0f} mm^3)")
+
+
 def check_mass_cg(solids):
     total, mx, my, mz = 0.0, 0.0, 0.0, 0.0
     for name, solid in solids.items():
@@ -315,6 +384,7 @@ def main():
     check_interference(solids)
     check_overhangs(solids)
     check_head_mechanism(solids)
+    check_access(solids)
     total, cgx, cgy, cgz = check_mass_cg(solids)
 
     if estimates:

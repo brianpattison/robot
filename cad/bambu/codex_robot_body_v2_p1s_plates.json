@@ -111,7 +111,7 @@
           "name": "shell_v2",
           "center_mm": [
             128.0,
-            128.0
+            118.0
           ],
           "rotated_z_degrees": 0,
           "span_xy_mm": [
@@ -128,7 +128,19 @@
           "qualification_status": "open",
           "optional": false
         }
-      ]
+      ],
+      "qc_tab": {
+        "name": "qc_tab_p1",
+        "center_mm": [
+          238.0,
+          241.0
+        ],
+        "span_xy_mm": [
+          20.0,
+          14.0
+        ],
+        "release_status": "QC proof tab: printer self-check only; never installed on the robot; outside the 40-part budget and the 45-piece inventory"
+      }
     },
     {
       "plate_number": 2,
@@ -147,7 +159,7 @@
           "name": "tray_v2",
           "center_mm": [
             128.0,
-            128.0
+            118.0
           ],
           "rotated_z_degrees": 0,
           "span_xy_mm": [
@@ -164,7 +176,19 @@
           "qualification_status": "not-required",
           "optional": false
         }
-      ]
+      ],
+      "qc_tab": {
+        "name": "qc_tab_p2",
+        "center_mm": [
+          238.0,
+          241.0
+        ],
+        "span_xy_mm": [
+          20.0,
+          14.0
+        ],
+        "release_status": "QC proof tab: printer self-check only; never installed on the robot; outside the 40-part budget and the 45-piece inventory"
+      }
     },
     {
       "plate_number": 3,
@@ -284,7 +308,19 @@
           "qualification_status": "not-required",
           "optional": false
         }
-      ]
+      ],
+      "qc_tab": {
+        "name": "qc_tab_p3",
+        "center_mm": [
+          18.0,
+          241.0
+        ],
+        "span_xy_mm": [
+          20.0,
+          14.0
+        ],
+        "release_status": "QC proof tab: printer self-check only; never installed on the robot; outside the 40-part budget and the 45-piece inventory"
+      }
     },
     {
       "plate_number": 4,
@@ -365,12 +401,12 @@
         {
           "name": "bayonet_collar_v2",
           "center_mm": [
-            41.2,
+            40.95,
             184.85
           ],
           "rotated_z_degrees": 0,
           "span_xy_mm": [
-            62.4,
+            61.9,
             61.7
           ],
           "brim_mm": 0.0,
@@ -404,7 +440,19 @@
           "qualification_status": "not-required",
           "optional": false
         }
-      ]
+      ],
+      "qc_tab": {
+        "name": "qc_tab_p4",
+        "center_mm": [
+          238.0,
+          241.0
+        ],
+        "span_xy_mm": [
+          20.0,
+          14.0
+        ],
+        "release_status": "QC proof tab: printer self-check only; never installed on the robot; outside the 40-part budget and the 45-piece inventory"
+      }
     },
     {
       "plate_number": 5,
@@ -440,7 +488,19 @@
           "qualification_status": "not-required",
           "optional": false
         }
-      ]
+      ],
+      "qc_tab": {
+        "name": "qc_tab_p5",
+        "center_mm": [
+          238.0,
+          241.0
+        ],
+        "span_xy_mm": [
+          20.0,
+          14.0
+        ],
+        "release_status": "QC proof tab: printer self-check only; never installed on the robot; outside the 40-part budget and the 45-piece inventory"
+      }
     },
     {
       "plate_number": 6,
@@ -477,31 +537,10 @@
           "optional": false
         },
         {
-          "name": "head_pan_plate_v2",
-          "center_mm": [
-            24.0,
-            165.3
-          ],
-          "rotated_z_degrees": 90,
-          "span_xy_mm": [
-            28.0,
-            50.0
-          ],
-          "brim_mm": 0.0,
-          "release_status": "prototype: material proofs + purchased-part fit gates apply",
-          "registry_part": "head_pan_plate",
-          "mechanical_role": "wear_motion",
-          "requested_material_family": "PETG",
-          "effective_material_family": "PETG",
-          "qualification": "fixed-PETG",
-          "qualification_status": "not-required",
-          "optional": false
-        },
-        {
           "name": "front_pod_left_v2",
           "center_mm": [
             30.0,
-            215.8
+            161.8
           ],
           "rotated_z_degrees": 0,
           "span_xy_mm": [
@@ -521,8 +560,8 @@
         {
           "name": "front_pod_right_v2",
           "center_mm": [
-            62.0,
-            161.8
+            30.0,
+            208.8
           ],
           "rotated_z_degrees": 0,
           "span_xy_mm": [
@@ -543,7 +582,7 @@
           "name": "front_wheel_v2_i1",
           "center_mm": [
             75.0,
-            208.3
+            161.3
           ],
           "rotated_z_degrees": 0,
           "span_xy_mm": [
@@ -563,8 +602,8 @@
         {
           "name": "front_wheel_v2_i2",
           "center_mm": [
-            89.5,
-            31.0
+            75.0,
+            207.3
           ],
           "rotated_z_degrees": 0,
           "span_xy_mm": [
@@ -585,7 +624,7 @@
           "name": "rear_wheel_v2_i1",
           "center_mm": [
             89.5,
-            77.0
+            31.0
           ],
           "rotated_z_degrees": 0,
           "span_xy_mm": [
@@ -605,8 +644,8 @@
         {
           "name": "rear_wheel_v2_i2",
           "center_mm": [
-            107.0,
-            123.0
+            89.5,
+            77.0
           ],
           "rotated_z_degrees": 0,
           "span_xy_mm": [
@@ -624,10 +663,31 @@
           "optional": false
         },
         {
+          "name": "head_pan_plate_v2",
+          "center_mm": [
+            79.5,
+            117.0
+          ],
+          "rotated_z_degrees": 0,
+          "span_xy_mm": [
+            22.0,
+            30.0
+          ],
+          "brim_mm": 0.0,
+          "release_status": "prototype: material proofs + purchased-part fit gates apply",
+          "registry_part": "head_pan_plate",
+          "mechanical_role": "wear_motion",
+          "requested_material_family": "PETG",
+          "effective_material_family": "PETG",
+          "qualification": "fixed-PETG",
+          "qualification_status": "not-required",
+          "optional": false
+        },
+        {
           "name": "printed_washer_v2_i1",
           "center_mm": [
-            97.0,
-            159.0
+            105.5,
+            113.0
           ],
           "rotated_z_degrees": 0,
           "span_xy_mm": [
@@ -647,8 +707,8 @@
         {
           "name": "printed_washer_v2_i2",
           "center_mm": [
-            111.0,
-            185.0
+            125.5,
+            21.0
           ],
           "rotated_z_degrees": 0,
           "span_xy_mm": [
@@ -668,8 +728,8 @@
         {
           "name": "printed_washer_v2_i3",
           "center_mm": [
-            123.0,
-            159.0
+            125.5,
+            47.0
           ],
           "rotated_z_degrees": 0,
           "span_xy_mm": [
@@ -689,8 +749,8 @@
         {
           "name": "printed_washer_v2_i4",
           "center_mm": [
-            111.0,
-            211.0
+            125.5,
+            73.0
           ],
           "rotated_z_degrees": 0,
           "span_xy_mm": [
@@ -710,8 +770,8 @@
         {
           "name": "printed_washer_v2_i5",
           "center_mm": [
-            137.0,
-            185.0
+            151.5,
+            21.0
           ],
           "rotated_z_degrees": 0,
           "span_xy_mm": [
@@ -731,8 +791,8 @@
         {
           "name": "printed_washer_v2_i6",
           "center_mm": [
-            137.0,
-            211.0
+            177.5,
+            21.0
           ],
           "rotated_z_degrees": 0,
           "span_xy_mm": [
@@ -752,8 +812,8 @@
         {
           "name": "tilt_bushing_v2",
           "center_mm": [
-            59.0,
-            238.3
+            119.5,
+            93.0
           ],
           "rotated_z_degrees": 0,
           "span_xy_mm": [
@@ -770,7 +830,19 @@
           "qualification_status": "not-required",
           "optional": false
         }
-      ]
+      ],
+      "qc_tab": {
+        "name": "qc_tab_p6",
+        "center_mm": [
+          238.0,
+          241.0
+        ],
+        "span_xy_mm": [
+          20.0,
+          14.0
+        ],
+        "release_status": "QC proof tab: printer self-check only; never installed on the robot; outside the 40-part budget and the 45-piece inventory"
+      }
     },
     {
       "plate_number": 7,
@@ -869,7 +941,19 @@
           "qualification_status": "not-required",
           "optional": false
         }
-      ]
+      ],
+      "qc_tab": {
+        "name": "qc_tab_p7",
+        "center_mm": [
+          238.0,
+          241.0
+        ],
+        "span_xy_mm": [
+          20.0,
+          14.0
+        ],
+        "release_status": "QC proof tab: printer self-check only; never installed on the robot; outside the 40-part budget and the 45-piece inventory"
+      }
     },
     {
       "plate_number": 8,
@@ -947,7 +1031,19 @@
           "qualification_status": "open",
           "optional": false
         }
-      ]
+      ],
+      "qc_tab": {
+        "name": "qc_tab_p8",
+        "center_mm": [
+          238.0,
+          241.0
+        ],
+        "span_xy_mm": [
+          20.0,
+          14.0
+        ],
+        "release_status": "QC proof tab: printer self-check only; never installed on the robot; outside the 40-part budget and the 45-piece inventory"
+      }
     },
     {
       "plate_number": 9,
@@ -983,7 +1079,19 @@
           "qualification_status": "open",
           "optional": true
         }
-      ]
+      ],
+      "qc_tab": {
+        "name": "qc_tab_p9",
+        "center_mm": [
+          238.0,
+          241.0
+        ],
+        "span_xy_mm": [
+          20.0,
+          14.0
+        ],
+        "release_status": "QC proof tab: printer self-check only; never installed on the robot; outside the 40-part budget and the 45-piece inventory"
+      }
     },
     {
       "plate_number": 10,
@@ -1040,7 +1148,19 @@
           "qualification_status": "open",
           "optional": false
         }
-      ]
+      ],
+      "qc_tab": {
+        "name": "qc_tab_p10",
+        "center_mm": [
+          238.0,
+          241.0
+        ],
+        "span_xy_mm": [
+          20.0,
+          14.0
+        ],
+        "release_status": "QC proof tab: printer self-check only; never installed on the robot; outside the 40-part budget and the 45-piece inventory"
+      }
     },
     {
       "plate_number": 11,
@@ -1076,7 +1196,19 @@
           "qualification_status": "not-required",
           "optional": false
         }
-      ]
+      ],
+      "qc_tab": {
+        "name": "qc_tab_p11",
+        "center_mm": [
+          238.0,
+          241.0
+        ],
+        "span_xy_mm": [
+          20.0,
+          14.0
+        ],
+        "release_status": "QC proof tab: printer self-check only; never installed on the robot; outside the 40-part budget and the 45-piece inventory"
+      }
     },
     {
       "plate_number": 12,
@@ -1112,7 +1244,19 @@
           "qualification_status": "not-required",
           "optional": false
         }
-      ]
+      ],
+      "qc_tab": {
+        "name": "qc_tab_p12",
+        "center_mm": [
+          238.0,
+          241.0
+        ],
+        "span_xy_mm": [
+          20.0,
+          14.0
+        ],
+        "release_status": "QC proof tab: printer self-check only; never installed on the robot; outside the 40-part budget and the 45-piece inventory"
+      }
     },
     {
       "plate_number": 13,
@@ -1232,7 +1376,19 @@
           "qualification_status": "not-required",
           "optional": false
         }
-      ]
+      ],
+      "qc_tab": {
+        "name": "qc_tab_p13",
+        "center_mm": [
+          238.0,
+          241.0
+        ],
+        "span_xy_mm": [
+          20.0,
+          14.0
+        ],
+        "release_status": "QC proof tab: printer self-check only; never installed on the robot; outside the 40-part budget and the 45-piece inventory"
+      }
     }
   ],
   "inventory_counts": {

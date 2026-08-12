@@ -40,3 +40,19 @@ The core already tests fixed velocity/acceleration clamps, independent
 heartbeat and motion leases, physical reset latches, six NC bumper zones,
 zero motion while any bumper loop is open, broken-wire clear rejection, charger
 inhibit, low-battery latch behavior, head clamps, CRC, and fragmented frames.
+
+## Stop-latency telemetry
+
+The safety core self-reports stop-event timing: on every new onset of a
+stopping cause (E-stop, bumper/wiring, watchdog, motion lease, charger, low
+battery) it records the cause flags, the millisecond tick that first observed
+the input, and the tick that folded it into the motor-enable decision. The
+Pico target drains that single latest-wins slot into an EVENT (`0x82`) frame;
+overwritten events are counted in `dropped_events`, not queued. Boot-time
+latches are seeded as already active so power-up never fakes an event.
+
+This is read-only telemetry. It adds no configuration path and no new
+Pi-to-Pico command, and it changes no output logic -- the bench build's motor
+enable stays hard-off either way. The number measures the firmware loop only,
+so commissioning still cross-checks it once against an independent external
+probe before trusting it (see `docs/body-protocol-v1.md`).

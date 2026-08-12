@@ -16,7 +16,7 @@ physical first article.
 | --- | --- | --- |
 | Builder's Book | `output/pdf/codex_robot_body_v2_assembly_guide.pdf` | Picture-first dry assembly plus explicit release holds. |
 | Body print project | `cad/bambu/codex_robot_body_v2_p1s.3mf` | 45 prototype pieces on 13 material-separated plates. |
-| Proof print project | `cad/bambu/codex_robot_body_v2_proofs_p1s.3mf` | 18 logical tests / 19 objects / 5 material-separated plates. |
+| Proof print project | `cad/bambu/codex_robot_body_v2_proofs_p1s.3mf` | 18 logical tests / 20 objects / 5 material-separated plates. |
 | UART contract | `docs/body-protocol-v1.md` | Fixed v1 bench protocol; no flash/config-write path. |
 | Pi body daemon | `software/robotd/` | Executable local Unix-socket/UART baseline with blackbox logging. |
 | Pi 5 appliance | `software/appliance/` + `software/install.sh` | Closed-world Bookworm provisioning baseline; real Pi, Tunnel, dual-UART, and append-only collector attestations remain open. |
@@ -44,8 +44,8 @@ physical first article.
 
 | Exact size | Buy | Role |
 | --- | --- | --- |
-| M3 × 8 mm socket head screws | one 100-pack | The ONLY screw in the robot (47 used + spares). |
-| M3 × 5.7 mm brass heat-set inserts (4.6 mm OD) | one 100-pack | The only insert (47 used + spares). |
+| M3 × 8 mm socket head screws | one 100-pack | The ONLY screw in the robot (51 used + spares). |
+| M3 × 5.7 mm brass heat-set inserts (4.6 mm OD) | one 100-pack | The only insert (51 used + spares). |
 
 ## Electronics and purchased hardware
 
@@ -60,9 +60,7 @@ Any row whose fit, termination, load, or test evidence is open stays open.
 | Raspberry Pi Pico 2 (no headers, no WiFi) | 1 | The safety helper: reflexes and watchdog. |
 | Cytron MDDS10 motor driver | 1 | The purple board that powers the wheels. |
 | Pololu #4867 gearmotor (99:1, 25D, 12 V, encoder) | 2 | The wheel motors. |
-| Hitec D85MG servo | 2 | The neck motors (look left/right, up/down). |
-| Hitec R-ML24 aluminum horn (H24T) | 0 for now | DO NOT BUY YET — no normal US quantity-one source is confirmed, and an unmodeled substitute horn is forbidden. The head build pauses at the step 18 sourcing gate until this row clears. |
-| Verified D85MG/R-ML24 component hardware pack | 0 for now | DO NOT BUY YET — not yet purchasable as a kit (spline-center screws, M2 horn-link screws, servo grommets, eyelets, nuts). Releases with the horn row above; confirm the delivered pack against the head proofs. |
+| Hitec D85MG servo | 2 | The neck motors (look left/right, up/down). The single arm, spline screw, grommets, and eyelets in each servo's own bag are the drive parts — the old metal-horn and hardware-pack rows are retired (D048), so there is nothing extra to buy. Confirm the delivered arm against the horn-capture proof before the head steps. |
 | Bioenno BLF-1203AB 12 V 3 Ah LiFePO4 battery | 1 | The robot’s power pack. |
 | Bioenno BPC-1502DC charger | 1 | The matching charger. Only ever use this one. |
 | Switchcraft EN2P3M20 inlet + EN2C3F20G2 plug | 1 pair | The keyed charging plug on the back. |
@@ -81,6 +79,18 @@ Any row whose fit, termination, load, or test evidence is open stays open.
 | ReSpeaker USB mic array | 1 | Selected envelope; exact revision plus a true VBUS-cut/no-backfeed mute interface remain BLOCKED. |
 | Enclosed 3 W 4 ohm speakers + 2× Adafruit MAX98357A amps | 1 set | The robot’s voice. |
 | Prototype wire, terminal, and connector kit | not released | The production terminal schedule, measured lengths, and crimp tooling are still open; do not improvise a powered harness from this preview. |
+
+## Bench equipment
+
+The commissioning plan's acceptance thresholds assume these instruments; they
+are commissioning tools, not robot parts, and none of them ride in the body.
+
+| Instrument | Qty | What it proves |
+| --- | --- | --- |
+| Current-limited DC bench supply (0–15 V, ≥3 A, settable current limit) | 1 | Regulator bring-up (C006), the fixture's 0.20 A negative-control stage, the low-battery sweep (C017), and the 6 V servo bench (C022). A settable limit is the requirement; programmable sweep is a convenience. |
+| Multimeter with continuity beeper, mV resolution, and 0.01 A DC current | 1 | Every continuity check in the harness traveler, the ≤100 mV mute/backfeed readings (C018), and the per-motor / pack current ceilings (C024). |
+| Contactless IR thermometer (or thermocouple meter) | 1 | Terminal, conductor, servo, motor, driver, and pack temperature evidence (C019, C022, C024, C025). |
+| Raspberry Pi Debug Probe (SC0889) | 1 | Already in the fixture BOM: the Pi debug-console attestation cable, the Pico service corridor, and the one-time independent cross-check of the firmware's self-reported stop-latency telemetry. |
 
 ## Bench commands
 
@@ -102,8 +112,10 @@ OpenSSH `allowed_signers` / revocation policy.
 
 ## Powered-motion release remains blocked on
 
-- A protected mobile Pi 5 input, normal US R-ML24 source, available/qualified
-  servo regulator, production relay driver, and Pico-local physical reset.
+- A protected mobile Pi 5 input, available/qualified servo regulator,
+  production relay driver, and Pico-local physical reset (the R-ML24 sourcing
+  blocker is retired — D048's printed arm-capture cradle drives the head with
+  the arm from the servo's own bag, pending the delivered-arm proof).
 - Exact delivered-part fit and the completed 18-proof record.
 - Exact connector housings/contacts, measured harness lengths, continuity and
   pull tests, released fuse values, selective-fault tests, and thermal soak.

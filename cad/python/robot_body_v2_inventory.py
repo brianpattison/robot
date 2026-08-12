@@ -200,18 +200,25 @@ ENVELOPES = [
        76 + P.motor_cutoff_terminal_service_height),
       "motor_cutoff_terminal_service_height 16"),
     E("regD24_under", "item", "regD24",
-      (92, 92 + P.pi_regulator_width, -50, -50 + P.pi_regulator_length, 94, DECK0),
-      "D24V90F5 40.6x20.3 rotated, hung under the deck"),
-    E("regD24_term_S", "service", "regD24", (94, 110, -60, -50, 90, DECK0),
-      "pi_regulator_terminal_service 10x16x12, south end"),
-    E("regD24_term_N", "service", "regD24", (94, 110, -9.4, 0.6, 90, DECK0),
-      "pi_regulator_terminal_service 10x16x12, north end (round-3 fix)"),
+      (92, 92 + P.pi_regulator_width, -50, -50 + P.pi_regulator_length, 90.7, 98.7),
+      "D24V90F5 40.6x20.3 rotated, seated component-side-down in the D049 "
+      "under-deck bay (PCB top on the bay pads at Z 98.7; pads, walls, and "
+      "the two M3 edge-clamp stations are deck geometry)"),
+    E("regD24_term_S", "service", "regD24", (94, 110, -60, -50, 86.7, 98.7),
+      "pi_regulator_terminal_service 10x16x12, south end (rides the D049 "
+      "seated-board height)"),
+    E("regD24_term_N", "service", "regD24", (94, 110, -9.4, 0.6, 86.7, 98.7),
+      "pi_regulator_terminal_service 10x16x12, north end (round-3 fix; "
+      "rides the D049 seated-board height)"),
     E("regD36_under", "item", "regD36",
-      (60, 60 + P.servo_regulator_length, -6, -6 + P.servo_regulator_width, 92.5, DECK0),
-      "D36V50F6 25.4 sq, hung under the deck"),
+      (60, 60 + P.servo_regulator_length, -6, -6 + P.servo_regulator_width, 89.2, 98.7),
+      "D36V50F6 25.4 sq, seated component-side-down in the D049 dual-footprint "
+      "bay (PCB top on the bay pads at Z 98.7; the D36V28F6-class alternate "
+      "shares the SE datum and both clamp stations, dims PROVISIONAL)"),
     E("regD36_wire_W", "service", "regD36",
-      (60 - P.servo_regulator_wire_service_length, 60, -2, 20, 90, DECK0),
-      "servo_regulator_wire_service 14x22x12 facing WEST (round-3 fix: east exits the body)"),
+      (60 - P.servo_regulator_wire_service_length, 60, -2, 20, 86.7, 98.7),
+      "servo_regulator_wire_service 14x22x12 facing WEST (round-3 fix: east "
+      "exits the body; rides the D049 seated-board height)"),
     E("rail_L", "item", "rail_L", (38, 78, -60, -46, 96, DECK0),
       "signal/audio harness channel under the deck (v2: deck rib per D028); shortened clear of the SW and SE deck towers"),
     E("rail_R", "item", "rail_R", (26, 96, 41, 55, 96, DECK0),
@@ -362,16 +369,19 @@ PRINTED_PARTS = [
     PP("tof_side_clamp", 2, "PETG", "structure", "structure_light", "fixed-PETG", "flat", "side ToF capture in shell pockets"),
     PP("head_shell", 1, "PLA", "qualified_enclosure", "body_primary", "physical-gate-required", "open face down", "one-piece head enclosure (v1 front/rear covers merged)",
        qualification_status="open", fallback_material_family="PETG", fallback_color_slot="structure_light"),
-    PP("head_pan_plate", 1, "PETG", "wear_motion", "structure_wear", "fixed-PETG", "flat",
-       "under-lid service plate; clamps the pan-servo flange into the collar cradle with two standard joints"),
+    PP("head_pan_plate", 1, "PETG", "wear_motion", "structure_wear", "fixed-PETG", "flat on boss feet; shim ribs up",
+       "pan arm-capture cover (reused part slot, D028 budget): closes the neck's horn-arm slot "
+       "with shim ribs and two standard joints; the retired flange-plate duty moved to the "
+       "servo's supplied ear hardware on the collar frame"),
     PP("head_faceplate", 1, "PLA", "visible_cosmetic", "dark_panel", "direct", "flat, face down",
        "color break + fused camera annulus + camera pocket and eye NeoPixel pockets (merges executed)", qualification_status="open"),
     PP("neck", 1, "PETG", "structure", "structure_light", "fixed-PETG", "top flange down",
-       "rotating pan journal, thrust shoulder, horn drive, cable corridor, and four-insert yoke interface"),
+       "rotating pan journal, thrust shoulder, horn-arm capture slot, cable corridor, and four-insert yoke interface"),
     PP("bayonet_collar", 1, "PETG", "structure", "structure_light", "fixed-PETG", "visible flange down; cradle rises",
-       "printed pan journal/thrust face, three-lug tool-free lid retention, hard stops, and integrated pan-servo cradle"),
+       "printed pan journal/thrust face, three-lug tool-free lid retention, hard stops, and "
+       "integrated pan-servo cradle with supplied-hardware flange stations"),
     PP("yoke", 1, "PETG", "wear_motion", "structure_wear", "fixed-PETG", "neck flange down",
-       "four-screw neck bridge, drawing-backed D85MG frame, active horn opening, hard stops, and passive insert boss"),
+       "four-screw neck bridge, drawing-backed D85MG frame, active arm/spline opening, hard stops, and passive insert boss"),
     PP("tilt_bushing", 1, "PETG", "wear_motion", "structure_wear", "fixed-PETG", "axis vertical", "designated tilt wear part"),
     PP("eye_diffuser_bar", 1, "PLA", "optical", "light_diffuser", "direct", "flat", "color/optics: both eye diffusers as one bar", qualification_status="open"),
     PP("status_diffuser_bar", 1, "PLA", "optical", "light_diffuser", "direct", "flat", "color/optics: both status diffusers as one bar", qualification_status="open"),
@@ -420,31 +430,101 @@ FASTENER = {
 class Joint:
     """One screwed joint family: M3 x 8 through `stack` mm of clamped
     material into a heat-set insert. The clamp-stack rule (D026) requires
-    3.0 <= stack <= 3.4 so the single screw length works everywhere."""
+    3.0 <= stack <= 3.4 so the single screw length works everywhere.
+
+    D050 access metadata: `drive` is the direction the driver retreats
+    along (the tool corridor grows this way from the head seat), given
+    for the +Y instance — corridors at negative-Y positions mirror the
+    Y component.  `head_z` completes the head-seat point (x, y, head_z).
+    `mates` are the joint's own clamped parts (allowed in the corridor);
+    `access_allow` lists other solids the corridor may legitimately
+    cross, each justified by a comment at the joint entry."""
     name: str
     positions: tuple      # (x, y) interface points
     stack: float = 3.2
     modeled: bool = False  # True once BOTH sides exist in robot_body_v2
+    drive: tuple = (0, 0, 1)   # default: driven from above, +Z retreat
+    head_z: float | None = None
+    mates: tuple = ()
+    access_allow: tuple = ()
 
 
 J = Joint
 JOINTS = [
-    J("shell_tray", ((110, 85), (110, -85), (-110, 85), (-110, -85)), modeled=True),
-    J("lid_shell", ((100, 90), (100, -90), (-100, 90), (-100, -90)), modeled=True),
-    J("deck_towers", ((30, -61), (86, -61), (95, 61), (107, 55)), modeled=True),
-    J("motor_caps", ((63, 83), (85, 83), (63, -83), (85, -83)), modeled=True),
-    J("battery_clamp", ((17, 42.5), (17, -42.5)), modeled=True),
-    J("controller_tower_base", ((-101, 59), (-101, -59), (-33, 59), (-33, -59)), modeled=True),
-    J("front_pods", ((-86, 85), (-62, 85), (-86, -85), (-62, -85)), modeled=True),
-    J("rear_wheel_clamps", ((74, 118), (74, -118)), modeled=True),
-    J("front_axle_retainers", ((-74, 126), (-74, -126)), modeled=True),
-    J("mic_cradle", ((30, -25), (90, -25)), modeled=True),
-    J("speaker_clamps", ((-52, 100), (26, 100), (-52, -100), (26, -100)), modeled=True),
-    J("tof_clamps", ((-32, 100), (-32, -100)), modeled=True),
-    J("pico_clamp", ((3, 43), (3, 84)), modeled=True),
-    J("pan_servo_plate", ((-54, 0), (-14, 0)), modeled=True),
-    J("yoke_neck", ((-14.3, 11.7), (-37.7, 11.7), (-37.7, -11.7), (-14.3, -11.7)), modeled=True),
-    J("head_tilt_pivot", ((-10, -66.8),), modeled=True),
+    # Driven upward from the tray underside; heads seat in the bottom
+    # counterbores at Z 45.8 and the corridor drops into open floor space.
+    J("shell_tray", ((110, 85), (110, -85), (-110, 85), (-110, -85)), modeled=True,
+      drive=(0, 0, -1), head_z=45.8, mates=("tray_v2", "shell_v2")),
+    J("lid_shell", ((100, 90), (100, -90), (-100, 90), (-100, -90)), modeled=True,
+      head_z=181.15, mates=("lid_v2", "shell_v2")),
+    J("deck_towers", ((30, -61), (86, -61), (95, 61), (107, 55)), modeled=True,
+      head_z=104.75, mates=("deck_v2", "tray_v2")),
+    J("motor_caps", ((63, 83), (85, 83), (63, -83), (85, -83)), modeled=True,
+      head_z=82.3, mates=("motor_cap_v2", "tray_v2")),
+    J("battery_clamp", ((17, 42.5), (17, -42.5)), modeled=True,
+      head_z=83.2, mates=("battery_clamp_v2", "tray_v2")),
+    J("controller_tower_base", ((-101, 59), (-101, -59), (-33, 59), (-33, -59)), modeled=True,
+      head_z=52.15, mates=("controller_tower_v2", "tray_v2")),
+    J("front_pods", ((-86, 85), (-62, 85), (-86, -85), (-62, -85)), modeled=True,
+      head_z=52.2, mates=("front_pod_left_v2", "front_pod_right_v2", "tray_v2")),
+    # Head seats deep in the stepped rim well (wheel_center_z + 9.2); the
+    # corridor rises through the wheel's 7.4 tool channel and the tire's
+    # 7.2 tread port (the tire is checked in its mounted pose).
+    J("rear_wheel_clamps", ((74, 118), (74, -118)), modeled=True,
+      head_z=75.2, mates=("rear_wheel_v2",)),
+    # Driven horizontally outward along the axle; the corridor leaves
+    # through the front wheel's 18.5 bore and open air beyond the washer.
+    J("front_axle_retainers", ((-74, 126), (-74, -126)), modeled=True,
+      drive=(0, 1, 0), head_z=66.0,
+      mates=("printed_washer_v2", "front_pod_left_v2", "front_pod_right_v2")),
+    # Driven upward into the under-lid bosses; heads seat at Z 172 and the
+    # corridor drops 60 into the open bay (it stops 6 above the deck).
+    J("mic_cradle", ((30, -25), (90, -25)), modeled=True,
+      drive=(0, 0, -1), head_z=172.0, mates=("mic_cradle_v2", "lid_v2")),
+    # Positions are the true bore axes at IY - 3 = +/-103.8 (D050 fix of
+    # the old +/-100 approximation).
+    J("speaker_clamps", ((-52, 103.8), (26, 103.8), (-52, -103.8), (26, -103.8)),
+      modeled=True, head_z=151.2, mates=("speaker_clamp_v2", "shell_v2")),
+    # True bore axes +/-103.8 (D050 fix, as above).  access_allow: the
+    # corridor's only foreign hit is the speaker clamp bar 45 mm above the
+    # head — a removable two-screw service part with clear corridors of
+    # its own; the ToF clamp is serviced below the speaker service stack.
+    J("tof_clamps", ((-32, 103.8), (-32, -103.8)), modeled=True,
+      head_z=103.2, mates=("tof_clamp_v2", "shell_v2"),
+      access_allow=("speaker_clamp_v2",)),
+    J("pico_clamp", ((3, 43), (3, 84)), modeled=True,
+      head_z=70.2, mates=("pico_clamp_v2", "tray_v2")),
+    # Kept joint name (build/docs step tables key on it): these two screws now
+    # clamp the pan horn cover to the neck's arm-capture pad, replacing the
+    # retired flange-plate joint at the same 3.2 mm stack.  Driven upward
+    # from inside the bay (lid off); the collar frame walls carry D050
+    # notches so the corridor passes them.
+    J("pan_servo_plate", ((-32, 11.5), (-32, -11.5)), modeled=True,
+      drive=(0, 0, -1), head_z=172.0, mates=("head_pan_plate_v2", "neck_v2")),
+    # access_allow: the corridor's last ~2 mm grazes the head-cavity crown
+    # fillet at the two X -14.3 stations — open interior space, and the
+    # head shell mounts onto the yoke pivots only after these four screws
+    # are driven (tilting the mounted head also clears the graze).
+    J("yoke_neck", ((-14.3, 11.7), (-37.7, 11.7), (-37.7, -11.7), (-14.3, -11.7)),
+      modeled=True, head_z=225.9, mates=("yoke_v2", "neck_v2"),
+      access_allow=("head_shell_v2",)),
+    # Driven horizontally outward through the head's passive-boss bore.
+    J("head_tilt_pivot", ((-10, -66.8),), modeled=True,
+      drive=(0, 1, 0), head_z=257.0,
+      mates=("tilt_bushing_v2", "yoke_v2", "head_shell_v2")),
+    # D049 under-deck regulator bays: heads clamp the seated PCB edges from
+    # below (stack 3.2 = 0.2 recess + 1.6 PCB + boss; insert flush with the
+    # deck top).  access_allow: these screws drive upward on the bench
+    # before the removable deck drops onto its towers — in situ the space
+    # below is the battery bay (tray floor / TPU pad frame 45+ mm down).
+    J("pi_regulator_bay", ((90.2, -46), (91.6, -7.6)), modeled=True,
+      drive=(0, 0, -1), head_z=97.3, mates=("deck_v2",),
+      access_allow=("tray_v2",)),
+    # The 6 V bay's two stations serve BOTH accepted footprints (D36V50F6
+    # and the PROVISIONAL D36V28F6-class alternate on the shared SE datum).
+    J("servo_regulator_bay", ((76, -7.8), (87.2, 4)), modeled=True,
+      drive=(0, 0, -1), head_z=97.3, mates=("deck_v2",),
+      access_allow=("tray_v2", "battery_pad_frame_v2")),
 ]
 
 
@@ -454,8 +534,8 @@ PURCHASED_MASSES = [
     ("battery BLF-1203AB", 460, (30, 0, 65)),
     ("motor+bracketless L", 96, (74, -90, 66)), ("motor R", 96, (74, 90, 66)),
     ("MDDS10", 82, (-67, 0, 70)), ("Pi 5 + cooler", 85, (-53, 0, 104)),
-    ("Pico 2", 5, (3, 63, 58)), ("reg D24V90F5", 15, (102, -30, 98)),
-    ("reg D36V50F6", 10, (73, 7, 97)), ("relay CB1A", 46, (-20, -79, 62)),
+    ("Pico 2", 5, (3, 63, 58)), ("reg D24V90F5", 15, (102, -30, 95)),
+    ("reg D36V50F6", 10, (73, 7, 94)), ("relay CB1A", 46, (-20, -79, 62)),
     ("fuse block 5045", 120, (46, -22, 122)), ("EN2 inlet", 25, (112, 35, 130)),
     ("mute switch", 20, (112, -35, 130)), ("E-stop XW1E", 90, (59, 56, 150)),
     ("mic array", 55, (60, -25, 170)), ("speaker L", 60, (-13, -90, 128)),

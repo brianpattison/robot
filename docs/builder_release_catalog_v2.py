@@ -15,7 +15,7 @@ PLATES = json.loads(
     (ROOT / "cad" / "bambu" / "codex_robot_body_v2_p1s_plates.json").read_text()
 )
 
-FASTENER_COUNT = 47
+FASTENER_COUNT = 51
 THEME_NAMES = {
     "structure_light": "White",
     "structure_wear": "Black",
@@ -79,6 +79,32 @@ SHOP_FASTENERS = [
     ),
 ]
 
+# Commissioning-grade bench equipment. The 27-step plan specifies acceptance
+# thresholds down to millivolts and milliseconds; this table names the
+# instruments those thresholds assume so no builder has to reverse-engineer
+# the equipment list from the acceptance math. Quantity-one US retail rule
+# applies as everywhere else.
+SHOP_BENCH_GEAR = [
+    ("Current-limited DC bench supply (0–15 V, ≥3 A, settable current limit)",
+     "1",
+     "Regulator bring-up (C006), the fixture's 0.20 A negative-control stage, the "
+     "low-battery sweep (C017), and the 6 V servo bench (C022). A settable limit is "
+     "the requirement; programmable sweep is a convenience."),
+    ("Multimeter with continuity beeper, mV resolution, and 0.01 A DC current",
+     "1",
+     "Every continuity check in the harness traveler, the ≤100 mV mute/backfeed "
+     "readings (C018), and the per-motor / pack current ceilings (C024)."),
+    ("Contactless IR thermometer (or thermocouple meter)",
+     "1",
+     "Terminal, conductor, servo, motor, driver, and pack temperature evidence "
+     "(C019, C022, C024, C025)."),
+    ("Raspberry Pi Debug Probe (SC0889)",
+     "1",
+     "Already in the fixture BOM: the Pi debug-console attestation cable, the "
+     "Pico service corridor, and the one-time independent cross-check of the "
+     "firmware's self-reported stop-latency telemetry."),
+]
+
 SHOP_ELECTRONICS = [
     ("Raspberry Pi 5 (8 GB)", "1", "The robot’s computer."),
     ("32 GB+ A2 microSD card", "1", "The computer’s memory card — the robot’s programs live here."),
@@ -86,9 +112,7 @@ SHOP_ELECTRONICS = [
     ("Raspberry Pi Pico 2 (no headers, no WiFi)", "1", "The safety helper: reflexes and watchdog."),
     ("Cytron MDDS10 motor driver", "1", "The purple board that powers the wheels."),
     ("Pololu #4867 gearmotor (99:1, 25D, 12 V, encoder)", "2", "The wheel motors."),
-    ("Hitec D85MG servo", "2", "The neck motors (look left/right, up/down)."),
-    ("Hitec R-ML24 aluminum horn (H24T)", "0 for now", "DO NOT BUY YET — no normal US quantity-one source is confirmed, and an unmodeled substitute horn is forbidden. The head build pauses at the step 18 sourcing gate until this row clears."),
-    ("Verified D85MG/R-ML24 component hardware pack", "0 for now", "DO NOT BUY YET — not yet purchasable as a kit (spline-center screws, M2 horn-link screws, servo grommets, eyelets, nuts). Releases with the horn row above; confirm the delivered pack against the head proofs."),
+    ("Hitec D85MG servo", "2", "The neck motors (look left/right, up/down). The single arm, spline screw, grommets, and eyelets in each servo's own bag are the drive parts — the old metal-horn and hardware-pack rows are retired (D048), so there is nothing extra to buy. Confirm the delivered arm against the horn-capture proof before the head steps."),
     ("Bioenno BLF-1203AB 12 V 3 Ah LiFePO4 battery", "1", "The robot’s power pack."),
     ("Bioenno BPC-1502DC charger", "1", "The matching charger. Only ever use this one."),
     ("Switchcraft EN2P3M20 inlet + EN2C3F20G2 plug", "1 pair", "The keyed charging plug on the back."),

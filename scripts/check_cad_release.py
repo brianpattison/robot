@@ -29,15 +29,17 @@ def main() -> None:
         raise SystemExit("proof plate manifest names the wrong generator")
     if (functional, spares, optional, total) != (40, 4, 1, 45):
         raise SystemExit("v2 inventory count drift")
-    if (screws, inserts) != (47, 47):
+    # 51 joints since D049 (regulator bays); 20 proof objects since D048
+    # (proof_horn_capture is a two-object proof).
+    if (screws, inserts) != (51, 51):
         raise SystemExit("v2 fastener count drift")
     if len(body["plates"]) != 13 or sum(p["part_count"] for p in body["plates"]) != total:
         raise SystemExit("body plate count drift")
-    if len(proofs["plates"]) != 5 or sum(p["part_count"] for p in proofs["plates"]) != 19:
+    if len(proofs["plates"]) != 5 or sum(p["part_count"] for p in proofs["plates"]) != 20:
         raise SystemExit("proof plate count drift")
     if proofs["inventory_counts"]["logical_proof_tests"] != 18:
         raise SystemExit("logical proof count drift")
-    print("CAD_RELEASE_PASS body=45/13 proofs=18-tests/19-objects/5-plates joints=47")
+    print("CAD_RELEASE_PASS body=45/13 proofs=18-tests/20-objects/5-plates joints=51")
 
 
 if __name__ == "__main__":

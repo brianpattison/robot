@@ -7,7 +7,7 @@ must not be used as a purchase list.
 | --- | --- | --- |
 | Body envelope | 238 x 220 x 133 body; inventory validator passes | Printer calibration, large-part warp, delivered-part fit |
 | Printed inventory | 40 functional + 4 spare + 1 optional; all solids registered | Print and inspect all production plates |
-| Fasteners | 47 modeled M3 x 8 joints and 47 M3 inserts | Exact lot proofs, insert temperature, torque/service cycles |
+| Fasteners | 51 modeled M3 x 8 joints and 51 M3 inserts (D049 added the four regulator-bay stations) | Exact lot proofs, insert temperature, torque/service cycles |
 | Motors/wheels | Printed saddles/caps, D-bores, tread service ports, axle caps | #4867 revision, torque, retention, wear, current, heat, skid turns |
 | Bumpers | Two TPU halves, six switch pockets, rest/stroke/stops modeled | Switch proof, six-zone actuation/rebound, broken-wire stop timing |
 | Battery | BLF-1203AB envelope, pad, cradle, clamp, lead corridor | Pack evidence, insulation, retention, current/runtime/BMS/regen/thermal |

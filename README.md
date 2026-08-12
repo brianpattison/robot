@@ -24,6 +24,9 @@ one insert size.
 
 - **Versioned v2 Builder Release Index:** [`docs/builder-release-v2.md`](docs/builder-release-v2.md)
 - **The Builder's Book (v2 prototype preview):** [`output/pdf/codex_robot_body_v2_assembly_guide.pdf`](output/pdf/codex_robot_body_v2_assembly_guide.pdf)
+- **The interactive Builder's Site (same content, live progress):** build with
+  [`docs/generate_guide_site_v2.py`](docs/generate_guide_site_v2.py) → `output/site/index.html`
+  (offline-first; tracks shop/print/build progress in your browser)
 - v2 Bambu Studio project: [`cad/bambu/codex_robot_body_v2_p1s.3mf`](cad/bambu/codex_robot_body_v2_p1s.3mf)
 - v2 qualification-proof project: [`cad/bambu/codex_robot_body_v2_proofs_p1s.3mf`](cad/bambu/codex_robot_body_v2_proofs_p1s.3mf)
 - v2 book generator: [`docs/generate_assembly_guide_v2.py`](docs/generate_assembly_guide_v2.py)

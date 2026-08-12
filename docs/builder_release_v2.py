@@ -6,7 +6,8 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from builder_release_catalog_v2 import SHOP_ELECTRONICS, SHOP_FASTENERS, SHOP_FILAMENT
+from builder_release_catalog_v2 import (SHOP_BENCH_GEAR, SHOP_ELECTRONICS,
+                                         SHOP_FASTENERS, SHOP_FILAMENT)
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "docs" / "builder-release-v2.md"
@@ -21,6 +22,8 @@ def render() -> str:
         f"| {name} | {amount} | {role} |" for name, amount, role in SHOP_FASTENERS)
     electronics_rows = "\n".join(
         f"| {name} | {amount} | {role} |" for name, amount, role in SHOP_ELECTRONICS)
+    bench_rows = "\n".join(
+        f"| {name} | {amount} | {role} |" for name, amount, role in SHOP_BENCH_GEAR)
     return f"""# Rover Bean Builder Release — {RELEASE_ID}
 
 Permanent source: [{RELEASE_URL}]({RELEASE_URL})
@@ -39,7 +42,7 @@ physical first article.
 | --- | --- | --- |
 | Builder's Book | `output/pdf/codex_robot_body_v2_assembly_guide.pdf` | Picture-first dry assembly plus explicit release holds. |
 | Body print project | `cad/bambu/codex_robot_body_v2_p1s.3mf` | 45 prototype pieces on 13 material-separated plates. |
-| Proof print project | `cad/bambu/codex_robot_body_v2_proofs_p1s.3mf` | 18 logical tests / 19 objects / 5 material-separated plates. |
+| Proof print project | `cad/bambu/codex_robot_body_v2_proofs_p1s.3mf` | 18 logical tests / 20 objects / 5 material-separated plates. |
 | UART contract | `docs/body-protocol-v1.md` | Fixed v1 bench protocol; no flash/config-write path. |
 | Pi body daemon | `software/robotd/` | Executable local Unix-socket/UART baseline with blackbox logging. |
 | Pi 5 appliance | `software/appliance/` + `software/install.sh` | Closed-world Bookworm provisioning baseline; real Pi, Tunnel, dual-UART, and append-only collector attestations remain open. |
@@ -71,6 +74,15 @@ Any row whose fit, termination, load, or test evidence is open stays open.
 | --- | --- | --- |
 {electronics_rows}
 
+## Bench equipment
+
+The commissioning plan's acceptance thresholds assume these instruments; they
+are commissioning tools, not robot parts, and none of them ride in the body.
+
+| Instrument | Qty | What it proves |
+| --- | --- | --- |
+{bench_rows}
+
 ## Bench commands
 
 ```bash
@@ -91,8 +103,10 @@ OpenSSH `allowed_signers` / revocation policy.
 
 ## Powered-motion release remains blocked on
 
-- A protected mobile Pi 5 input, normal US R-ML24 source, available/qualified
-  servo regulator, production relay driver, and Pico-local physical reset.
+- A protected mobile Pi 5 input, available/qualified servo regulator,
+  production relay driver, and Pico-local physical reset (the R-ML24 sourcing
+  blocker is retired — D048's printed arm-capture cradle drives the head with
+  the arm from the servo's own bag, pending the delivered-arm proof).
 - Exact delivered-part fit and the completed 18-proof record.
 - Exact connector housings/contacts, measured harness lengths, continuity and
   pull tests, released fuse values, selective-fault tests, and thermal soak.

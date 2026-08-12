@@ -85,6 +85,20 @@ PAN_STOP_STATION_DEG = 72.0
 TILT_LIMIT_DEG = 20.0
 TILT_HARD_STOP_DEG = 30.0
 
+# Printed ARM-CAPTURE CRADLE (replaces the exact Hitec R-ML24 aluminum horn,
+# which has no US quantity-one source, and with it the four M2 link screws —
+# the only non-M3 fasteners).  A generic single-arm 24T horn (the arm shipped
+# in the D85MG bag qualifies) is retained on the spline by its own arm screw;
+# its blade seats in a close-fitting printed slot.  Drive torque is carried by
+# the slot walls bearing on the arm flanks, never by screws through the horn's
+# link holes.  All four values are PROVISIONAL pending delivered-part
+# measurement of the actual bag arm.
+ARM_LEN_MIN, ARM_LEN_MAX = 18.0, 27.0   # accepted arm length from spline center
+ARM_SLOT_W = 4.6                        # slot width: accepts arm width 4.0 +0.6/-0
+ARM_THK_MIN, ARM_THK_MAX = 1.8, 2.6     # accepted blade thickness band
+ARM_THK_NOM = 2.5                       # nominal bag-arm blade (shim-rib datum)
+ARM_HUB_CLEAR_R = 6.0                   # hub boss + arm-screw head relief radius
+
 
 def rounded_slab(length, width, height, radius, z0):
     """Vertical-edge-filleted box with its base at z0."""
@@ -162,6 +176,9 @@ def build_tray():
         else:
             sx = 1 if cx > 0 else -1
             tray -= Pos((cx + sx * inv.BODY_L / 2) / 2, cy, TRAY_Z0 + 3.0) * Box(20, 12, 6.0)
+    # Recessed part-ID (poka-yoke): open floor between the battery pads,
+    # up-facing in the flat print pose and hidden under the pack.
+    tray -= Pos(55.0, 0, inv.TRAY_TOP - 0.3) * material_mark("P TRAY")
     return tray
 
 
@@ -221,6 +238,11 @@ def build_shell():
         shell += Pos(-20, sy * (inv.BODY_W / 2 - WALL - 3), 89.5) * Box(24, 6, 5)
         shell += Pos(-32, sy * (inv.BODY_W / 2 - WALL - 3), (87.0 + 100.0) / 2) * Cylinder(4.0, 13)
         shell -= Pos(-32, sy * (inv.BODY_W / 2 - WALL - 3), 100.0 - 3.5) * Cylinder(2.3, 7)
+        # ToF-clamp orientation fence (poka-yoke): rotated 180 degrees about
+        # its single screw the clamp bar would sweep X -48..-28; this wall
+        # stub occupies X -38..-36.5 so the wrong pose sits 4 mm proud,
+        # while the correct bar (X -36..-16) clears it by 0.5.
+        shell += Pos(-37.25, sy * 105.0, 102.0) * Box(1.5, 5.0, 4.0)
 
     # Fascia opening: two 27 mm sub-openings with a hidden 4 mm mullion
     # (every bridge span <= 30; the fascia panel covers the mullions).
@@ -232,6 +254,10 @@ def build_shell():
     # Flush seating recesses for the snap-in fascia and rear panels.
     shell -= Pos(-(inv.BODY_L / 2 - 0.7), 0, 110.0) * Box(1.5, 76, 40)
     shell -= Pos(inv.BODY_L / 2 - 0.7, 0, 132.0) * Box(1.5, 104, 50)
+    # Recessed part-ID on the interior rear wall (side-facing in the
+    # upright print pose; hidden inside the bay, below the panel opening).
+    shell -= (Pos(inv.IX - 0.05, 0, 70.0) * Rot(0, 90, 0) * Rot(0, 0, 90)
+              * material_mark("P SHELL"))
     return shell
 
 
@@ -358,6 +384,14 @@ def build_front_pod(left: bool):
     # Axle-end insert bore for the retaining screw (prints axis-vertical in
     # the pod's inboard-face-down orientation).
     pod -= Pos(inv.FRONT_AXLE_X, sy * 126.0, P.wheel_center_z) * Rot(90, 0, 0) * Cylinder(2.3, 12)
+    # Orientation audit: every pod feature is symmetric about the axle
+    # plane X = -74, so a 180-degree turn about vertical maps left onto
+    # right — the two pods are congruent and interchangeable, and the
+    # flange holes only align with the flange inboard and axle outboard,
+    # so no cross-mount or wrong pose can seat.  Recessed ID on the
+    # outboard face (up-facing in the inboard-face-down print pose).
+    pod -= (Pos(inv.FRONT_AXLE_X, sy * 105.05, 84.0)
+            * Rot(sy * 90, 0, 0) * material_mark("P POD"))
     return pod
 
 
@@ -412,6 +446,9 @@ def build_controller_tower():
     for wx, wy in ((-77, -34.5), (-77, 0.0), (-77, 34.5), (-29, -34.5), (-29, 0.0), (-29, 34.5)):
         frame -= Pos(wx, wy, inv.SHELF0 + 2.0) * Box(36, 23, 6)
     tower += frame
+    # Recessed part-ID on the base top face (up-facing in the flat print
+    # pose), on the solid strip between cable channels, under the MDDS10.
+    tower -= Pos(-67.0, 20.0, 57.7) * material_mark("P TWR")
     return tower
 
 
@@ -431,12 +468,23 @@ def build_rear_wheel():
     wheel -= Pos(inv.REAR_AXLE_X, 118, (z + 9.2 + z + 22.5) / 2) * Cylinder(3.7, 13.3)
     wheel -= Pos(inv.REAR_AXLE_X, 118, (z + 3.5 + z + 9.2) / 2) * Cylinder(2.3, 5.7)
     wheel -= Pos(inv.REAR_AXLE_X, 118, (z + 1.0 + z + 3.5) / 2) * Cylinder(1.7, 2.5)
+    # Orientation audit: the wheel is symmetric about its own Y midplane
+    # (through D-bore, centered radial clamp well), so either face may sit
+    # inboard.  Recessed ID on the modeled inboard face (up-facing in the
+    # axis-vertical print pose), clear of the D-flat and the clamp well.
+    wheel -= (Pos(inv.REAR_AXLE_X, 105.95, 74.0)
+              * Rot(-90, 0, 0) * material_mark("P WHL R", size=3.0))
     return wheel
 
 
 def build_front_wheel():
     wheel = Pos(inv.FRONT_AXLE_X, 118, P.wheel_center_z) * Rot(90, 0, 0) * Cylinder(21.0, 24)
     wheel -= Pos(inv.FRONT_AXLE_X, 118, P.wheel_center_z) * Rot(90, 0, 0) * Cylinder(9.25, 26)
+    # Orientation audit: plain cylinder + through bearing bore — flip- and
+    # side-agnostic.  Recessed ID on the modeled inboard face (up-facing
+    # in the axis-vertical print pose).
+    wheel -= (Pos(inv.FRONT_AXLE_X, 105.95, 81.0)
+              * Rot(-90, 0, 0) * material_mark("P WHL F", size=3.0))
     return wheel
 
 
@@ -463,7 +511,15 @@ PAN_SERVO_BODY_C = (P.neck_x - P.servo_output_offset, 0.0,
 PAN_SERVO_FLANGE_Z = (PAN_SERVO_CASE_TOP_Z - P.servo_body_height
                       + P.servo_mount_plane_from_bottom)
 PAN_PLATE_TOP_Z = PAN_SERVO_FLANGE_Z - P.servo_flange_thickness / 2
-PAN_HORN_Z = PAN_SERVO_CASE_TOP_Z + P.servo_output_stack_height - 2.15
+# Pan cradle stations: the blade top plane rides 0.2 under the journal bottom
+# (blade tips beyond r26.5 also pass 0.2 under the lid rim — trim note in the
+# neck comment); the slot floor is the capture-pad underside.
+PAN_ARM_TOP_Z = PAN_SERVO_CASE_TOP_Z + P.servo_output_stack_height - 1.9  # 177.8
+PAN_SLOT_FLOOR_Z = PAN_ARM_TOP_Z - ARM_THK_MAX                            # 175.2
+# Tilt cradle: inner (blade) face and thickness on the head shell.  The 8.0
+# thickness reaches the cavity wall (the old boss's proven attachment).
+TILT_CRADLE_Y0 = P.head_width / 2 - 10.0                                  # 60.0
+TILT_CRADLE_T = 8.0
 
 
 def pan_servo_body_fit():
@@ -528,19 +584,42 @@ def build_head_shell():
     for angle in range(-int(TILT_HARD_STOP_DEG), int(TILT_HARD_STOP_DEG) + 1, 2):
         shell -= fixed_yoke.rotate(tilt_axis, float(-angle))
 
-    # Active (+Y) tilt drive: the shell-side boss is the moving member.  The
-    # supplied R-ML24 horn lands against its inner face and its two M2 threaded
-    # stations fasten through these clearance holes.  The center bore clears
-    # the servo spline rather than asking the spline to carry head weight.
-    drive_y = P.head_width / 2 - 6.0
-    drive = Pos(TILT_AXIS_X, drive_y, TILT_AXIS_Z) * Rot(90, 0, 0) * Cylinder(17.5, 8.0)
-    drive -= Pos(TILT_AXIS_X, drive_y, TILT_AXIS_Z) * Rot(90, 0, 0) * Cylinder(3.3, 14.0)
-    for off in P.servo_horn_threaded_offsets:
-        drive -= Pos(TILT_AXIS_X - off, drive_y, TILT_AXIS_Z) * Rot(90, 0, 0) * Cylinder(1.1, 14.0)
+    # Active (+Y) tilt drive: printed ARM-CAPTURE CRADLE on the moving shell
+    # (replaces the exact R-ML24 horn and its two M2 screws).  The generic 24T
+    # arm rides the spline; its blade seats in this open-ended radial slot and
+    # torque is carried by the slot walls on the arm flanks.  The slot mouth
+    # faces the servo, so the assembled position itself closes the capture:
+    # the arm is held on the spline by its own screw and the head's Y station
+    # is set by the passive-side bushing and its standard M3 — no separate
+    # tilt cover part is spent (D028 40-piece budget).  The hub bore clears
+    # the arm hub and screw head; blade-plane reach is PROVISIONAL pending
+    # delivered-arm measurement (tune TILT_CRADLE_Y0 to the measured stack).
+    cradle_yc = TILT_CRADLE_Y0 + TILT_CRADLE_T / 2
+    drive = (Pos(TILT_AXIS_X, cradle_yc, TILT_AXIS_Z)
+             * Rot(90, 0, 0) * Cylinder(17.5, TILT_CRADLE_T))
+    # Teardrop brace under the rim: in the open-face-down print pose (+X up)
+    # the disc's forward rim would overhang past 50 degrees, so a 45-degree
+    # wedge fin (clipped flush at the rim height) makes the underside
+    # self-supporting instead of leaning on an audit allowance.
+    wedge = (Pos(TILT_AXIS_X - 17.5, cradle_yc, TILT_AXIS_Z)
+             * Rot(0, 45, 0) * Box(24.75, TILT_CRADLE_T, 24.75))
+    wedge &= Pos(TILT_AXIS_X - 10.0, cradle_yc, TILT_AXIS_Z) * Box(
+        44.0, TILT_CRADLE_T, 35.0)
+    drive += wedge
+    # Diamond hub relief (45-degree walls print support-free) clears the arm
+    # hub and its spline screw head across the accepted hub envelope.
+    drive -= (Pos(TILT_AXIS_X, cradle_yc, TILT_AXIS_Z)
+              * Rot(0, 45, 0) * Box(2 * ARM_HUB_CLEAR_R, TILT_CRADLE_T + 8.0,
+                                    2 * ARM_HUB_CLEAR_R))
+    drive -= Pos(TILT_AXIS_X - 19.0, TILT_CRADLE_Y0 + ARM_THK_MAX / 2,
+                 TILT_AXIS_Z) * Box(38.0, ARM_THK_MAX, ARM_SLOT_W)
+    # Tilt-center index tick: a recessed notch on the cradle rim top that
+    # lines up with the yoke spine notch at neutral tilt.
+    drive -= Pos(TILT_AXIS_X, cradle_yc, TILT_AXIS_Z + 17.5) * Box(1.2, 6.0, 1.2)
     # Moving hard-stop finger.  The fixed yoke carries compact mating tabs at
     # nominal +/-30-degree stations; their finite width starts contact just
     # outside the commanded +/-20-degree range.
-    drive += Pos(TILT_AXIS_X + 15.0, drive_y - 5.5, TILT_AXIS_Z) * Box(7.0, 4.0, 2.5)
+    drive += Pos(TILT_AXIS_X + 15.0, TILT_CRADLE_Y0 - 1.5, TILT_AXIS_Z) * Box(7.0, 4.0, 2.5)
     shell += drive
 
     # Passive (-Y) pivot boss and bushing bore.  The replaceable black PETG
@@ -550,6 +629,10 @@ def build_head_shell():
     passive = Pos(TILT_AXIS_X, passive_y, TILT_AXIS_Z) * Rot(90, 0, 0) * Cylinder(12.0, 3.0)
     passive -= Pos(TILT_AXIS_X, passive_y, TILT_AXIS_Z) * Rot(90, 0, 0) * Cylinder(4.2, 5.0)
     shell += passive
+    # Recessed part-ID on the flat -Y interior cavity wall (vertical in
+    # the open-face-down print pose; hidden inside the head).
+    shell -= (Pos(-35.0, -(P.head_width - 5) / 2 + 0.05, 250.0)
+              * Rot(90, 0, 0) * material_mark("P HEAD", size=3.5))
     # OCC can leave zero-volume edge wisps after the sampled sweep.  They are
     # not printable geometry; retain the single production solid explicitly.
     if len(shell.solids()) > 1:
@@ -563,6 +646,10 @@ def build_head_faceplate():
     plate -= Pos(x0 + 1.5, 0, HEAD_C[2]) * Cylinder(P.head_camera_aperture_radius, 5, rotation=(0, 90, 0))
     for sy in (1, -1):
         plate -= Pos(x0 + 1.5, sy * 40.0, HEAD_C[2]) * Box(4, 9, 14)
+    # Recessed part-ID on the interior face, below the camera bore and
+    # clear of the eye slots (hidden when the faceplate is mounted).
+    plate -= (Pos(x0 + 2.95, 0, HEAD_C[2] - 22.0)
+              * Rot(0, -90, 0) * Rot(0, 0, 90) * material_mark("P FACE", size=3.0))
     return plate
 
 
@@ -579,14 +666,25 @@ def build_neck():
     neck -= Pos(P.neck_x, 0, (journal_z0 + NECK_Z1) / 2) * Cylinder(
         10.0, NECK_Z1 - journal_z0 + 4)
 
-    # Horn drive pad below the collar.  The two holes match the R-ML24's
-    # component-integral M2 threaded stations; no new general fastener SKU is
-    # introduced.  A positive-X crescent remains open for the camera ribbon.
-    drive = Pos(P.neck_x - 10.0, 0, inv.Z_TOP - 4.7) * Box(24.0, 8.0, 2.6)
-    drive += Pos(P.neck_x, 0, inv.Z_TOP - 4.7) * Cylinder(6.0, 2.6)
-    for off in P.servo_horn_threaded_offsets:
-        drive -= Pos(P.neck_x - off, 0, inv.Z_TOP - 4.7) * Cylinder(1.1, 5.0)
-    neck += drive
+    # ARM-CAPTURE CRADLE pad under the journal (replaces the R-ML24 horn and
+    # its two M2 link screws).  The generic 24T arm rides the pan spline; its
+    # blade enters this open-ended underside slot and torque is carried by the
+    # slot walls on the arm flanks.  The head_pan_plate part (registry slot
+    # reused as the pan horn cover) closes the slot from below with shim ribs
+    # and two standard M3 x 8 + insert joints.  The +X and +/-Y crescents stay
+    # open for the camera ribbon.  Blade tips beyond r26.5 pass 0.2 under the
+    # lid rim — trim long arms flush (PROVISIONAL, ARM_* constants).
+    pad = Pos(P.neck_x - 11.0, 0, (PAN_SLOT_FLOOR_Z + inv.Z_TOP - 3.6) / 2) * Box(
+        22.0, 30.0, inv.Z_TOP - 3.6 - PAN_SLOT_FLOOR_Z)
+    pad -= Pos(P.neck_x - 34.0, 0, PAN_SLOT_FLOOR_Z + ARM_THK_MAX / 2) * Box(
+        36.0, ARM_SLOT_W, ARM_THK_MAX)
+    pad -= Pos(P.neck_x, 0, PAN_SLOT_FLOOR_Z) * Cylinder(ARM_HUB_CLEAR_R, 5.0)
+    for sy in (1, -1):
+        pad -= Pos(P.neck_x - 6.0, sy * 11.5, PAN_SLOT_FLOOR_Z + 3.0) * Cylinder(2.3, 6.0)
+    neck += pad
+    # Pan-center index tick: recessed notch on the thrust-shoulder top at -X
+    # (the arm direction), matching the notch on the collar ring.
+    neck -= Pos(P.neck_x - 23.0, 0, inv.Z_TOP + 5.8) * Box(3.0, 1.2, 1.0)
 
     # Four top insert bores receive the yoke's standard M3x8 screws.
     for angle in (45.0, 135.0, 225.0, 315.0):
@@ -598,6 +696,10 @@ def build_neck():
     # stationed farther around the collar so contact begins outside the
     # commanded +/-60-degree range.
     neck += Pos(P.neck_x + 25.5, 0, inv.Z_TOP + 5.0) * Box(5.0, 4.0, 2.0)
+    # Recessed part-ID on the journal's bottom annulus, +X of the arm pad
+    # (up-facing in the flange-down print pose; hidden inside the bay).
+    neck -= (Pos(P.neck_x + 15.0, 0, inv.Z_TOP - 3.7)
+             * Rot(180, 0, 0) * Rot(0, 0, 90) * material_mark("P NECK", size=3.0))
     return neck
 
 
@@ -639,10 +741,23 @@ def build_bayonet_collar():
             collar += rail
     for y in (-12.0, 12.0):
         collar += Pos(P.neck_x + 18.5, y, frame_z + 1.8) * Box(5.0, 4.0, 3.6)
-    # Two insert towers for the M3x8 pan-plate retention joint.
-    for x in (bx - 20.0, bx + 20.0):
-        collar += Pos(x, 0, frame_z + 1.8) * Cylinder(4.5, 7.2)
-        collar -= Pos(x, 0, frame_z - 0.2) * Cylinder(2.3, 6.0)
+    # D050 hex-key corridors: the pan-cover screws at (neck_x - 6, +/-11.5)
+    # seat ~4 mm above this frame's north/south wall band (|Y| 10.6..13.5),
+    # which would bury their heads for any straight driver.  Two 7.5 mm
+    # bites through the walls open the corridors; the interrupted ring
+    # still hangs from all four rails and both +X support tabs.
+    for sy in (1, -1):
+        collar -= Pos(P.neck_x - 6.0, sy * 11.5, frame_z + 1.8) * Cylinder(3.75, 6.0)
+    # Pan-servo flange mount: the under-servo plate part is retired (its
+    # registry slot is now the pan horn cover), and the servo hangs from this
+    # frame by its manufacturer-supplied ear screws and nuts through two
+    # drawing-backed stations — the same supplied-hardware pattern the yoke's
+    # tilt frame uses.  Nuts seat on the frame top, clear of the rails and of
+    # the rotating pad/cover sweep above.
+    for x in (bx - P.servo_mount_spacing / 2, bx + P.servo_mount_spacing / 2):
+        collar -= Pos(x, 0, frame_z + 1.8) * Cylinder(P.servo_mount_hole / 2, 5.0)
+    # Pan-center index tick on the ring top at -X, matching the neck notch.
+    collar -= Pos(P.neck_x - 27.5, 0, inv.Z_TOP + 4.0) * Box(3.0, 1.2, 1.0)
 
     # Fixed pan-stop posts: the 72-degree stations plus finite tab widths put
     # first contact a few degrees outside the commanded +/-60-degree range.
@@ -651,20 +766,33 @@ def build_bayonet_collar():
                    * Rot(0, 0, angle)
                    * Pos(28.0, 0, 0)
                    * Box(5.0, 4.0, 2.0))
+    # Recessed part-ID on the barrel's bottom annulus at the -Y lug gap
+    # (up-facing in the flange-down print pose; hidden in the lid opening).
+    collar -= (Pos(P.neck_x, -23.0, inv.Z_TOP - 2.7)
+               * Rot(180, 0, 0) * material_mark("P COL", size=2.5))
     return collar
 
 
 def build_head_pan_plate():
-    # Under-lid pan-servo capture plate.  It is intentionally a removable
-    # black PETG wear/service part rather than a mysterious head-bottom tile.
-    bx = PAN_SERVO_BODY_C[0]
-    plate = Pos(bx, 0, PAN_PLATE_TOP_Z - 1.6) * Box(50.0, 28.0, 3.2)
-    plate -= Pos(bx, 0, PAN_PLATE_TOP_Z - 1.6) * Box(P.servo_body_length + 1.2,
-                                                    P.servo_body_width + 1.2, 5.0)
-    for x in (bx - 20.0, bx + 20.0):
-        plate -= Pos(x, 0, PAN_PLATE_TOP_Z - 1.6) * Cylinder(1.7, 5.0)
-        plate -= Pos(x, 0, PAN_PLATE_TOP_Z - 3.15) * Cylinder(3.25, 0.9)
-    return plate
+    # Pan ARM-CAPTURE COVER (reused registry slot: the under-servo flange
+    # plate was retired when the pan servo moved to its supplied ear
+    # hardware).  This removable black PETG part closes the neck's arm slot
+    # from below: two 3.2 mm bosses are the standard M3 x 8 + insert clamp
+    # stack into the pad, a thin web crosses the slot 0.4 mm above the servo
+    # case fit, and two shim ribs rise into the slot to press the blade
+    # against the ceiling (sized for ARM_THK_NOM; reprint-to-measure is the
+    # designated tuning path across ARM_THK_MIN..ARM_THK_MAX).
+    web = Pos(P.neck_x - 12.0, 0, PAN_SLOT_FLOOR_Z - 0.4) * Box(22.0, 29.0, 0.8)
+    cover = web
+    for sy in (1, -1):
+        boss = Pos(P.neck_x - 6.0, sy * 11.5, PAN_SLOT_FLOOR_Z - 1.6) * Cylinder(3.5, 3.2)
+        boss -= Pos(P.neck_x - 6.0, sy * 11.5, PAN_SLOT_FLOOR_Z - 1.6) * Cylinder(1.7, 4.0)
+        cover += boss
+    rib_top = PAN_ARM_TOP_Z - ARM_THK_NOM + 0.1     # 0.1 nominal preload
+    for x in (P.neck_x - 14.0, P.neck_x - 20.0):
+        cover += Pos(x, 0, (PAN_SLOT_FLOOR_Z - 0.4 + rib_top) / 2) * Box(
+            1.6, ARM_SLOT_W - 0.4, rib_top - PAN_SLOT_FLOOR_Z + 0.4)
+    return cover
 
 
 def build_deck():
@@ -682,14 +810,79 @@ def build_deck():
     for y in (39.0 + 1.0, 57.0 - 1.0):
         deck += Pos(56.5, y, (96 + inv.DECK0) / 2) * Box(61, 2, inv.DECK0 - 96)
     # Fuse block pocket lip (west/east/north; the south edge is the wire
-    # overhang) — the block drops in and the lip locates its base.
-    deck += Pos(22.0, -20.75, inv.DECK1 + 1.5) * Box(4, 92.5, 3)
+    # overhang) — the block drops in and the lip locates its base.  The
+    # west lip is trimmed to 2.5 mm (X 21.5..24) so the battery-clamp
+    # screw at (17, -42.5) keeps a clear D050 hex-key corridor beside it.
+    deck += Pos(22.75, -20.75, inv.DECK1 + 1.5) * Box(2.5, 92.5, 3)
     deck += Pos(69.8, -20.75, inv.DECK1 + 1.5) * Box(4, 92.5, 3)
     deck += Pos(45.9, 27.5, inv.DECK1 + 1.5) * Box(51.8, 4, 3)
     # Tower joint holes: through 3.4 with a 0.8 top counterbore -> 3.2 stack.
+    # Orientation audit (poka-yoke): the four stations share no 180-degree
+    # symmetry (paired midpoints (62.5, 0) vs (96.5, -3) disagree), so a
+    # rotated or flipped deck can never line up with its towers — the hole
+    # pattern itself is the locator key.
     for jx, jy in ((30, -61), (86, -61), (95, 61), (107, 55)):
         deck -= Pos(jx, jy, (inv.DECK0 + inv.DECK1) / 2) * Cylinder(1.7, 6)
         deck -= Pos(jx, jy, inv.DECK1 - 0.35) * Cylinder(3.25, 0.9)
+
+    # --- D049 under-deck regulator bays ------------------------------------
+    # Both Pololu regulators hang component-side-down under the plate:
+    # the bare PCB back seats on rim pads at Z 98.7 and standard M3 x 8 +
+    # insert stations clamp the PCB edges (socket heads overlap each edge
+    # by ~0.95 mm; the boards' drawing-backed 2.18 mm holes cannot pass
+    # the single-SKU M3).  Every pocket opens downward, so all features
+    # build upward in the deck's declared top-face-down print pose.
+    # PROVISIONAL: a 3 mm component-free strip is assumed along each
+    # clamped PCB edge (both boards are edge-sparse per their drawings).
+    #
+    # 5 V bay — D24V90F5 at X 92..112.3, Y -50..-9.4 (envelope regD24_*):
+    # stations SW (90.2, -46) and N (91.6, -7.6) stay west of the X 94..110
+    # terminal-service envelopes; E/S walls locate the free edges.
+    #
+    # 6 V bay — shared-SE-datum dual-footprint pocket (envelope regD36_*):
+    # the D36V50F6 (25.4 sq, X 60..85.4, Y -6..19.4) and a D36V28F6-class
+    # alternate (17.8 x 20.3 PROVISIONAL, anchored to the same SE corner
+    # at X 85.4 / Y -6, so it spans X 67.6..85.4, Y -6..14.3) share the
+    # SAME two stations S (76, -7.8) and E (87.2, 4): both heads overlap
+    # whichever board is seated.  The big board gets a N wall and W stop;
+    # the alternate's NW quadrant relies on the SE datum walls plus the
+    # two clamp heads (PROVISIONAL until delivered-part dims confirm).
+    for x0, x1, y0, y1 in (
+            (92.0, 97.0, -49.5, -42.5),    # 5 V pad over the SW station
+            (88.2, 97.0, -14.4, -9.4),     # 5 V pad over the N station
+            (107.3, 112.3, -46.0, -36.0),  # 5 V east rest pad
+            (107.3, 112.3, -24.0, -14.0),  # 5 V east rest pad
+            (72.5, 79.5, -6.0, -1.0),      # 6 V pad over the S station
+            (80.4, 85.4, 0.5, 7.5),        # 6 V pad over the E station
+            (60.0, 65.0, 14.4, 19.4),      # 6 V NW rest pad (big board)
+            (80.4, 85.4, 9.3, 14.3)):      # 6 V NE rest pad (both boards)
+        deck += Pos((x0 + x1) / 2, (y0 + y1) / 2, (98.7 + inv.DECK0) / 2) * Box(
+            x1 - x0, y1 - y0, inv.DECK0 - 98.7)
+    for x0, x1, y0, y1 in (
+            (86.8, 92.0, -49.5, -42.5),    # 5 V SW boss, face flush X 92
+            (88.2, 94.0, -9.4, -3.6),      # 5 V N boss, face flush Y -9.4
+            (72.5, 79.5, -11.4, -6.0),     # 6 V S boss, face flush Y -6
+            (85.4, 90.7, 0.5, 7.5)):       # 6 V E boss, face flush X 85.4
+        deck += Pos((x0 + x1) / 2, (y0 + y1) / 2, (97.3 + inv.DECK0) / 2) * Box(
+            x1 - x0, y1 - y0, inv.DECK0 - 97.3)
+    for x0, x1, y0, y1 in (
+            (112.55, 113.35, -45.0, -15.0),  # 5 V east wall (0.25 clearance)
+            (88.5, 93.9, -51.0, -50.25),     # 5 V south wall, west of term_S
+            (62.0, 84.0, 19.65, 20.45),      # 6 V north wall (big board)
+            (59.2, 59.75, -6.0, -2.25)):     # 6 V west stop, south of wire_W
+        deck += Pos((x0 + x1) / 2, (y0 + y1) / 2, (96.7 + inv.DECK0) / 2) * Box(
+            x1 - x0, y1 - y0, inv.DECK0 - 96.7)
+    # Station bores.  Head seat 97.3 clamps the 1.6 PCB (0.2 recess); the
+    # D026 stack between head and insert mouth is 0.2 + 1.6 + boss = 3.2.
+    # The 4.6 insert bore runs through the plate so the M3 x 5.7 insert
+    # presses in flush from the deck top; the M3 x 8 tip stays inside it.
+    for jx, jy in ((90.2, -46.0), (91.6, -7.6), (76.0, -7.8), (87.2, 4.0)):
+        deck -= Pos(jx, jy, (97.3 + 100.3) / 2) * Cylinder(1.7, 3.0)
+        deck -= Pos(jx, jy, (100.3 + inv.DECK1 + 0.5) / 2) * Cylinder(
+            2.3, inv.DECK1 + 0.5 - 100.3)
+    # Recessed part-ID on the underside (up-facing in the top-face-down
+    # print pose), clear of the bays, harness ribs, and tower bores.
+    deck -= Pos(40.0, -20.0, inv.DECK0 + 0.3) * Rot(180, 0, 0) * material_mark("P DECK")
     return deck
 
 
@@ -701,6 +894,15 @@ def build_motor_cap():
     for jx in (63, 85):
         cap -= Pos(jx, 83.0, 81.4) * Cylinder(1.7, 8)
         cap -= Pos(jx, 83.0, 83.4) * Cylinder(3.25, 2.2)
+    # Orientation audit (poka-yoke): the cap is symmetric in plan — joint
+    # holes at the trough center +/-11 and the trough itself centered — so
+    # the two caps are interchangeable and 180-degree rotation is harmless.
+    # Upside-down installation is refused by the fastener system: the
+    # counterbores would face the saddle and the M3 x 8, standing 2.2 proud
+    # of the D026 clamp stack, could not reach its insert.  Recessed ID on
+    # the +X side face (vertical in the arc-up print pose).
+    cap -= (Pos(88.05, 83.0, 81.4) * Rot(0, -90, 0) * Rot(0, 0, 90)
+            * material_mark("P CAP", size=3.0))
     return cap
 
 
@@ -710,6 +912,10 @@ def build_battery_clamp():
     bar = Pos(17.0, 0, 81.6) * Box(16, 99, 3.2)
     for sy in (1, -1):
         bar -= Pos(17.0, sy * 42.5, 81.6) * Cylinder(1.7, 5)
+    # Orientation audit: holes at +/-42.5 about the bar center, constant
+    # flat section, plain through-holes — symmetric under rotation and face
+    # flip, so no orientation can be wrong.  Recessed ID on the top face.
+    bar -= Pos(17.0, 0, 82.9) * Rot(0, 0, 90) * material_mark("P BAT", size=3.0)
     return bar
 
 
@@ -721,6 +927,11 @@ def build_mic_cradle():
         ear = Pos(jx, jy, 173.6) * Cylinder(6.0, 3.2)
         ear -= Pos(jx, jy, 173.6) * Cylinder(1.7, 5)
         ring += ear
+    # Orientation audit: annulus + two ears at +/-30 from center, uniform
+    # 3.2 section, plain through-holes — symmetric under the 180-degree
+    # turn and the face flip, so no orientation can be wrong.  Recessed ID
+    # on the underside, clear of the two screw-head seats.
+    ring -= Pos(60.0, 8.0, 172.3) * Rot(180, 0, 0) * material_mark("P MIC", size=3.0)
     return ring
 
 
@@ -729,12 +940,21 @@ def build_speaker_clamp():
     bar = Pos(-13, bar_y, 149.6) * Box(86, 8, 3.2)
     for jx in (-52.0, 26.0):
         bar -= Pos(jx, bar_y, 149.6) * Cylinder(1.7, 5)
+    # Orientation audit: holes at +/-39 about the bar center, constant flat
+    # section — symmetric under rotation, face flip, and Y-mirror, so one
+    # design serves both sides in any pose.  Recessed ID on the top face.
+    bar -= Pos(-13.0, bar_y, 150.9) * material_mark("P SPK", size=3.0)
     return bar
 
 
 def build_tof_clamp():
     bar = Pos(-26, inv.BODY_W / 2 - WALL - 3, 101.6) * Box(20, 8, 3.2)
     bar -= Pos(-32, inv.BODY_W / 2 - WALL - 3, 101.6) * Cylinder(1.7, 5)
+    # The single off-center screw would let this bar seat rotated 180
+    # degrees (clamping nothing); the shell's fence stub at X -38..-36.5
+    # blocks that footprint (see build_shell).  Face flip is harmless:
+    # flat bar, plain through-hole.  Recessed ID on the top face.
+    bar -= Pos(-23.0, inv.BODY_W / 2 - WALL - 3, 102.9) * material_mark("P TOF", size=2.8)
     return bar
 
 
@@ -742,6 +962,9 @@ def build_pico_clamp():
     bar = Pos(3, 63.5, 68.6) * Box(10, 49, 3.2)
     for jy in (43.0, 84.0):
         bar -= Pos(3, jy, 68.6) * Cylinder(1.7, 5)
+    # Orientation audit: holes at +/-20.5 about the bar center, constant
+    # flat section — symmetric under rotation and face flip.
+    bar -= Pos(3.0, 63.5, 69.9) * Rot(0, 0, 90) * material_mark("P PICO", size=3.0)
     return bar
 
 
@@ -804,19 +1027,27 @@ def build_yoke():
         90, 0, 0) * Cylinder(2.3, 5.7)
     yoke += passive
 
-    # Active-side horn/spline opening and fixed tilt-stop posts.  The compact
-    # tabs sit at nominal +/-30-degree stations; their finite width starts
-    # contact just outside the commanded +/-20-degree motion range.
+    # Active-side arm/spline opening and fixed tilt-stop posts.  The generic
+    # 24T arm's hub (relief ARM_HUB_CLEAR_R) passes through this opening to
+    # reach the head cradle slot.  The compact tabs sit at nominal
+    # +/-30-degree stations; their finite width starts contact just outside
+    # the commanded +/-20-degree motion range.
     yoke -= Pos(TILT_AXIS_X, YOKE_ARM_Y, TILT_AXIS_Z) * Rot(90, 0, 0) * Cylinder(7.0, 9.0)
     # A spine outside the spline radius carries the hard-stop loads back into
     # the upright and prevents tiny relief crescents becoming loose islands.
     yoke += Pos(TILT_AXIS_X - 8.5, YOKE_ARM_Y, TILT_AXIS_Z) * Box(5.0, 6.0, 24.0)
+    # Tilt-center index tick on the spine outer face; it lines up with the
+    # head-cradle rim notch at neutral tilt.
+    yoke -= Pos(TILT_AXIS_X - 8.5, YOKE_ARM_Y + 3.0, TILT_AXIS_Z + 10.0) * Box(1.2, 1.0, 3.0)
     for angle in (-TILT_HARD_STOP_DEG, TILT_HARD_STOP_DEG):
         x = TILT_AXIS_X + 15.0 * math.cos(math.radians(angle))
         z = TILT_AXIS_Z + 15.0 * math.sin(math.radians(angle))
         yoke += Pos(x, 57.5, z) * Box(5.0, 4.0, 2.5)
         yoke += Pos((x - 18.5) / 2, 54.5, z) * Box(x + 18.5, 3.0, 2.0)
     yoke -= Pos(-4.05, 55.0, TILT_AXIS_Z + 2.5) * Box(2.3, 6.2, 5.2)
+    # Recessed part-ID on the exposed base-flange top, west of the bridge
+    # feet (up-facing in the neck-flange-down print pose).
+    yoke -= Pos(-42.0, 0, base_z + 1.3) * Rot(0, 0, 90) * material_mark("P YOKE", size=3.0)
     return yoke
 
 
@@ -921,7 +1152,7 @@ PRINT_UP = {
     "head_faceplate_v2": (-1, 0, 0),   # cosmetic face down
     "neck_v2": (0, 0, -1),             # flange down
     "bayonet_collar_v2": (0, 0, -1),   # visible flange down; cradle builds upward
-    "head_pan_plate_v2": (0, 0, 1),    # flat
+    "head_pan_plate_v2": (0, 0, 1),    # flat on the boss feet; shim ribs build up
     "motor_cap_v2": (0, 0, -1),        # upside down: gripping arc opens up
     "battery_clamp_v2": (0, 0, 1),     # flat bar
     "deck_v2": (0, 0, -1),             # top face down: ribs and lips build up
