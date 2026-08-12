@@ -13,7 +13,8 @@ import signal
 import time
 from typing import Any
 
-from .protocol import Frame, FrameParser, MessageType, decode_status, drive_frame, head_frame
+from .protocol import (Frame, FrameParser, MessageType, decode_status,
+                       decode_stop_event, drive_frame, head_frame)
 from .transport import SerialTransport, SimulatorTransport, Transport
 
 
@@ -141,6 +142,17 @@ class RobotDaemon:
                 self.send(Frame(MessageType.STATUS_REQUEST, self.next_sequence()))
                 request_at = now
             for frame in self.parser.feed(self.transport.read(0.0)):
+                if frame.message_type == MessageType.EVENT:
+                    try:
+                        event = decode_stop_event(frame.payload)
+                    except ValueError as exc:
+                        self.state.last_error = str(exc)
+                        await self.blackbox.write("protocol_error", error=str(exc))
+                        continue
+                    # Read-only firmware telemetry (stop latency); journal it —
+                    # a stop is exactly the news the blackbox exists to keep.
+                    await self.blackbox.write("firmware_stop_event", **event)
+                    continue
                 if frame.message_type == MessageType.STATUS:
                     try:
                         new_status = decode_status(frame.payload)

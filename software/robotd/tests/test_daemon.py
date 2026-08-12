@@ -191,3 +191,54 @@ class HeadTrimTests(unittest.IsolatedAsyncioTestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class StopEventTests(unittest.IsolatedAsyncioTestCase):
+    async def test_firmware_stop_event_frames_are_journaled(self) -> None:
+        import struct
+
+        from robotd.protocol import Frame, MessageType, decode_stop_event
+
+        payload = struct.pack("<BHIIH", 0x01, 0x0020, 1200, 1210, 0)
+        decoded = decode_stop_event(payload)
+        self.assertEqual(decoded["latency_ms"], 10)
+        self.assertEqual(decoded["cause_flags"], 0x0020)
+
+        class EventOnceTransport(SimulatorTransport):
+            def __init__(self) -> None:
+                super().__init__()
+                self._event = Frame(MessageType.EVENT, 1, payload).encode()
+
+            def read(self, timeout: float = 0.0) -> bytes:
+                data = super().read(timeout)
+                if self._event:
+                    data = self._event + data
+                    self._event = b""
+                return data
+
+        with tempfile.TemporaryDirectory(prefix="robotd-event-test-") as temp:
+            root = Path(temp)
+            socket = root / "robotd.sock"
+            log = root / "blackbox.jsonl"
+            daemon = RobotDaemon(EventOnceTransport(), socket, Blackbox(log))
+            running = asyncio.create_task(daemon.run())
+            for _ in range(200):
+                if log.exists() and "firmware_stop_event" in log.read_text():
+                    break
+                await asyncio.sleep(0.01)
+            daemon.stopping.set()
+            await running
+            records = [json.loads(line) for line in log.read_text().splitlines()]
+            events = [r for r in records if r["kind"] == "firmware_stop_event"]
+            self.assertEqual(len(events), 1)
+            self.assertEqual(events[0]["latency_ms"], 10)
+            self.assertEqual(events[0]["observed_ms"], 1200)
+            self.assertEqual(events[0]["enacted_ms"], 1210)
+
+    async def test_malformed_event_payload_is_recorded_not_fatal(self) -> None:
+        from robotd.protocol import decode_stop_event
+
+        with self.assertRaises(ValueError):
+            decode_stop_event(b"\x02" + b"\x00" * 12)
+        with self.assertRaises(ValueError):
+            decode_stop_event(b"\x01\x00")
