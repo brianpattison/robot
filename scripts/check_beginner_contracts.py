@@ -67,7 +67,7 @@ def main() -> None:
     ):
         require(forbidden not in guide_html, f"unsafe/non-portable guide text remains: {forbidden}")
     for required in (
-        "PROTECTED PI INPUT BLOCKED",
+        "PI INPUT + RAIL PROOF BLOCKED",
         "BRANCH 3 → COVERED SPARE",
         "contact assignments TBD",
     ):

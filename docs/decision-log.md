@@ -1227,3 +1227,115 @@ neck-greasing with a wipe blade. Two judgment steps (insert tilt,
 grease amount) become tool-guaranteed. Tool pieces are bench equipment
 like the fixture, never registry parts: no budget, tally, or body-plate
 impact.
+
+## D053: The Head Servos Move To The 5 V Rail; The 6 V Regulator Is Retired
+
+Date: 2026-08-12
+Status: accepted direction; gated on the shared-rail transient proof
+
+The separate 6 V rail existed only for the two head servos, and its
+regulator row was itself a purchase gate (availability + qualification
+open). Direction accepted: the D85MG servos run from the D24V90F5's
+5 V rail as their own fused-branch feed with bulk capacitance at the
+splice. Rationale: the D-series' published operating range includes
+5 V (confirm against the datasheet at delivery), the D24V90F5's 9 A
+comfortably covers Pi peaks plus two mini-servo stalls, and the repo's
+own torque sanity check leaves margin below 6 V. The release evidence
+is one decisive bench test — a servo-stall transient on the shared
+rail with the Pi under load (folded into C006/C022; plan revision
+`v2-commissioning-C5`, harness revision `v2-prototype-H2` retargets
+PWR-10/11/12 to the 5 V splice, GREEN becomes the head-servo-branch
+color). The dual-footprint 6 V bay (D049) stays in the deck as a
+reserved spare so a failed proof reverts by substitution, not
+redesign. One purchased part, one purchase gate, and one bench rail
+cease to exist.
+
+## D054: The Production Relay Driver Candidate Is The Fixture's Adafruit 5648
+
+Date: 2026-08-12
+Status: proposed candidate selected; gated on positive-control review
+
+Rather than design a discrete transistor/diode driver, promote the
+part already trusted for negative-control duty in RB-FIXTURE-V1. Exit:
+positive-control conditioning (default-off at power-up and reset,
+pulldown verified), fit, and EE review — one bench session with a part
+already in the fixture box. Refines the relay-driver blocker; the
+purchase row stays gated but now names its exact exit.
+
+## D055: The Pico Reset Is A Seventh Omron D2HW Behind A Printed Guard
+
+Date: 2026-08-12
+Status: proposed candidate selected; refines D045
+
+No new part family: the reset control is the same sealed D2HW
+pin-plunger switch the six bumper zones already use — a seventh unit,
+recessed behind a printed guard ring in the rear service corridor,
+wired to the Pico reset/recovery input through the D045 conditioning.
+The bumper proofs and fixture already exercise this switch family.
+Exit: conditioning circuit values + the CAD pocket.
+
+## D056: Owning Is Not Installing — The Fuse And Harness Rows Split
+
+Date: 2026-08-12
+Status: accepted
+
+The safety gate was never about possessing hardware; it is about
+installing unproven values and terminals. The purchase list now
+distinguishes the two: an ATO/ATC assortment box and the D047 harness
+bench stock (lever nuts, labels, wire in the traveler's published
+gauges) are ordinary buyable rows with explicit INSTALL-NOTHING holds,
+while the true evidence gates — measured fuse values, exact production
+terminals, measured cut lengths — keep their red rows exactly as
+before. No safety boundary moves; the wall of red shrinks to the rows
+that genuinely cannot close without a bench.
+
+## D057: The Side Distance Boards Are Optional Garnish
+
+Date: 2026-08-12
+Status: accepted
+
+Answering "how much does this robot actually need to do": the safety
+floor is the NC bumper loops, and the perception plan is the camera.
+The two front ToF boards stay baseline (they face the direction of
+travel); the two side boards become an optional add-on. The shell
+windows, pockets, and clamp bars stay in the prints either way, so
+opting in later is two boards and two screws. Purchase drops from four
+boards to two.
+
+## D058: Replace The Fuse Block With Two Inline Holders — Proposed
+
+Date: 2026-08-12
+Status: proposed (geometry + selective-clearing review required)
+
+With the 6 V branch retired (D053), the four-branch Blue Sea 5045
+feeds exactly one real load. Two sealed inline ATO holders (battery-
+near feeder + motor branch) would delete a ~$40 part, its deck pocket,
+and two fuse positions of standing confusion, while keeping covered
+live parts and the selective-clearing discipline. Not accepted until
+the deck geometry, strain relief, and the fuse program are reviewed
+together — the 5045 purchase row carries a hold-if-you-can-wait note
+meanwhile.
+
+## D059: MDD10A As The Motor-Driver Cost Candidate — Proposed
+
+Date: 2026-08-12
+Status: proposed (envelope + evidence re-qualification required)
+
+The MDDS10 (~$95) is driven as PWM/DIR by the Pico; Cytron's MDD10A
+(~$25) accepts the same interface at the same current class. A ~$70
+saving on the single most expensive non-compute part, at the cost of
+re-qualifying a settled drawing-backed envelope (deck pocket, terminal
+service, thermal). Not accepted; logged so the cost lever is visible
+when the first article's measured currents make the review cheap.
+
+## D060: Any USB Microphone Clears Bring-Up; The Array Is The Upgrade
+
+Date: 2026-08-12
+Status: accepted for bring-up; array slot unchanged
+
+The ReSpeaker array (~$70) was specified before any voice software
+exists, and its exact revision was already blocked. For bring-up, any
+small USB microphone satisfies the requirement; the 70 mm cradle and
+array slot remain for when wake-word performance in real rooms earns
+the upgrade. The VBUS-cut/no-backfeed mute interface requirement
+(D046) applies to whichever microphone is installed.

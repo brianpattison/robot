@@ -502,7 +502,6 @@ SHOP_VISUALS = [
     ("thumb_px_relay.png", "Panasonic relay"),
     ("thumb_px_fuse.png", "Blue Sea fuse block"),
     ("thumb_px_reg1.png", "5 V regulator"),
-    ("thumb_px_reg2.png", "6 V regulator (skip for now)"),
     ("thumb_px_switch.png", "Bumper switch ×6"),
     ("thumb_px_servo.png", "D85MG servo ×2"),
     ("thumb_px_speaker_L.png", "Speaker + amp ×2"),
@@ -593,7 +592,7 @@ STEPS = [
      "The relay clicks into its pocket and doesn’t rattle."),
     ("step_12_deck", "Put on the power deck", SCREWS["deck_towers"] + SCREWS["pi_regulator_bay"] + SCREWS["servo_regulator_bay"],
      [("deck_v2", 1), ("px_fuse", 1), ("px_reg1", 2), ("px_insert", 4)],
-     ["Flip the deck over and melt 4 inserts into the regulator stations (the jig keeps them straight), then seat each small green regulator board in its underside bay and snug its 2 screws — the screw heads hold the board’s edges like little hands. If the 6 V regulator is still on its shopping hold, its bay stays empty for the dry build; the bay fits two different 6 V boards on purpose.",
+     ["Flip the deck over and melt 4 inserts into the regulator stations (the jig keeps them straight), then seat the green 5 V regulator board in its underside bay and snug its 2 screws — the screw heads hold the board’s edges like little hands. Since D053 this one board feeds the computer AND the head; the second bay stays empty on purpose (a reserved spare in case the shared-rail test ever demands a separate 6 V board).",
       "Lower the deck onto the four towers — the notch at the back-right corner is where the battery’s wires will pass once it moves back in.",
       "Drive 4 screws down into the tower tops.",
       "Set the black fuse box into its raised outline on the deck’s LEFT half, wire tail hanging over the left edge."],
@@ -624,8 +623,8 @@ STEPS = [
      [("px_speaker_L", 2), ("px_tof_L", 2), ("speaker_clamp_v2", 2), ("tof_clamp_v2", 2)],
      ["Reach in through the open top: rest a speaker on each side shelf, magnet side in, grille facing the wall.",
       "Lay a clamp bar across each speaker’s top and screw into the two posts (2 screws per side) — the inserts went in with the shell step.",
-      "Slide a little blue distance board behind each side window, then its clamp bar and 1 screw."],
-     "Speakers can’t rattle; the blue boards peek through their side windows."),
+      "OPTIONAL: the side distance boards are garnish, not safety (D057) — the bumpers feel and the camera sees. If you bought the extra pair, slide one behind each side window, then its clamp bar and 1 screw; if not, install the empty clamp bars the same way and the windows just look cool."],
+     "Speakers can’t rattle; the clamp bars are snug (with or without side boards behind the windows)."),
     ("step_17_lid", "The lid and the BIG RED BUTTON",
      SCREWS["mic_cradle"],
      [("lid_v2", 1), ("lid_skin_v2", 1), ("px_estop_cap", 1), ("px_mic", 1), ("mic_cradle_v2", 1), ("px_insert", 2)],
@@ -663,15 +662,15 @@ WIRE_RULES = [
     "This chapter is the REFERENCE MAP for a harness that is not released yet — no step in this book cuts a wire. Read it to understand the design; build it only when the wire/terminal/fuse releases close.",
     "Wiring is the careful part. Read this whole chapter once, start to finish, before cutting a single wire.",
     "The battery stays OUT of the robot until every wire is checked against these maps.",
-    "Use wire colors: RED = battery 12 V, YELLOW = switched motor 12 V, BLUE = 5 V, GREEN = 6 V, BLACK = ground, WHITE = signals.",
+    "Use wire colors: RED = battery 12 V, YELLOW = switched motor 12 V, BLUE = 5 V computer, GREEN = 5 V head-servo branch, BLACK = ground, WHITE = signals.",
     "Crimp or solder every joint; no bare twists. Label both ends of every wire with tape.",
     "Fuse values are UNSET — NOT RELEASED. Do not install any from a prose guess; measured loads, conductor ampacity, inrush, time-current, selective-clearing, and thermal tests must close first.",
     "The robot must FAIL STOPPED: if any of this feels wrong, it stays off.",
 ]
 POWER_MAP = [
     ("Battery +12 V", "covered split → accessory feeder fuse", "Blue Sea fuse block IN"),
-    ("Fuse branch 1", "D24V90F5 regulator", "protected 5 V harness; Pi input BLOCKED"),
-    ("Fuse branch 2", "D36V50F6 regulator", "6 V servos; regulator qualification BLOCKED"),
+    ("Fuse branch 1", "D24V90F5 regulator", "protected 5 V harness — computer AND head servos (D053); Pi input + shared-rail proof BLOCKED"),
+    ("Fuse branch 2", "covered spare (the 6 V rail retired to it, D053)", "no assigned load or fuse value"),
     ("Fuse branches 3 + 4", "covered spare positions", "no assigned loads or fuse values"),
     ("Battery +12 V", "separate motor fuse → relay contacts", "MDDS10 motor board power"),
     ("12 V coil feed (exact tap OPEN)", "BOTH E-stop NC contacts + driver (proof BLOCKED)", "relay coil"),
@@ -1374,7 +1373,7 @@ def build_body_pages():
             <tr><td><b>Battery</b></td><td>middle-back floor</td><td>wires BACK</td></tr>
             <tr><td><b>Relay</b></td><td>floor pocket, left</td><td>terminals UP</td></tr>
             <tr><td><b>Fuse block</b></td><td>deck, left half</td><td>wire exit LEFT edge</td></tr>
-            <tr><td><b>Regulators (5 V + 6 V)</b></td><td>hang UNDER deck, back half</td><td>6 V wire exit FRONT</td></tr>
+            <tr><td><b>Regulator (5 V — computer + head)</b></td><td>hangs UNDER deck, back half; spare bay beside it</td><td>servo-branch wire exit FRONT</td></tr>
             <tr><td><b>Big red button</b></td><td>through the lid</td><td>UP; test with a centered firm press</td></tr>
             <tr><td><b>Mic array</b></td><td>under the lid slots</td><td>UP</td></tr>
             <tr><td><b>Speakers</b></td><td>side shelves</td><td>grilles OUT</td></tr>
@@ -1423,12 +1422,12 @@ def build_body_pages():
         <g>
           <rect x="688" y="40" width="214" height="52" rx="10" fill="#fff" stroke="#d8cfb6"/>
           <rect x="688" y="40" width="8" height="52" rx="4" fill="#2b6cb0"/>
-          <text x="800" y="62" fill="#22231F" font-size="13" font-weight="bold" text-anchor="middle">BRANCH 1 → 5 V REG</text>
-          <text x="800" y="79" fill="#C4230F" font-size="11" text-anchor="middle">PROTECTED PI INPUT BLOCKED</text>
+          <text x="800" y="62" fill="#22231F" font-size="13" font-weight="bold" text-anchor="middle">BRANCH 1 → 5 V REG (PI + HEAD)</text>
+          <text x="800" y="79" fill="#C4230F" font-size="11" text-anchor="middle">PI INPUT + RAIL PROOF BLOCKED</text>
           <rect x="688" y="110" width="214" height="52" rx="10" fill="#fff" stroke="#d8cfb6"/>
           <rect x="688" y="110" width="8" height="52" rx="4" fill="#2f855a"/>
-          <text x="800" y="132" fill="#22231F" font-size="13" font-weight="bold" text-anchor="middle">BRANCH 2 → 6 V REG</text>
-          <text x="800" y="149" fill="#C4230F" font-size="11" text-anchor="middle">SERVO QUALIFICATION BLOCKED</text>
+          <text x="800" y="132" fill="#22231F" font-size="13" font-weight="bold" text-anchor="middle">BRANCH 2 → COVERED SPARE</text>
+          <text x="800" y="149" fill="#6E6553" font-size="11" text-anchor="middle">6 V RAIL RETIRED (D053)</text>
           <rect x="688" y="180" width="214" height="52" rx="10" fill="#fff" stroke="#d8cfb6"/>
           <rect x="688" y="180" width="8" height="52" rx="4" fill="#8C887E"/>
           <text x="800" y="202" fill="#22231F" font-size="13" font-weight="bold" text-anchor="middle">BRANCH 3 → COVERED SPARE</text>
@@ -1492,7 +1491,7 @@ def build_body_pages():
           <p style="font-size:11.5px;">Nothing below happens today; it goes live with the released harness. First, no shorts: beep-test + to − at the fuse block (no fuses in yet). Then:</p>
           <ol style="font-size:11.5px; margin-left:.25in;">
           <li>Red button held down = relay coil circuit reads OPEN.</li>
-          <li>Regulator outputs read 5.0–5.2 V and 6.0 V on the bench before their loads connect.</li>
+          <li>The regulator output reads 5.0–5.2 V on the bench — under compute load AND a head-servo sweep — before anything else connects.</li>
           <li>Do not choose or install fuses until the measured-load, conductor, inrush, selective-clearing, and thermal evidence is released.</li>
           <li>Charger plug in = motors will not run.</li>
           <li>The eventual first powered test (its own future release) starts with the lid closed with its 4 corner screws; reopen only while shut down with the motor branch physically isolated.</li></ol>

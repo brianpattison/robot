@@ -103,10 +103,13 @@ OpenSSH `allowed_signers` / revocation policy.
 
 ## Powered-motion release remains blocked on
 
-- A protected mobile Pi 5 input, available/qualified servo regulator,
-  production relay driver, and Pico-local physical reset (the R-ML24 sourcing
-  blocker is retired — D048's printed arm-capture cradle drives the head with
-  the arm from the servo's own bag, pending the delivered-arm proof).
+- A protected mobile Pi 5 input, the D053 shared-rail servo transient proof
+  (the separate 6 V regulator is retired; its bay is a reserved spare), the
+  production relay driver (candidate selected: the fixture's Adafruit 5648,
+  D054), and the Pico-local physical reset (candidate selected: a seventh
+  Omron D2HW behind a printed guard, D055). The R-ML24 sourcing blocker is
+  retired by D048's printed arm-capture cradle, pending the delivered-arm
+  proof.
 - Exact delivered-part fit and the completed 18-proof record.
 - Exact connector housings/contacts, measured harness lengths, continuity and
   pull tests, released fuse values, selective-fault tests, and thermal soak.
